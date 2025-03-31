@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../component/components.dart';
+import 'component/above_footer.dart';
 import 'component/custom_footer.dart';
 import 'component/custom_header.dart';
 import 'component/custom_sidebar.dart';
 import 'component/home_content.dart';
+import 'component/home_content_new.dart';
 import 'component/scrollable_header.dart';
 
 class LandingPageWeb extends StatefulWidget {
@@ -21,6 +24,7 @@ class _LandingPageWebState extends State<LandingPageWeb> {
   final ScrollController _scrollController = ScrollController();
   bool _isHeaderVisible = true;
   double _previousScrollOffset = 0.0;
+  final TextEditingController _textController = TextEditingController();
 
   @override
   void initState() {
@@ -35,6 +39,7 @@ class _LandingPageWebState extends State<LandingPageWeb> {
   void dispose() {
     _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
@@ -44,12 +49,10 @@ class _LandingPageWebState extends State<LandingPageWeb> {
 
     if (currentScrollOffset > _previousScrollOffset &&
         currentScrollOffset > scrollThreshold) {
-      // Scrolling down
       if (_isHeaderVisible) {
         setState(() => _isHeaderVisible = false);
       }
     } else if (currentScrollOffset < _previousScrollOffset) {
-      // Scrolling up
       if (!_isHeaderVisible) {
         setState(() => _isHeaderVisible = true);
       }
@@ -76,9 +79,7 @@ class _LandingPageWebState extends State<LandingPageWeb> {
               child: Column(
                 children: [
                   const ScrollableWebHeader(),
-                  SizedBox(
-                    height: _isHeaderVisible ? 99 : 0,
-                  ), // Space for header when visible
+                  SizedBox(height: _isHeaderVisible ? 99 : 0),
                   Row(children: [_getContentForSelectedItem(_selectedItem)]),
                   const SizedBox(height: 5),
                   const CustomWebFooter(),
@@ -94,15 +95,11 @@ class _LandingPageWebState extends State<LandingPageWeb> {
             ),
             AnimatedPositioned(
               duration: const Duration(milliseconds: 200),
-              top:
-                  _isHeaderVisible
-                      ? 32
-                      : -99, // 32 is height of ScrollingHeader
+              top: _isHeaderVisible ? 32 : -99,
               left: 0,
               right: 0,
               child: const CustomWebHeader(),
             ),
-            // In your LandingPageWeb build method, update the SidebarWeb instantiation:
             SidebarWeb(
               sidebarItems: _sidebarItems,
               selectedItem: _selectedItem,
@@ -118,132 +115,10 @@ class _LandingPageWebState extends State<LandingPageWeb> {
   Widget _getContentForSelectedItem(String item) {
     switch (item) {
       case 'Home':
-        return Container(
-          // color: Colors.blue,
-          child: Column(
-            // crossAxisAlignment: CrossAxisAlignment.start ,
-            children: [
-              Column(
-                children: [
-                  Container(
-                    color: Colors.blue,
-                    width: MediaQuery.of(context).size.width,
-                    child: Stack(
-                      children: [
-                        // Background image (second image)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 590,
-                            top: 17,
-                            right: 90,
-                          ),
-                          child: Image.asset(
-                            'assets/aquaCollection.png',
-                            width: 699,
-                            height: 373,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        // Foreground image (first image) that overlaps
-                        Padding(
-                          padding: const EdgeInsets.only(left: 380, top: 42),
-                          child: SvgPicture.asset(
-                            'assets/PanelTitle.svg',
-                            width: 261,
-                            height: 214,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.green,
-                    child: Padding(
-                      // Match the right padding of 90 from the aquaCollection image
-                      padding: const EdgeInsets.only(left: 252, right: 90,top:30),
-                      child: GridView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 23,
-                              mainAxisSpacing: 23,
-                            ),
-                        itemCount: 6,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            color: Colors.pink,
-                            width: 297,
-                            height: 342,
-                            child: Stack(
-                              children: [
-                                Image.asset(
-                                  'assets/plate.jpeg',
-                                  width: 330,
-                                  height: 350,
-                                  fit: BoxFit.fitWidth,
-                                ),
-                                Positioned(
-                                  top: 14,
-                                  left: 15,
-                                  right: 13,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      SvgPicture.asset(
-                                        index == 1
-                                            ? 'assets/off.svg'
-                                            : 'assets/fewPiecesLeft.svg',
-                                        height: 32,
-                                        fit: BoxFit.contain,
-                                      ),
-                                      SvgPicture.asset(
-                                        index == 1
-                                            ? 'assets/IconWishlist.svg'
-                                            : 'assets/IconWishlistEmpty.svg',
-                                        // width: 34,
-                                        height: 20,
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (index == 1)
-                                  Positioned(
-                                    bottom: 9,
-                                    // top: 213,
-                                    left: 8,
-                                    right: 7,
-                                    child: SizedBox(
-                                      width: 282,
-                                      height: 120,
-                                      child: SvgPicture.asset(
-                                        'assets/quickDetail.svg',
-                                        fit: BoxFit.contain,
-                                        width: 282,
-                                        height: 120,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
+        return HomeContentNew();
 
       default:
-        return const HomeContentWeb(); // Use the new HomeContent widget
+        return const Expanded(child: HomeContentNew());
     }
   }
 }

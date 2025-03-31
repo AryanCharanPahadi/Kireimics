@@ -23,6 +23,7 @@ class SidebarWeb extends StatefulWidget {
 class _SidebarWebState extends State<SidebarWeb> {
   bool _isVisible = true;
   double _lastScrollPosition = 0;
+  String? _hoveredItem;
 
   @override
   void initState() {
@@ -40,18 +41,15 @@ class _SidebarWebState extends State<SidebarWeb> {
     final currentPosition = widget.scrollController.position.pixels;
     final maxScroll = widget.scrollController.position.maxScrollExtent;
 
-    // Calculate scroll percentages
     final scrollPercentage = currentPosition / maxScroll;
     final isScrollingDown = currentPosition > _lastScrollPosition;
 
     setState(() {
       if (isScrollingDown) {
-        // Original behavior for scrolling down - hide at 50%
         if (scrollPercentage >= 0.5) {
           _isVisible = false;
         }
       } else {
-        // New behavior for scrolling up - show at 40%
         if (scrollPercentage <= 0.6) {
           _isVisible = true;
         }
@@ -64,7 +62,7 @@ class _SidebarWebState extends State<SidebarWeb> {
   Widget build(BuildContext context) {
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 300),
-      left: _isVisible ? 44 : -150, // Move off-screen when hidden
+      left: _isVisible ? 44 : -150,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 300),
         opacity: _isVisible ? 1.0 : 0.0,
@@ -73,7 +71,6 @@ class _SidebarWebState extends State<SidebarWeb> {
           child: Container(
             width: 150.0,
             height: 210.0,
-            color: Colors.green,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -83,30 +80,33 @@ class _SidebarWebState extends State<SidebarWeb> {
                     children: [
                       ...widget.sidebarItems.map((item) {
                         bool isSelected = item == widget.selectedItem;
-                        return GestureDetector(
-                          onTap: () {
-                            widget.onItemSelected(item);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10.0),
-                            child: Text(
-                              item.toUpperCase(),
-                              style: TextStyle(
-                                fontFamily: GoogleFonts.barlow().fontFamily,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                                height: 1.0,
-                                letterSpacing: 1.5,
-                                color:
-                                    item == "SALE"
-                                        ? const Color(0xFFF46856)
-                                        : const Color(0xFF3E5B84),
-                                background:
-                                    item != "SALE" && isSelected
-                                        ? (Paint()
-                                          ..color = const Color(0xFFd3e4fd)
-                                          ..style = PaintingStyle.fill)
-                                        : null,
+                        bool isHovered = item == _hoveredItem;
+                        return MouseRegion(
+                          onEnter: (_) => setState(() => _hoveredItem = item),
+                          onExit: (_) => setState(() => _hoveredItem = null),
+                          child: GestureDetector(
+                            onTap: () {
+                              widget.onItemSelected(item);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10.0),
+                              child: Text(
+                                item.toUpperCase(),
+                                style: TextStyle(
+                                  fontFamily: GoogleFonts.barlow().fontFamily,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  height: 1.0,
+                                  letterSpacing: 1.5,
+                                  color: item == "SALE"
+                                      ? const Color(0xFFF46856)
+                                      : const Color(0xFF3E5B84),
+                                  background: item != "SALE" && (isSelected || isHovered)
+                                      ? (Paint()
+                                    ..color = const Color(0xFFd3e4fd)
+                                    ..style = PaintingStyle.fill)
+                                      : null,
+                                ),
                               ),
                             ),
                           ),

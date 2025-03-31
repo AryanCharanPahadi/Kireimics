@@ -62,16 +62,17 @@ class AutoScrollImagesWebState extends State<AutoScrollImagesWeb> {
           children: [
             Padding(
               padding: const EdgeInsets.only(
-                right: 8,
+                right: 2,
               ), // Small space between all images
               child: SvgPicture.asset(
                 widget.imagePaths[actualIndex],
                 height: widget.imageHeights[actualIndex],
+                color: Color(0xFFD7E7FF),
                 fit: BoxFit.contain,
               ),
             ),
             if (isLastInLoop)
-              const SizedBox(width: 15), // Larger space after a full cycle
+              const SizedBox(width: 20), // Larger space after a full cycle
           ],
         );
       },

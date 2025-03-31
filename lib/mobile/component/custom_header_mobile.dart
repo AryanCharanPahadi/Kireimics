@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'drawer.dart';
+
 class CustomHeaderMobile extends StatelessWidget {
   const CustomHeaderMobile({super.key});
 
@@ -18,7 +20,9 @@ class CustomHeaderMobile extends StatelessWidget {
           children: [
             IconButton(
               icon: Icon(Icons.menu, size: 30, color: Color(0xFF3E5B84)),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>DrawerMobile()));
+              },
             ),
 
             Image.asset('assets/fullLogoNew.png', height: 24, width: 150),

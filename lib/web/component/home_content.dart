@@ -61,8 +61,7 @@ class _HomeContentWebState extends State<HomeContentWeb> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child:
-      Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Stack(
@@ -76,11 +75,12 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                       Container(
                         height: 373,
                         width: 699,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/aquaCollection.png'),
-                            fit: BoxFit.cover,
-                          ),
+                        decoration: const BoxDecoration(),
+                        child: Image.asset(
+                          'assets/aquaCollection.png',
+                          height: 373,
+                          width: 699,
+                          fit: BoxFit.cover,
                         ),
                       ),
 
@@ -103,7 +103,7 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                                   fontWeight: FontWeight.w600,
                                   fontSize: 20,
                                   height:
-                                  36 /
+                                      36 /
                                       20, // line-height divided by font-size
                                   letterSpacing: 0.04 * 20, // 4% of font-size
                                   color: Color(0xFF0D2C54),
@@ -131,8 +131,7 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                   height: 1.0, // 100% of font size
-                                  letterSpacing:
-                                  0.04 * 16, // 4% of 16px = 0.64
+                                  letterSpacing: 0.04 * 16, // 4% of 16px = 0.64
                                   color: Color(0xFF0D2C54),
                                 ),
                               ),
@@ -145,7 +144,7 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 42,left: 370),
+                padding: const EdgeInsets.only(top: 42, left: 370),
                 child: Container(
                   color: Colors.transparent,
 
@@ -161,11 +160,6 @@ class _HomeContentWebState extends State<HomeContentWeb> {
             ],
           ),
 
-
-
-
-
-
           SizedBox(
             child: Transform.translate(
               offset: const Offset(0, 680),
@@ -176,9 +170,7 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                     image: AssetImage("assets/bggrid.png"),
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
-                      Color(
-                        0xFF2472e3,
-                      ).withOpacity(0.9), // Adjust opacity here
+                      Color(0xFF2472e3).withOpacity(0.9), // Adjust opacity here
                       BlendMode
                           .srcATop, // Try different modes like overlay, multiply, etc.
                     ),
@@ -205,8 +197,8 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                                       fontSize: 14,
                                       color: Colors.white,
                                       fontFamily:
-                                      GoogleFonts.barlow()
-                                          .fontFamily, // Make sure to include this font in pubspec.yaml
+                                          GoogleFonts.barlow()
+                                              .fontFamily, // Make sure to include this font in pubspec.yaml
                                     ),
                                     enabledBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
@@ -233,8 +225,8 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                                       fontSize: 14,
                                       color: Colors.white,
                                       fontFamily:
-                                      GoogleFonts.barlow()
-                                          .fontFamily, // Make sure to include this font in pubspec.yaml
+                                          GoogleFonts.barlow()
+                                              .fontFamily, // Make sure to include this font in pubspec.yaml
                                     ),
                                     enabledBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
@@ -274,8 +266,8 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                                       fontSize: 14,
                                       color: Colors.white,
                                       fontFamily:
-                                      GoogleFonts.barlow()
-                                          .fontFamily, // Make sure to include this font in pubspec.yaml
+                                          GoogleFonts.barlow()
+                                              .fontFamily, // Make sure to include this font in pubspec.yaml
                                     ),
                                     enabledBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
@@ -329,8 +321,8 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                           SizedBox(width: 40),
                           Column(
                             crossAxisAlignment:
-                            CrossAxisAlignment
-                                .start, // Aligns text to start
+                                CrossAxisAlignment
+                                    .start, // Aligns text to start
 
                             children: [
                               Container(
@@ -358,8 +350,7 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
-                                    fontFamily:
-                                    GoogleFonts.barlow().fontFamily,
+                                    fontFamily: GoogleFonts.barlow().fontFamily,
                                     fontWeight: FontWeight.w200,
                                     height: 1.0,
                                     letterSpacing: 0.0,
@@ -394,12 +385,12 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                           physics: const NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 23,
-                            mainAxisSpacing: 23,
-                            childAspectRatio: 0.9,
-                          ),
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 23,
+                                mainAxisSpacing: 23,
+                                childAspectRatio: 0.9,
+                              ),
                           itemCount: 6,
                           itemBuilder: (context, index) {
                             return Stack(
@@ -416,7 +407,7 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                                   right: 14,
                                   child: Row(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       SvgPicture.asset(
                                         index == 1
@@ -500,7 +491,6 @@ class _HomeContentWebState extends State<HomeContentWeb> {
           ),
         ],
       ),
-
     );
   }
 }
