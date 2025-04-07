@@ -12,17 +12,17 @@ class AboveFooter extends StatefulWidget {
 
 class _AboveFooterState extends State<AboveFooter> {
   final List<String> imagePaths = [
-    "assets/dot.svg",
-    "assets/@.svg",
-    "assets/k.svg",
-    "assets/i.svg",
-    "assets/r.svg",
-    "assets/e.svg",
-    "assets/i.svg",
-    "assets/m.svg",
-    "assets/i.svg",
-    "assets/c.svg",
-    "assets/s.svg",
+    "assets/grouped_alphabet/dot.svg",
+    "assets/grouped_alphabet/@.svg",
+    "assets/grouped_alphabet/k.svg",
+    "assets/grouped_alphabet/i.svg",
+    "assets/grouped_alphabet/r.svg",
+    "assets/grouped_alphabet/e.svg",
+    "assets/grouped_alphabet/i.svg",
+    "assets/grouped_alphabet/m.svg",
+    "assets/grouped_alphabet/i.svg",
+    "assets/grouped_alphabet/c.svg",
+    "assets/grouped_alphabet/s.svg",
   ];
   List<double> imageHeights = [
     16.0,
@@ -71,7 +71,11 @@ class _AboveFooterState extends State<AboveFooter> {
               SizedBox(width: 8),
               GestureDetector(
                 onTap: _launchInstagram,
-                child: Image.asset("assets/instag.png", height: 31, width: 31),
+                child: Image.asset(
+                  "assets/above_footer/instag.png",
+                  height: 31,
+                  width: 31,
+                ),
               ),
             ],
           ),

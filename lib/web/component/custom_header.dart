@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class CustomWebHeader extends StatelessWidget {
+class CustomWebHeader extends StatefulWidget {
   const CustomWebHeader({super.key});
+
+  @override
+  State<CustomWebHeader> createState() => _CustomWebHeaderState();
+}
+
+class _CustomWebHeaderState extends State<CustomWebHeader> {
+  final Map<String, bool> _isHovered = {}; // Store hover states for each icon
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +25,7 @@ class CustomWebHeader extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 44),
               child: Image.asset(
-                'assets/fullLogoNew.png',
+                'assets/header/fullLogoNew.png',
                 height: 31,
                 width: 191,
               ),
@@ -28,13 +35,13 @@ class CustomWebHeader extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildHoverIcon('assets/IconSearch.svg', 18, 18),
+                  _buildIcon('assets/header/IconSearch.svg', 18, 18),
                   const SizedBox(width: 32),
-                  _buildHoverIcon('assets/IconWishlist.svg', 18, 15),
+                  _buildIcon('assets/header/IconWishlist.svg', 18, 15),
                   const SizedBox(width: 32),
-                  _buildHoverIcon('assets/IconProfile.svg', 18, 16),
+                  _buildIcon('assets/header/IconProfile.svg', 18, 16),
                   const SizedBox(width: 32),
-                  _buildHoverIcon('assets/IconCart.svg', 20, 19),
+                  _buildIcon('assets/header/IconCart.svg', 20, 19),
                 ],
               ),
             ),
@@ -44,30 +51,22 @@ class CustomWebHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildHoverIcon(String assetPath, double width, double height) {
-    final ValueNotifier<bool> isHovered = ValueNotifier(false);
+  Widget _buildIcon(String assetPath, double width, double height) {
+    _isHovered.putIfAbsent(assetPath, () => false); // Initialize state if missing
 
     return MouseRegion(
-      onEnter: (_) => isHovered.value = true,
-      onExit: (_) => isHovered.value = false,
-      child: ValueListenableBuilder<bool>(
-        valueListenable: isHovered,
-        builder: (context, isHoveredValue, child) {
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            transform: isHoveredValue
-                ? Matrix4.diagonal3Values(1.5, 1.5, 1.0)
-                : Matrix4.identity(),
-            child: GestureDetector(
-              onTap: () {},
-              child: SvgPicture.asset(
-                assetPath,
-                width: width,
-                height: height,
-              ),
-            ),
-          );
-        },
+      onEnter: (_) => setState(() => _isHovered[assetPath] = true),
+      onExit: (_) => setState(() => _isHovered[assetPath] = false),
+      child: GestureDetector(
+        onTap: () {},
+        child: SvgPicture.asset(
+          assetPath,
+          width: width,
+          height: height,
+          colorFilter: _isHovered[assetPath] == true
+              ? const ColorFilter.mode(Color(0xFF2876E4), BlendMode.srcIn)
+              : null, // Change color on hover
+        ),
       ),
     );
   }

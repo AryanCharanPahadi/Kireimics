@@ -7,7 +7,7 @@ class AutoScrollImagesWeb extends StatefulWidget {
   final List<String> imagePaths;
   final List<double> imageHeights;
 
-  const AutoScrollImagesWeb({
+  const AutoScrollImagesWeb({super.key,
     required this.imagePaths,
     required this.imageHeights,
   });

@@ -52,7 +52,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
+            SizedBox(
               // color: Colors.red,
               height: 51.49,
               width: 211,
@@ -294,7 +294,7 @@ class CustomFooter extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
+                              SizedBox(
                                 height: 114,
                                 width: 460,
                                 child: Text(
@@ -349,11 +349,11 @@ class Sidebar extends StatefulWidget {
   final Function(String) onItemSelected;
 
   const Sidebar({
-    Key? key,
+    super.key,
     required this.sidebarItems,
     required this.selectedItem,
     required this.onItemSelected,
-  }) : super(key: key);
+  });
 
   @override
   State<Sidebar> createState() => _SidebarState();
@@ -418,7 +418,7 @@ class _SidebarState extends State<Sidebar> {
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
                     const SizedBox(height: 22),
                     const Divider(color: Color(0xFF3E5B84), thickness: 1),
                   ],
@@ -430,7 +430,7 @@ class _SidebarState extends State<Sidebar> {
                   Padding(
                     padding: const EdgeInsets.only(left: 4.0),
                     child: SvgPicture.asset(
-                      'assets/Subtract.svg',
+                      'assets/instagram.svg',
                       width: 24,
                       height: 24,
                     ),
@@ -439,7 +439,7 @@ class _SidebarState extends State<Sidebar> {
                   Padding(
                     padding: const EdgeInsets.only(left: 4.0),
                     child: SvgPicture.asset(
-                      'assets/Icon.svg',
+                      'assets/email.svg',
                       width: 24,
                       height: 24,
                     ),
@@ -618,7 +618,7 @@ class _HomeContentState extends State<HomeContent> {
                 child: Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage("assets/bggrid.png"),
+                      image: AssetImage("assets/background.png"),
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
                         Color(
@@ -764,7 +764,7 @@ class _HomeContentState extends State<HomeContent> {
                                   padding: EdgeInsets.only(left: 250, top: 20),
                                   // width: 302, // Adjust width if needed
                                   child: SvgPicture.asset(
-                                    "assets/Buttons.svg",
+                                    "assets/submit.svg",
                                     height: 19,
                                     width: 58,
                                   ),
@@ -830,7 +830,7 @@ class _HomeContentState extends State<HomeContent> {
 
                     child: Padding(
                       padding: const EdgeInsets.only(left: 252),
-                      child: Container(
+                      child: SizedBox(
                         // color: Colors.black,
                         height: 707,
                         width: 938,
@@ -850,7 +850,7 @@ class _HomeContentState extends State<HomeContent> {
                               return Stack(
                                 children: [
                                   Image.asset(
-                                    'assets/plate.jpeg',
+                                    'assets/gridview_img.jpeg',
                                     height: 342,
                                     width: 297,
                                     fit: BoxFit.cover,

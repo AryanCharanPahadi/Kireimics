@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../../component/routes.dart';
 
 class Footer extends StatefulWidget {
   const Footer({super.key});
@@ -19,7 +22,7 @@ class _FooterState extends State<Footer> {
           right: 63,
           left: 64,
           child: SvgPicture.asset(
-            'assets/footerbg.svg',
+            'assets/footer/footerbg.svg',
             height: 239,
             width: 235,
             fit: BoxFit.contain,
@@ -43,33 +46,49 @@ class _FooterState extends State<Footer> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text(
-                      "Shipping Policy",
-                      style: GoogleFonts.barlow(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 0.64,
-                        color: Color(0xFF3E5B84),
+                    GestureDetector(
+                      onTap: () {
+                        context.go(AppRoutes.shippingPolicy);
+                      },
+                      child: Text(
+                        "Shipping Policy",
+                        style: GoogleFonts.barlow(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          letterSpacing: 0.64,
+                          color: Color(0xFF3E5B84),
+                        ),
                       ),
                     ),
                     SizedBox(height: 20),
-                    Text(
-                      "Privacy Policy",
-                      style: GoogleFonts.barlow(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 0.64,
-                        color: Color(0xFF3E5B84),
+                    GestureDetector(
+                      onTap: () {
+                        // Navigator.pop(context); // Close drawer
+                        context.go(AppRoutes.privacyPolicy);
+                      },
+                      child: Text(
+                        "Privacy Policy",
+                        style: GoogleFonts.barlow(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          letterSpacing: 0.64,
+                          color: Color(0xFF3E5B84),
+                        ),
                       ),
                     ),
                     SizedBox(height: 20),
-                    Text(
-                      "Contact",
-                      style: GoogleFonts.barlow(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 0.64,
-                        color: Color(0xFF3E5B84),
+                    GestureDetector(
+                      onTap: () {
+                        context.go(AppRoutes.contactUs);
+                      },
+                      child: Text(
+                        "Contact",
+                        style: GoogleFonts.barlow(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          letterSpacing: 0.64,
+                          color: Color(0xFF3E5B84),
+                        ),
                       ),
                     ),
                   ],
@@ -92,8 +111,10 @@ class _FooterState extends State<Footer> {
                             letterSpacing: 0.0,
                           ),
                           softWrap: true,
+                          textAlign: TextAlign.center, // Aligns text centrally
                         ),
                       ),
+
                     ),
                   ],
                 ),
@@ -172,7 +193,7 @@ class _FooterState extends State<Footer> {
                         Padding(
                           padding: const EdgeInsets.only(left: 4.0),
                           child: SvgPicture.asset(
-                            'assets/Subtract.svg',
+                            'assets/sidebar/instagram.svg',
                             width: 18,
                             height: 18,
                           ),
@@ -181,7 +202,7 @@ class _FooterState extends State<Footer> {
                         Padding(
                           padding: const EdgeInsets.only(left: 4.0),
                           child: SvgPicture.asset(
-                            'assets/Icon.svg',
+                            'assets/sidebar/email.svg',
                             width: 18,
                             height: 14,
                           ),

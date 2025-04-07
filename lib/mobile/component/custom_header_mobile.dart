@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:kireimics/component/custom_text.dart';
+import '../../component/routes.dart';
 import 'drawer.dart';
 
 class CustomHeaderMobile extends StatelessWidget {
@@ -21,15 +22,22 @@ class CustomHeaderMobile extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.menu, size: 30, color: Color(0xFF3E5B84)),
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>DrawerMobile()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DrawerMobile()),
+                );
               },
             ),
 
-            Image.asset('assets/fullLogoNew.png', height: 24, width: 150),
+            Image.asset(
+              'assets/header/fullLogoNew.png',
+              height: 24,
+              width: 150,
+            ),
             GestureDetector(
               onTap: () {},
               child: SvgPicture.asset(
-                'assets/IconCart.svg', // Ensure the correct path
+                'assets/header/IconCart.svg', // Ensure the correct path
                 width: 23,
                 height: 24,
               ),
@@ -42,25 +50,17 @@ class CustomHeaderMobile extends StatelessWidget {
 }
 
 class Column1 extends StatelessWidget {
-  const Column1({super.key});
+  final Function(String) onNavItemSelected;
+
+  const Column1({super.key, required this.onNavItemSelected});
 
   @override
   Widget build(BuildContext context) {
-    final navTextStyle = TextStyle(
-      fontFamily: GoogleFonts.barlow().fontFamily,
-      fontWeight: FontWeight.w600,
-      fontSize: 18,
-      height: 1.0,
-      letterSpacing: 0.56,
-      color: Color(0xFF3E5B84),
-    );
-
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Column(
         children: [
           SizedBox(
-            // color: Colors.black,
             height: 60,
             child: Padding(
               padding: const EdgeInsets.only(left: 14, right: 14),
@@ -68,40 +68,72 @@ class Column1 extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        GestureDetector(
-                          onTap: () {},
-                          child: Text("HOME", style: navTextStyle),
+                        BarlowText(
+                          route: AppRoutes.home,
+                          onTap: () => onNavItemSelected(AppRoutes.home),
+
+                          text: "HOME",
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          lineHeight: 1.0,
+                          letterSpacing: 0.56,
+                          color: Color(0xFF3E5B84),
+                          activeBackgroundColor: Color(0xFFb9d6ff),
+                          enableBackgroundForActiveRoute: true,
                         ),
-                        const SizedBox(width: 24),
-                        GestureDetector(
-                          onTap: () {},
-                          child: Text("CATALOG", style: navTextStyle),
+                        const SizedBox(width: 12),
+                        BarlowText(
+                          onTap: () => onNavItemSelected(AppRoutes.catalog),
+                          route: AppRoutes.catalog,
+                          text: "CATALOG",
+                          fontWeight: FontWeight.w600,
+                          enableBackgroundForActiveRoute: true,
+                          fontSize: 18,
+                          lineHeight: 1.0,
+                          letterSpacing: 0.56,
+                          color: Color(0xFF3E5B84),
+                          activeBackgroundColor: Color(0xFFb9d6ff),
                         ),
-                        const SizedBox(width: 24),
-                        GestureDetector(
-                          onTap: () {},
-                          child: Text("SALE", style: navTextStyle),
+                        const SizedBox(width: 12),
+
+                        BarlowText(
+                          route: AppRoutes.sale,
+                          onTap: () => onNavItemSelected(AppRoutes.sale),
+                          text: "SALE",
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          lineHeight: 1.0,
+                          letterSpacing: 0.56,
+                          color: Color(0xFFf46856),
+                          activeBackgroundColor: Color(0xFFfde1dd),
+                          enableBackgroundForActiveRoute: true,
                         ),
-                        const SizedBox(width: 24),
-                        GestureDetector(
-                          onTap: () {},
-                          child: Text("ABOUT", style: navTextStyle),
+                        const SizedBox(width: 12),
+                        BarlowText(
+                          onTap: () => onNavItemSelected(AppRoutes.about),
+                          route: AppRoutes.about,
+                          text: "ABOUT",
+                          fontWeight: FontWeight.w600,
+                          enableBackgroundForActiveRoute: true,
+                          fontSize: 18,
+                          lineHeight: 1.0,
+                          letterSpacing: 0.56,
+                          color: Color(0xFF3E5B84),
+                          activeBackgroundColor: Color(0xFFb9d6ff),
                         ),
                       ],
                     ),
                   ),
-                  Divider(color: Color(0xFF3E5B84),),
+                  Divider(color: Color(0xFF3E5B84)),
                 ],
               ),
             ),
           ),
-          // SizedBox(height: 10),
           SizedBox(
-            // color: Colors.black,
             height: 70,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -117,8 +149,7 @@ class Column1 extends StatelessWidget {
                             hintStyle: TextStyle(
                               fontSize: 20,
                               fontFamily: GoogleFonts.barlow().fontFamily,
-                              color:Color(0xFF414141)
-                                
+                              color: Color(0xFF414141),
                             ),
                             border: InputBorder.none,
                             focusedBorder: InputBorder.none,
@@ -126,10 +157,10 @@ class Column1 extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Icon(Icons.search, color:Color(0xFF3E5B84),size: 24,),
+                      Icon(Icons.search, color: Color(0xFF3E5B84), size: 24),
                     ],
                   ),
-                  Divider(color: Color(0xFF414141),),
+                  Divider(color: Color(0xFF414141)),
                 ],
               ),
             ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'auto_scroll.dart';
+import '../web/component/auto_scroll.dart';
 
 class HomeContentWeb extends StatefulWidget {
   const HomeContentWeb({super.key});
@@ -167,7 +167,7 @@ class _HomeContentWebState extends State<HomeContentWeb> {
               child: Container(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage("assets/bggrid.png"),
+                    image: AssetImage("assets/background.png"),
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
                       Color(0xFF2472e3).withOpacity(0.9), // Adjust opacity here
@@ -311,7 +311,7 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                                 padding: EdgeInsets.only(left: 250, top: 20),
                                 // width: 302, // Adjust width if needed
                                 child: SvgPicture.asset(
-                                  "assets/Buttons.svg",
+                                  "assets/submit.svg",
                                   height: 19,
                                   width: 58,
                                 ),
@@ -391,12 +391,12 @@ class _HomeContentWebState extends State<HomeContentWeb> {
                                 mainAxisSpacing: 23,
                                 childAspectRatio: 0.9,
                               ),
-                          itemCount: 6,
+                          itemCount: 9,
                           itemBuilder: (context, index) {
                             return Stack(
                               children: [
                                 Image.asset(
-                                  'assets/plate.jpeg',
+                                  'assets/gridview_img.jpeg',
                                   height: 342,
                                   width: 297,
                                   fit: BoxFit.cover,

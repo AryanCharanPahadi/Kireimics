@@ -24,6 +24,8 @@ class _SidebarWebState extends State<SidebarWeb> {
   bool _isVisible = true;
   double _lastScrollPosition = 0;
   String? _hoveredItem;
+  Color? _iconColor1; // Default to null for the first icon
+  Color? _iconColor2; // Default to null for the second icon
 
   @override
   void initState() {
@@ -89,7 +91,9 @@ class _SidebarWebState extends State<SidebarWeb> {
                               widget.onItemSelected(item);
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10.0),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10.0,
+                              ),
                               child: Text(
                                 item.toUpperCase(),
                                 style: TextStyle(
@@ -98,14 +102,24 @@ class _SidebarWebState extends State<SidebarWeb> {
                                   fontSize: 16,
                                   height: 1.0,
                                   letterSpacing: 1.5,
-                                  color: item == "SALE"
-                                      ? const Color(0xFFF46856)
-                                      : const Color(0xFF3E5B84),
-                                  background: item != "SALE" && (isSelected || isHovered)
-                                      ? (Paint()
-                                    ..color = const Color(0xFFd3e4fd)
-                                    ..style = PaintingStyle.fill)
-                                      : null,
+                                  color:
+                                      item == "SALE"
+                                          ? const Color(
+                                            0xFFF46856,
+                                          ) // Keep text color red for SALE
+                                          : const Color(0xFF3E5B84),
+                                  background:
+                                      (item == "SALE" &&
+                                              (isHovered || isSelected))
+                                          ? (Paint()
+                                            ..color = const Color(0xFFFFE5E5)
+                                            ..style = PaintingStyle.fill)
+                                          : (item != "SALE" &&
+                                              (isHovered || isSelected))
+                                          ? (Paint()
+                                            ..color = const Color(0xFFd3e4fd)
+                                            ..style = PaintingStyle.fill)
+                                          : null,
                                 ),
                               ),
                             ),
@@ -120,21 +134,55 @@ class _SidebarWebState extends State<SidebarWeb> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4.0),
-                      child: SvgPicture.asset(
-                        'assets/Subtract.svg',
-                        width: 24,
-                        height: 24,
+                    MouseRegion(
+                      onEnter: (_) {
+                        setState(() {
+                          _iconColor1 = Color(
+                            0xFF2876E4,
+                          ); // Change color for the first icon on hover
+                        });
+                      },
+                      onExit: (_) {
+                        setState(() {
+                          _iconColor1 =
+                              null; // Reset to null or leave as default when not hovered
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 4.0),
+                        child: SvgPicture.asset(
+                          'assets/sidebar/instagram.svg',
+                          width: 24,
+                          height: 24,
+                          color:
+                              _iconColor1, // Apply hover color if available, else keep default (null)
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4.0),
-                      child: SvgPicture.asset(
-                        'assets/Icon.svg',
-                        width: 24,
-                        height: 24,
+                    MouseRegion(
+                      onEnter: (_) {
+                        setState(() {
+                          _iconColor2 = Color(
+                            0xFF2876E4,
+                          ); // Change color for the second icon on hover
+                        });
+                      },
+                      onExit: (_) {
+                        setState(() {
+                          _iconColor2 =
+                              null; // Reset to null or leave as default when not hovered
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 4.0),
+                        child: SvgPicture.asset(
+                          'assets/sidebar/email.svg',
+                          width: 24,
+                          height: 24,
+                          color:
+                              _iconColor2, // Apply hover color if available, else keep default (null)
+                        ),
                       ),
                     ),
                   ],

@@ -3,8 +3,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomWebFooter extends StatelessWidget {
-  const CustomWebFooter({super.key});
+  final Function(String) onItemSelected;
 
+  const CustomWebFooter({super.key, required this.onItemSelected});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -20,7 +21,7 @@ class CustomWebFooter extends StatelessWidget {
               top: 60,
 
               child: SvgPicture.asset(
-                'assets/footerbg.svg',
+                'assets/footer/footerbg.svg',
                 height: 258,
                 width: 254,
                 fit: BoxFit.contain,
@@ -33,28 +34,6 @@ class CustomWebFooter extends StatelessWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 40),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 9.0),
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: Tooltip(
-                            message: "Open Chatbot",
-                            child: SvgPicture.asset(
-                              "assets/chat.svg",
-                              width: 36,
-                              height: 36,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsets.only(left: 15, right: 15, top: 50),
                   child: Divider(color: Color(0xFF3E5B84), thickness: 1),
@@ -71,33 +50,44 @@ class CustomWebFooter extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Text(
-                              "Shipping Policy",
-                              style: GoogleFonts.barlow(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                letterSpacing: 0.64,
-                                color: Color(0xFF3E5B84),
+                            GestureDetector(
+                              onTap: () => onItemSelected('Shipping Policy'),
+                              child: Text(
+                                "Shipping Policy",
+                                style: GoogleFonts.barlow(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  letterSpacing: 0.64,
+                                  color: Color(0xFF3E5B84),
+                                ),
                               ),
                             ),
                             SizedBox(height: 15),
-                            Text(
-                              "Privacy Policy",
-                              style: GoogleFonts.barlow(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                letterSpacing: 0.64,
-                                color: Color(0xFF3E5B84),
+                            GestureDetector(
+                              onTap: () => onItemSelected('Privacy Policy'),
+
+                              child: Text(
+                                "Privacy Policy",
+                                style: GoogleFonts.barlow(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  letterSpacing: 0.64,
+                                  color: Color(0xFF3E5B84),
+                                ),
                               ),
                             ),
                             SizedBox(height: 15),
-                            Text(
-                              "Contact",
-                              style: GoogleFonts.barlow(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                letterSpacing: 0.64,
-                                color: Color(0xFF3E5B84),
+                            GestureDetector(
+                              onTap: () => onItemSelected('Contact'),
+
+                              child: Text(
+                                "Contact",
+                                style: GoogleFonts.barlow(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  letterSpacing: 0.64,
+                                  color: Color(0xFF3E5B84),
+                                ),
                               ),
                             ),
                           ],
@@ -134,64 +124,63 @@ class CustomWebFooter extends StatelessWidget {
                     Column(
                       children: [
                         ElevatedButton(
-                            onPressed: null, // Disables the button
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey[50],
-                              elevation: 0,
-                              side: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(45),
-                              ),
-                              disabledForegroundColor: Colors.transparent,
-                              disabledBackgroundColor: Colors.grey[50],
+                          onPressed: null, // Disables the button
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[50],
+                            elevation: 0,
+                            side: BorderSide(color: Colors.grey[300]!),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(45),
                             ),
-                            child: RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Handmade",
-                                    style: TextStyle(
-                                      fontFamily: 'Cralika',
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 16,
-                                      letterSpacing: 0.04,
-                                      color: Color(0xFF3e5b84),
-                                    ),
+                            disabledForegroundColor: Colors.transparent,
+                            disabledBackgroundColor: Colors.grey[50],
+                          ),
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Handmade",
+                                  style: TextStyle(
+                                    fontFamily: 'Cralika',
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16,
+                                    letterSpacing: 0.04,
+                                    color: Color(0xFF3e5b84),
                                   ),
-                                  TextSpan(
-                                    text: "with",
-                                    style: TextStyle(
-                                      fontFamily: 'Cralika',
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 16,
-                                      letterSpacing: 0.04,
-                                      color: Color(0xFF5a8acf),
-                                    ),
+                                ),
+                                TextSpan(
+                                  text: "with",
+                                  style: TextStyle(
+                                    fontFamily: 'Cralika',
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16,
+                                    letterSpacing: 0.04,
+                                    color: Color(0xFF5a8acf),
                                   ),
-                                  TextSpan(
-                                    text: "love",
-                                    style: TextStyle(
-                                      fontFamily: 'Cralika',
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 16,
-                                      letterSpacing: 0.04,
-                                      color: Color(0xFF94c0ff),
-                                    ),
+                                ),
+                                TextSpan(
+                                  text: "love",
+                                  style: TextStyle(
+                                    fontFamily: 'Cralika',
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16,
+                                    letterSpacing: 0.04,
+                                    color: Color(0xFF94c0ff),
                                   ),
-                                  TextSpan(
-                                    text: "🩵",
-                                    style: TextStyle(
-                                      fontFamily: 'Cralika',
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 16,
-                                      letterSpacing: 0.04,
-                                    ),
+                                ),
+                                TextSpan(
+                                  text: "🩵",
+                                  style: TextStyle(
+                                    fontFamily: 'Cralika',
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16,
+                                    letterSpacing: 0.04,
                                   ),
-                                ],
-                              ),
-                            ))
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                     Column(

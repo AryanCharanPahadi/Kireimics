@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/mobile/component/scrolling_header.dart';
+import 'package:kireimics/component/routes.dart'; // Import your routes file
 
 import '../../component/custom_text.dart';
 
@@ -12,14 +15,21 @@ class DrawerMobile extends StatefulWidget {
 }
 
 class _DrawerMobileState extends State<DrawerMobile> {
+  bool _isCurrentRoute(String routePath) {
+    final router = GoRouter.of(context);
+    return router.routeInformationProvider.value.location == routePath;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF46856),
+      backgroundColor: const Color(0xFFF46856),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Column(children: [ScrollingHeaderMobile(color: Color(0xFFF46856))]),
+            Column(
+              children: [ScrollingHeaderMobile(color: const Color(0xFFF46856))],
+            ),
             Column(
               children: [
                 Padding(
@@ -28,22 +38,25 @@ class _DrawerMobileState extends State<DrawerMobile> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.close, size: 30, color: Colors.white),
+                        icon: const Icon(
+                          Icons.close,
+                          size: 30,
+                          color: Colors.white,
+                        ),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
-                      Text(
+                      const Text(
                         "MENU",
-                        textAlign: TextAlign.right, // Align text to the right
+                        textAlign: TextAlign.right,
                         style: TextStyle(
-                          fontFamily: "Cralika", // Cralika font
-                          fontWeight: FontWeight.w400, // Equivalent to 400
-                          fontSize: 32, // 32px
-                          height: 1.0, // Line height 32px (32/32)
-                          letterSpacing: 1.28, // 4% of 32px = 1.28
-                          color:
-                              Colors.white, // Default color (change if needed)
+                          fontFamily: "Cralika",
+                          fontWeight: FontWeight.w400,
+                          fontSize: 32,
+                          height: 1.0,
+                          letterSpacing: 1.28,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -52,191 +65,145 @@ class _DrawerMobileState extends State<DrawerMobile> {
               ],
             ),
 
+            // Main Menu Items
             Padding(
               padding: const EdgeInsets.only(left: 24, right: 32, top: 20),
               child: SizedBox(
-                // color: Colors.yellow,
                 height: 164,
                 width: MediaQuery.of(context).size.width,
-
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    CustomText(
-                      text: "HOME",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
+                    _buildMenuItem(
+                      "HOME",
+                      isActive: _isCurrentRoute(AppRoutes.home),
+                      onTap: () {
+                        context.go(AppRoutes.home);
+                        Navigator.pop(context);
+                      },
                     ),
+                    _buildMenuItem(
+                      isActive: _isCurrentRoute(AppRoutes.catalog),
 
-                    CustomText(
-                      text: "CATALOG",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
+                      "CATALOG",
+                      onTap: () {
+                        // Add your catalog route here if different
+                        context.go(AppRoutes.catalog);
+                        Navigator.pop(context);
+                      },
                     ),
+                    _buildMenuItem(
+                      "SALE",
+                      isActive: _isCurrentRoute(AppRoutes.sale),
 
-                    CustomText(
-                      text: "SALE",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
+                      onTap: () {
+                        // Add your sale route here if different
+                        context.go(AppRoutes.sale);
+                        Navigator.pop(context);
+                      },
                     ),
-                    CustomText(
-                      text: "ABOUT",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
+                    _buildMenuItem(
+                      isActive: _isCurrentRoute(AppRoutes.about),
+
+                      "ABOUT",
+                      onTap: () {
+                        context.go(AppRoutes.about);
+                        Navigator.pop(context);
+                      },
                     ),
                   ],
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 24, right: 32, top: 24),
+
+            const Padding(
+              padding: EdgeInsets.only(left: 24, right: 32, top: 24),
               child: Divider(color: Colors.black),
             ),
 
+            // Account Section
             Padding(
               padding: const EdgeInsets.only(left: 24, right: 32, top: 20),
               child: SizedBox(
                 height: 164,
                 width: MediaQuery.of(context).size.width,
-
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    CustomText(
-                      text: "MY ACCOUNT",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
-                    ),
-
-                    CustomText(
-                      text: "MY ORDERS",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
-                    ),
-
-                    CustomText(
-                      text: "WISHLIST",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
-                    ),
+                    _buildMenuItem("MY ACCOUNT"),
+                    _buildMenuItem("MY ORDERS"),
+                    _buildMenuItem("WISHLIST"),
                   ],
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 24, right: 32, top: 24),
+
+            const Padding(
+              padding: EdgeInsets.only(left: 24, right: 32, top: 24),
               child: Divider(color: Colors.black),
             ),
+
+            // Policies Section
             Padding(
               padding: const EdgeInsets.only(left: 24, right: 32, top: 20),
               child: SizedBox(
                 height: 164,
                 width: MediaQuery.of(context).size.width,
-
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    CustomText(
-                      text: "Shipping Policy",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
-                    ),
+                    _buildMenuItem(
+                      isActive: _isCurrentRoute(AppRoutes.shippingPolicy),
 
-                    CustomText(
-                      text: "Privacy Policy",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
+                      "Shipping Policy",
+                      onTap: () {
+                        Navigator.pop(context); // Close drawer
+                        context.go(AppRoutes.shippingPolicy);
+                      },
                     ),
+                    _buildMenuItem(
+                      isActive: _isCurrentRoute(AppRoutes.privacyPolicy),
 
-                    CustomText(
-                      text: "Contact",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
+                      "Privacy Policy",
+                      onTap: () {
+                        Navigator.pop(context); // Close drawer
+                        context.go(AppRoutes.privacyPolicy);
+                      },
                     ),
+                    _buildMenuItem(
+                      isActive: _isCurrentRoute(AppRoutes.contactUs),
 
-                    CustomText(
-                      text: "Log In / Sign Up",
-                      fontFamily: "Barlow",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      lineHeight: 14, // 100%
-                      letterSpacing: 0.56, // 4% of 14px
-                      color: Colors.white,
-                      textAlign: TextAlign.center,
+                      "Contact",
+                      onTap: () {
+                        Navigator.pop(context); // Close drawer
+                        context.go(AppRoutes.contactUs);
+                      },
                     ),
+                    _buildMenuItem("Log In / Sign Up"),
                   ],
                 ),
               ),
             ),
+
+            // Social Icons
             Padding(
               padding: const EdgeInsets.only(left: 24, right: 32, top: 24),
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
-
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     SvgPicture.asset(
-                      'assets/white_insta.svg', // Ensure the correct path
+                      'assets/drawer/white_insta.svg',
                       width: 18,
                       height: 18,
                     ),
-                    SizedBox(width: 15),
+                    const SizedBox(width: 15),
                     SvgPicture.asset(
-                      'assets/white_email.svg', // Ensure the correct path
+                      'assets/drawer/white_email.svg',
                       width: 14,
                       height: 18,
                     ),
@@ -245,6 +212,36 @@ class _DrawerMobileState extends State<DrawerMobile> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(
+    String text, {
+    bool isActive = false,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: isActive ? Colors.white : Colors.transparent,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+            child: CustomText(
+              text: text,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
+              fontSize: 14,
+              lineHeight: 14,
+              letterSpacing: 0.56,
+              color: isActive ? Color(0xFFf68d80) : Colors.white,
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       ),
     );

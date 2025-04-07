@@ -7,97 +7,83 @@ class AquaCollectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left "New In!" Text
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SvgPicture.asset(
-                    'assets/PanelTitle.svg',
-                    width: 75,
-                    height: 64,
-                    fit: BoxFit.cover,
-                  ),
-                ],
-              ),
-              SizedBox(width: 2),
-              // Image and Details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start, // Align content with image
+    return Container(
+      padding: EdgeInsets.only(left: 14.0,right: 14,top: 24),
+      // color: Colors.red,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SvgPicture.asset(
+            'assets/home_page/PanelTitle.svg',
+            height: 85,
+            fit: BoxFit.cover,
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/home_page/aquaCollection.png',
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+                SizedBox(height: 14), // Space between image and text
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start, // Aligns both texts at the top
                   children: [
-                    Align(
-                      alignment:
-                          Alignment
-                              .centerRight, // Ensure image aligns properly
-                      child: Image.asset(
-                        'assets/aquaCollection.png',
-                        width: 284,
-                        height: 179,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    SizedBox(height: 14),
-                    Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment
-                              .spaceBetween, // Align text and VIEW
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           "Aqua Collection",
                           style: TextStyle(
-                            fontFamily: "Cralika", // Cralika font
-                            fontWeight: FontWeight.w400, // Equivalent to 400
-                            fontSize: 18, // 18px
-                            height: 2.0, // Line height 36px (36/18)
-                            letterSpacing: 0.72, // 4% of 18px = 0.72
-                            color: Color(0xFF3E5B84), // Custom color
+                            fontFamily: "Cralika",
+                            fontWeight: FontWeight.w400,
+                            fontSize: 18,
+                            height: 1.0,
+                            letterSpacing: 0.72,
+                            color: Color(0xFF3E5B84),
                           ),
                         ),
-
+                        SizedBox(height: 8),
                         Text(
                           "VIEW",
                           style: TextStyle(
-                            fontFamily:
-                                GoogleFonts.barlow()
-                                    .fontFamily, // Barlow font
-                            fontWeight: FontWeight.w600, // Equivalent to 600
-                            fontSize: 14, // 14px
-                            height: 1.0, // Line height 100% (14px / 14px)
-                            letterSpacing: 0.56, // 4% of 14px = 0.56
-                            color: Color(0xFF3E5B84), // Custom color
+                            fontFamily: GoogleFonts.barlow().fontFamily,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            height: 1.0,
+                            letterSpacing: 0.56,
+                            color: Color(0xFF3E5B84),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 6),
-                    Text(
-                      "4 Pieces",
-                      style: TextStyle(
-                        fontFamily:
-                            GoogleFonts.barlow().fontFamily, // Barlow font
-                        fontWeight: FontWeight.w400, // Equivalent to 400
-                        fontSize: 14, // 14px
-                        height: 1.0, // Line height 100% (14px / 14px)
-                        letterSpacing: 0.0, // 0% letter spacing
-                        color: Color(0xFF3E5B84), // Custom color
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          "4 Pieces",
+                          style: TextStyle(
+                            fontFamily: GoogleFonts.barlow().fontFamily,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 18,
+                            height: 1.0,
+                            letterSpacing: 0.0,
+                            color: Color(0xFF3E5B84),
+                          ),
+                        ),
+                        SizedBox(height: 24), // Adjusts spacing to match "VIEW"
+                      ],
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
