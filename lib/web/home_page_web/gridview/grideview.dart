@@ -73,7 +73,6 @@ class _GridViewWebState extends State<GridViewWeb> {
                     context.go(AppRoutes.productDetails(product.id));
                   },
 
-
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       double imageWidth = constraints.maxWidth;

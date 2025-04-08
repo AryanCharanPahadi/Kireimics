@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../component/product_details/product_details_controller.dart';
 import '../../component/routes.dart';
-import '../../web/home_page_web/gridview/animation_gridview.dart';
 
 class Gridview extends StatefulWidget {
   const Gridview({super.key});
@@ -103,17 +102,15 @@ class _GridviewState extends State<Gridview> {
                                   child: Text(
                                     "${product.discount}% OFF",
                                     style: TextStyle(
-                                      fontFamily: GoogleFonts.barlow().fontFamily,
+                                      fontFamily:
+                                          GoogleFonts.barlow().fontFamily,
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                       letterSpacing: 0.48,
-
                                     ),
                                   ),
                                 ),
-
-
 
                                 GestureDetector(
                                   onTap: () {

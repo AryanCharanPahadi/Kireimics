@@ -18,7 +18,6 @@ import '../component/routes.dart';
 import 'collection/collection.dart';
 
 class LandingPageWeb extends StatefulWidget {
-
   final String? initialRoute;
 
   const LandingPageWeb({super.key, this.initialRoute});
@@ -58,7 +57,7 @@ class _LandingPageWebState extends State<LandingPageWeb> {
     AppRoutes.shippingPolicy: (_) => const ShippingPolicyWeb(),
     AppRoutes.privacyPolicy: (_) => const PrivacyPolicyWeb(),
     AppRoutes.contactUs: (_) => const ContactUs(),
-    AppRoutes.catalog: (_) => CatalogWeb(),
+    AppRoutes.catalog: (_) => CategoryListDetails(),
     AppRoutes.collection: (_) => const CollectionWeb(),
     AppRoutes.sale: (_) => const SaleWeb(),
     '/product':

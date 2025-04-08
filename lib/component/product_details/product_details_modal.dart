@@ -11,6 +11,7 @@ class Product {
   final String dimensions;
   final String description;
   final String catName;
+  final String catDesc;
   final List<OtherDetail> otherDetails;
   final int discount;
 
@@ -27,6 +28,7 @@ class Product {
     required this.catName,
     required this.otherDetails,
     required this.discount,
+    required this.catDesc,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class Product {
       dimensions: json['dimensions'],
       description: json['description'],
       catName: json['category_name'],
+      catDesc: json['description'],
       discount: json['discount'],
       otherDetails:
           (json['other_details'] != null)

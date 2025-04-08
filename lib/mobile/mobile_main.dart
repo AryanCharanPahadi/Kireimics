@@ -43,14 +43,14 @@ class _LandingPageMobileState extends State<LandingPageMobile> {
   }
 
   final Map<String, Widget Function(String?)> _pageMap = {
-    AppRoutes.home:(_)=> const HomePageMobile(),
-    AppRoutes.about:(_)=> const AboutPage(),
-    AppRoutes.shippingPolicy:(_)=> const ShippingPolicy(),
-    AppRoutes.privacyPolicy:(_)=> const PrivacyPolicyComponent(),
-    AppRoutes.contactUs: (_)=>const ContactUsComponent(),
-    AppRoutes.catalog:(_)=> const CatalogMobileComponent(),
-    AppRoutes.collection: (_)=>const CollectionMobile(),
-    AppRoutes.sale: (_)=>const SaleMobile(),
+    AppRoutes.home: (_) => const HomePageMobile(),
+    AppRoutes.about: (_) => const AboutPage(),
+    AppRoutes.shippingPolicy: (_) => const ShippingPolicy(),
+    AppRoutes.privacyPolicy: (_) => const PrivacyPolicyComponent(),
+    AppRoutes.contactUs: (_) => const ContactUsComponent(),
+    AppRoutes.catalog: (_) => const CatalogMobileComponent(),
+    AppRoutes.collection: (_) => const CollectionMobile(),
+    AppRoutes.sale: (_) => const SaleMobile(),
     '/product':
         (id) => ProductDetailsMobile(productId: int.tryParse(id ?? '0') ?? 0),
   };
@@ -118,13 +118,13 @@ class _LandingPageMobileState extends State<LandingPageMobile> {
                 Column1(onNavItemSelected: _onNavItemSelected),
                 _selectedPage == '/product'
                     ? _pageMap[_selectedPage]!(
-                  widget.initialRoute?.split('/').last,
-                )
-                    : _pageMap[_selectedPage]!(null),                // ProductDetailsMobile(),
-
+                      widget.initialRoute?.split('/').last,
+                    )
+                    : _pageMap[_selectedPage]!(null), // ProductDetailsMobile(),
                 // Only show AboveFooter if the current route is not catalog
                 if ((_selectedPage != AppRoutes.catalog) &&
-                    (_selectedPage != AppRoutes.sale))
+                    (_selectedPage != AppRoutes.sale) &&
+                    (_selectedPage != '/product'))
                   const AboveFooter(),
                 const SizedBox(height: 27),
                 const Footer(),

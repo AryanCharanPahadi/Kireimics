@@ -39,7 +39,7 @@ class ApiHelper {
       );
 
       if (response.statusCode == 200) {
-        print(response.body);
+        // print(response.body);
         final Map<String, dynamic> jsonData = jsonDecode(response.body);
         if (jsonData['error'] == false && jsonData['data'] != null) {
           List<Product> products =
@@ -81,5 +81,36 @@ class ApiHelper {
     }
 
     return null;
+  }
+
+  // In your ApiHelper class
+  static Future<List<Product>> fetchProductByCatId(int catId) async {
+    final url = Uri.parse(
+      '${baseUrl}get_products_by_category_id.php?cat_id=$catId',
+    );
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        print("This is from the cat_id");
+        print(response.body);
+        if (jsonResponse['error'] == false && jsonResponse['data'] != null) {
+          final List<dynamic> productsData = jsonResponse['data'];
+          return productsData
+              .map((productData) => Product.fromJson(productData))
+              .toList();
+        } else {
+          print('API Error: ${jsonResponse['message']}');
+        }
+      } else {
+        print('HTTP Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Exception: $e');
+    }
+
+    return []; // Return empty list on failure instead of null
   }
 }

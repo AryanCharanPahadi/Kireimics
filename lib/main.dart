@@ -69,6 +69,7 @@ final GoRouter _router = GoRouter(
           (context, state) =>
               const ResponsiveLayout(initialRoute: AppRoutes.catalog),
     ),
+
     GoRoute(
       path: AppRoutes.collection,
       builder:
@@ -91,6 +92,8 @@ final GoRouter _router = GoRouter(
         );
       },
     ),
+
+
   ],
 );
 

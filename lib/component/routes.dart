@@ -9,5 +9,5 @@ class AppRoutes {
   static const String collection = '/catalog/Collections';
 
   static const String productDetailsPath = '/product/:id'; // for GoRouter
-  static String productDetails(int id) => '/product/$id';  // for navigation
+  static String productDetails(int id) => '/product/$id'; // for navigation
 }
