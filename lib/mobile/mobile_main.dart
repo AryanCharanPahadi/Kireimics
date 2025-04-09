@@ -12,6 +12,7 @@ import 'package:kireimics/web/component/above_footer.dart';
 import 'package:kireimics/component/routes.dart';
 
 import 'about_page/about_page.dart';
+import 'cart_panel/cart_panel_mobile.dart';
 import 'catalog/catalog.dart';
 import 'collection/collection.dart';
 import 'component/custom_header_mobile.dart';
@@ -53,9 +54,11 @@ class _LandingPageMobileState extends State<LandingPageMobile> {
     AppRoutes.sale: (_) => const SaleMobile(),
     '/product':
         (id) => ProductDetailsMobile(productId: int.tryParse(id ?? '0') ?? 0),
+    '/cart': (id) => CartPanelMobile(productId: int.tryParse(id ?? '0') ?? 0),
   };
   String _getPageFromRoute(String route) {
     if (route.startsWith('/product/')) return '/product';
+    if (route.startsWith('/cart/')) return '/cart';
 
     return _pageMap.containsKey(route) ? route : AppRoutes.home;
   }
@@ -120,11 +123,16 @@ class _LandingPageMobileState extends State<LandingPageMobile> {
                     ? _pageMap[_selectedPage]!(
                       widget.initialRoute?.split('/').last,
                     )
-                    : _pageMap[_selectedPage]!(null), // ProductDetailsMobile(),
+                    : _selectedPage == '/cart'
+                    ? _pageMap[_selectedPage]!(
+                      widget.initialRoute?.split('/').last,
+                    )
+                    : _pageMap[_selectedPage]!(null),
+
                 // Only show AboveFooter if the current route is not catalog
                 if ((_selectedPage != AppRoutes.catalog) &&
                     (_selectedPage != AppRoutes.sale) &&
-                    (_selectedPage != '/product'))
+                    (_selectedPage != '/product') && (_selectedPage != '/cart'))
                   const AboveFooter(),
                 const SizedBox(height: 27),
                 const Footer(),

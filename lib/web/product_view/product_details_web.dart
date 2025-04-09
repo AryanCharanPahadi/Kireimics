@@ -613,7 +613,7 @@ class _ProductDetailsWebState extends State<ProductDetailsWeb> {
                               SizedBox(height: 14),
 
                               BarlowText(
-                                text: product!.price,
+                                text: product!.price.toString(),
 
                                 fontWeight: FontWeight.w400, // 400 weight
                                 fontSize: 16, // 32px
@@ -651,14 +651,21 @@ class _ProductDetailsWebState extends State<ProductDetailsWeb> {
                               ),
 
                               SizedBox(height: 44),
-                              BarlowText(
-                                text: "ADD TO CART",
-                                color: Color(0xFF3E5B84),
-                                fontWeight: FontWeight.w600, // 400 weight
-                                fontSize: 16, // 32px
-                                lineHeight: 1.0,
-                                letterSpacing: 1 * 0.04, // 4% of 32px
-                                backgroundColor: Color(0xFFb9d6ff),
+                              GestureDetector(
+                                onTap: () {
+                                  context.go(
+                                    AppRoutes.cartDetails(product!.id),
+                                  );
+                                },
+                                child: BarlowText(
+                                  text: "ADD TO CART",
+                                  color: Color(0xFF3E5B84),
+                                  fontWeight: FontWeight.w600, // 400 weight
+                                  fontSize: 16, // 32px
+                                  lineHeight: 1.0,
+                                  letterSpacing: 1 * 0.04, // 4% of 32px
+                                  backgroundColor: Color(0xFFb9d6ff),
+                                ),
                               ),
                               SizedBox(height: 24),
                               BarlowText(

@@ -247,7 +247,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                     SizedBox(height: 14),
 
                     BarlowText(
-                      text: product!.price,
+                      text: product!.price.toString(),
 
                       fontWeight: FontWeight.w400, // 400 weight
                       fontSize: 16, // 32px
@@ -285,14 +285,21 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                     ),
 
                     SizedBox(height: 44),
-                    BarlowText(
-                      text: "ADD TO CART",
-                      color: Color(0xFF3E5B84),
-                      fontWeight: FontWeight.w600, // 400 weight
-                      fontSize: 16, // 32px
-                      lineHeight: 1.0,
-                      letterSpacing: 1 * 0.04, // 4% of 32px
-                      backgroundColor: Color(0xFFb9d6ff),
+                    GestureDetector(
+                      onTap: () {
+                        context.go(
+                          AppRoutes.cartDetails(product!.id),
+                        );
+                      },
+                      child: BarlowText(
+                        text: "ADD TO CART",
+                        color: Color(0xFF3E5B84),
+                        fontWeight: FontWeight.w600, // 400 weight
+                        fontSize: 16, // 32px
+                        lineHeight: 1.0,
+                        letterSpacing: 1 * 0.04, // 4% of 32px
+                        backgroundColor: Color(0xFFb9d6ff),
+                      ),
                     ),
                     SizedBox(height: 24),
                     BarlowText(
@@ -389,182 +396,130 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                         final relatedProduct = displayedProducts[index];
                         return Padding(
                           padding: EdgeInsets.only(right: 14.0),
-                          child: MouseRegion(
-                            onEnter: (_) {
-                              setState(() {
-                                _isHoveredList[index] = true;
-                              });
-                            },
-                            onExit: (_) {
-                              setState(() {
-                                _isHoveredList[index] = false;
-                              });
-                            },
-                            child: SizedBox(
-                              height: 260,
-                              width: 260,
-                              child: Stack(
-                                children: [
-                                  // Product Image
-                                  ClipRect(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        context.go(
-                                          AppRoutes.productDetails(
-                                            relatedProduct.id,
-                                          ),
-                                        );
-                                      },
-                                      child: Image.network(
-                                        relatedProduct.thumbnail,
-                                        height: 260,
-                                        width: 260,
-                                        fit: BoxFit.cover,
+                          child: SizedBox(
+                            height:
+                                380, // increased to accommodate the details below
+                            width: 260,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Stack(
+                                  children: [
+                                    // Product Image
+                                    ClipRect(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          context.go(
+                                            AppRoutes.productDetails(
+                                              relatedProduct.id,
+                                            ),
+                                          );
+                                        },
+                                        child: Image.network(
+                                          relatedProduct.thumbnail,
+                                          height: 260,
+                                          width: 260,
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  // Discount Badge & Wishlist
-                                  Positioned(
-                                    top: 10,
-                                    left: 6,
-                                    right: 6,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ElevatedButton(
-                                          onPressed: null,
-                                          style: ElevatedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 5,
-                                            ),
-                                            backgroundColor: const Color(
-                                              0xFFF46856,
-                                            ),
-                                            disabledBackgroundColor:
-                                                const Color(0xFFF46856),
-                                            disabledForegroundColor:
-                                                Colors.white,
-                                            elevation: 0,
-                                            side: BorderSide.none,
-                                          ),
-                                          child: Text(
-                                            "${relatedProduct.discount}% OFF",
-                                            style: TextStyle(
-                                              fontFamily:
-                                                  GoogleFonts.barlow()
-                                                      .fontFamily,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                              letterSpacing: 0.48,
-                                            ),
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              _wishlistStates[index] =
-                                                  !_wishlistStates[index];
-                                            });
-                                          },
-                                          child: SvgPicture.asset(
-                                            _wishlistStates[index]
-                                                ? 'assets/home_page/IconWishlist.svg'
-                                                : 'assets/home_page/IconWishlistEmpty.svg',
-                                            width: 20,
-                                            height: 20,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // Hover Info
-                                  Positioned(
-                                    bottom: 9,
-                                    left: 8,
-                                    right: 7,
-                                    child: AnimatedOpacity(
-                                      duration: Duration(milliseconds: 300),
-                                      opacity:
-                                          _isHoveredList[index] ? 1.0 : 0.0,
-                                      child: Container(
-                                        width: 282,
-                                        height: 120,
-                                        padding: EdgeInsets.only(
-                                          left: 18,
-                                          right: 20,
-                                          bottom: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Color(
-                                            0xFF3E5B84,
-                                          ).withOpacity(0.8),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            CralikaFont(
-                                              text: relatedProduct.name,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.white,
-                                              fontSize: 15,
-                                              lineHeight: 1.2,
-                                              letterSpacing: 4,
-                                            ),
-                                            SizedBox(height: 8),
-                                            BarlowText(
-                                              text:
-                                                  "Rs. ${relatedProduct.price}",
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 10,
-                                              lineHeight: 1.0,
-                                            ),
-                                            SizedBox(height: 14),
-                                            Row(
-                                              children: [
-                                                BarlowText(
-                                                  text: "VIEW",
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 10,
-                                                  lineHeight: 1.0,
-                                                ),
-                                                SizedBox(width: 5),
-                                                BarlowText(
-                                                  text: " / ",
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 10,
-                                                  lineHeight: 1.0,
-                                                ),
-                                                SizedBox(width: 5),
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    // Add to cart logic
-                                                  },
-                                                  child: BarlowText(
-                                                    text: "ADD TO CART",
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 10,
-                                                    lineHeight: 1.0,
+                                    // Discount Badge & Wishlist
+                                    Positioned(
+                                      top: 10,
+                                      left: 6,
+                                      right: 6,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ElevatedButton(
+                                            onPressed: null,
+                                            style: ElevatedButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 5,
                                                   ),
-                                                ),
-                                              ],
+                                              backgroundColor: const Color(
+                                                0xFFF46856,
+                                              ),
+                                              disabledBackgroundColor:
+                                                  const Color(0xFFF46856),
+                                              disabledForegroundColor:
+                                                  Colors.white,
+                                              elevation: 0,
+                                              side: BorderSide.none,
                                             ),
-                                          ],
-                                        ),
+                                            child: Text(
+                                              "${relatedProduct.discount}% OFF",
+                                              style: TextStyle(
+                                                fontFamily:
+                                                    GoogleFonts.barlow()
+                                                        .fontFamily,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                                letterSpacing: 0.48,
+                                              ),
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _wishlistStates[index] =
+                                                    !_wishlistStates[index];
+                                              });
+                                            },
+                                            child: SvgPicture.asset(
+                                              _wishlistStates[index]
+                                                  ? 'assets/home_page/IconWishlist.svg'
+                                                  : 'assets/home_page/IconWishlistEmpty.svg',
+                                              width: 20,
+                                              height: 20,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                  ],
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  relatedProduct.name, // Use product name
+                                  style: const TextStyle(
+                                    fontFamily: "Cralika",
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16,
+                                    height: 1.2,
+                                    letterSpacing: 0.64,
+                                    color: Color(0xFF3E5B84),
                                   ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "Rs. ${relatedProduct.price}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.barlow(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                    height: 1.2,
+                                    color: const Color(0xFF3E5B84),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+
+                                Text(
+                                  "ADD TO CART",
+                                  style: GoogleFonts.barlow(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    height: 1.2,
+                                    letterSpacing: 0.56,
+                                    color: const Color(0xFF3E5B84),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         );

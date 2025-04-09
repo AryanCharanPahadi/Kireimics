@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kireimics/mobile/cart_panel/cart_panel_mobile.dart';
 import 'package:kireimics/web/catalog/catalog.dart';
 import 'package:kireimics/web/contact_us/contact_us.dart';
 import 'package:kireimics/web/privacy_policy/privacy_policy_component.dart';
@@ -15,6 +18,7 @@ import 'package:kireimics/web/component/custom_sidebar.dart';
 import 'package:kireimics/web/component/scrollable_header.dart';
 import '../component/components.dart';
 import '../component/routes.dart';
+import 'cart/cart_panel.dart';
 import 'collection/collection.dart';
 
 class LandingPageWeb extends StatefulWidget {
@@ -50,6 +54,8 @@ class _LandingPageWebState extends State<LandingPageWeb> {
     _previousScrollOffset = currentScrollOffset;
   }
 
+  final ValueNotifier<bool> _showSideContainer = ValueNotifier(false);
+
   // Page map similar to mobile version
   final Map<String, Widget Function(String?)> _pageMap = {
     AppRoutes.home: (_) => const HomePageWeb(),
@@ -62,13 +68,21 @@ class _LandingPageWebState extends State<LandingPageWeb> {
     AppRoutes.sale: (_) => const SaleWeb(),
     '/product':
         (id) => ProductDetailsWeb(productId: int.tryParse(id ?? '0') ?? 0),
+    '/cart': (id) => CartPanelMobile(productId: int.tryParse(id ?? '0') ?? 0),
   };
+  int? _cartProductId;
 
   @override
   void initState() {
     super.initState();
     _selectedPage = _getPageFromRoute(widget.initialRoute ?? AppRoutes.home);
     _scrollController.addListener(_handleScroll);
+
+    if ((widget.initialRoute ?? '').startsWith('/cart')) {
+      _showSideContainer.value = true;
+      final id = widget.initialRoute?.split('/').last;
+      _cartProductId = int.tryParse(id ?? '0');
+    }
   }
 
   String _getPageFromRoute(String route) {
@@ -87,6 +101,13 @@ class _LandingPageWebState extends State<LandingPageWeb> {
     super.didUpdateWidget(oldWidget);
     if (widget.initialRoute != oldWidget.initialRoute) {
       _handleRouteChange(widget.initialRoute ?? AppRoutes.home);
+      _showSideContainer.value =
+          widget.initialRoute?.startsWith('/cart') ?? false;
+
+      if ((widget.initialRoute ?? '').startsWith('/cart')) {
+        final id = widget.initialRoute?.split('/').last;
+        _cartProductId = int.tryParse(id ?? '0');
+      }
     }
   }
 
@@ -185,6 +206,15 @@ class _LandingPageWebState extends State<LandingPageWeb> {
                 width: 36,
                 height: 36,
               ),
+            ),
+
+            ValueListenableBuilder<bool>(
+              valueListenable: _showSideContainer,
+              builder: (context, show, _) {
+                return show
+                    ? CartPanelOverlay(productId: _cartProductId ?? 0)
+                    : const SizedBox.shrink();
+              },
             ),
           ],
         ),

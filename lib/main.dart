@@ -82,6 +82,13 @@ final GoRouter _router = GoRouter(
           (context, state) =>
               const ResponsiveLayout(initialRoute: AppRoutes.sale),
     ),
+    GoRoute(
+      path: AppRoutes.addToCart,
+      builder: (context, state) {
+        final productId = int.tryParse(state.pathParameters['id'] ?? '0') ?? 0;
+        return ResponsiveLayout(initialRoute: AppRoutes.cartDetails(productId));
+      },
+    ),
 
     GoRoute(
       path: AppRoutes.productDetailsPath,
@@ -92,8 +99,6 @@ final GoRouter _router = GoRouter(
         );
       },
     ),
-
-
   ],
 );
 

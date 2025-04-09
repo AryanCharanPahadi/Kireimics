@@ -69,35 +69,32 @@ class _GridviewState extends State<Gridview> {
                               context.go(AppRoutes.productDetails(product.id));
                             },
                             child: Image.network(
-                              height: 196,
-                              width: 170,
                               product.thumbnail,
+                              width: double.infinity,
+                              height: double.infinity,
                               fit: BoxFit.cover,
                             ),
                           ),
                           Positioned(
                             top: 10,
-                            left: 6,
-                            right: 6,
+                            left: 10,
+                            right: 10,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 ElevatedButton(
-                                  onPressed: null, // Disable the button
+                                  onPressed: null,
                                   style: ElevatedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 10,
                                       vertical: 5,
                                     ),
-                                    backgroundColor: const Color(
-                                      0xFFF46856,
-                                    ), // Keep the same color when disabled
+                                    backgroundColor: const Color(0xFFF46856),
                                     disabledBackgroundColor: const Color(
                                       0xFFF46856,
                                     ),
                                     disabledForegroundColor: Colors.white,
                                     elevation: 0,
-                                    side: BorderSide.none,
                                   ),
                                   child: Text(
                                     "${product.discount}% OFF",
@@ -111,7 +108,6 @@ class _GridviewState extends State<Gridview> {
                                     ),
                                   ),
                                 ),
-
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -123,8 +119,8 @@ class _GridviewState extends State<Gridview> {
                                     _wishlistStates[index]
                                         ? 'assets/home_page/IconWishlist.svg'
                                         : 'assets/home_page/IconWishlistEmpty.svg',
-                                    width: 33.99,
-                                    height: 19.33,
+                                    width: 34,
+                                    height: 20,
                                   ),
                                 ),
                               ],

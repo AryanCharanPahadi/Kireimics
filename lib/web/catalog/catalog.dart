@@ -111,7 +111,7 @@ class _CategoryListDetailsState extends State<CategoryListDetails> {
                     image: const AssetImage("assets/home_page/background.png"),
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
-                      const Color(0xFFf36250).withOpacity(0.9),
+                      const Color(0xFFffb853).withOpacity(0.9),
                       BlendMode.srcATop,
                     ),
                   ),
@@ -128,7 +128,7 @@ class _CategoryListDetailsState extends State<CategoryListDetails> {
                         _currentDescription, // Use the variable here instead of hardcoded text
 
                     fontSize: 20,
-                    color: Color(0xFFFFFFFF),
+                    color: Color(0xFF414141),
                   ),
                 ),
               ),
