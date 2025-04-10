@@ -5,7 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/custom_text.dart';
 import 'package:kireimics/component/routes.dart';
 import '../../component/api_helper/api_helper.dart';
+import '../../component/cart_loader.dart';
 import '../../component/product_details/product_details_modal.dart';
+import '../cart/cart_panel.dart';
 
 class ProductDetailsWeb extends StatefulWidget {
   final int productId;
@@ -422,6 +424,7 @@ class _ProductDetailsWebState extends State<ProductDetailsWeb> {
                                                         onTap: () {
                                                           // Add to cart logic
                                                         },
+
                                                         child: BarlowText(
                                                           text: "ADD TO CART",
                                                           color: Colors.white,
@@ -653,10 +656,19 @@ class _ProductDetailsWebState extends State<ProductDetailsWeb> {
                               SizedBox(height: 44),
                               GestureDetector(
                                 onTap: () {
-                                  context.go(
-                                    AppRoutes.cartDetails(product!.id),
+                                  showDialog(
+                                    context: context,
+                                    barrierColor: Colors.transparent,
+                                    builder: (BuildContext context) {
+                                       cartNotifier.refresh();
+
+                                      return CartPanelOverlay(
+                                        productId: product!.id,
+                                      );
+                                    },
                                   );
                                 },
+
                                 child: BarlowText(
                                   text: "ADD TO CART",
                                   color: Color(0xFF3E5B84),

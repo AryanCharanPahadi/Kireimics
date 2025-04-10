@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kireimics/mobile/checkout/checkout_page.dart';
 import 'package:kireimics/mobile/contact_us/contact_us_component.dart';
 import 'package:kireimics/mobile/home_page/home_page_mobile.dart';
 import 'package:kireimics/mobile/privacy_policy/privacy_policy_component.dart';
@@ -52,6 +53,7 @@ class _LandingPageMobileState extends State<LandingPageMobile> {
     AppRoutes.catalog: (_) => const CatalogMobileComponent(),
     AppRoutes.collection: (_) => const CollectionMobile(),
     AppRoutes.sale: (_) => const SaleMobile(),
+    AppRoutes.checkOut: (_) => const CheckoutPageMobile(),
     '/product':
         (id) => ProductDetailsMobile(productId: int.tryParse(id ?? '0') ?? 0),
     '/cart': (id) => CartPanelMobile(productId: int.tryParse(id ?? '0') ?? 0),
@@ -132,6 +134,7 @@ class _LandingPageMobileState extends State<LandingPageMobile> {
                 // Only show AboveFooter if the current route is not catalog
                 if ((_selectedPage != AppRoutes.catalog) &&
                     (_selectedPage != AppRoutes.sale) &&
+                    (_selectedPage != AppRoutes.checkOut) &&
                     (_selectedPage != '/product') && (_selectedPage != '/cart'))
                   const AboveFooter(),
                 const SizedBox(height: 27),

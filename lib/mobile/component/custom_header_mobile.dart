@@ -1,50 +1,104 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/custom_text.dart';
+import '../../component/cart_loader.dart';
 import '../../component/routes.dart';
+import '../../component/shared_preferences.dart';
 import 'drawer.dart';
 
-class CustomHeaderMobile extends StatelessWidget {
+class CustomHeaderMobile extends StatefulWidget {
   const CustomHeaderMobile({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      height: 73,
-      width: MediaQuery.of(context).size.width,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: Icon(Icons.menu, size: 30, color: Color(0xFF3E5B84)),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => DrawerMobile()),
-                );
-              },
-            ),
+  State<CustomHeaderMobile> createState() => _CustomHeaderMobileState();
+}
 
-            Image.asset(
-              'assets/header/fullLogoNew.png',
-              height: 24,
-              width: 150,
+class _CustomHeaderMobileState extends State<CustomHeaderMobile> {
+  @override
+  void initState() {
+    super.initState();
+
+    _loadCartItemCount(); // load cart count on init
+  }
+
+  Future<void> _loadCartItemCount() async {
+    final ids = await SharedPreferencesHelper.getAllProductIds();
+    setState(() {
+      _cartItemCount = ids.length;
+    });
+  }
+
+  int _cartItemCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    int? cartProductId;
+
+    return Stack(
+      children: [
+        Container(
+          color: Colors.white,
+          height: 73,
+          width: MediaQuery.of(context).size.width,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.menu, size: 30, color: Color(0xFF3E5B84)),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => DrawerMobile()),
+                    );
+                  },
+                ),
+
+                Image.asset(
+                  'assets/header/fullLogoNew.png',
+                  height: 24,
+                  width: 150,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    context.go(AppRoutes.cartDetails(cartProductId ?? 0));
+                  },
+                  child: SvgPicture.asset(
+                    'assets/header/IconCart.svg', // Ensure the correct path
+                    width: 23,
+                    height: 24,
+                  ),
+                ),
+              ],
             ),
-            GestureDetector(
-              onTap: () {},
-              child: SvgPicture.asset(
-                'assets/header/IconCart.svg', // Ensure the correct path
-                width: 23,
-                height: 24,
+          ),
+        ),
+        if (_cartItemCount > 0)
+          Positioned(
+            top: 13,
+            right: 10,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              child: Text(
+                '$_cartItemCount',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 }

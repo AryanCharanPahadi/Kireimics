@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -112,7 +113,7 @@ class _CartPanelOverlayState extends State<CartPanelOverlay> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     GestureDetector(
-                      onTap: () => context.go(AppRoutes.home),
+                      onTap: () => Navigator.of(context).pop(), // OR context.pop() if using GoRouter
                       child: BarlowText(
                         text: "Close",
                         color: Color(0xFF3E5B84),
@@ -140,12 +141,13 @@ class _CartPanelOverlayState extends State<CartPanelOverlay> {
                             children: [
                               SvgPicture.asset("assets/icons/notFound.svg"),
                               SizedBox(height: 20),
-                              CralikaFont(text: "No results found!"),
+                              CralikaFont(text: "No orders yet!"),
                               SizedBox(height: 10),
                               BarlowText(
                                 text:
-                                    "Looks like the product you're looking for is not available. Please try a different keyword, or check the spelling!",
+                                    "What are you waiting for? Browse our wide range of products and bring home something new to love!",
                                 fontSize: 18,
+                                textAlign: TextAlign.center, // Add this line
                               ),
                               SizedBox(height: 15),
                               GestureDetector(
@@ -348,14 +350,24 @@ class _CartPanelOverlayState extends State<CartPanelOverlay> {
                             SizedBox(height: 27),
                             Align(
                               alignment: Alignment.centerRight,
-                              child: BarlowText(
-                                text: "PROCEED TO CHECKOUT",
-                                color: Color(0xFF3E5B84),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                lineHeight: 1.0,
-                                letterSpacing: 1 * 0.04,
-                                backgroundColor: Color(0xFFb9d6ff),
+                              child: GestureDetector(
+                                // In your PROCEED TO CHECKOUT button's onTap:
+                                // In your PROCEED TO CHECKOUT button's onTap:
+                                onTap: () {
+                                  final subtotal = calculateTotal();
+                                  context.go(
+                                    '${AppRoutes.checkOut}?subtotal=${subtotal.toStringAsFixed(2)}',
+                                  );
+                                },
+                                child: BarlowText(
+                                  text: "PROCEED TO CHECKOUT",
+                                  color: Color(0xFF3E5B84),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  lineHeight: 1.0,
+                                  letterSpacing: 1 * 0.04,
+                                  backgroundColor: Color(0xFFb9d6ff),
+                                ),
                               ),
                             ),
                           ],

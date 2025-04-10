@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../component/api_helper/api_helper.dart';
@@ -101,53 +102,96 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
               letterSpacing: 0.128,
             ),
             SizedBox(height: 19),
+            if (productList.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: Column(
+                  children: [
+                    SvgPicture.asset("assets/icons/notFound.svg"),
+                    SizedBox(height: 12),
+                    CralikaFont(text: "No orders yet!"),
+                    SizedBox(height: 9),
+                    BarlowText(
+                      text:
+                          "What are you waiting for? Browse our wide range of products and bring home something new to love!",
+                      fontSize: 18,
+                      textAlign: TextAlign.center, // Add this line
+                    ),
 
-            // List of Cart Items with Divider
-            ...productList.asMap().entries.map((entry) {
-              final index = entry.key;
-              final product = entry.value;
-              final quantity = quantityList[index];
-
-              return Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // First container with the image
-                      Container(
-                        child: Column(
-                          children: [
-                            Image.network(
-                              product.thumbnail,
-                              height: 123,
-                              width: 107,
-                              fit: BoxFit.cover,
-                            ),
-                          ],
-                        ),
+                    SizedBox(height: 44),
+                    GestureDetector(
+                      onTap: () {
+                        context.go(AppRoutes.catalog);
+                      },
+                      child: BarlowText(
+                        text: "BROWSE OUR CATALOG",
+                        backgroundColor: Color(0xFFb9d6ff),
+                        color: Color(0xFF3E5B84),
+                        fontSize: 17,
                       ),
-                      SizedBox(width: 17),
-                      // Second container with text and controls
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.0,
-                            vertical: 4.0,
+                    ),
+                  ],
+                ),
+              )
+            // List of Cart Items with Divider
+            else
+              ...productList.asMap().entries.map((entry) {
+                final index = entry.key;
+                final product = entry.value;
+                final quantity = quantityList[index];
+
+                return Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // First container with the image
+                        Container(
+                          child: Column(
+                            children: [
+                              Image.network(
+                                product.thumbnail,
+                                height: 123,
+                                width: 107,
+                                fit: BoxFit.cover,
+                              ),
+                            ],
                           ),
-                          child: SizedBox(
-                            height: 123,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // First row: name and price
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: CralikaFont(
-                                        text: product.name,
+                        ),
+                        SizedBox(width: 17),
+                        // Second container with text and controls
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 4.0,
+                            ),
+                            child: SizedBox(
+                              height: 123,
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // First row: name and price
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: CralikaFont(
+                                          text: product.name,
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 16,
+                                          lineHeight: 1.0,
+                                          letterSpacing: 0.0,
+                                          color: Color(0xFF414141),
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                      SizedBox(width: 8),
+                                      CralikaFont(
+                                        text: "Rs ${product.price}",
                                         fontWeight: FontWeight.w400,
                                         fontSize: 16,
                                         lineHeight: 1.0,
@@ -155,192 +199,193 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                         color: Color(0xFF414141),
                                         softWrap: true,
                                       ),
-                                    ),
-                                    SizedBox(width: 8),
-                                    CralikaFont(
-                                      text: "Rs ${product.price}",
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 16,
-                                      lineHeight: 1.0,
-                                      letterSpacing: 0.0,
-                                      color: Color(0xFF414141),
-                                      softWrap: true,
-                                    ),
-                                  ],
-                                ),
+                                    ],
+                                  ),
 
-                                // Second row: quantity controls
-                                Row(
-                                  children: [
-                                    ValueListenableBuilder<int>(
-                                      valueListenable: quantity,
-                                      builder: (context, value, _) {
-                                        return Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            IconButton(
-                                              icon: Icon(
-                                                Icons.remove,
-                                                color: Color(0xFF3E5B84),
+                                  // Second row: quantity controls
+                                  Row(
+                                    children: [
+                                      ValueListenableBuilder<int>(
+                                        valueListenable: quantity,
+                                        builder: (context, value, _) {
+                                          return Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(
+                                                  Icons.remove,
+                                                  color: Color(0xFF3E5B84),
+                                                ),
+                                                onPressed: () {
+                                                  if (value > 1) {
+                                                    quantity.value--;
+                                                    setState(() {});
+                                                  }
+                                                },
+                                                padding: EdgeInsets.zero,
+                                                constraints: BoxConstraints(),
                                               ),
-                                              onPressed: () {
-                                                if (value > 1) {
-                                                  quantity.value--;
-                                                  setState(() {});
-                                                }
-                                              },
-                                              padding: EdgeInsets.zero,
-                                              constraints: BoxConstraints(),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8.0,
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 8.0,
+                                                    ),
+                                                child: Text(
+                                                  value.toString(),
+                                                  style: TextStyle(
+                                                    fontSize: 16,
                                                   ),
-                                              child: Text(
-                                                value.toString(),
-                                                style: TextStyle(fontSize: 16),
+                                                ),
                                               ),
-                                            ),
-                                            IconButton(
-                                              icon: Icon(
-                                                Icons.add,
-                                                color: Color(0xFF3E5B84),
+                                              IconButton(
+                                                icon: Icon(
+                                                  Icons.add,
+                                                  color: Color(0xFF3E5B84),
+                                                ),
+                                                onPressed: () {
+                                                  quantity.value++;
+                                                  setState(() {});
+                                                },
+                                                padding: EdgeInsets.zero,
+                                                constraints: BoxConstraints(),
                                               ),
-                                              onPressed: () {
-                                                quantity.value++;
-                                                setState(() {});
-                                              },
-                                              padding: EdgeInsets.zero,
-                                              constraints: BoxConstraints(),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-
-                                // Third row: Remove button
-                                Row(
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () async {
-                                        await SharedPreferencesHelper.removeProductId(
-                                          product.id,
-                                        );
-                                        setState(() {
-                                          productList.removeAt(index);
-                                          quantityList.removeAt(index);
-                                        });
-                                      },
-                                      child: BarlowText(
-                                        text: "Remove",
-                                        color: Color(0xFF3E5B84),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
+                                            ],
+                                          );
+                                        },
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+
+                                  // Third row: Remove button
+                                  Row(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () async {
+                                          await SharedPreferencesHelper.removeProductId(
+                                            product.id,
+                                          );
+                                          setState(() {
+                                            productList.removeAt(index);
+                                            quantityList.removeAt(index);
+                                          });
+                                        },
+                                        child: BarlowText(
+                                          text: "Remove",
+                                          color: Color(0xFF3E5B84),
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-
-                  // Divider after each product except last
-                  if (index != productList.length - 1)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Divider(color: Color(0xFF3E5B84)),
+                      ],
                     ),
-                ],
-              );
-            }).toList(),
+
+                    // Divider after each product except last
+                    if (index != productList.length - 1)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Divider(color: Color(0xFF3E5B84)),
+                      ),
+                  ],
+                );
+              }).toList(),
 
             SizedBox(height: 20),
 
             /// Subtotal Section
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CralikaFont(
-                      text: "Subtotal",
-                      color: Color(0xFF414141),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      lineHeight: 1.0,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 11),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(
-                      width: 157,
-                      child: BarlowText(
-                        text: "(Taxes & shipping calculated at checkout)",
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
+            if (productList.isNotEmpty) ...[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CralikaFont(
+                        text: "Subtotal",
+                        color: Color(0xFF414141),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
                         lineHeight: 1.0,
-                        letterSpacing: 0,
                       ),
-                    ),
-                    CralikaFont(
+                    ],
+                  ),
+                  SizedBox(height: 11),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 157,
+                        child: BarlowText(
+                          text: "(Taxes & shipping calculated at checkout)",
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14,
+                          lineHeight: 1.0,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      CralikaFont(
+                        text: "Rs ${calculateTotal().toStringAsFixed(2)}",
+                        color: Color(0xFF414141),
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                        lineHeight: 1.0,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 27),
+              Divider(color: Color(0xFFB9D6FF)),
+              SizedBox(height: 22),
+
+              /// Checkout Section
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: CralikaFont(
                       text: "Rs ${calculateTotal().toStringAsFixed(2)}",
                       color: Color(0xFF414141),
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
                     ),
-                  ],
-                ),
-              ],
-            ),
-
-            SizedBox(height: 27),
-            Divider(color: Color(0xFFB9D6FF)),
-            SizedBox(height: 22),
-
-            /// Checkout Section
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: CralikaFont(
-                    text: "Rs ${calculateTotal().toStringAsFixed(2)}",
-                    color: Color(0xFF414141),
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    lineHeight: 1.0,
                   ),
-                ),
-                SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    height: 40,
-                    child: BarlowText(
-                      text: "PROCEED TO CHECKOUT",
-                      color: Color(0xFF3E5B84),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 20,
-                      lineHeight: 1.0,
-                      letterSpacing: 1 * 0.04,
-                      backgroundColor: Color(0xFFb9d6ff),
+                  SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      height: 40,
+                      child: GestureDetector(
+                        onTap: () {
+                          final subtotal = calculateTotal();
+                          context.go(
+                            '${AppRoutes.checkOut}?subtotal=${subtotal.toStringAsFixed(2)}',
+                          );
+                        },
+                        child: BarlowText(
+                          text: "PROCEED TO CHECKOUT",
+                          color: Color(0xFF3E5B84),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 20,
+                          lineHeight: 1.0,
+                          letterSpacing: 1 * 0.04,
+                          backgroundColor: Color(0xFFb9d6ff),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

@@ -1,10 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kireimics/web/product_view/product_details_web.dart';
 
 import 'package:url_strategy/url_strategy.dart';
+import 'component/cart_loader.dart';
 import 'component/product_details/pd.dart';
 import 'component/product_details/product_details_modal.dart';
 import 'component/responsive_layout.dart';
@@ -14,6 +17,7 @@ import 'component/splash_screen/splash_screen.dart';
 import 'dart:html' as html; // Import only for Flutter Web
 
 void main() {
+
   setPathUrlStrategy();
   html.document.body?.style.cursor =
       'url("https://vedvika.com/Vector.svg"), auto';
@@ -81,6 +85,12 @@ final GoRouter _router = GoRouter(
       builder:
           (context, state) =>
               const ResponsiveLayout(initialRoute: AppRoutes.sale),
+    ),
+    GoRoute(
+      path: AppRoutes.checkOut,
+      builder:
+          (context, state) =>
+              const ResponsiveLayout(initialRoute: AppRoutes.checkOut),
     ),
     GoRoute(
       path: AppRoutes.addToCart,

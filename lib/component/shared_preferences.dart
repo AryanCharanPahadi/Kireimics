@@ -1,10 +1,13 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'cart_loader.dart';
+
 class SharedPreferencesHelper {
   static const String _productIdsKey = 'cart_product_ids';
 
   // Save a new product ID (append to existing ones, avoid duplicates)
   static Future<void> addProductId(int productId) async {
+
     final prefs = await SharedPreferences.getInstance();
     List<String> currentIds = prefs.getStringList(_productIdsKey) ?? [];
     if (!currentIds.contains(productId.toString())) {
@@ -17,11 +20,15 @@ class SharedPreferencesHelper {
   static Future<List<int>> getAllProductIds() async {
     final prefs = await SharedPreferences.getInstance();
     List<String> ids = prefs.getStringList(_productIdsKey) ?? [];
-    return ids.map((id) => int.tryParse(id) ?? 0).where((id) => id > 0).toList();
+    return ids
+        .map((id) => int.tryParse(id) ?? 0)
+        .where((id) => id > 0)
+        .toList();
   }
 
   // Remove a product ID
   static Future<void> removeProductId(int productId) async {
+
     final prefs = await SharedPreferences.getInstance();
     List<String> currentIds = prefs.getStringList(_productIdsKey) ?? [];
     currentIds.remove(productId.toString());

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:kireimics/component/custom_text.dart';
 
 import '../../component/routes.dart';
+import '../../component/shared_preferences.dart';
+import '../cart/cart_panel.dart';
 
 class CustomWebHeader extends StatefulWidget {
   const CustomWebHeader({super.key});
@@ -14,6 +16,7 @@ class CustomWebHeader extends StatefulWidget {
 
 class _CustomWebHeaderState extends State<CustomWebHeader> {
   int? _cartProductId;
+  int _cartItemCount = 0;
 
   final Map<String, bool> _isHovered = {};
   bool showSearchField = false;
@@ -30,6 +33,14 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
           showSearchField = false;
         });
       }
+    });
+    _loadCartItemCount(); // load cart count on init
+  }
+
+  Future<void> _loadCartItemCount() async {
+    final ids = await SharedPreferencesHelper.getAllProductIds();
+    setState(() {
+      _cartItemCount = ids.length;
     });
   }
 
@@ -199,8 +210,14 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
                         20,
                         19,
                         onTap: () {
-                          context.go(
-                            AppRoutes.cartDetails(_cartProductId ?? 0),
+                          showDialog(
+                            context: context,
+                            barrierColor: Colors.transparent,
+                            builder: (BuildContext context) {
+                              return CartPanelOverlay(
+                                productId: _cartProductId ?? 0,
+                              );
+                            },
                           );
                         },
                       ),
@@ -211,6 +228,32 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
             ),
           ),
         ),
+
+        if (_cartItemCount > 0)
+          Positioned(
+            top: 30,
+            right: 63,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(
+                minWidth: 18,
+                minHeight: 18,
+              ),
+              child: Text(
+                '$_cartItemCount',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
 
         // Outside click handler - now positioned above everything else
         if (showSearchField || showProfileDropdown)

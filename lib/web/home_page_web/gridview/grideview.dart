@@ -52,10 +52,10 @@ class _GridViewWebState extends State<GridViewWeb> {
           }
 
           return GridView.builder(
-            physics: const NeverScrollableScrollPhysics(),
+            physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 4 : 3,
               crossAxisSpacing: 23,
               mainAxisSpacing: 23,
               childAspectRatio: 0.9,
