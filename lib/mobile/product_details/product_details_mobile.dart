@@ -7,6 +7,7 @@ import '../../component/api_helper/api_helper.dart';
 import '../../component/custom_text.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/routes.dart';
+import '../../component/shared_preferences.dart';
 
 class ProductDetailsMobile extends StatefulWidget {
   final int productId;
@@ -287,9 +288,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                     SizedBox(height: 44),
                     GestureDetector(
                       onTap: () {
-                        context.go(
-                          AppRoutes.cartDetails(product!.id),
-                        );
+                        context.go(AppRoutes.cartDetails(product!.id));
                       },
                       child: BarlowText(
                         text: "ADD TO CART",
@@ -302,13 +301,35 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       ),
                     ),
                     SizedBox(height: 24),
-                    BarlowText(
-                      text: "WISHLIST",
-                      color: Color(0xFF3E5B84),
-                      fontWeight: FontWeight.w600, // 400 weight
-                      fontSize: 16, // 32px
-                      lineHeight: 1.0,
-                      letterSpacing: 1 * 0.04, // 4% of 32px
+                    FutureBuilder<bool>(
+                      future: SharedPreferencesHelper.isInWishlist(
+                        product!.id.toString(),
+                      ),
+                      builder: (context, snapshot) {
+                        final isInWishlist = snapshot.data ?? false;
+                        return GestureDetector(
+                          onTap: () async {
+                            if (isInWishlist) {
+                              await SharedPreferencesHelper.removeFromWishlist(
+                                product!.id.toString(),
+                              );
+                            } else {
+                              await SharedPreferencesHelper.addToWishlist(
+                                product!.id.toString(),
+                              );
+                            }
+                            setState(() {});
+                          },
+                          child: BarlowText(
+                            text: "WISHLIST",
+                            color: Color(0xFF3E5B84),
+                            fontWeight: FontWeight.w600, // 400 weight
+                            fontSize: 16, // 32px
+                            lineHeight: 1.0,
+                            letterSpacing: 1 * 0.04, // 4% of 32px
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

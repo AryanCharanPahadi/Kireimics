@@ -8,8 +8,12 @@ import 'package:kireimics/component/custom_text.dart';
 import 'package:kireimics/component/routes.dart';
 
 import '../../component/api_helper/api_helper.dart';
+import '../../component/cart_loader.dart';
 import '../../component/categories/categories_controller.dart';
+import '../../component/product_details/product_details_controller.dart';
 import '../../component/product_details/product_details_modal.dart';
+import '../../component/shared_preferences.dart';
+import '../cart/cart_panel.dart';
 import 'category_navigation.dart';
 
 class CategoryListDetails extends StatefulWidget {
@@ -24,11 +28,22 @@ class _CategoryListDetailsState extends State<CategoryListDetails> {
   List<Product> productList = [];
   bool isLoading = false;
   int _selectedCategoryId = 1; // Default to first category
-  final List<bool> _isHoveredList = List.generate(
-    9,
-    (_) => false,
-  ); // Track hover state for each item
-  final List<bool> _wishlistStates = List.filled(9, false);
+  List<bool> _isHoveredList = [];
+  List<bool> _wishlistStates = [];
+
+  void _initializeStates(int count) {
+    if (_isHoveredList.length != count) {
+      _isHoveredList = List.filled(count, false);
+    }
+    if (_wishlistStates.length != count) {
+      _wishlistStates = List.filled(count, false);
+    }
+  }
+
+  Future<void> _initializeWishlistStates() async {
+    // This will be called after products are loaded
+    if (mounted) setState(() {});
+  }
 
   Future<void> fetchAllProducts() async {
     setState(() {
@@ -50,6 +65,7 @@ class _CategoryListDetailsState extends State<CategoryListDetails> {
     super.initState();
     fetchAllProducts();
     _initializeDescription();
+    _initializeWishlistStates();
   }
 
   Future<void> fetchProductsByCategoryId(int catId) async {
@@ -92,8 +108,15 @@ class _CategoryListDetailsState extends State<CategoryListDetails> {
     });
   }
 
+  final ProductController controller = Get.put(ProductController());
+
   @override
   Widget build(BuildContext context) {
+    if (controller.products.isNotEmpty) {
+      _initializeStates(controller.products.length); // ← add this only once here
+    }
+
+
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,16 +299,9 @@ class _CategoryListDetailsState extends State<CategoryListDetails> {
                               child: Stack(
                                 children: [
                                   Positioned.fill(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        context.go(
-                                          AppRoutes.productDetails(product.id),
-                                        );
-                                      },
-                                      child: Image.network(
-                                        product.thumbnail,
-                                        fit: BoxFit.cover,
-                                      ),
+                                    child: Image.network(
+                                      product.thumbnail,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
                                   Positioned(
@@ -345,24 +361,36 @@ class _CategoryListDetailsState extends State<CategoryListDetails> {
                                           ),
                                         ),
 
-                                        GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              _wishlistStates[index] =
-                                                  !_wishlistStates[index];
-                                            });
+                                        FutureBuilder<bool>(
+                                          future:
+                                              SharedPreferencesHelper.isInWishlist(
+                                                product.id.toString(),
+                                              ),
+                                          builder: (context, snapshot) {
+                                            final isInWishlist =
+                                                snapshot.data ?? false;
+                                            return GestureDetector(
+                                              onTap: () async {
+                                                if (isInWishlist) {
+                                                  await SharedPreferencesHelper.removeFromWishlist(
+                                                    product.id.toString(),
+                                                  );
+                                                } else {
+                                                  await SharedPreferencesHelper.addToWishlist(
+                                                    product.id.toString(),
+                                                  );
+                                                }
+                                                setState(() {});
+                                              },
+                                              child: SvgPicture.asset(
+                                                isInWishlist
+                                                    ? 'assets/home_page/IconWishlist.svg'
+                                                    : 'assets/home_page/IconWishlistEmpty.svg',
+                                                width: imageWidth * 0.10,
+                                                height: imageHeight * 0.05,
+                                              ),
+                                            );
                                           },
-                                          child: SvgPicture.asset(
-                                            _wishlistStates[index]
-                                                ? 'assets/home_page/IconWishlist.svg'
-                                                : 'assets/home_page/IconWishlistEmpty.svg',
-                                            width:
-                                                imageWidth *
-                                                0.10, // 12% of image width
-                                            height:
-                                                imageHeight *
-                                                0.05, // 6% of image height
-                                          ),
                                         ),
                                       ],
                                     ),
@@ -439,18 +467,28 @@ class _CategoryListDetailsState extends State<CategoryListDetails> {
                                             ),
                                             Row(
                                               children: [
-                                                Text(
-                                                  "VIEW",
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontFamily:
-                                                        GoogleFonts.barlow()
-                                                            .fontFamily,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize:
-                                                        imageWidth *
-                                                        0.040, // Responsive font size
-                                                    height: 1.0,
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    context.go(
+                                                      AppRoutes.productDetails(
+                                                        product.id,
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: Text(
+                                                    "VIEW",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontFamily:
+                                                          GoogleFonts.barlow()
+                                                              .fontFamily,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize:
+                                                          imageWidth *
+                                                          0.040, // Responsive font size
+                                                      height: 1.0,
+                                                    ),
                                                   ),
                                                 ),
                                                 SizedBox(
@@ -472,18 +510,37 @@ class _CategoryListDetailsState extends State<CategoryListDetails> {
                                                 SizedBox(
                                                   width: imageWidth * 0.02,
                                                 ),
-                                                Text(
-                                                  "ADD TO CART",
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontFamily:
-                                                        GoogleFonts.barlow()
-                                                            .fontFamily,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize:
-                                                        imageWidth *
-                                                        0.040, // Responsive font size
-                                                    height: 1.0,
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      barrierColor:
+                                                          Colors.transparent,
+                                                      builder: (
+                                                        BuildContext context,
+                                                      ) {
+                                                        cartNotifier.refresh();
+
+                                                        return CartPanelOverlay(
+                                                          productId: product.id,
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                  child: Text(
+                                                    "ADD TO CART",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontFamily:
+                                                          GoogleFonts.barlow()
+                                                              .fontFamily,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize:
+                                                          imageWidth *
+                                                          0.040, // Responsive font size
+                                                      height: 1.0,
+                                                    ),
                                                   ),
                                                 ),
                                               ],

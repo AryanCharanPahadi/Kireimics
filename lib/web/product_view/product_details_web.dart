@@ -7,6 +7,7 @@ import 'package:kireimics/component/routes.dart';
 import '../../component/api_helper/api_helper.dart';
 import '../../component/cart_loader.dart';
 import '../../component/product_details/product_details_modal.dart';
+import '../../component/shared_preferences.dart';
 import '../cart/cart_panel.dart';
 
 class ProductDetailsWeb extends StatefulWidget {
@@ -660,7 +661,7 @@ class _ProductDetailsWebState extends State<ProductDetailsWeb> {
                                     context: context,
                                     barrierColor: Colors.transparent,
                                     builder: (BuildContext context) {
-                                       cartNotifier.refresh();
+                                      cartNotifier.refresh();
 
                                       return CartPanelOverlay(
                                         productId: product!.id,
@@ -675,18 +676,41 @@ class _ProductDetailsWebState extends State<ProductDetailsWeb> {
                                   fontWeight: FontWeight.w600, // 400 weight
                                   fontSize: 16, // 32px
                                   lineHeight: 1.0,
+
                                   letterSpacing: 1 * 0.04, // 4% of 32px
                                   backgroundColor: Color(0xFFb9d6ff),
                                 ),
                               ),
                               SizedBox(height: 24),
-                              BarlowText(
-                                text: "WISHLIST",
-                                color: Color(0xFF3E5B84),
-                                fontWeight: FontWeight.w600, // 400 weight
-                                fontSize: 16, // 32px
-                                lineHeight: 1.0,
-                                letterSpacing: 1 * 0.04, // 4% of 32px
+                              FutureBuilder<bool>(
+                                future: SharedPreferencesHelper.isInWishlist(
+                                  product!.id.toString(),
+                                ),
+                                builder: (context, snapshot) {
+                                  final isInWishlist = snapshot.data ?? false;
+                                  return GestureDetector(
+                                    onTap: () async {
+                                      if (isInWishlist) {
+                                        await SharedPreferencesHelper.removeFromWishlist(
+                                          product!.id.toString(),
+                                        );
+                                      } else {
+                                        await SharedPreferencesHelper.addToWishlist(
+                                          product!.id.toString(),
+                                        );
+                                      }
+                                      setState(() {});
+                                    },
+                                    child: BarlowText(
+                                      text: "WISHLIST",
+                                      color: Color(0xFF3E5B84),
+                                      fontWeight: FontWeight.w600, // 400 weight
+                                      fontSize: 16, // 32px
+                                      lineHeight: 1.0,
+                                      letterSpacing: 1 * 0.04, // 4% of 32px
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),

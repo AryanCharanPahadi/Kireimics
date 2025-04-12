@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:kireimics/mobile/checkout/checkout_page.dart';
 import 'package:kireimics/mobile/contact_us/contact_us_component.dart';
 import 'package:kireimics/mobile/home_page/home_page_mobile.dart';
+import 'package:kireimics/mobile/login/login.dart';
+import 'package:kireimics/mobile/my_account_route/my_account/my_account_ui.dart';
+import 'package:kireimics/mobile/my_account_route/my_orders/my_order_ui.dart';
 import 'package:kireimics/mobile/privacy_policy/privacy_policy_component.dart';
 import 'package:kireimics/mobile/product_details/product_details_mobile.dart';
 import 'package:kireimics/mobile/sale/sale_mobile.dart';
@@ -19,6 +22,7 @@ import 'collection/collection.dart';
 import 'component/custom_header_mobile.dart';
 import 'component/footer.dart';
 import 'component/scrolling_header.dart';
+import 'my_account_route/wishlist_ui/wishlist.dart';
 
 class LandingPageMobile extends StatefulWidget {
   final String? initialRoute;
@@ -54,6 +58,9 @@ class _LandingPageMobileState extends State<LandingPageMobile> {
     AppRoutes.collection: (_) => const CollectionMobile(),
     AppRoutes.sale: (_) => const SaleMobile(),
     AppRoutes.checkOut: (_) => const CheckoutPageMobile(),
+    AppRoutes.myAccount: (_) => const MyAccountUiMobile(),
+    AppRoutes.myOrder: (_) => const MyOrderUiMobile(),
+    AppRoutes.wishlist: (_) => const WishlistUiMobile(),
     '/product':
         (id) => ProductDetailsMobile(productId: int.tryParse(id ?? '0') ?? 0),
     '/cart': (id) => CartPanelMobile(productId: int.tryParse(id ?? '0') ?? 0),
@@ -135,7 +142,10 @@ class _LandingPageMobileState extends State<LandingPageMobile> {
                 if ((_selectedPage != AppRoutes.catalog) &&
                     (_selectedPage != AppRoutes.sale) &&
                     (_selectedPage != AppRoutes.checkOut) &&
-                    (_selectedPage != '/product') && (_selectedPage != '/cart'))
+                    (_selectedPage != AppRoutes.myAccount) &&
+                    (_selectedPage != AppRoutes.myOrder) &&  (_selectedPage != AppRoutes.wishlist) &&
+                    (_selectedPage != '/product') &&
+                    (_selectedPage != '/cart'))
                   const AboveFooter(),
                 const SizedBox(height: 27),
                 const Footer(),

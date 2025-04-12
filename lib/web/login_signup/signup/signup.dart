@@ -1,20 +1,22 @@
 import 'dart:ui';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kireimics/web/login_signup/signup/signup.dart';
+import 'package:kireimics/component/routes.dart';
+import 'package:kireimics/web/login_signup/login/login_page.dart';
 
 import '../../../component/custom_text.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class Signup extends StatefulWidget {
+  const Signup({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<Signup> createState() => _SignupState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignupState extends State<Signup> {
   bool isChecked = false;
 
   @override
@@ -57,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       SizedBox(height: 33),
                       CralikaFont(
-                        text: "Log In",
+                        text: "Sign Up",
                         color: Color(0xFF414141),
                         fontWeight: FontWeight.w600,
                         fontSize: 32.0,
@@ -67,62 +69,20 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(height: 8),
                       BarlowText(
                         text:
-                            "Log in to your Kireimics account for a quick checkout.",
+                            "Create a free Kireimics account for a quick checkout.",
                         fontWeight: FontWeight.w400,
                         fontSize: 16,
                         lineHeight: 1.0,
                         letterSpacing: 0.0,
                       ),
                       SizedBox(height: 32),
-                      customTextFormField(hintText: "Enter your email"),
+                      customTextFormField(hintText: "FIRST NAME"),
 
-                      customTextFormField(hintText: "Enter your password"),
-                      SizedBox(height: 15),
+                      customTextFormField(hintText: "LAST NAME"),
+                      customTextFormField(hintText: "EMAIL"),
+                      customTextFormField(hintText: "PHONE"),
+                      customTextFormField(hintText: "CREATE PASSWORD"),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Checkbox(
-                                    value: isChecked,
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        isChecked = value ?? false;
-                                      });
-                                    },
-                                    activeColor: Colors.green,
-                                  ),
-                                  BarlowText(
-                                    text: "Remember Me",
-                                    color: Color(0xFF414141),
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 14,
-                                    lineHeight: 1.0, // 100% line height
-                                    letterSpacing: 0.0, // 0%
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              BarlowText(
-                                text: "Forgot Password?",
-                                color: Color(0xFF3E5B84),
-
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                lineHeight: 1.0, // 100% line height
-                                letterSpacing: 0.64, // 4% of 16px = 0.64
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
                       SizedBox(height: 30),
 
                       Row(
@@ -132,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                           Column(
                             children: [
                               BarlowText(
-                                text: "LOG IN",
+                                text: "SIGN UP",
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                                 lineHeight: 1.0, // 100% line height
@@ -140,6 +100,63 @@ class _LoginPageState extends State<LoginPage> {
                                 color: Color(0xFF3E5B84),
                                 backgroundColor: Color(0xFFb9d6ff),
                               ),
+                              SizedBox(height: 30),
+
+                              Container(
+                                width: 320,
+                                child: Text.rich(
+                                  TextSpan(
+                                    text:
+                                        'By signing up, you are agreeing to our ',
+                                    style: TextStyle(
+                                      fontFamily:
+                                          GoogleFonts.barlow().fontFamily,
+                                      fontWeight:
+                                          FontWeight
+                                              .w600, // Matches font-weight: 600;
+                                      fontSize: 14, // Matches font-size: 14px;
+                                      height: 1.0, // Matches line-height: 100%;
+                                      letterSpacing:
+                                          0.0, // Matches letter-spacing: 0%;
+                                      color: Color(0xFF414141),
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: 'Privacy Policy',
+                                        style: TextStyle(
+                                          color: Color(0xFF3E5B84),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        recognizer:
+                                            TapGestureRecognizer()
+                                              ..onTap = () {
+                                                context.go(
+                                                  AppRoutes.privacyPolicy,
+                                                );
+                                              },
+                                      ),
+                                      TextSpan(text: ' & '),
+                                      TextSpan(
+                                        text: 'Shipping Policy',
+                                        style: TextStyle(
+                                          color: Color(0xFF3E5B84),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        recognizer:
+                                            TapGestureRecognizer()
+                                              ..onTap = () {
+                                                context.go(
+                                                  AppRoutes.shippingPolicy,
+                                                );
+                                              },
+                                      ),
+                                      TextSpan(text: '.'),
+                                    ],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+
                               SizedBox(height: 30),
 
                               BarlowText(
@@ -231,7 +248,7 @@ class _LoginPageState extends State<LoginPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   BarlowText(
-                                    text: "Don't have an account?",
+                                    text: "Already have an account?",
                                     fontWeight: FontWeight.w400,
                                     fontSize: 20,
                                     lineHeight: 1.0,
@@ -239,20 +256,21 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                   GestureDetector(
                                     onTap: () {
-                                      Navigator.pop(context); // Closes the LoginPage
+                                      Navigator.pop(
+                                        context,
+                                      ); // Closes the LoginPage
                                       Future.delayed(Duration.zero, () {
                                         showDialog(
                                           context: context,
                                           barrierColor: Colors.transparent,
                                           builder: (BuildContext context) {
-                                            return Signup(); // Opens the Signup dialog
+                                            return LoginPage(); // Opens the Signup dialog
                                           },
                                         );
                                       });
                                     },
-
                                     child: BarlowText(
-                                      text: "SIGN UP NOW",
+                                      text: "LOG IN NOW",
                                       fontWeight: FontWeight.w600,
                                       fontSize: 14,
                                       lineHeight: 1.5,

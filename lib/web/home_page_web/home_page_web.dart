@@ -16,7 +16,7 @@ class HomePageWeb extends StatefulWidget {
 
 class _HomePageWebState extends State<HomePageWeb>
     with SingleTickerProviderStateMixin {
- // Track wishlist state
+  // Track wishlist state
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -94,66 +94,15 @@ class _HomePageWebState extends State<HomePageWeb>
                                   children: [
                                     SizedBox(
                                       // width: screenWidth * 0.20,
-                                      child: TextFormField(
-                                        textAlign: TextAlign.right,
-                                        cursorColor: Colors.white,
-                                        decoration: InputDecoration(
-                                          hintText: "YOUR NAME",
-                                          hintStyle: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.white,
-                                            fontFamily:
-                                                GoogleFonts.barlow().fontFamily,
-                                          ),
-                                          enabledBorder:
-                                              const UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                          focusedBorder:
-                                              const UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                        ),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                        ),
+                                      child: customTextFormField(
+                                        hintText: "YOUR NAME",
                                       ),
                                     ),
                                     const SizedBox(height: 10),
                                     SizedBox(
                                       // width: screenWidth * 0.20,
-                                      child: TextFormField(
-                                        textAlign: TextAlign.right,
-
-                                        cursorColor: Colors.white,
-                                        decoration: InputDecoration(
-                                          hintText: "YOUR EMAIL",
-                                          hintStyle: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.white,
-                                            fontFamily:
-                                                GoogleFonts.barlow().fontFamily,
-                                          ),
-                                          enabledBorder:
-                                              const UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                          focusedBorder:
-                                              const UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                        ),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                        ),
+                                      child: customTextFormField(
+                                        hintText: "YOUR EMAIL",
                                       ),
                                     ),
                                   ],
@@ -169,68 +118,14 @@ class _HomePageWebState extends State<HomePageWeb>
                                   children: [
                                     SizedBox(
                                       // width: screenWidth * 0.20,
-                                      child: TextFormField(
-                                        textAlign: TextAlign.right,
-
-                                        cursorColor: Colors.white,
-                                        decoration: InputDecoration(
-                                          hintText: "YOUR MESSAGE",
-                                          hintStyle: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.white,
-                                            fontFamily:
-                                                GoogleFonts.barlow().fontFamily,
-                                          ),
-                                          enabledBorder:
-                                              const UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                          focusedBorder:
-                                              const UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                        ),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                        ),
+                                      child: customTextFormField(
+                                        hintText: "MESSAGE",
                                       ),
                                     ),
                                     const SizedBox(height: 10),
                                     SizedBox(
                                       // width: screenWidth * 0.20,
-                                      child: TextFormField(
-                                        textAlign: TextAlign.right,
-
-                                        cursorColor: Colors.white,
-                                        decoration: InputDecoration(
-                                          hintText: "",
-                                          hintStyle: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.white,
-                                            fontFamily:
-                                                GoogleFonts.barlow().fontFamily,
-                                          ),
-                                          enabledBorder:
-                                              const UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                          focusedBorder:
-                                              const UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                        ),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
+                                      child: customTextFormField(hintText: ""),
                                     ),
                                     const SizedBox(height: 24),
                                     Align(
@@ -256,7 +151,7 @@ class _HomePageWebState extends State<HomePageWeb>
                                 ),
                               ),
                             ),
-                            SizedBox(width: 20),
+                            SizedBox(width: 30),
 
                             Expanded(
                               child: Padding(
@@ -535,6 +430,48 @@ class _HomePageWebState extends State<HomePageWeb>
           ),
         ],
       ),
+    );
+  }
+
+  Widget customTextFormField({
+    required String hintText,
+    TextEditingController? controller,
+  }) {
+    return Stack(
+      children: [
+        // Hint text positioned on the left
+        Positioned(
+          left: 0,
+          top: 16, // Adjust this value to align vertically
+          child: Text(
+            hintText,
+            style: GoogleFonts.barlow(fontSize: 14, color: Colors.white),
+          ),
+        ),
+        // Text field with right-aligned input
+        TextFormField(
+          controller: controller,
+          cursorColor: Colors.white,
+          textAlign: TextAlign.right, // Align user input to the right
+          decoration: InputDecoration(
+            hintStyle: TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontFamily: GoogleFonts.barlow().fontFamily,
+            ),
+            enabledBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+            ),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+            ),
+          ),
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: GoogleFonts.barlow().fontFamily,
+          ),
+        ),
+      ],
     );
   }
 }

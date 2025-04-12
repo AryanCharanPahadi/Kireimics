@@ -4,10 +4,10 @@ import 'cart_loader.dart';
 
 class SharedPreferencesHelper {
   static const String _productIdsKey = 'cart_product_ids';
+  static const _wishlistKey = 'wishlist_items';
 
   // Save a new product ID (append to existing ones, avoid duplicates)
   static Future<void> addProductId(int productId) async {
-
     final prefs = await SharedPreferences.getInstance();
     List<String> currentIds = prefs.getStringList(_productIdsKey) ?? [];
     if (!currentIds.contains(productId.toString())) {
@@ -28,7 +28,6 @@ class SharedPreferencesHelper {
 
   // Remove a product ID
   static Future<void> removeProductId(int productId) async {
-
     final prefs = await SharedPreferences.getInstance();
     List<String> currentIds = prefs.getStringList(_productIdsKey) ?? [];
     currentIds.remove(productId.toString());
@@ -39,5 +38,39 @@ class SharedPreferencesHelper {
   static Future<void> clearAllProductIds() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_productIdsKey);
+  }
+
+  static Future<void> addToWishlist(String productId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final wishlist = await getWishlist();
+    if (!wishlist.contains(productId)) {
+      wishlist.add(productId);
+      await prefs.setStringList(_wishlistKey, wishlist);
+    }
+    print('Current wishlist: $wishlist');
+  }
+
+  static Future<void> removeFromWishlist(String productId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final wishlist = await getWishlist();
+    wishlist.remove(productId);
+    await prefs.setStringList(_wishlistKey, wishlist);
+    print('Current wishlist: $wishlist');
+  }
+
+  static Future<List<String>> getWishlist() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_wishlistKey) ?? [];
+  }
+
+  // Check if a product is in wishlist
+  static Future<bool> isInWishlist(String productId) async {
+    final wishlist = await getWishlist();
+    return wishlist.contains(productId);
+  }
+
+  static Future<void> clearWishlist() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_wishlistKey);
   }
 }

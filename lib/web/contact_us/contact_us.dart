@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:kireimics/component/custom_text.dart';
 
-import '../../component/api_helper/api_helper.dart';
 import '../component/above_footer.dart';
 import 'contact_us_controller.dart';
 
@@ -137,13 +136,13 @@ class _ContactUsState extends State<ContactUs> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          contactField("YOUR NAME"),
+                          customTextFormField(hintText: "YOUR NAME"),
                           const SizedBox(height: 10),
-                          contactField("YOUR EMAIL"),
+                          customTextFormField(hintText: "YOUR EMAIL"),
                           const SizedBox(height: 10),
-                          contactField("MESSAGE"),
+                          customTextFormField(hintText: "MESSAGE"),
                           const SizedBox(height: 10),
-                          contactField(""),
+                          customTextFormField(hintText: ""),
                           const SizedBox(height: 24),
                           Align(
                             alignment: Alignment.bottomRight,
@@ -182,14 +181,20 @@ class _ContactUsState extends State<ContactUs> {
                       margin: const EdgeInsets.only(bottom: 8.0),
                       padding: const EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFF000001).withOpacity(0.2), width: 1),
+                        border: Border.all(
+                          color: Color(0xFF000001).withOpacity(0.2),
+                          width: 1,
+                        ),
                         color: Colors.white,
                         boxShadow: [
                           BoxShadow(
                             color: Color(0xFFDDEAFF),
                             spreadRadius: 0,
                             blurRadius: 6,
-                            offset: Offset(6, 6), // Right and Bottom shadow only
+                            offset: Offset(
+                              6,
+                              6,
+                            ), // Right and Bottom shadow only
                           ),
                         ],
                       ),
@@ -299,26 +304,47 @@ class _ContactUsState extends State<ContactUs> {
     }
   }
 
-  Widget contactField(String hintText) {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.black, width: 1)),
-      ),
-      child: TextField(
-        textAlign: TextAlign.right,
-
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
+  Widget customTextFormField({
+    required String hintText,
+    TextEditingController? controller,
+  }) {
+    return Stack(
+      children: [
+        // Hint text positioned on the left
+        Positioned(
+          left: 0,
+          top: 16, // Adjust this value to align vertically
+          child: Text(
+            hintText,
+            style: GoogleFonts.barlow(fontSize: 14, color: Color(0xFF414141)),
+          ),
+        ),
+        // Text field with right-aligned input
+        TextFormField(
+          controller: controller,
+          cursorColor: Colors.black,
+          textAlign: TextAlign.right, // Align user input to the right
+          decoration: InputDecoration(
+            hintStyle: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              fontFamily: GoogleFonts.barlow().fontFamily,
+            ),
+            enabledBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF414141)),
+            ),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF414141)),
+            ),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.only(bottom: 5),
+          ),
+          style: TextStyle(
+            color: Color(0xFF414141),
             fontFamily: GoogleFonts.barlow().fontFamily,
           ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.only(bottom: 5),
         ),
-      ),
+      ],
     );
   }
 }

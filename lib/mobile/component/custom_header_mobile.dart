@@ -201,7 +201,7 @@ class Column1 extends StatelessWidget {
                           decoration: InputDecoration(
                             hintText: 'SEARCH',
                             hintStyle: TextStyle(
-                              fontSize: 20,
+                              fontSize:16,
                               fontFamily: GoogleFonts.barlow().fontFamily,
                               color: Color(0xFF414141),
                             ),
@@ -211,7 +211,7 @@ class Column1 extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Icon(Icons.search, color: Color(0xFF3E5B84), size: 24),
+                      Icon(Icons.search, color: Color(0xFF3E5B84), size: 20),
                     ],
                   ),
                   Divider(color: Color(0xFF414141)),

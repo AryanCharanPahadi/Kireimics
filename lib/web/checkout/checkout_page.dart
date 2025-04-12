@@ -515,33 +515,59 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
       ),
     );
   }
-
   Widget customTextFormField({
     required String hintText,
     TextEditingController? controller,
-    TextAlign textAlign = TextAlign.right,
   }) {
-    return TextFormField(
-      controller: controller,
-      textAlign: textAlign,
-      cursorColor: const Color(0xFF414141),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: GoogleFonts.barlow(
-          fontWeight: FontWeight.w400,
-          fontSize: 14,
-          height: 1.0,
-          letterSpacing: 0.0,
-          color: const Color(0xFF414141),
+    return Stack(
+      children: [
+        // Hint text positioned on the left
+        Positioned(
+          left: 0,
+          top: 16, // Adjust this value to align vertically
+          child: Text(
+            hintText,
+            style: GoogleFonts.barlow(
+              fontWeight: FontWeight.w400,
+              fontSize: 14,
+              color: const Color(0xFF414141),
+            ),
+          ),
         ),
-        enabledBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF414141)),
+        // Text field with right-aligned input
+        TextFormField(
+          controller: controller,
+          textAlign: TextAlign.right,
+          cursorColor: const Color(0xFF414141),
+          decoration: InputDecoration(
+            border: UnderlineInputBorder(
+              // Add this for the bottom border
+              borderSide: BorderSide(color: const Color(0xFF414141)),
+            ),
+            enabledBorder: UnderlineInputBorder(
+              // Add this for enabled state
+              borderSide: BorderSide(color: const Color(0xFF414141)),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              // Add this for focused state
+              borderSide: BorderSide(color: const Color(0xFF414141)),
+            ),
+            hintText: '', // Empty hint since we're showing our own
+            hintStyle: GoogleFonts.barlow(
+              fontWeight: FontWeight.w400,
+              fontSize: 14,
+              height: 1.0,
+              letterSpacing: 0.0,
+              color: const Color(0xFF414141),
+            ),
+
+            contentPadding: const EdgeInsets.only(
+              top: 16,
+            ), // Match the Positioned top value
+          ),
+          style: const TextStyle(color: Color(0xFF414141)),
         ),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF414141)),
-        ),
-      ),
-      style: const TextStyle(color: Color(0xFF414141)),
+      ],
     );
   }
 }

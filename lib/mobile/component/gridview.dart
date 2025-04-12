@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../component/product_details/product_details_controller.dart';
 import '../../component/routes.dart';
+import '../../component/shared_preferences.dart';
 
 class Gridview extends StatefulWidget {
   const Gridview({super.key});
@@ -18,7 +19,29 @@ class Gridview extends StatefulWidget {
 class _GridviewState extends State<Gridview> {
   final ProductController controller = Get.put(ProductController());
 
-  final List<bool> _wishlistStates = List.filled(6, false);
+  List<bool> _isHoveredList = [];
+  List<bool> _wishlistStates = [];
+
+  void _initializeStates(int count) {
+    if (_isHoveredList.length != count) {
+      _isHoveredList = List.filled(count, false);
+    }
+    if (_wishlistStates.length != count) {
+      _wishlistStates = List.filled(count, false);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize wishlist states when widget loads
+    _initializeWishlistStates();
+  }
+
+  Future<void> _initializeWishlistStates() async {
+    // This will be called after products are loaded
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +58,12 @@ class _GridviewState extends State<Gridview> {
 
         if (controller.products.isEmpty) {
           return const Center(child: Text("No products found"));
+        }
+
+        if (controller.products.isNotEmpty) {
+          _initializeStates(
+            controller.products.length,
+          ); // ← add this only once here
         }
 
         return SizedBox(
@@ -115,12 +144,36 @@ class _GridviewState extends State<Gridview> {
                                           !_wishlistStates[index];
                                     });
                                   },
-                                  child: SvgPicture.asset(
-                                    _wishlistStates[index]
-                                        ? 'assets/home_page/IconWishlist.svg'
-                                        : 'assets/home_page/IconWishlistEmpty.svg',
-                                    width: 34,
-                                    height: 20,
+                                  child: FutureBuilder<bool>(
+                                    future:
+                                        SharedPreferencesHelper.isInWishlist(
+                                          product.id.toString(),
+                                        ),
+                                    builder: (context, snapshot) {
+                                      final isInWishlist =
+                                          snapshot.data ?? false;
+                                      return GestureDetector(
+                                        onTap: () async {
+                                          if (isInWishlist) {
+                                            await SharedPreferencesHelper.removeFromWishlist(
+                                              product.id.toString(),
+                                            );
+                                          } else {
+                                            await SharedPreferencesHelper.addToWishlist(
+                                              product.id.toString(),
+                                            );
+                                          }
+                                          setState(() {});
+                                        },
+                                        child: SvgPicture.asset(
+                                          isInWishlist
+                                              ? 'assets/home_page/IconWishlist.svg'
+                                              : 'assets/home_page/IconWishlistEmpty.svg',
+                                          width: 34,
+                                          height: 20,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],
@@ -160,14 +213,19 @@ class _GridviewState extends State<Gridview> {
                             ),
                             const SizedBox(height: 8),
 
-                            Text(
-                              "ADD TO CART",
-                              style: GoogleFonts.barlow(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                height: 1.2,
-                                letterSpacing: 0.56,
-                                color: const Color(0xFF3E5B84),
+                            GestureDetector(
+                              onTap: () {
+                                context.go(AppRoutes.cartDetails(product.id));
+                              },
+                              child: Text(
+                                "ADD TO CART",
+                                style: GoogleFonts.barlow(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  height: 1.2,
+                                  letterSpacing: 0.56,
+                                  color: const Color(0xFF3E5B84),
+                                ),
                               ),
                             ),
                           ],

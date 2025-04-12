@@ -73,102 +73,22 @@ class _LetConnectState extends State<LetConnect> {
                 children: [
                   SizedBox(
                     width: 300,
-                    child: TextFormField(
-                      cursorColor: Colors.white,
-                      textAlign:
-                          TextAlign.right, // Align user input to the right
-                      decoration: InputDecoration(
-                        hintText: "YOUR NAME",
-                        hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontFamily: GoogleFonts.barlow().fontFamily,
-                        ),
-                        alignLabelWithHint:
-                            true, // Ensures proper hint alignment
-                        enabledBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                    ),
+                    child: customTextFormField(hintText: "YOUR NAME"),
                   ),
                   SizedBox(height: 10),
                   SizedBox(
                     width: 300,
-                    child: TextFormField(
-                      cursorColor: Colors.white,
-                      textAlign:
-                          TextAlign.right, // Align user input to the right
-
-                      decoration: InputDecoration(
-                        hintText: "YOUR EMAIL",
-                        hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontFamily: GoogleFonts.barlow().fontFamily,
-                        ),
-                        enabledBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                    ),
+                    child: customTextFormField(hintText: "YOUR EMAIL"),
                   ),
                   SizedBox(height: 10),
                   SizedBox(
                     width: 300,
-                    child: TextFormField(
-                      cursorColor: Colors.white,
-                      textAlign:
-                          TextAlign.right, // Align user input to the right
-
-                      decoration: InputDecoration(
-                        hintText: "MESSAGE",
-                        hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontFamily: GoogleFonts.barlow().fontFamily,
-                        ),
-                        enabledBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                    ),
+                    child: customTextFormField(hintText: "MESSAGE"),
                   ),
                   SizedBox(height: 10),
                   SizedBox(
                     width: 300,
-                    child: TextFormField(
-                      cursorColor: Colors.white,
-                      textAlign:
-                          TextAlign.right, // Align user input to the right
-
-                      decoration: InputDecoration(
-                        hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontFamily: GoogleFonts.barlow().fontFamily,
-                        ),
-                        enabledBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                    ),
+                    child: customTextFormField(hintText: ""),
                   ),
                 ],
               ),
@@ -190,6 +110,49 @@ class _LetConnectState extends State<LetConnect> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget customTextFormField({
+    required String hintText,
+    TextEditingController? controller,
+  }) {
+    return Stack(
+      children: [
+        // Hint text positioned on the left
+        Positioned(
+          left: 0,
+          top: 16, // Adjust this value to align vertically
+          child: Text(
+            hintText,
+            style: GoogleFonts.barlow(fontSize: 14, color: Colors.white),
+          ),
+        ),
+        // Text field with right-aligned input
+        TextFormField(
+          controller: controller,
+          cursorColor: Colors.white,
+          textAlign: TextAlign.right, // Align user input to the right
+          decoration: InputDecoration(
+            hintStyle: TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontFamily: GoogleFonts.barlow().fontFamily,
+            ),
+            enabledBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+            ),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+            ),
+            contentPadding: const EdgeInsets.only(top: 16),
+          ),
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: GoogleFonts.barlow().fontFamily,
+          ),
+        ),
+      ],
     );
   }
 }

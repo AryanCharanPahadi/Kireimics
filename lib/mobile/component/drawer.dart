@@ -132,9 +132,34 @@ class _DrawerMobileState extends State<DrawerMobile> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _buildMenuItem("MY ACCOUNT"),
-                    _buildMenuItem("MY ORDERS"),
-                    _buildMenuItem("WISHLIST"),
+                    _buildMenuItem(
+                      "MY ACCOUNT",
+                      isActive: _isCurrentRoute(AppRoutes.myAccount),
+
+                      onTap: () {
+                        context.go(AppRoutes.myAccount);
+                        Navigator.pop(context);
+                      },
+                    ),
+                    _buildMenuItem("MY ORDERS",
+                      isActive: _isCurrentRoute(AppRoutes.myOrder),
+
+                      onTap: () {
+                        context.go(AppRoutes.myOrder);
+                        Navigator.pop(context);
+                      },
+                    ),
+                    _buildMenuItem("WISHLIST",
+
+                      isActive: _isCurrentRoute(AppRoutes.wishlist),
+
+                      onTap: () {
+                        context.go(AppRoutes.wishlist);
+                        Navigator.pop(context);
+                      },
+
+
+                    ),
                   ],
                 ),
               ),

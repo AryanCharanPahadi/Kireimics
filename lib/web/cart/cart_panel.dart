@@ -93,7 +93,7 @@ class _CartPanelOverlayState extends State<CartPanelOverlay> {
         Positioned.fill(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
-            child: Container(color: Colors.black.withOpacity(0.3)),
+            child: Container(color: Colors.black.withOpacity(0.1)),
           ),
         ),
         Positioned(

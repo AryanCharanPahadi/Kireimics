@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kireimics/mobile/cart_panel/cart_panel_mobile.dart';
+import 'package:kireimics/web/address_page/add_address_ui/add_address_ui.dart';
 import 'package:kireimics/web/catalog/catalog.dart';
 import 'package:kireimics/web/checkout/checkout_page.dart';
 import 'package:kireimics/web/contact_us/contact_us.dart';
 import 'package:kireimics/web/login_signup/login/login_page.dart';
+import 'package:kireimics/web/login_signup/signup/signup.dart';
+import 'package:kireimics/web/my_account_route/my_account/my_account_ui.dart';
 import 'package:kireimics/web/privacy_policy/privacy_policy_component.dart';
 import 'package:kireimics/web/product_view/product_details_web.dart';
 import 'package:kireimics/web/sale/sale.dart';
@@ -16,10 +18,13 @@ import 'package:kireimics/web/component/custom_footer.dart';
 import 'package:kireimics/web/component/custom_header.dart';
 import 'package:kireimics/web/component/custom_sidebar.dart';
 import 'package:kireimics/web/component/scrollable_header.dart';
+import 'package:kireimics/web/component/profile_dropdown.dart'; // Import the new file
+import 'package:kireimics/web/wishlist/wishlist_ui.dart';
 import '../component/components.dart';
 import '../component/routes.dart';
 import 'cart/cart_panel.dart';
 import 'collection/collection.dart';
+import 'my_account_route/my_orders/my_order_ui.dart';
 
 class LandingPageWeb extends StatefulWidget {
   final String? initialRoute;
@@ -36,6 +41,8 @@ class _LandingPageWebState extends State<LandingPageWeb> {
   bool _isHeaderVisible = true;
   double _previousScrollOffset = 0.0;
   late String _selectedPage;
+  bool _showProfileDropdown = false;
+
   void _handleScroll() {
     final currentScrollOffset = _scrollController.offset;
     const scrollThreshold = 50.0;
@@ -56,8 +63,9 @@ class _LandingPageWebState extends State<LandingPageWeb> {
 
   final ValueNotifier<bool> _showSideContainer = ValueNotifier(false);
   final ValueNotifier<bool> _showSideLogIn = ValueNotifier(false);
+  final ValueNotifier<bool> _showSideSignIn = ValueNotifier(false);
+  final ValueNotifier<bool> _showSideAddress = ValueNotifier(false);
 
-  // Page map similar to mobile version
   final Map<String, Widget Function(String?)> _pageMap = {
     AppRoutes.home: (_) => const HomePageWeb(),
     AppRoutes.about: (_) => const AboutPageWeb(),
@@ -68,6 +76,9 @@ class _LandingPageWebState extends State<LandingPageWeb> {
     AppRoutes.collection: (_) => const CollectionWeb(),
     AppRoutes.sale: (_) => const SaleWeb(),
     AppRoutes.checkOut: (_) => const CheckoutPageWeb(),
+    AppRoutes.myAccount: (_) => const MyAccountUiWeb(),
+    AppRoutes.myOrder: (_) => const MyOrderUiWeb(),
+    AppRoutes.wishlist: (_) => const WishlistUiWeb(),
     '/product':
         (id) => ProductDetailsWeb(productId: int.tryParse(id ?? '0') ?? 0),
     '/cart': (id) => CartPanelOverlay(productId: int.tryParse(id ?? '0') ?? 0),
@@ -88,6 +99,12 @@ class _LandingPageWebState extends State<LandingPageWeb> {
 
     if ((widget.initialRoute ?? '').startsWith('/log-in')) {
       _showSideLogIn.value = true;
+    }
+    if ((widget.initialRoute ?? '').startsWith('/sign-in')) {
+      _showSideSignIn.value = true;
+    }
+    if ((widget.initialRoute ?? '').startsWith('/add-address')) {
+      _showSideAddress.value = true;
     }
   }
 
@@ -111,6 +128,11 @@ class _LandingPageWebState extends State<LandingPageWeb> {
           widget.initialRoute?.startsWith('/cart') ?? false;
       _showSideLogIn.value =
           widget.initialRoute?.startsWith('/log-in') ?? false;
+      _showSideSignIn.value =
+          widget.initialRoute?.startsWith('/sign-in') ?? false;
+
+      _showSideAddress.value =
+          widget.initialRoute?.startsWith('/add-address') ?? false;
 
       if ((widget.initialRoute ?? '').startsWith('/cart')) {
         final id = widget.initialRoute?.split('/').last;
@@ -159,6 +181,18 @@ class _LandingPageWebState extends State<LandingPageWeb> {
     );
   }
 
+  void _handleProfileDropdownChanged(bool isVisible) {
+    setState(() {
+      _showProfileDropdown = isVisible;
+    });
+  }
+
+  void _closeProfileDropdown() {
+    setState(() {
+      _showProfileDropdown = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,12 +210,11 @@ class _LandingPageWebState extends State<LandingPageWeb> {
                     children: [
                       _selectedPage == '/product'
                           ? _pageMap[_selectedPage]!(
-                            widget.initialRoute?.split('/').last,
-                          )
+                        widget.initialRoute?.split('/').last,
+                      )
                           : _pageMap[_selectedPage]!(null),
                     ],
                   ),
-
                   const SizedBox(height: 5),
                   CustomWebFooter(onItemSelected: _onFooterItemSelected),
                 ],
@@ -198,7 +231,9 @@ class _LandingPageWebState extends State<LandingPageWeb> {
               top: _isHeaderVisible ? 32 : -99,
               left: 0,
               right: 0,
-              child: const CustomWebHeader(),
+              child: CustomWebHeader(
+                onProfileDropdownChanged: _handleProfileDropdownChanged,
+              ),
             ),
             SidebarWeb(
               sidebarItems: _sidebarItems,
@@ -215,25 +250,37 @@ class _LandingPageWebState extends State<LandingPageWeb> {
                 height: 36,
               ),
             ),
-
             ValueListenableBuilder<bool>(
               valueListenable: _showSideContainer,
               builder: (context, show, _) {
                 return show
-                    ? CartPanelOverlay(productId: _cartProductId ?? 0,)
+                    ? CartPanelOverlay(productId: _cartProductId ?? 0)
                     : const SizedBox.shrink();
+              },
+            ),
+            ValueListenableBuilder<bool>(
+              valueListenable: _showSideLogIn,
+              builder: (context, show, _) {
+                return show ? LoginPage() : const SizedBox.shrink();
+              },
+            ),
+            ValueListenableBuilder<bool>(
+              valueListenable: _showSideSignIn,
+              builder: (context, show, _) {
+                return show ? Signup() : const SizedBox.shrink();
               },
             ),
 
             ValueListenableBuilder<bool>(
-              valueListenable: _showSideLogIn,
+              valueListenable: _showSideAddress,
               builder: (context, show, _) {
-                return show
-                    ? LoginPage()
-                    : const SizedBox.shrink();
+                return show ? AddAddressUiWeb() : const SizedBox.shrink();
               },
             ),
-
+            ProfileDropdown(
+              isVisible: _showProfileDropdown,
+              onClose: _closeProfileDropdown,
+            ),
           ],
         ),
       ),
@@ -250,6 +297,12 @@ class _LandingPageWebState extends State<LandingPageWeb> {
         return 'SALE';
       case AppRoutes.checkOut:
         return 'Checkout';
+      case AppRoutes.myAccount:
+        return 'My Account';
+      case AppRoutes.myOrder:
+        return 'My Orders';
+      case AppRoutes.wishlist:
+        return 'Wishlist';
       case AppRoutes.collection:
         return 'Collections';
       default:

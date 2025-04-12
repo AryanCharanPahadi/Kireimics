@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kireimics/component/custom_text.dart';
-
 import '../../component/routes.dart';
 import '../../component/shared_preferences.dart';
 import '../cart/cart_panel.dart';
 
 class CustomWebHeader extends StatefulWidget {
-  const CustomWebHeader({super.key});
+  final ValueChanged<bool>? onProfileDropdownChanged;
+
+  const CustomWebHeader({super.key, this.onProfileDropdownChanged});
 
   @override
   State<CustomWebHeader> createState() => _CustomWebHeaderState();
@@ -34,7 +35,7 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
         });
       }
     });
-    _loadCartItemCount(); // load cart count on init
+    _loadCartItemCount();
   }
 
   Future<void> _loadCartItemCount() async {
@@ -54,8 +55,8 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.none,
       children: [
-        // Main header content
         Container(
           color: Colors.white,
           height: 99,
@@ -70,7 +71,7 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
                   child: Image.asset(
                     'assets/header/fullLogoNew.png',
                     height: 31,
-                    width: 191,
+                    width: 180,
                   ),
                 ),
                 Padding(
@@ -116,93 +117,50 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
                             18,
                             18,
                             onTap: () {
+                              print("Search icon tapped");
                               setState(() {
                                 if (showSearchField) {
                                   _searchController.clear();
                                   _searchFocusNode.unfocus();
+                                  showSearchField = false;
                                 } else {
                                   _searchFocusNode.requestFocus();
+                                  showSearchField = true;
                                 }
-                                showSearchField = !showSearchField;
                               });
                             },
                           ),
                         ],
                       ),
                       const SizedBox(width: 32),
-                      _buildIcon('assets/header/IconWishlist.svg', 18, 15),
+                      GestureDetector(
+                        onTap: () {
+                          context.go(AppRoutes.wishlist);
+                        },
+
+                        child: _buildIcon(
+                          'assets/header/IconWishlist.svg',
+                          18,
+                          15,
+                        ),
+                      ),
                       const SizedBox(width: 32),
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          _buildIcon(
-                            'assets/header/IconProfile.svg',
-                            18,
-                            16,
-                            onTap: () {
-                              setState(() {
-                                showProfileDropdown = !showProfileDropdown;
-                              });
-                            },
-                          ),
-                          Positioned(
-                            top: 28,
-                            right: -20,
-                            child: Visibility(
-                              visible: showProfileDropdown,
-                              child: Container(
-                                width: 180,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 8,
-                                      ),
-                                      child: BarlowText(
-                                        text: 'LOG IN / SIGN UP',
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        lineHeight: 1.0, // Line height of 100%
-                                        letterSpacing:
-                                            0.64, // 4% of 16px = 0.64
-                                        color: Color(0xFF3E5B84),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                      ),
-                                      child: const Divider(
-                                        color: Color(0xFF3E5B84),
-                                      ),
-                                    ),
-                                    _dropdownItem('My Account'),
-                                    _dropdownItem('My Orders'),
-                                    _dropdownItem('Wishlist'),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          print("Profile icon tapped");
+                          setState(() {
+                            showProfileDropdown = !showProfileDropdown;
+                            widget.onProfileDropdownChanged?.call(
+                              showProfileDropdown,
+                            );
+                          });
+                        },
+                        child: _buildIcon(
+                          'assets/header/IconProfile.svg',
+                          18,
+                          16,
+                        ),
                       ),
                       const SizedBox(width: 32),
                       _buildIcon(
@@ -210,6 +168,7 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
                         20,
                         19,
                         onTap: () {
+                          print("Cart icon tapped");
                           showDialog(
                             context: context,
                             barrierColor: Colors.transparent,
@@ -239,10 +198,7 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
                 color: Colors.redAccent,
                 shape: BoxShape.circle,
               ),
-              constraints: const BoxConstraints(
-                minWidth: 18,
-                minHeight: 18,
-              ),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
               child: Text(
                 '$_cartItemCount',
                 style: const TextStyle(
@@ -254,47 +210,7 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
               ),
             ),
           ),
-
-        // Outside click handler - now positioned above everything else
-        if (showSearchField || showProfileDropdown)
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                setState(() {
-                  showSearchField = false;
-                  showProfileDropdown = false;
-                  if (_searchFocusNode.hasFocus) {
-                    _searchFocusNode.unfocus();
-                  }
-                });
-              },
-            ),
-          ),
       ],
-    );
-  }
-
-  Widget _dropdownItem(String text) {
-    return InkWell(
-      onTap: () {
-        // Handle each option tap
-        print('$text tapped');
-        setState(() {
-          showProfileDropdown = false;
-        });
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: BarlowText(
-          text: text,
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-          lineHeight: 1.0, // 100% line height
-          letterSpacing: 0.64, // 4% of 16px = 0.64
-          color: Color(0xFF3E5B84),
-        ),
-      ),
     );
   }
 
@@ -303,13 +219,21 @@ class _CustomWebHeaderState extends State<CustomWebHeader> {
     double width,
     double height, {
     VoidCallback? onTap,
+    Key? key,
   }) {
     _isHovered.putIfAbsent(assetPath, () => false);
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered[assetPath] = true),
-      onExit: (_) => setState(() => _isHovered[assetPath] = false),
+      onEnter: (_) {
+        print("Mouse entered $assetPath");
+        setState(() => _isHovered[assetPath] = true);
+      },
+      onExit: (_) {
+        print("Mouse exited $assetPath");
+        setState(() => _isHovered[assetPath] = false);
+      },
       child: GestureDetector(
+        key: key,
         onTap: onTap,
         child: SvgPicture.asset(
           assetPath,
