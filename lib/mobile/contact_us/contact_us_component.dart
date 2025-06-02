@@ -5,7 +5,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../component/custom_text.dart';
+import '../../component/text_fonts/custom_text.dart';
+import '../../component/utilities/url_launcher.dart';
 import '../../web/contact_us/contact_us_controller.dart';
 
 class ContactUsComponent extends StatefulWidget {
@@ -60,7 +61,8 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                     // height: 120,
                     width: 342,
                     child: Text(
-                      "/Looking for gifting options, or want to get a piece commissioned? Let's connect and create something wonderful/",
+                      contactController.contactData!['band_text'] ??
+                          "/Looking for gifting options, or want to get a piece commissioned? Let's connect and create something wonderful/",
                       style: TextStyle(
                         fontFamily: GoogleFonts.barlow().fontFamily,
                         fontWeight: FontWeight.w400,
@@ -120,18 +122,20 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                         children: [
                           BarlowText(
                             text:
-                                "Our address:\n${contactController.contactData!['address']}",
+                                "Our address:\n${contactController.contactData!['address'].toString()}",
                             fontSize: 14,
                             softWrap: true,
                           ),
                           const SizedBox(height: 24),
                           InkWell(
                             onTap:
-                                () => _launchURL(
-                                  "tel:${contactController.contactData!['phone']}",
+                                () => UrlLauncherHelper.launchURL(context,
+                                  "tel:${contactController.contactData!['phone'].toString()}",
                                 ),
                             child: BarlowText(
-                              text: contactController.contactData!['phone'],
+                              text:
+                                  contactController.contactData!['phone']
+                                      .toString(),
                               decoration: TextDecoration.underline,
                               fontSize: 14,
                             ),
@@ -139,11 +143,13 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                           const SizedBox(height: 24),
                           InkWell(
                             onTap:
-                                () => _launchURL(
-                                  "mailto:${contactController.contactData!['email']}",
+                                () => UrlLauncherHelper.launchURL(context,
+                                  "mailto:${contactController.contactData!['email'].toString()}",
                                 ),
                             child: BarlowText(
-                              text: contactController.contactData!['email'],
+                              text:
+                                  contactController.contactData!['email']
+                                      .toString(),
                               fontSize: 14,
                               decoration: TextDecoration.underline,
                             ),
@@ -151,7 +157,8 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                           const SizedBox(height: 24),
                           Row(
                             children: _buildSocialLinks(
-                              contactController.contactData!['social'],
+                              contactController.contactData!['social_media']
+                                  .toString(),
                             ),
                           ),
                         ],
@@ -224,8 +231,8 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    contactController
-                                        .faqData[index]["question"]!,
+                                    contactController.faqData[index]["question"]
+                                        .toString()!,
                                     style: GoogleFonts.barlow(
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.w400,
@@ -237,7 +244,8 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                                   ),
                                   const SizedBox(height: 4.0),
                                   Text(
-                                    contactController.faqData[index]["answer"]!,
+                                    contactController.faqData[index]["answer"]
+                                        .toString()!,
                                     style: GoogleFonts.barlow(
                                       fontSize: 14.0,
                                       fontWeight: FontWeight.w400,
@@ -309,7 +317,7 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
         return Padding(
           padding: const EdgeInsets.only(right: 10),
           child: InkWell(
-            onTap: () => _launchURL(entry.value),
+            onTap: () => UrlLauncherHelper.launchURL(context,entry.value),
             child: BarlowText(
               text: entry.key,
               fontSize: 16,
@@ -325,23 +333,4 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
     }
   }
 
-  Future<void> _launchURL(String url) async {
-    if (!url.startsWith("http://") &&
-        !url.startsWith("https://") &&
-        !url.startsWith("mailto:") &&
-        !url.startsWith("tel:")) {
-      url = "https://$url";
-    }
-
-    try {
-      Uri uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        debugPrint("Could not launch $url");
-      }
-    } catch (e) {
-      debugPrint("Error launching URL: $e");
-    }
-  }
 }

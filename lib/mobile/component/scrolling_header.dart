@@ -1,30 +1,77 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:marquee/marquee.dart';
 
-class ScrollingHeaderMobile extends StatelessWidget {
-  final Color color;
+class ScrollingHeaderMobile extends StatefulWidget {
+  final Color? customColor;
 
-  const ScrollingHeaderMobile({
-    super.key,
-    this.color =  Colors.blue,
-  });
+  const ScrollingHeaderMobile({super.key, this.customColor});
+
+  @override
+  State<ScrollingHeaderMobile> createState() => _ScrollingHeaderMobileState();
+}
+
+class _ScrollingHeaderMobileState extends State<ScrollingHeaderMobile> {
+  String bandText = '';
+  Color? bandColor;
+
+  @override
+  void initState() {
+    super.initState();
+    getBandDetails();
+  }
+
+  Future<void> getBandDetails() async {
+    final response = await http.get(
+      Uri.parse(
+        "https://vedvika.com/v1/apis/common/band_details/get_band_details.php",
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      setState(() {
+        bandText = data['band_text']?.trim() ?? '';
+
+        if (widget.customColor == null) {
+          final colorString = data['band_color'];
+          if (colorString != null) {
+            bandColor = Color(int.parse(colorString));
+          } else {
+            bandColor = Colors.black; // fallback color if API color null
+          }
+        } else {
+          bandColor = widget.customColor;
+        }
+
+        // print("Band Text: $bandText");
+        // print("Band Color: $bandColor");
+      });
+    } else {
+      print('Failed to fetch band details: ${response.statusCode}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (bandText.isEmpty) {
+      return const SizedBox.shrink(); // or a placeholder if needed
+    }
+
     return Container(
       height: 40,
-      color: color,
+      color: bandColor,
       child: Marquee(
-        text: '✦ Free shipping pan-India for orders above Rs. 2000    ',
+        text: bandText,
         style: TextStyle(
           color: Colors.white,
           fontFamily: GoogleFonts.barlow().fontFamily,
           fontWeight: FontWeight.w400,
           fontStyle: FontStyle.italic,
           fontSize: 14,
-          height: 1.0,
-          letterSpacing: 0.0,
         ),
         scrollAxis: Axis.horizontal,
         blankSpace: 160.0,

@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
-import 'package:kireimics/component/routes.dart';
+import 'package:kireimics/component/app_routes/routes.dart';
 
-import '../../../component/custom_text.dart';
+import '../../../component/text_fonts/custom_text.dart';
+import '../../../web_desktop_common/view_details_cart/view_detail/view_details_cart.dart';
 
 class MyOrderUiWeb extends StatefulWidget {
   const MyOrderUiWeb({super.key});
@@ -40,7 +41,11 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 292, top: 24, right: 140),
+            padding: EdgeInsets.only(
+              left: 292,
+              top: 24,
+              right: MediaQuery.of(context).size.width * 0.07,
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,13 +218,28 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                         color: const Color(0xFF414141),
                       ),
                       const SizedBox(height: 10),
-                      BarlowText(
-                        text: "VIEW DETAILS",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        lineHeight: 1.5,
-                        letterSpacing: 0,
-                        color: const Color(0xFF3E5B84),
+                      GestureDetector(
+                        onTap: () {
+                          print("Cart icon tapped");
+                          showDialog(
+                            context: context,
+                            barrierColor: Colors.transparent,
+                            builder: (BuildContext context) {
+                              return ViewDetailsCart();
+                            },
+                          );
+                        },
+                        child: BarlowText(
+                          text: "VIEW DETAILS",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          lineHeight: 1.5,
+                          letterSpacing: 0,
+                          color: const Color(0xFF3E5B84),
+                          hoverBackgroundColor: Color(0xFFb9d6ff),
+
+                          enableHoverBackground: true,
+                        ),
                       ),
                     ],
                   ),

@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
-import 'package:kireimics/component/routes.dart';
-import 'package:kireimics/web/login_signup/login/login_page.dart';
-
-import '../../../component/custom_text.dart';
+import 'package:kireimics/component/app_routes/routes.dart';
+import 'package:kireimics/mobile/view_details/view_details_ui.dart';
+import '../../../component/text_fonts/custom_text.dart';
 
 class MyOrderUiMobile extends StatefulWidget {
   const MyOrderUiMobile({super.key});
@@ -54,7 +53,6 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                   lineHeight: 36 / 32,
                   letterSpacing: 1.28,
                   color: Color(0xFF414141),
-
                 ),
                 SizedBox(height: 14),
 
@@ -94,7 +92,8 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                       ), // Color of the underline
                       onTap: () {
                         context.go(AppRoutes.myOrder);
-                      },                    ),
+                      },
+                    ),
                     SizedBox(width: 32),
 
                     BarlowText(
@@ -109,7 +108,6 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                     ),
                   ],
                 ),
-
               ],
             ),
           ),
@@ -121,7 +119,6 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // Dynamic list of address containers
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -185,7 +182,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                   Expanded(
                     child: BarlowText(
                       text:
-                      "Placed On: ${order['placedDate']} / Delivered On: ${order['deliveredDate']}",
+                          "Placed On: ${order['placedDate']} / Delivered On: ${order['deliveredDate']}",
                       fontWeight: FontWeight.w400,
                       fontSize: 14,
                       lineHeight: 1.4,
@@ -243,13 +240,18 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                         color: const Color(0xFF414141),
                       ),
                       const SizedBox(height: 10),
-                      BarlowText(
-                        text: "VIEW DETAILS",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        lineHeight: 1.5,
-                        letterSpacing: 0,
-                        color: const Color(0xFF3E5B84),
+                      GestureDetector(
+                        onTap: () {
+                       context.go(AppRoutes.viewDetails);
+                        },
+                        child: BarlowText(
+                          text: "VIEW DETAILS",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          lineHeight: 1.5,
+                          letterSpacing: 0,
+                          color: const Color(0xFF3E5B84),
+                        ),
                       ),
                     ],
                   ),

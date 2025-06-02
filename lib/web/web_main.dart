@@ -1,29 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kireimics/web/address_page/add_address_ui/add_address_ui.dart';
-import 'package:kireimics/web/catalog/catalog.dart';
+import 'package:kireimics/web_desktop_common/catalog_page/catalog.dart';
 import 'package:kireimics/web/checkout/checkout_page.dart';
 import 'package:kireimics/web/contact_us/contact_us.dart';
-import 'package:kireimics/web/login_signup/login/login_page.dart';
-import 'package:kireimics/web/login_signup/signup/signup.dart';
 import 'package:kireimics/web/my_account_route/my_account/my_account_ui.dart';
-import 'package:kireimics/web/privacy_policy/privacy_policy_component.dart';
-import 'package:kireimics/web/product_view/product_details_web.dart';
-import 'package:kireimics/web/sale/sale.dart';
-import 'package:kireimics/web/shipping_policy/shipping_policy_component.dart';
 import 'package:kireimics/web/about_us/about_page.dart';
 import 'package:kireimics/web/home_page_web/home_page_web.dart';
-import 'package:kireimics/web/component/custom_footer.dart';
-import 'package:kireimics/web/component/custom_header.dart';
-import 'package:kireimics/web/component/custom_sidebar.dart';
-import 'package:kireimics/web/component/scrollable_header.dart';
-import 'package:kireimics/web/component/profile_dropdown.dart'; // Import the new file
-import 'package:kireimics/web/wishlist/wishlist_ui.dart';
-import '../component/components.dart';
-import '../component/routes.dart';
-import 'cart/cart_panel.dart';
-import 'collection/collection.dart';
+import 'package:kireimics/web_desktop_common/footer/custom_footer.dart';
+import '../component/notification_toast/custom_toast.dart';
+import '../component/app_routes/routes.dart';
+import '../web_desktop_common/add_address_ui/add_address_ui.dart';
+import '../web_desktop_common/cart/cart_panel.dart';
+import '../web_desktop_common/catalog_sale_gridview/catalog_view_all.dart';
+import '../web_desktop_common/collection/collection.dart';
+import '../web_desktop_common/collection/collection_view.dart';
+import '../web_desktop_common/component/profile_dropdown.dart';
+import '../web_desktop_common/component/scrollable_header.dart';
+import '../web_desktop_common/product_view/product_details.dart';
+import '../web_desktop_common/sidebar/custom_sidebar.dart';
+import '../web_desktop_common/custom_header/header.dart';
+import '../web_desktop_common/login_signup/login/login_page.dart';
+import '../web_desktop_common/login_signup/signup/signup.dart' show Signup;
+import '../web_desktop_common/privacy_policy/privacy_policy_component.dart';
+import '../web_desktop_common/sale/sale.dart' show Sale;
+import '../web_desktop_common/search_gridview/search_gridview.dart';
+import '../web_desktop_common/shipping_policy/shipping_policy_component.dart';
+import '../web_desktop_common/view_details_cart/view_detail/view_details_cart.dart';
+import '../web_desktop_common/wishlist/wishlist_ui.dart';
 import 'my_account_route/my_orders/my_order_ui.dart';
 
 class LandingPageWeb extends StatefulWidget {
@@ -35,13 +39,94 @@ class LandingPageWeb extends StatefulWidget {
   State<LandingPageWeb> createState() => _LandingPageWebState();
 }
 
-class _LandingPageWebState extends State<LandingPageWeb> {
+class _LandingPageWebState extends State<LandingPageWeb>
+    with SingleTickerProviderStateMixin {
   final List<String> _sidebarItems = ['Home', 'CATALOG', 'SALE', 'ABOUT'];
   final ScrollController _scrollController = ScrollController();
   bool _isHeaderVisible = true;
   double _previousScrollOffset = 0.0;
   late String _selectedPage;
   bool _showProfileDropdown = false;
+  final ValueNotifier<bool> _showSideContainer = ValueNotifier(false);
+  final ValueNotifier<bool> _showSideLogIn = ValueNotifier(false);
+  final ValueNotifier<bool> _showSideSignIn = ValueNotifier(false);
+  final ValueNotifier<bool> _showSideAddress = ValueNotifier(false);
+  final ValueNotifier<bool> _showSideCartDetails = ValueNotifier(false);
+  final ValueNotifier<String?> _notificationMessage = ValueNotifier(null);
+
+  // Animation controller and animations
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+  bool _isClosing = false; // Track whether the page is closing
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPage = _getPageFromRoute(widget.initialRoute ?? AppRoutes.home);
+    _scrollController.addListener(_handleScroll);
+
+    // Initialize animation controller with opening duration
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1000), // Bottom-to-top duration
+      vsync: this,
+    );
+
+    // Slide animation: bottom to top for opening
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1), // Start from bottom for opening
+      end: Offset.zero, // End at original position
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOutSine, // Smoother curve for opening
+      ),
+    );
+
+    // Fade animation: from transparent to opaque
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOutSine, // Smoother curve for opening
+      ),
+    );
+
+    // Start the opening animation
+    _animationController.forward();
+
+    // Handle initial route side panels
+    if ((widget.initialRoute ?? '').startsWith('/cart')) {
+      _showSideContainer.value = true;
+      final id = widget.initialRoute?.split('/').last;
+      _cartProductId = int.tryParse(id ?? '0');
+    }
+    if ((widget.initialRoute ?? '').startsWith('/log-in')) {
+      _showSideLogIn.value = true;
+    }
+    if ((widget.initialRoute ?? '').startsWith('/sign-in')) {
+      _showSideSignIn.value = true;
+    }
+    if ((widget.initialRoute ?? '').startsWith('/add-address')) {
+      _showSideAddress.value = true;
+    }
+    if ((widget.initialRoute ?? '').startsWith('/view-cart')) {
+      _showSideCartDetails.value = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    // Always call super.dispose() first to ensure proper cleanup
+    _animationController.dispose();
+    _scrollController.dispose();
+    _showSideContainer.dispose();
+    _showSideLogIn.dispose();
+    _showSideSignIn.dispose();
+    _showSideAddress.dispose();
+    _showSideCartDetails.dispose();
+    _notificationMessage.dispose();
+    super.dispose();
+  }
 
   void _handleScroll() {
     final currentScrollOffset = _scrollController.offset;
@@ -61,55 +146,67 @@ class _LandingPageWebState extends State<LandingPageWeb> {
     _previousScrollOffset = currentScrollOffset;
   }
 
-  final ValueNotifier<bool> _showSideContainer = ValueNotifier(false);
-  final ValueNotifier<bool> _showSideLogIn = ValueNotifier(false);
-  final ValueNotifier<bool> _showSideSignIn = ValueNotifier(false);
-  final ValueNotifier<bool> _showSideAddress = ValueNotifier(false);
-
-  final Map<String, Widget Function(String?)> _pageMap = {
-    AppRoutes.home: (_) => const HomePageWeb(),
-    AppRoutes.about: (_) => const AboutPageWeb(),
-    AppRoutes.shippingPolicy: (_) => const ShippingPolicyWeb(),
-    AppRoutes.privacyPolicy: (_) => const PrivacyPolicyWeb(),
-    AppRoutes.contactUs: (_) => const ContactUs(),
-    AppRoutes.catalog: (_) => CategoryListDetails(),
-    AppRoutes.collection: (_) => const CollectionWeb(),
-    AppRoutes.sale: (_) => const SaleWeb(),
-    AppRoutes.checkOut: (_) => const CheckoutPageWeb(),
-    AppRoutes.myAccount: (_) => const MyAccountUiWeb(),
-    AppRoutes.myOrder: (_) => const MyOrderUiWeb(),
-    AppRoutes.wishlist: (_) => const WishlistUiWeb(),
-    '/product':
-        (id) => ProductDetailsWeb(productId: int.tryParse(id ?? '0') ?? 0),
-    '/cart': (id) => CartPanelOverlay(productId: int.tryParse(id ?? '0') ?? 0),
-  };
-  int? _cartProductId;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedPage = _getPageFromRoute(widget.initialRoute ?? AppRoutes.home);
-    _scrollController.addListener(_handleScroll);
-
-    if ((widget.initialRoute ?? '').startsWith('/cart')) {
-      _showSideContainer.value = true;
-      final id = widget.initialRoute?.split('/').last;
-      _cartProductId = int.tryParse(id ?? '0');
-    }
-
-    if ((widget.initialRoute ?? '').startsWith('/log-in')) {
-      _showSideLogIn.value = true;
-    }
-    if ((widget.initialRoute ?? '').startsWith('/sign-in')) {
-      _showSideSignIn.value = true;
-    }
-    if ((widget.initialRoute ?? '').startsWith('/add-address')) {
-      _showSideAddress.value = true;
-    }
+  void _showNotification(String message) {
+    _notificationMessage.value = message;
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        _notificationMessage.value = null;
+      }
+    });
   }
+
+  final Map<String, Widget Function(String?)> _basePageMap = {
+    AppRoutes.about: (_) => const AboutPageWeb(),
+    AppRoutes.shippingPolicy: (_) => const ShippingPolicy(),
+    AppRoutes.privacyPolicy: (_) => const PrivacyPolicy(),
+    AppRoutes.contactUs: (_) => const ContactUs(),
+    // AppRoutes.collection: (_) => const Collection(),
+    AppRoutes.checkOut: (_) => const CheckoutPageWeb(),
+    AppRoutes.myOrder: (_) => const MyOrderUiWeb(),
+
+    '/cart': (id) => CartPanel(productId: int.tryParse(id ?? '0') ?? 0),
+  };
+
+  Map<String, Widget Function(String?)> get _pageMap {
+    return {
+      ..._basePageMap,
+      AppRoutes.home: (_) => HomePageWeb(onWishlistChanged: _showNotification),
+      AppRoutes.searchQuery:
+          (_) => SearchGridview(onWishlistChanged: _showNotification),
+      AppRoutes.sale: (_) => Sale(onWishlistChanged: _showNotification),
+
+      AppRoutes.wishlist:
+          (_) => WishlistUi(onWishlistChanged: _showNotification),
+      AppRoutes.catalog:
+          (_) => CatalogPage(onWishlistChanged: _showNotification),
+      AppRoutes.myAccount:
+          (_) => MyAccountUiWeb(onWishlistChanged: _showNotification),
+
+      '/product':
+          (id) => ProductDetails(
+            productId: int.tryParse(id ?? '0') ?? 0,
+            onWishlistChanged: _showNotification,
+          ),
+      '/category':
+          (id) => CatalogViewAll(
+            catId: int.tryParse(id ?? '0') ?? 0,
+            onWishlistChanged: _showNotification,
+          ),
+
+      '/collection':
+          (id) => CollectionProductPage(
+            productIds: int.tryParse(id ?? '0') ?? 0,
+            onWishlistChanged: _showNotification,
+          ),
+    };
+  }
+
+  int? _cartProductId;
 
   String _getPageFromRoute(String route) {
     if (route.startsWith('/product/')) return '/product';
+    if (route.startsWith('/category/')) return '/category';
+    if (route.startsWith('/collection/')) return '/collection';
     return _pageMap.containsKey(route) ? route : AppRoutes.home;
   }
 
@@ -130,55 +227,163 @@ class _LandingPageWebState extends State<LandingPageWeb> {
           widget.initialRoute?.startsWith('/log-in') ?? false;
       _showSideSignIn.value =
           widget.initialRoute?.startsWith('/sign-in') ?? false;
-
       _showSideAddress.value =
           widget.initialRoute?.startsWith('/add-address') ?? false;
+      _showSideCartDetails.value =
+          widget.initialRoute?.startsWith('/view-cart') ?? false;
 
       if ((widget.initialRoute ?? '').startsWith('/cart')) {
         final id = widget.initialRoute?.split('/').last;
         _cartProductId = int.tryParse(id ?? '0');
       }
+
+      // Restart the opening animation when the route changes
+      _animationController.reset();
+      _animationController.duration = const Duration(
+        milliseconds: 1000,
+      ); // Bottom-to-top duration
+      _slideAnimation = Tween<Offset>(
+        begin: const Offset(0, 1),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(
+          parent: _animationController,
+          curve: Curves.easeInOutSine, // Smoother curve for opening
+        ),
+      );
+      _animationController.forward();
     }
   }
 
   void _onSidebarItemSelected(String item) {
+    String targetRoute;
     switch (item) {
       case 'Home':
-        context.go(AppRoutes.home);
+        targetRoute = AppRoutes.home;
         break;
       case 'ABOUT':
-        context.go(AppRoutes.about);
+        targetRoute = AppRoutes.about;
         break;
       case 'CATALOG':
-        context.go(AppRoutes.catalog);
+        targetRoute = AppRoutes.catalog;
         break;
       case 'SALE':
-        context.go(AppRoutes.sale);
+        targetRoute = AppRoutes.sale;
         break;
       default:
-        context.go(AppRoutes.home);
+        targetRoute = AppRoutes.home;
     }
+
+    // Check if the target route is the same as the current route
+    final currentRoute =
+        GoRouter.of(context).routerDelegate.currentConfiguration.uri.toString();
+    if (currentRoute == targetRoute) {
+      return; // Do not navigate or animate if already on the same route
+    }
+
+    // Navigate to the new route immediately
+    context.go(targetRoute);
+
+    // Run closing animation for the current page
+    _isClosing = true;
+    _animationController.duration = const Duration(
+      milliseconds: 300,
+    ); // Faster top-to-bottom duration
+    _slideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0, 1),
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic, // Snappier curve for closing
+      ),
+    );
+    _animationController.reverse();
+
+    // Start the opening animation for the new page with a slight overlap
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted && _isClosing) {
+        _isClosing = false;
+        _animationController.reset();
+        _animationController.duration = const Duration(
+          milliseconds: 1000,
+        ); // Bottom-to-top duration
+        _slideAnimation = Tween<Offset>(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOutSine, // Smoother curve for opening
+          ),
+        );
+        _animationController.forward();
+      }
+    });
   }
 
   void _onFooterItemSelected(String item) {
+    String targetRoute;
     switch (item) {
       case 'Shipping Policy':
-        context.go(AppRoutes.shippingPolicy);
+        targetRoute = AppRoutes.shippingPolicy;
         break;
       case 'Privacy Policy':
-        context.go(AppRoutes.privacyPolicy);
+        targetRoute = AppRoutes.privacyPolicy;
         break;
       case 'Contact':
-        context.go(AppRoutes.contactUs);
+        targetRoute = AppRoutes.contactUs;
         break;
       default:
-        context.go(AppRoutes.home);
+        targetRoute = AppRoutes.home;
     }
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
+
+    // Check if the target route is the same as the current route
+    final currentRoute =
+        GoRouter.of(context).routerDelegate.currentConfiguration.uri.toString();
+    if (currentRoute == targetRoute) {
+      return; // Do not navigate or animate if already on the same route
+    }
+
+    // Navigate to the new route immediately
+    context.go(targetRoute);
+
+    // Run closing animation for the current page
+    _isClosing = true;
+    _animationController.duration = const Duration(
+      milliseconds: 300,
+    ); // Faster top-to-bottom duration
+    _slideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0, 1),
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic, // Snappier curve for closing
+      ),
     );
+    _animationController.reverse();
+
+    // Start the opening animation for the new page with a slight overlap
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted && _isClosing) {
+        _isClosing = false;
+        _animationController.reset();
+        _animationController.duration = const Duration(
+          milliseconds: 1000,
+        ); // Bottom-to-top duration
+        _slideAnimation = Tween<Offset>(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOutSine, // Smoother curve for opening
+          ),
+        );
+        _animationController.forward();
+      }
+    });
   }
 
   void _handleProfileDropdownChanged(bool isVisible) {
@@ -195,93 +400,156 @@ class _LandingPageWebState extends State<LandingPageWeb> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Colors.white,
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
-                children: [
-                  const ScrollableWebHeader(),
-                  SizedBox(height: _isHeaderVisible ? 99 : 0),
-                  Row(
-                    children: [
-                      _selectedPage == '/product'
-                          ? _pageMap[_selectedPage]!(
-                        widget.initialRoute?.split('/').last,
-                      )
-                          : _pageMap[_selectedPage]!(null),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  CustomWebFooter(onItemSelected: _onFooterItemSelected),
-                ],
-              ),
-            ),
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: ScrollingHeader(),
-            ),
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 200),
-              top: _isHeaderVisible ? 32 : -99,
-              left: 0,
-              right: 0,
-              child: CustomWebHeader(
-                onProfileDropdownChanged: _handleProfileDropdownChanged,
-              ),
-            ),
-            SidebarWeb(
-              sidebarItems: _sidebarItems,
-              selectedItem: _getSelectedItemFromRoute(_selectedPage),
-              onItemSelected: _onSidebarItemSelected,
-              scrollController: _scrollController,
-            ),
-            Positioned(
-              bottom: 20,
-              right: 45,
-              child: SvgPicture.asset(
-                "assets/chat_bot/chat.svg",
-                width: 36,
-                height: 36,
-              ),
-            ),
-            ValueListenableBuilder<bool>(
-              valueListenable: _showSideContainer,
-              builder: (context, show, _) {
-                return show
-                    ? CartPanelOverlay(productId: _cartProductId ?? 0)
-                    : const SizedBox.shrink();
-              },
-            ),
-            ValueListenableBuilder<bool>(
-              valueListenable: _showSideLogIn,
-              builder: (context, show, _) {
-                return show ? LoginPage() : const SizedBox.shrink();
-              },
-            ),
-            ValueListenableBuilder<bool>(
-              valueListenable: _showSideSignIn,
-              builder: (context, show, _) {
-                return show ? Signup() : const SizedBox.shrink();
-              },
-            ),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        _isClosing = true;
+        _animationController.duration = const Duration(
+          milliseconds: 300,
+        ); // Faster top-to-bottom duration
+        _slideAnimation = Tween<Offset>(
+          begin: Offset.zero,
+          end: const Offset(0, 1),
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic, // Snappier curve for closing
+          ),
+        );
+        await _animationController.reverse();
+        if (context.mounted) {
+          context.pop();
+        }
+      },
+      child: ColoredBox(
+        color: Colors.white, // Persistent background to prevent flicker
+        child: Scaffold(
+          body: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Container(
+                color: Colors.white,
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Column(
+                        children: [
+                          const ScrollableHeader(),
+                          SizedBox(height: _isHeaderVisible ? 99 : 0),
+                          Row(
+                            children: [
+                              (_selectedPage == '/product' ||
+                                      _selectedPage == '/category' ||
+                                      _selectedPage == '/collection')
+                                  ? _pageMap[_selectedPage]!(
+                                    widget.initialRoute?.split('/').last,
+                                  )
+                                  : _pageMap[_selectedPage]!(null),
+                            ],
+                          ),
 
-            ValueListenableBuilder<bool>(
-              valueListenable: _showSideAddress,
-              builder: (context, show, _) {
-                return show ? AddAddressUiWeb() : const SizedBox.shrink();
-              },
+                          const SizedBox(height: 5),
+                          Footer(onItemSelected: _onFooterItemSelected),
+                        ],
+                      ),
+                    ),
+                    const Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: ScrollableHeader(),
+                    ),
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 200),
+                      top: _isHeaderVisible ? 32 : -99,
+                      left: 0,
+                      right: 0,
+                      child: Header(
+                        onProfileDropdownChanged: _handleProfileDropdownChanged,
+                      ),
+                    ),
+                    CustomSidebar(
+                      sidebarItems: _sidebarItems,
+                      selectedItem: _getSelectedItemFromRoute(_selectedPage),
+                      onItemSelected: _onSidebarItemSelected,
+                      scrollController: _scrollController,
+                    ),
+                    Positioned(
+                      bottom: 20,
+                      right: 50,
+                      child: SvgPicture.asset(
+                        "assets/chat_bot/chat.svg",
+                        width: 40,
+                        height: 40,
+                      ),
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _showSideContainer,
+                      builder: (context, show, _) {
+                        return show
+                            ? CartPanel(productId: _cartProductId ?? 0)
+                            : const SizedBox.shrink();
+                      },
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _showSideLogIn,
+                      builder: (context, show, _) {
+                        return show ? LoginPage() : const SizedBox.shrink();
+                      },
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _showSideSignIn,
+                      builder: (context, show, _) {
+                        return show ? Signup() : const SizedBox.shrink();
+                      },
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _showSideAddress,
+                      builder: (context, show, _) {
+                        return show ? AddAddressUi() : const SizedBox.shrink();
+                      },
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _showSideCartDetails,
+                      builder: (context, show, _) {
+                        return show
+                            ? ViewDetailsCart()
+                            : const SizedBox.shrink();
+                      },
+                    ),
+                    ValueListenableBuilder<String?>(
+                      valueListenable: _notificationMessage,
+                      builder: (context, message, _) {
+                        return message != null
+                            ? Positioned(
+                              top: 50,
+                              right: 24,
+                              child: NotificationBanner(
+                                textColor: Colors.black,
+                                message: message,
+                                iconPath: "assets/icons/i_icons.svg",
+                                bannerColor: const Color(0xFF2876E4),
+                                onClose: () {
+                                  _notificationMessage.value =
+                                      null; // This will close the banner
+                                },
+                              ),
+                            )
+                            : const SizedBox.shrink();
+                      },
+                    ),
+                    ProfileDropdown(
+                      isVisible: _showProfileDropdown,
+                      onClose: _closeProfileDropdown,
+                    ),
+                  ],
+                ),
+              ),
             ),
-            ProfileDropdown(
-              isVisible: _showProfileDropdown,
-              onClose: _closeProfileDropdown,
-            ),
-          ],
+          ),
         ),
       ),
     );

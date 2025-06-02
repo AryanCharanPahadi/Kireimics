@@ -5,15 +5,18 @@ class Product {
   final int catId;
   final String name;
   final String tag;
-  final String price;
+  final double price;
   final String thumbnail;
   final List<String> otherImages;
   final String dimensions;
   final String description;
   final String catName;
   final String catDesc;
+  final String? collectionName;
   final List<OtherDetail> otherDetails;
   final int discount;
+  final int isSale;
+  final int isMakerChoice;
 
   Product({
     required this.id,
@@ -26,9 +29,12 @@ class Product {
     required this.dimensions,
     required this.description,
     required this.catName,
+     this.collectionName,
     required this.otherDetails,
     required this.discount,
     required this.catDesc,
+    required this.isSale,
+    required this.isMakerChoice,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -39,12 +45,15 @@ class Product {
       tag: json['tag'],
       price: json['price'],
       thumbnail: json['thumnail'],
+      collectionName: json['collection_name'],
       otherImages: (json['other_images'] as String).split(','),
       dimensions: json['dimensions'],
       description: json['description'],
       catName: json['category_name'],
       catDesc: json['description'],
       discount: json['discount'],
+      isSale: json['is_sale'],
+      isMakerChoice: json['is_make_choice'],
       otherDetails:
           (json['other_details'] != null)
               ? (jsonDecode(json['other_details']) as List)

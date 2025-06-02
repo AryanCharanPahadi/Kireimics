@@ -2,17 +2,23 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kireimics/component/no_result_found/no_order_yet.dart';
 
 import '../../component/api_helper/api_helper.dart';
-import '../../component/custom_text.dart';
+import '../../component/text_fonts/custom_text.dart';
 import '../../component/product_details/product_details_modal.dart';
-import '../../component/routes.dart';
-import '../../component/shared_preferences.dart';
+import '../../component/app_routes/routes.dart';
+import '../../component/shared_preferences/shared_preferences.dart';
 
 class CartPanelMobile extends StatefulWidget {
+  final Function(String)? onWishlistChanged; // Updated callback
   final int? productId;
 
-  const CartPanelMobile({Key? key, required this.productId}) : super(key: key);
+  const CartPanelMobile({
+    Key? key,
+    required this.productId,
+    this.onWishlistChanged,
+  }) : super(key: key);
 
   @override
   State<CartPanelMobile> createState() => _CartPanelMobileState();
@@ -21,16 +27,37 @@ class CartPanelMobile extends StatefulWidget {
 class _CartPanelMobileState extends State<CartPanelMobile> {
   List<Product> productList = [];
   List<ValueNotifier<int>> quantityList = [];
+  List<int?> stockQuantities = []; // New list to track stock quantities
   bool isLoading = true;
   String errorMessage = "";
+
   double calculateTotal() {
     double total = 0.0;
     for (int i = 0; i < productList.length; i++) {
-      final priceString = productList[i].price.toString().replaceAll(',', '');
-      final price = double.tryParse(priceString) ?? 0.0;
-      total += price * quantityList[i].value;
+      if (stockQuantities[i] != null && stockQuantities[i]! > 0) {
+        final priceString = productList[i].price.toString().replaceAll(',', '');
+        final price = double.tryParse(priceString) ?? 0.0;
+        total += price * quantityList[i].value;
+      }
     }
     return total;
+  }
+
+  Future<int?> fetchStockQuantity(String productId) async {
+    try {
+      var result = await ApiHelper.getStockDetail(productId);
+      if (result['error'] == false && result['data'] != null) {
+        for (var stock in result['data']) {
+          if (stock['product_id'].toString() == productId) {
+            return stock['quantity'];
+          }
+        }
+      }
+      return null;
+    } catch (e) {
+      print("Error fetching stock: $e");
+      return null;
+    }
   }
 
   @override
@@ -47,19 +74,27 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
 
       List<int> storedIds = await SharedPreferencesHelper.getAllProductIds();
       List<Product> fetchedProducts = [];
+      List<int?> fetchedStockQuantities = [];
 
       for (int id in storedIds) {
-        final product = await ApiHelper.fetchProductById(id);
+        final product = await ApiHelper.fetchProductDetailsById(id);
         if (product != null) {
           fetchedProducts.add(product);
+          final stock = await fetchStockQuantity(id.toString());
+          fetchedStockQuantities.add(stock);
         }
       }
 
       setState(() {
         productList = fetchedProducts;
+        stockQuantities = fetchedStockQuantities;
         quantityList = List.generate(
           fetchedProducts.length,
-          (_) => ValueNotifier<int>(1),
+          (index) => ValueNotifier<int>(
+            stockQuantities[index] != null && stockQuantities[index]! > 0
+                ? 1
+                : 0,
+          ),
         );
         isLoading = false;
       });
@@ -96,8 +131,8 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
             CralikaFont(
               text: "My Cart",
               color: Color(0xFF414141),
-              fontWeight: FontWeight.w600,
-              fontSize: 32.0,
+              fontWeight: FontWeight.w400,
+              fontSize: 24.0,
               lineHeight: 1.0,
               letterSpacing: 0.128,
             ),
@@ -105,47 +140,21 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
             if (productList.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 40),
-                child: Column(
-                  children: [
-                    SvgPicture.asset("assets/icons/notFound.svg"),
-                    SizedBox(height: 12),
-                    CralikaFont(text: "No orders yet!"),
-                    SizedBox(height: 9),
-                    BarlowText(
-                      text:
-                          "What are you waiting for? Browse our wide range of products and bring home something new to love!",
-                      fontSize: 18,
-                      textAlign: TextAlign.center, // Add this line
-                    ),
-
-                    SizedBox(height: 44),
-                    GestureDetector(
-                      onTap: () {
-                        context.go(AppRoutes.catalog);
-                      },
-                      child: BarlowText(
-                        text: "BROWSE OUR CATALOG",
-                        backgroundColor: Color(0xFFb9d6ff),
-                        color: Color(0xFF3E5B84),
-                        fontSize: 17,
-                      ),
-                    ),
-                  ],
-                ),
+                child: CartEmpty(),
               )
-            // List of Cart Items with Divider
             else
               ...productList.asMap().entries.map((entry) {
                 final index = entry.key;
                 final product = entry.value;
                 final quantity = quantityList[index];
+                final stock = stockQuantities[index];
+                final isOutOfStock = stock == null || stock == 0;
 
                 return Column(
                   children: [
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // First container with the image
                         Container(
                           child: Column(
                             children: [
@@ -159,7 +168,6 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                           ),
                         ),
                         SizedBox(width: 17),
-                        // Second container with text and controls
                         Expanded(
                           child: Container(
                             padding: EdgeInsets.symmetric(
@@ -173,90 +181,100 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                     MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // First row: name and price
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
-                                        child: CralikaFont(
+                                        child: BarlowText(
                                           text: product.name,
                                           fontWeight: FontWeight.w400,
                                           fontSize: 16,
                                           lineHeight: 1.0,
                                           letterSpacing: 0.0,
-                                          color: Color(0xFF414141),
+                                          color:
+                                              isOutOfStock
+                                                  ? Colors.grey
+                                                  : Color(0xFF414141),
                                           softWrap: true,
                                         ),
                                       ),
                                       SizedBox(width: 8),
-                                      CralikaFont(
-                                        text: "Rs ${product.price}",
+                                      BarlowText(
+                                        text:
+                                            isOutOfStock
+                                                ? "Out of Stock"
+                                                : "Rs ${product.price}",
                                         fontWeight: FontWeight.w400,
                                         fontSize: 16,
                                         lineHeight: 1.0,
                                         letterSpacing: 0.0,
-                                        color: Color(0xFF414141),
+                                        color:
+                                            isOutOfStock
+                                                ? Colors.red
+                                                : Color(0xFF414141),
                                         softWrap: true,
                                       ),
                                     ],
                                   ),
-
-                                  // Second row: quantity controls
-                                  Row(
-                                    children: [
-                                      ValueListenableBuilder<int>(
-                                        valueListenable: quantity,
-                                        builder: (context, value, _) {
-                                          return Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(
-                                                  Icons.remove,
-                                                  color: Color(0xFF3E5B84),
+                                  if (!isOutOfStock)
+                                    Row(
+                                      children: [
+                                        ValueListenableBuilder<int>(
+                                          valueListenable: quantity,
+                                          builder: (context, value, _) {
+                                            return Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                IconButton(
+                                                  icon: Icon(
+                                                    Icons.remove,
+                                                    color: Color(0xFF3E5B84),
+                                                  ),
+                                                  onPressed:
+                                                      value > 1
+                                                          ? () {
+                                                            quantity.value--;
+                                                            setState(() {});
+                                                          }
+                                                          : null,
+                                                  padding: EdgeInsets.zero,
+                                                  constraints: BoxConstraints(),
                                                 ),
-                                                onPressed: () {
-                                                  if (value > 1) {
-                                                    quantity.value--;
-                                                    setState(() {});
-                                                  }
-                                                },
-                                                padding: EdgeInsets.zero,
-                                                constraints: BoxConstraints(),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 8.0,
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 8.0,
+                                                      ),
+                                                  child: Text(
+                                                    value.toString(),
+                                                    style: TextStyle(
+                                                      fontSize: 16,
                                                     ),
-                                                child: Text(
-                                                  value.toString(),
-                                                  style: TextStyle(
-                                                    fontSize: 16,
                                                   ),
                                                 ),
-                                              ),
-                                              IconButton(
-                                                icon: Icon(
-                                                  Icons.add,
-                                                  color: Color(0xFF3E5B84),
+                                                IconButton(
+                                                  icon: Icon(
+                                                    Icons.add,
+                                                    color: Color(0xFF3E5B84),
+                                                  ),
+                                                  onPressed:
+                                                      stock != null &&
+                                                              value < stock
+                                                          ? () {
+                                                            quantity.value++;
+                                                            setState(() {});
+                                                          }
+                                                          : null,
+                                                  padding: EdgeInsets.zero,
+                                                  constraints: BoxConstraints(),
                                                 ),
-                                                onPressed: () {
-                                                  quantity.value++;
-                                                  setState(() {});
-                                                },
-                                                padding: EdgeInsets.zero,
-                                                constraints: BoxConstraints(),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-
-                                  // Third row: Remove button
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                   Row(
                                     children: [
                                       GestureDetector(
@@ -264,13 +282,17 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                           await SharedPreferencesHelper.removeProductId(
                                             product.id,
                                           );
+                                          widget.onWishlistChanged?.call(
+                                            'Product Removed From Cart',
+                                          );
                                           setState(() {
                                             productList.removeAt(index);
                                             quantityList.removeAt(index);
+                                            stockQuantities.removeAt(index);
                                           });
                                         },
                                         child: BarlowText(
-                                          text: "Remove",
+                                          text: "REMOVE",
                                           color: Color(0xFF3E5B84),
                                           fontWeight: FontWeight.w600,
                                           fontSize: 14,
@@ -285,8 +307,6 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                         ),
                       ],
                     ),
-
-                    // Divider after each product except last
                     if (index != productList.length - 1)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -295,10 +315,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                   ],
                 );
               }).toList(),
-
             SizedBox(height: 20),
-
-            /// Subtotal Section
             if (productList.isNotEmpty) ...[
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -310,7 +327,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                         text: "Subtotal",
                         color: Color(0xFF414141),
                         fontSize: 20,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w400,
                         lineHeight: 1.0,
                       ),
                     ],
@@ -333,19 +350,16 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                         text: "Rs ${calculateTotal().toStringAsFixed(2)}",
                         color: Color(0xFF414141),
                         fontSize: 24,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w400,
                         lineHeight: 1.0,
                       ),
                     ],
                   ),
                 ],
               ),
-
               SizedBox(height: 27),
               Divider(color: Color(0xFFB9D6FF)),
               SizedBox(height: 22),
-
-              /// Checkout Section
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -354,8 +368,8 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                     child: CralikaFont(
                       text: "Rs ${calculateTotal().toStringAsFixed(2)}",
                       color: Color(0xFF414141),
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
                       lineHeight: 1.0,
                     ),
                   ),
@@ -375,7 +389,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                           text: "PROCEED TO CHECKOUT",
                           color: Color(0xFF3E5B84),
                           fontWeight: FontWeight.w600,
-                          fontSize: 20,
+                          fontSize: 16,
                           lineHeight: 1.0,
                           letterSpacing: 1 * 0.04,
                           backgroundColor: Color(0xFFb9d6ff),

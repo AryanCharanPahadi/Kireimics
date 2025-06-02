@@ -6,12 +6,13 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../component/product_details/product_details_controller.dart';
-import '../../component/routes.dart';
-import '../../component/shared_preferences.dart';
+import '../../component/app_routes/routes.dart';
+import '../../component/shared_preferences/shared_preferences.dart';
 
 class Gridview extends StatefulWidget {
-  const Gridview({super.key});
 
+  final Function(String)? onWishlistChanged; // Callback to notify parent
+  const Gridview({super.key, this.onWishlistChanged});
   @override
   State<Gridview> createState() => _GridviewState();
 }
@@ -131,7 +132,7 @@ class _GridviewState extends State<Gridview> {
                                       fontFamily:
                                           GoogleFonts.barlow().fontFamily,
                                       fontSize: 12,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w600,
                                       color: Colors.white,
                                       letterSpacing: 0.48,
                                     ),
@@ -146,9 +147,9 @@ class _GridviewState extends State<Gridview> {
                                   },
                                   child: FutureBuilder<bool>(
                                     future:
-                                        SharedPreferencesHelper.isInWishlist(
-                                          product.id.toString(),
-                                        ),
+                                    SharedPreferencesHelper.isInWishlist(
+                                      product.id.toString(),
+                                    ),
                                     builder: (context, snapshot) {
                                       final isInWishlist =
                                           snapshot.data ?? false;
@@ -158,10 +159,17 @@ class _GridviewState extends State<Gridview> {
                                             await SharedPreferencesHelper.removeFromWishlist(
                                               product.id.toString(),
                                             );
+                                            widget.onWishlistChanged
+                                                ?.call(
+                                              'Product Removed From Wishlist',
+                                            );
                                           } else {
                                             await SharedPreferencesHelper.addToWishlist(
                                               product.id.toString(),
                                             );
+                                            widget.onWishlistChanged?.call(
+                                              'Product Added To Wishlist',
+                                            ); // Trigger notification
                                           }
                                           setState(() {});
                                         },
@@ -169,7 +177,7 @@ class _GridviewState extends State<Gridview> {
                                           isInWishlist
                                               ? 'assets/home_page/IconWishlist.svg'
                                               : 'assets/home_page/IconWishlistEmpty.svg',
-                                          width: 34,
+                                          width: 24,
                                           height: 20,
                                         ),
                                       );

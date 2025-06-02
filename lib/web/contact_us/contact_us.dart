@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kireimics/component/api_helper/api_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:kireimics/component/custom_text.dart';
+import 'package:kireimics/component/text_fonts/custom_text.dart';
 
-import '../component/above_footer.dart';
+import '../../component/above_footer/above_footer.dart';
+import '../../component/utilities/url_launcher.dart';
 import 'contact_us_controller.dart';
 
 class ContactUs extends StatefulWidget {
@@ -39,9 +41,9 @@ class _ContactUsState extends State<ContactUs> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 280, top: 35),
+              padding: const EdgeInsets.only(left: 292, top: 35),
               child: Container(
-                width: MediaQuery.of(context).size.width - 280,
+                width: MediaQuery.of(context).size.width - 292,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: const AssetImage("assets/home_page/background.png"),
@@ -60,7 +62,8 @@ class _ContactUsState extends State<ContactUs> {
                     right: 50,
                   ),
                   child: Text(
-                    "/Looking for gifting options, or want to get a piece commissioned? Let's connect and create something wonderful/",
+                    contactController.contactData!['band_text'] ??
+                        "/Looking for gifting options, or want to get a piece commissioned? Let's connect and create something wonderful/",
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontFamily: GoogleFonts.barlow().fontFamily,
@@ -76,7 +79,7 @@ class _ContactUsState extends State<ContactUs> {
             ),
             const SizedBox(height: 32),
             Padding(
-              padding: const EdgeInsets.only(left: 280, top: 35),
+              padding: const EdgeInsets.only(left: 292, top: 35),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [CralikaFont(text: "Contact Us", fontSize: 28)],
@@ -86,7 +89,10 @@ class _ContactUsState extends State<ContactUs> {
             SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Padding(
-                padding: const EdgeInsets.only(left: 280, right: 192),
+                padding: EdgeInsets.only(
+                  left: 292,
+                  right: MediaQuery.of(context).size.width * 0.07,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,17 +102,20 @@ class _ContactUsState extends State<ContactUs> {
                       children: [
                         BarlowText(
                           text:
-                              "Our address:\n${contactController.contactData!['address']}",
+                              "Our address:\n${contactController.contactData!['address'].toString()}",
                           fontSize: 14,
                         ),
                         const SizedBox(height: 24),
                         InkWell(
                           onTap:
-                              () => _launchURL(
-                                "tel:${contactController.contactData!['phone']}",
+                              () => UrlLauncherHelper.launchURL(
+                                context,
+                                "tel:${contactController.contactData!['phone'].toString()}",
                               ),
                           child: BarlowText(
-                            text: contactController.contactData!['phone'],
+                            text:
+                                contactController.contactData!['phone']
+                                    .toString(),
                             decoration: TextDecoration.underline,
                             fontSize: 14,
                           ),
@@ -114,11 +123,14 @@ class _ContactUsState extends State<ContactUs> {
                         const SizedBox(height: 24),
                         InkWell(
                           onTap:
-                              () => _launchURL(
-                                "mailto:${contactController.contactData!['email']}",
+                              () => UrlLauncherHelper.launchURL(
+                                context,
+                                "mailto:${contactController.contactData!['email'].toString()}",
                               ),
                           child: BarlowText(
-                            text: contactController.contactData!['email'],
+                            text:
+                                contactController.contactData!['email']
+                                    .toString(),
                             fontSize: 14,
                             decoration: TextDecoration.underline,
                           ),
@@ -126,7 +138,8 @@ class _ContactUsState extends State<ContactUs> {
                         const SizedBox(height: 24),
                         Row(
                           children: _buildSocialLinks(
-                            contactController.contactData!['social'],
+                            contactController.contactData!['social_media']
+                                .toString(),
                           ),
                         ),
                       ],
@@ -161,7 +174,7 @@ class _ContactUsState extends State<ContactUs> {
             ),
             const SizedBox(height: 32),
             Padding(
-              padding: const EdgeInsets.only(left: 280, top: 35),
+              padding: const EdgeInsets.only(left: 292, top: 35),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [CralikaFont(text: "FAQ's", fontSize: 28)],
@@ -171,7 +184,10 @@ class _ContactUsState extends State<ContactUs> {
             Container(
               width: MediaQuery.of(context).size.width,
               child: Padding(
-                padding: const EdgeInsets.only(left: 280, right: 192),
+                padding: EdgeInsets.only(
+                  left: 292,
+                  right: MediaQuery.of(context).size.width * 0.07,
+                ),
                 child: ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
@@ -255,8 +271,6 @@ class _ContactUsState extends State<ContactUs> {
                 ),
               ),
             ),
-            const SizedBox(height: 32),
-            AboveFooter(),
           ],
         );
   }
@@ -268,7 +282,7 @@ class _ContactUsState extends State<ContactUs> {
         return Padding(
           padding: const EdgeInsets.only(right: 10),
           child: InkWell(
-            onTap: () => _launchURL(entry.value),
+            onTap: () => UrlLauncherHelper.launchURL(context, entry.value),
             child: BarlowText(
               text: entry.key,
               fontSize: 16,
@@ -281,26 +295,6 @@ class _ContactUsState extends State<ContactUs> {
     } catch (e) {
       debugPrint("Error parsing social links: $e");
       return []; // Return empty list if parsing fails
-    }
-  }
-
-  Future<void> _launchURL(String url) async {
-    if (!url.startsWith("http://") &&
-        !url.startsWith("https://") &&
-        !url.startsWith("mailto:") &&
-        !url.startsWith("tel:")) {
-      url = "https://$url";
-    }
-
-    try {
-      Uri uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        debugPrint("Could not launch $url");
-      }
-    } catch (e) {
-      debugPrint("Error launching URL: $e");
     }
   }
 

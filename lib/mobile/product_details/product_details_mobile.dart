@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../component/api_helper/api_helper.dart';
-import '../../component/custom_text.dart';
+import '../../component/no_result_found/no_product_yet.dart';
+import '../../component/text_fonts/custom_text.dart';
 import '../../component/product_details/product_details_modal.dart';
-import '../../component/routes.dart';
-import '../../component/shared_preferences.dart';
+import '../../component/app_routes/routes.dart';
+import '../../component/shared_preferences/shared_preferences.dart';
+import '../../web_desktop_common/catalog_sale_gridview/catalog_controller1.dart';
 
 class ProductDetailsMobile extends StatefulWidget {
   final int productId;
+  final Function(String)? onWishlistChanged; // Callback to notify parent
 
-  const ProductDetailsMobile({Key? key, required this.productId})
-    : super(key: key);
+  const ProductDetailsMobile({
+    super.key,
+    required this.productId,
+    this.onWishlistChanged,
+  });
   @override
   State<ProductDetailsMobile> createState() => _ProductDetailsMobileState();
 }
@@ -24,18 +32,17 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
   String errorMessage = "";
   List<Product> relatedProducts = [];
   int _currentIndex = 0; // Tracks the starting index of displayed products
+  String? _currentMainImage; // Track the currently displayed main image
+  List<String> _otherImages = []; // Track all other images
+  Future<bool> _isLoggedIn() async {
+    String? userData = await SharedPreferencesHelper.getUserData();
+    return userData != null && userData.isNotEmpty;
+  }
+
   @override
   void initState() {
     super.initState();
     fetchProduct();
-  }
-
-  void _showNextProducts() {
-    setState(() {
-      if (relatedProducts.isNotEmpty) {
-        _currentIndex = (_currentIndex + 1) % relatedProducts.length;
-      }
-    });
   }
 
   void _showPreviousProducts() {
@@ -67,15 +74,16 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
     }
   }
 
-  final List<bool> _isHoveredList = List.generate(3, (_) => false);
-  final List<bool> _wishlistStates = List.filled(6, false);
-
   Future<void> fetchProduct() async {
     try {
-      final fetchedProduct = await ApiHelper.fetchProductById(widget.productId);
+      final fetchedProduct = await ApiHelper.fetchProductDetailsById(
+        widget.productId,
+      );
       if (fetchedProduct != null) {
         setState(() {
           product = fetchedProduct;
+          _currentMainImage = fetchedProduct.thumbnail;
+          _otherImages = List.from(fetchedProduct.otherImages);
           isLoading = false;
         });
 
@@ -103,6 +111,32 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
         errorMessage = "Something went wrong";
         isLoading = false;
       });
+    }
+  }
+
+  void _swapImageWithMain(int index) {
+    setState(() {
+      // Swap the clicked image with the current main image
+      final clickedImage = _otherImages[index];
+      _otherImages[index] = _currentMainImage!;
+      _currentMainImage = clickedImage;
+    });
+  }
+
+  Future<int?> fetchStockQuantity(String productId) async {
+    try {
+      var result = await ApiHelper.getStockDetail(productId);
+      if (result['error'] == false && result['data'] != null) {
+        for (var stock in result['data']) {
+          if (stock['product_id'].toString() == productId) {
+            return stock['quantity'];
+          }
+        }
+      }
+      return null;
+    } catch (e) {
+      print("Error fetching stock: $e");
+      return null;
     }
   }
 
@@ -145,6 +179,9 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
                       letterSpacing: 1 * 0.04, // 4% of 32px
+                      onTap: () {
+                        context.go(AppRoutes.catalog);
+                      },
                     ),
                     SizedBox(width: 9.0),
                     SvgPicture.asset(
@@ -161,6 +198,20 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
+                      onTap: () {
+                        final controller = Get.put(
+                          CatalogPageController(),
+                        ); // Access the controller
+                        controller.selectedCategoryId.value =
+                            product!.catId; // Update selectedCategoryId
+                        context.go(
+                          AppRoutes
+                              .catalog, // Navigate to the CatalogPage route
+                          extra: {
+                            'categoryId': product!.catId,
+                          }, // Pass categoryId as extra data if needed
+                        );
+                      },
                     ),
                     SizedBox(width: 9.0),
                     SvgPicture.asset(
@@ -189,33 +240,40 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                 ),
                 SizedBox(height: 20),
                 Image.network(
-                  product!.thumbnail, // Use product image path
-                  width: 346,
-                  height: 444,
+                  _currentMainImage!, // Use the current main image
+                  // width: 346,
+                  // height: 444,
                   fit: BoxFit.cover,
                 ),
                 SizedBox(height: 10),
+
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children:
-                      product!.otherImages.map((imageUrl) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 16.0),
+                      _otherImages.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final imageUrl = entry.value;
+                        return GestureDetector(
+                          onTap: () => _swapImageWithMain(index),
                           child: Image.network(
                             imageUrl,
-                            width: 106,
+                            width:
+                                106, // Set a fixed width to control image size
                             height: 122,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                             errorBuilder:
                                 (context, error, stackTrace) => Container(
                                   width: 106,
                                   height: 122,
                                   color: Colors.grey[300],
-                                  child: Icon(Icons.broken_image),
+                                  child: const Icon(Icons.broken_image),
                                 ),
                           ),
                         );
                       }).toList(),
                 ),
+                SizedBox(height: 24),
                 SizedBox(height: 24),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,7 +309,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       text: product!.price.toString(),
 
                       fontWeight: FontWeight.w400, // 400 weight
-                      fontSize: 16, // 32px
+                      fontSize: 14, // 32px
                       lineHeight: 1.0,
                       letterSpacing: 1 * 0.04, // 4% of 32px
                       color: Color(0xFF414141),
@@ -277,7 +335,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                         text: product!.description,
 
                         fontWeight: FontWeight.w400, // 400 weight
-                        fontSize: 16, // 32px
+                        fontSize: 14, // 32px
                         lineHeight: 1.0,
                         letterSpacing: 1 * 0.04, // 4% of 32px
                         color: Color(0xFF414141),
@@ -294,7 +352,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                         text: "ADD TO CART",
                         color: Color(0xFF3E5B84),
                         fontWeight: FontWeight.w600, // 400 weight
-                        fontSize: 16, // 32px
+                        fontSize: 14, // 32px
                         lineHeight: 1.0,
                         letterSpacing: 1 * 0.04, // 4% of 32px
                         backgroundColor: Color(0xFFb9d6ff),
@@ -309,22 +367,34 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                         final isInWishlist = snapshot.data ?? false;
                         return GestureDetector(
                           onTap: () async {
+                            bool isLoggedIn =
+                                await _isLoggedIn(); // Await login status
+                            if (!isLoggedIn) {
+                              context.go(AppRoutes.logIn);
+                              return;
+                            }
+
                             if (isInWishlist) {
-                              await SharedPreferencesHelper.removeFromWishlist(
-                                product!.id.toString(),
+                              // Product already in wishlist
+                              widget.onWishlistChanged?.call(
+                                'Already in wishlist',
                               );
                             } else {
+                              // Add product to wishlist
                               await SharedPreferencesHelper.addToWishlist(
                                 product!.id.toString(),
                               );
+                              widget.onWishlistChanged?.call(
+                                'Product Added to Wishlist',
+                              );
+                              setState(() {});
                             }
-                            setState(() {});
                           },
                           child: BarlowText(
                             text: "WISHLIST",
                             color: Color(0xFF3E5B84),
                             fontWeight: FontWeight.w600, // 400 weight
-                            fontSize: 16, // 32px
+                            fontSize: 14, // 32px
                             lineHeight: 1.0,
                             letterSpacing: 1 * 0.04, // 4% of 32px
                           ),
@@ -392,157 +462,390 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
             ),
           ),
           SizedBox(height: 10),
-          CralikaFont(text: "Other Products you may like"),
-          SizedBox(height: 10),
-
-          Column(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              relatedProducts.isEmpty
-                  ? Center(
-                    child: Text(
-                      "No product found",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[600],
+              if (relatedProducts.isNotEmpty)
+                Column(
+                  children: [
+                    CralikaFont(
+                      text: "Other Products\nyou may like",
+                      textAlign: TextAlign.right,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 18,
+                      lineHeight: 27 / 24,
+                      letterSpacing: 0.96,
+                      color: Color(0xFF414141),
+                    ),
+                    SizedBox(height: 27),
+                    GestureDetector(
+                      onTap: () {
+                        final controller = Get.put(
+                          CatalogPageController(),
+                        ); // Access the controller
+                        controller.selectedCategoryId.value =
+                            product!.catId; // Update selectedCategoryId
+                        context.go(
+                          AppRoutes
+                              .catalog, // Navigate to the CatalogPage route
+                          extra: {
+                            'categoryId': product!.catId,
+                          }, // Pass categoryId as extra data if needed
+                        );
+                      },
+                      child: BarlowText(
+                        text: "BROWSE OUR CATALOG",
+                        textAlign: TextAlign.right,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        lineHeight: 1.0,
+                        letterSpacing: 0.64,
+                        color: Color(0xFF3E5B84),
+                        backgroundColor: Color(0xFFb9d6ff),
                       ),
                     ),
-                  )
+                  ],
+                ),
+              SizedBox(width: 27),
+              relatedProducts.isEmpty
+                  ? NoProductYet()
                   : SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: List.generate(displayedProducts.length, (
-                        index,
-                      ) {
-                        final relatedProduct = displayedProducts[index];
-                        return Padding(
-                          padding: EdgeInsets.only(right: 14.0),
-                          child: SizedBox(
-                            height:
-                                380, // increased to accommodate the details below
-                            width: 260,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Stack(
+                      children: List.generate(1, (index) {
+                        final relatedProduct = displayedProducts[0];
+                        return FutureBuilder<int?>(
+                          future: fetchStockQuantity(
+                            relatedProduct.id.toString(),
+                          ),
+                          builder: (context, snapshot) {
+                            final quantity = snapshot.data;
+                            final isOutOfStock = quantity == 0;
+
+                            return Padding(
+                              padding: EdgeInsets.only(right: 14.0),
+                              child: SizedBox(
+                                height: 300,
+                                width: 170,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Product Image
-                                    ClipRect(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          context.go(
-                                            AppRoutes.productDetails(
-                                              relatedProduct.id,
+                                    Stack(
+                                      children: [
+                                        ClipRect(
+                                          child: GestureDetector(
+                                            onTap:
+                                                isOutOfStock
+                                                    ? null
+                                                    : () {
+                                                      context.go(
+                                                        AppRoutes.productDetails(
+                                                          relatedProduct.id,
+                                                        ),
+                                                      );
+                                                    },
+                                            child: Image.network(
+                                              relatedProduct.thumbnail,
+                                              height: 196,
+                                              width: 170,
+                                              fit: BoxFit.cover,
                                             ),
-                                          );
-                                        },
-                                        child: Image.network(
-                                          relatedProduct.thumbnail,
-                                          height: 260,
-                                          width: 260,
-                                          fit: BoxFit.cover,
+                                          ),
                                         ),
+
+                                        Positioned.fill(
+                                          child: GestureDetector(
+                                            onTap:
+                                                isOutOfStock
+                                                    ? null
+                                                    : () {
+                                                      context.go(
+                                                        AppRoutes.productDetails(
+                                                          relatedProduct.id,
+                                                        ),
+                                                      );
+                                                    },
+                                            child: Image.network(
+                                              relatedProduct.thumbnail,
+                                              height: 196,
+                                              width: 170,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+
+                                        if (isOutOfStock)
+                                          Positioned.fill(
+                                            child: Container(
+                                              color: Colors.black.withOpacity(
+                                                0.5,
+                                              ),
+                                            ),
+                                          ),
+                                        Positioned(
+                                          top: 10,
+                                          left: 10,
+                                          right: 10,
+                                          child: LayoutBuilder(
+                                            builder: (context, constraints) {
+                                              bool isMobile =
+                                                  constraints.maxWidth < 800;
+
+                                              if (isOutOfStock) {
+                                                return Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Align(
+                                                      alignment:
+                                                          Alignment.centerLeft,
+                                                      child: SvgPicture.asset(
+                                                        "assets/home_page/outofstock.svg",
+                                                        height: 24,
+                                                      ),
+                                                    ),
+                                                    Align(
+                                                      alignment:
+                                                          Alignment.centerRight,
+                                                      child: SvgPicture.asset(
+                                                        "assets/home_page/IconWishlistEmpty.svg",
+                                                        width: 23,
+                                                        height: 20,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              }
+
+                                              return Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Builder(
+                                                    builder: (context) {
+                                                      final List<Widget>
+                                                      badges = [];
+
+                                                      if (relatedProduct
+                                                              .isMakerChoice ==
+                                                          1) {
+                                                        badges.add(
+                                                          SvgPicture.asset(
+                                                            "assets/home_page/maker_choice.svg",
+                                                            height:
+                                                                isMobile
+                                                                    ? 40
+                                                                    : 32,
+                                                          ),
+                                                        );
+                                                      }
+
+                                                      if (quantity != null &&
+                                                          quantity < 2) {
+                                                        if (badges.isNotEmpty)
+                                                          badges.add(
+                                                            SizedBox(
+                                                              height: 10,
+                                                            ),
+                                                          );
+                                                        badges.add(
+                                                          SvgPicture.asset(
+                                                            "assets/home_page/fewPiecesMobile.svg",
+                                                            height:
+                                                                isMobile
+                                                                    ? 28
+                                                                    : 32,
+                                                          ),
+                                                        );
+                                                      }
+
+                                                      if (relatedProduct
+                                                              .discount !=
+                                                          0) {
+                                                        if (badges.isNotEmpty)
+                                                          badges.add(
+                                                            SizedBox(
+                                                              height: 10,
+                                                            ),
+                                                          );
+                                                        badges.add(
+                                                          ElevatedButton(
+                                                            onPressed: null,
+                                                            style: ElevatedButton.styleFrom(
+                                                              padding:
+                                                                  const EdgeInsets.symmetric(
+                                                                    horizontal:
+                                                                        30,
+                                                                    vertical:
+                                                                        0, // Reduced vertical padding
+                                                                  ),
+                                                              backgroundColor:
+                                                                  const Color(
+                                                                    0xFFF46856,
+                                                                  ),
+                                                              disabledBackgroundColor:
+                                                                  const Color(
+                                                                    0xFFF46856,
+                                                                  ),
+                                                              disabledForegroundColor:
+                                                                  Colors.white,
+                                                              elevation: 0,
+                                                              side:
+                                                                  BorderSide
+                                                                      .none,
+                                                              minimumSize:
+                                                                  const Size(
+                                                                    0,
+                                                                    33,
+                                                                  ), // Optional: Set a smaller minimum height
+                                                            ),
+                                                            child: Text(
+                                                              "${relatedProduct.discount}% OFF",
+                                                              style: TextStyle(
+                                                                fontFamily:
+                                                                    GoogleFonts.barlow()
+                                                                        .fontFamily,
+                                                                fontSize:
+                                                                    10, // Reduced font size
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color:
+                                                                    Colors
+                                                                        .white,
+                                                                letterSpacing:
+                                                                    0.48,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
+
+                                                      return Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: badges,
+                                                      );
+                                                    },
+                                                  ),
+                                                  Spacer(),
+                                                  FutureBuilder<bool>(
+                                                    future:
+                                                        SharedPreferencesHelper.isInWishlist(
+                                                          relatedProduct.id
+                                                              .toString(),
+                                                        ),
+                                                    builder: (
+                                                      context,
+                                                      snapshot,
+                                                    ) {
+                                                      final isInWishlist =
+                                                          snapshot.data ??
+                                                          false;
+                                                      return GestureDetector(
+                                                        onTap:
+                                                            isOutOfStock
+                                                                ? null
+                                                                : () async {
+                                                                  if (isInWishlist) {
+                                                                    await SharedPreferencesHelper.removeFromWishlist(
+                                                                      relatedProduct
+                                                                          .id
+                                                                          .toString(),
+                                                                    );
+                                                                    widget
+                                                                        .onWishlistChanged
+                                                                        ?.call(
+                                                                          'Product Removed From Wishlist',
+                                                                        );
+                                                                  } else {
+                                                                    await SharedPreferencesHelper.addToWishlist(
+                                                                      relatedProduct
+                                                                          .id
+                                                                          .toString(),
+                                                                    );
+                                                                    widget
+                                                                        .onWishlistChanged
+                                                                        ?.call(
+                                                                          'Product Added To Wishlist',
+                                                                        );
+                                                                  }
+                                                                  setState(
+                                                                    () {},
+                                                                  );
+                                                                },
+                                                        child: SvgPicture.asset(
+                                                          isInWishlist
+                                                              ? 'assets/home_page/IconWishlist.svg'
+                                                              : 'assets/home_page/IconWishlistEmpty.svg',
+                                                          width:
+                                                              isMobile
+                                                                  ? 20
+                                                                  : 24,
+                                                          height:
+                                                              isMobile
+                                                                  ? 18
+                                                                  : 20,
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 16),
+                                    CralikaFont(
+                                      text: relatedProduct.name,
+                                      maxLines: 1,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.barlow(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 14,
+                                        height: 1.2,
+                                        color: const Color(0xFF3E5B84),
                                       ),
                                     ),
-                                    // Discount Badge & Wishlist
-                                    Positioned(
-                                      top: 10,
-                                      left: 6,
-                                      right: 6,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          ElevatedButton(
-                                            onPressed: null,
-                                            style: ElevatedButton.styleFrom(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 5,
+                                    const SizedBox(height: 8),
+                                    BarlowText(
+                                      text: "ADD TO CART",
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                      lineHeight: 1.2,
+                                      letterSpacing: 0.56,
+                                      color:
+                                          isOutOfStock
+                                              ? const Color(
+                                                0xFF3E5B84,
+                                              ).withOpacity(0.5)
+                                              : const Color(0xFF3E5B84),
+                                      onTap:
+                                          isOutOfStock
+                                              ? null
+                                              : () {
+                                                context.go(
+                                                  AppRoutes.cartDetails(
+                                                    relatedProduct.id,
                                                   ),
-                                              backgroundColor: const Color(
-                                                0xFFF46856,
-                                              ),
-                                              disabledBackgroundColor:
-                                                  const Color(0xFFF46856),
-                                              disabledForegroundColor:
-                                                  Colors.white,
-                                              elevation: 0,
-                                              side: BorderSide.none,
-                                            ),
-                                            child: Text(
-                                              "${relatedProduct.discount}% OFF",
-                                              style: TextStyle(
-                                                fontFamily:
-                                                    GoogleFonts.barlow()
-                                                        .fontFamily,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                                letterSpacing: 0.48,
-                                              ),
-                                            ),
-                                          ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                _wishlistStates[index] =
-                                                    !_wishlistStates[index];
-                                              });
-                                            },
-                                            child: SvgPicture.asset(
-                                              _wishlistStates[index]
-                                                  ? 'assets/home_page/IconWishlist.svg'
-                                                  : 'assets/home_page/IconWishlistEmpty.svg',
-                                              width: 20,
-                                              height: 20,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                                );
+                                              },
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 16),
-                                Text(
-                                  relatedProduct.name, // Use product name
-                                  style: const TextStyle(
-                                    fontFamily: "Cralika",
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 16,
-                                    height: 1.2,
-                                    letterSpacing: 0.64,
-                                    color: Color(0xFF3E5B84),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  "Rs. ${relatedProduct.price}",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.barlow(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 14,
-                                    height: 1.2,
-                                    color: const Color(0xFF3E5B84),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-
-                                Text(
-                                  "ADD TO CART",
-                                  style: GoogleFonts.barlow(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    height: 1.2,
-                                    letterSpacing: 0.56,
-                                    color: const Color(0xFF3E5B84),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            );
+                          },
                         );
                       }),
                     ),
@@ -582,7 +885,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                 title,
                 style: TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w400,
                   fontSize: 14,
                 ),
               ),

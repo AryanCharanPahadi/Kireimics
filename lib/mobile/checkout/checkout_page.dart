@@ -1,11 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
-import 'package:kireimics/component/routes.dart';
+import 'package:kireimics/component/app_routes/routes.dart';
 import 'package:kireimics/mobile/login/login.dart';
 
-import '../../component/custom_text.dart';
+import '../../component/shared_preferences/shared_preferences.dart';
+import '../../component/text_fonts/custom_text.dart';
 
 class CheckoutPageMobile extends StatefulWidget {
   const CheckoutPageMobile({super.key});
@@ -20,20 +22,75 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
   late double subtotal;
   final double deliveryCharge = 50.0; // Static delivery charge
   late double total;
-
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController mobileController = TextEditingController();
+  final TextEditingController address1Controller = TextEditingController();
+  final TextEditingController address2Controller = TextEditingController();
+  final TextEditingController zipController = TextEditingController();
+  final TextEditingController stateController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
   @override
   void initState() {
     super.initState();
-    // Get subtotal from URL parameters
+    _loadUserData();
     final route = GoRouter.of(context).routerDelegate.currentConfiguration;
     final uri = Uri.parse(route.uri.toString());
-
     subtotal = double.tryParse(uri.queryParameters['subtotal'] ?? '') ?? 0.0;
-    total = subtotal + deliveryCharge; // Calculate total with static delivery
+    total = subtotal + deliveryCharge;
+
+    // Extract and print product IDs
+    final productIds = uri.queryParameters['productIds']?.split(',') ?? [];
+    print('Product IDs: $productIds');
+  }
+  Future<void> _loadUserData() async {
+    String? storedUser = await SharedPreferencesHelper.getUserData();
+
+    if (storedUser != null) {
+      List<String> userDetails = storedUser.split(', ');
+
+      if (userDetails.length >= 4) {
+        // Adjusted to expect at least 4 parts
+        List<String> nameParts = userDetails[1].split(' ');
+        String firstName = nameParts.isNotEmpty ? nameParts[0] : '';
+        String lastName =
+        nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+        String phone = userDetails[2];
+        String email = userDetails[3];
+        String address1 = userDetails[6];
+        String address2 = userDetails[7];
+        String zip = userDetails[8];
+        String state = userDetails[9];
+        String city = userDetails[10];
+
+        if (mounted) {
+          setState(() {
+            firstNameController.text = firstName;
+            lastNameController.text = lastName;
+            emailController.text = email;
+            mobileController.text = phone;
+            address1Controller.text = address1;
+            address2Controller.text = address2;
+            zipController.text = zip;
+            stateController.text = state;
+            cityController.text = city;
+          });
+        }
+      } else {
+        print('Invalid user data format: $storedUser');
+      }
+    } else {
+      print('No user data found in SharedPreferences');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+
+
+
+
     return Stack(
       children: [
         Column(
@@ -221,30 +278,30 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          customTextFormField(hintText: "FIRST NAME"),
-                          customTextFormField(hintText: "LAST NAME"),
-                          customTextFormField(hintText: "EMAIL"),
-                          customTextFormField(hintText: "ADDRESS LINE 1*"),
-                          customTextFormField(hintText: "ADDRESS LINE 2"),
+                          customTextFormField(hintText: "FIRST NAME",controller: firstNameController),
+                          customTextFormField(hintText: "LAST NAME",controller: lastNameController),
+                          customTextFormField(hintText: "EMAIL",controller: emailController),
+                          customTextFormField(hintText: "ADDRESS LINE 1*",controller: address1Controller),
+                          customTextFormField(hintText: "ADDRESS LINE 2",controller: address2Controller),
                           Row(
                             children: [
                               Expanded(
-                                child: customTextFormField(hintText: "ZIP"),
+                                child: customTextFormField(hintText: "ZIP",controller: zipController),
                               ),
                               SizedBox(width: 32), // spacing between fields
                               Expanded(
-                                child: customTextFormField(hintText: "STATE"),
+                                child: customTextFormField(hintText: "STATE",controller: stateController),
                               ),
                             ],
                           ),
                           Row(
                             children: [
                               Expanded(
-                                child: customTextFormField(hintText: "CITY"),
+                                child: customTextFormField(hintText: "CITY" ,controller: cityController),
                               ),
                               SizedBox(width: 32), // spacing between fields
                               Expanded(
-                                child: customTextFormField(hintText: "PHONE"),
+                                child: customTextFormField(hintText: "PHONE" , controller: mobileController),
                               ),
                             ],
                           ),
@@ -258,7 +315,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                     isChecked = value ?? false;
                                   });
                                 },
-                                activeColor: Colors.green,
+                                activeColor: Color(0xFF3E5B84),
                               ),
                               SizedBox(width: 5),
                               Expanded(
@@ -451,15 +508,20 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
 
                         Column(
                           children: [
-                            BarlowText(
-                              text: "VIEW CART",
+                            GestureDetector(
+                              onTap: () {
+                                context.go(AppRoutes.addToCart);
+                              },
+                              child: BarlowText(
+                                text: "VIEW CART",
 
-                              fontWeight: FontWeight.w600,
-                              fontSize: 17,
-                              lineHeight: 1.0, // 100% line height
-                              letterSpacing:
-                                  0.64, // 4% of 16px = 0.04 * 16 = 0.64
-                              backgroundColor: Color(0xFFb9d6ff),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 17,
+                                lineHeight: 1.0, // 100% line height
+                                letterSpacing:
+                                    0.64, // 4% of 16px = 0.04 * 16 = 0.64
+                                backgroundColor: Color(0xFFb9d6ff),
+                              ),
                             ),
                           ],
                         ),
@@ -470,42 +532,6 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
               ),
             ),
           ],
-        ),
-        Positioned(
-          top: 420,
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: 100,
-            color: Colors.white,
-
-            child: Padding(
-              padding: const EdgeInsets.only(left: 22.0, top: 21, bottom: 28),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  BarlowText(
-                    text: "Rs. ${total.toStringAsFixed(2)}",
-                    color: Color(0xFF3E5B84),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    lineHeight: 1.0,
-                    letterSpacing: 1 * 0.04, // 4% of 32px
-                  ),
-                  SizedBox(height: 8),
-                  BarlowText(
-                    text: "MAKE PAYMENT",
-                    color: Color(0xFF3E5B84),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    backgroundColor: Color(0xFFB9D6FF),
-                    lineHeight: 1.0,
-                    letterSpacing: 1 * 0.04, // 4% of 32px
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
       ],
     );
