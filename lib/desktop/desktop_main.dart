@@ -7,7 +7,6 @@ import '../component/notification_toast/custom_toast.dart';
 import '../component/app_routes/routes.dart';
 import '../web_desktop_common/add_address_ui/add_address_ui.dart';
 import '../web_desktop_common/cart/cart_panel.dart';
-import '../web_desktop_common/collection/collection.dart';
 import '../web_desktop_common/component/profile_dropdown.dart';
 import '../web_desktop_common/component/scrollable_header.dart';
 import '../web_desktop_common/product_view/product_details.dart';
@@ -89,10 +88,8 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
     AppRoutes.about: (_) => const AboutPageDesktop(),
     AppRoutes.shippingPolicy: (_) => const ShippingPolicy(),
     AppRoutes.privacyPolicy: (_) => const PrivacyPolicy(),
-    AppRoutes.contactUs: (_) => const ContactUsDesktop(),
     // AppRoutes.collection: (_) => const Collection(),
     AppRoutes.sale: (_) => const Sale(),
-    AppRoutes.checkOut: (_) => const CheckoutPageDesktop(),
     AppRoutes.myOrder: (_) => const MyOrderUiDesktop(),
 
     '/cart': (id) => CartPanel(productId: int.tryParse(id ?? '0') ?? 0),
@@ -111,6 +108,10 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
           (_) => CatalogPage(onWishlistChanged: _showNotification),
       AppRoutes.myAccount:
           (_) => MyAccountUiDesktop(onWishlistChanged: _showNotification),
+      AppRoutes.checkOut:
+          (_) => CheckoutPageDesktop(onWishlistChanged: _showNotification),
+      AppRoutes.contactUs:
+          (_) => ContactUsDesktop(onWishlistChanged: _showNotification),
 
       '/product':
           (id) => ProductDetails(

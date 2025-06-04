@@ -64,7 +64,7 @@ class _CustomHeaderMobileState extends State<CustomHeaderMobile>
                     icon: AnimatedIcons.menu_close,
                     progress: _menuIconController,
                     size: 30,
-                    color: const Color(0xFF3E5B84),
+                    color: const Color(0xFF30578E),
                   ),
                   onPressed: () async {
                     await _menuIconController.forward(); // Animate to "close"
@@ -255,7 +255,7 @@ class _Column1State extends State<Column1> {
                           fontSize: 14,
                           lineHeight: 1.0,
                           letterSpacing: 0.56,
-                          color: const Color(0xFF3E5B84),
+                          color: const Color(0xFF30578E),
                           activeBackgroundColor: const Color(0xFFb9d6ff),
                           enableBackgroundForActiveRoute: true,
                         ),
@@ -270,7 +270,7 @@ class _Column1State extends State<Column1> {
                           fontSize: 14,
                           lineHeight: 1.0,
                           letterSpacing: 0.56,
-                          color: const Color(0xFF3E5B84),
+                          color: const Color(0xFF30578E),
                           activeBackgroundColor: const Color(0xFFb9d6ff),
                         ),
                         const SizedBox(width: 32),
@@ -297,13 +297,13 @@ class _Column1State extends State<Column1> {
                           fontSize: 14,
                           lineHeight: 1.0,
                           letterSpacing: 0.56,
-                          color: const Color(0xFF3E5B84),
+                          color: const Color(0xFF30578E),
                           activeBackgroundColor: const Color(0xFFb9d6ff),
                         ),
                       ],
                     ),
                   ),
-                  const Divider(color: Color(0xFF3E5B84)),
+                  const Divider(color: Color(0xFF30578E)),
                 ],
               ),
             ),
@@ -342,7 +342,7 @@ class _Column1State extends State<Column1> {
                               child: TextField(
                                 controller: _searchController,
                                 focusNode: _searchFocusNode,
-                                cursorColor: const Color(0xFF3E5B84),
+                                cursorColor: const Color(0xFF30578E),
                                 onSubmitted: (_) => _handleSearch(),
                                 textAlign:
                                     TextAlign.end, // Right-align user input
@@ -357,7 +357,7 @@ class _Column1State extends State<Column1> {
                                   fontSize: 16,
                                   fontFamily: GoogleFonts.barlow().fontFamily,
                                   fontWeight: FontWeight.w400,
-                                  color: const Color(0xFF3E5B84),
+                                  color: const Color(0xFF30578E),
                                 ),
                                 onChanged: (value) {
                                   // Update icon based on text input
@@ -374,7 +374,7 @@ class _Column1State extends State<Column1> {
                         onTap: _toggleIcon,
                         child: Icon(
                           _showSearchIcon ? Icons.search : Icons.close,
-                          color: const Color(0xFF3E5B84),
+                          color: const Color(0xFF30578E),
                           size: 20,
                         ),
                       ),

@@ -76,7 +76,7 @@ class _CollectionMobileState extends State<CollectionMobile> {
                                     fontSize: 16,
                                     height: 1.2,
                                     letterSpacing: 0.64,
-                                    color: Color(0xFF3E5B84),
+                                    color: Color(0xFF30578E),
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -88,7 +88,7 @@ class _CollectionMobileState extends State<CollectionMobile> {
                                     fontWeight: FontWeight.w400,
                                     fontSize: 14,
                                     height: 1.2,
-                                    color: const Color(0xFF3E5B84),
+                                    color: const Color(0xFF30578E),
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -98,7 +98,7 @@ class _CollectionMobileState extends State<CollectionMobile> {
                                   fontSize: 14,
                                   lineHeight: 1.2,
                                   letterSpacing: 0.56,
-                                  color: const Color(0xFF3E5B84),
+                                  color: const Color(0xFF30578E),
                                   onTap: () async {
                                     context.go(
                                       AppRoutes.idCollectionView(collection.id!),

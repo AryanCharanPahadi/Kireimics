@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../component/api_helper/api_helper.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/cart_length/cart_loader.dart';
@@ -199,7 +200,7 @@ class _SearchGridviewState extends State<SearchGridview>
                               child: BarlowText(
                                 text: "BROWSE OUR CATALOG",
                                 backgroundColor: Color(0xFFb9d6ff),
-                                color: Color(0xFF3E5B84),
+                                color: Color(0xFF30578E),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -259,28 +260,18 @@ class _SearchGridviewState extends State<SearchGridview>
                                   final isOutOfStock = quantity == 0;
 
                                   return MouseRegion(
-                                    onEnter:
-                                        isOutOfStock
-                                            ? null
-                                            : (_) {
-                                              setState(
-                                                () =>
-                                                    _isHoveredList[index] =
-                                                        true,
-                                              );
-                                              _controllers[index].forward();
-                                            },
-                                    onExit:
-                                        isOutOfStock
-                                            ? null
-                                            : (_) {
-                                              setState(
-                                                () =>
-                                                    _isHoveredList[index] =
-                                                        false,
-                                              );
-                                              _controllers[index].reverse();
-                                            },
+                                    onEnter: (_) {
+                                      setState(
+                                        () => _isHoveredList[index] = true,
+                                      );
+                                      _controllers[index].forward();
+                                    },
+                                    onExit: (_) {
+                                      setState(
+                                        () => _isHoveredList[index] = false,
+                                      );
+                                      _controllers[index].reverse();
+                                    },
                                     child: LayoutBuilder(
                                       builder: (context, constraints) {
                                         double imageWidth =
@@ -301,8 +292,11 @@ class _SearchGridviewState extends State<SearchGridview>
                                                     builder: (context, child) {
                                                       return Transform.scale(
                                                         scale:
-                                                            _animations[index]
-                                                                .value,
+                                                            _isHoveredList[index] &&
+                                                                    !isOutOfStock
+                                                                ? _animations[index]
+                                                                    .value
+                                                                : 1.0, // No scaling for out-of-stock
                                                         child: GestureDetector(
                                                           onTap:
                                                               isOutOfStock
@@ -369,7 +363,6 @@ class _SearchGridviewState extends State<SearchGridview>
                                                         );
 
                                                     if (isOutOfStock) {
-                                                      // Only return the Out of Stock image, nothing else
                                                       return Row(
                                                         mainAxisAlignment:
                                                             MainAxisAlignment
@@ -388,10 +381,59 @@ class _SearchGridviewState extends State<SearchGridview>
                                                             alignment:
                                                                 Alignment
                                                                     .centerRight,
-                                                            child: SvgPicture.asset(
-                                                              "assets/home_page/IconWishlistEmpty.svg",
-                                                              width: 23,
-                                                              height: 20,
+                                                            child: FutureBuilder<
+                                                              bool
+                                                            >(
+                                                              future: SharedPreferencesHelper.isInWishlist(
+                                                                product.id
+                                                                    .toString(),
+                                                              ),
+                                                              builder: (
+                                                                context,
+                                                                snapshot,
+                                                              ) {
+                                                                final isInWishlist =
+                                                                    snapshot
+                                                                        .data ??
+                                                                    false;
+                                                                return GestureDetector(
+                                                                  onTap: () async {
+                                                                    if (isInWishlist) {
+                                                                      await SharedPreferencesHelper.removeFromWishlist(
+                                                                        product
+                                                                            .id
+                                                                            .toString(),
+                                                                      );
+                                                                      widget
+                                                                          .onWishlistChanged
+                                                                          ?.call(
+                                                                            'Product Removed From Wishlist',
+                                                                          );
+                                                                    } else {
+                                                                      await SharedPreferencesHelper.addToWishlist(
+                                                                        product
+                                                                            .id
+                                                                            .toString(),
+                                                                      );
+                                                                      widget
+                                                                          .onWishlistChanged
+                                                                          ?.call(
+                                                                            'Product Added To Wishlist',
+                                                                          );
+                                                                    }
+                                                                    setState(
+                                                                      () {},
+                                                                    );
+                                                                  },
+                                                                  child: SvgPicture.asset(
+                                                                    isInWishlist
+                                                                        ? 'assets/home_page/IconWishlist.svg'
+                                                                        : 'assets/home_page/IconWishlistEmpty.svg',
+                                                                    width: 23,
+                                                                    height: 20,
+                                                                  ),
+                                                                );
+                                                              },
                                                             ),
                                                           ),
                                                         ],
@@ -400,13 +442,18 @@ class _SearchGridviewState extends State<SearchGridview>
 
                                                     // Normal UI when product is in stock
                                                     return Row(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: [
                                                         Builder(
                                                           builder: (context) {
-                                                            final List<Widget> badges = [];
+                                                            final List<Widget>
+                                                            badges = [];
 
-                                                            if (product.isMakerChoice == 1) {
+                                                            if (product
+                                                                    .isMakerChoice ==
+                                                                1) {
                                                               badges.add(
                                                                 SvgPicture.asset(
                                                                   "assets/home_page/maker_choice.svg",
@@ -415,37 +462,74 @@ class _SearchGridviewState extends State<SearchGridview>
                                                               );
                                                             }
 
-                                                            if (quantity != null && quantity < 2) {
-                                                              if (badges.isNotEmpty) badges.add(SizedBox(height: 10));
+                                                            if (quantity !=
+                                                                    null &&
+                                                                quantity < 2) {
+                                                              if (badges
+                                                                  .isNotEmpty)
+                                                                badges.add(
+                                                                  SizedBox(
+                                                                    height: 10,
+                                                                  ),
+                                                                );
                                                               badges.add(
                                                                 SvgPicture.asset(
                                                                   "assets/home_page/fewPiecesLeft.svg",
+                                                                  height: 25,
+                                                                  width: 25,
                                                                 ),
                                                               );
                                                             }
 
-                                                            if (product.discount != 0) {
-                                                              if (badges.isNotEmpty) badges.add(SizedBox(height: 10));
+                                                            if (product
+                                                                    .discount !=
+                                                                0) {
+                                                              if (badges
+                                                                  .isNotEmpty)
+                                                                badges.add(
+                                                                  SizedBox(
+                                                                    height: 10,
+                                                                  ),
+                                                                );
                                                               badges.add(
                                                                 ElevatedButton(
-                                                                  onPressed: null,
+                                                                  onPressed:
+                                                                      null,
                                                                   style: ElevatedButton.styleFrom(
                                                                     padding: EdgeInsets.symmetric(
-                                                                      vertical: paddingVertical,
-                                                                      horizontal: 32,
+                                                                      vertical:
+                                                                          paddingVertical,
+                                                                      horizontal:
+                                                                          30,
                                                                     ),
-                                                                    backgroundColor: const Color(0xFFF46856),
-                                                                    disabledBackgroundColor: const Color(0xFFF46856),
-                                                                    disabledForegroundColor: Colors.white,
-                                                                    elevation: 0,
-                                                                    side: BorderSide.none,
+                                                                    backgroundColor:
+                                                                        const Color(
+                                                                          0xFFF46856,
+                                                                        ),
+                                                                    disabledBackgroundColor:
+                                                                        const Color(
+                                                                          0xFFF46856,
+                                                                        ),
+                                                                    disabledForegroundColor:
+                                                                        Colors
+                                                                            .white,
+                                                                    elevation:
+                                                                        0,
+                                                                    side:
+                                                                        BorderSide
+                                                                            .none,
                                                                   ),
                                                                   child: Text(
                                                                     "${product.discount}% OFF",
                                                                     style: const TextStyle(
-                                                                      fontSize: 16,
-                                                                      fontWeight: FontWeight.w600,
-                                                                      color: Colors.white,
+                                                                      fontSize:
+                                                                          16,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      color:
+                                                                          Colors
+                                                                              .white,
                                                                     ),
                                                                   ),
                                                                 ),
@@ -453,31 +537,49 @@ class _SearchGridviewState extends State<SearchGridview>
                                                             }
 
                                                             return Column(
-                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
                                                               children: badges,
                                                             );
                                                           },
                                                         ),
                                                         Spacer(),
                                                         FutureBuilder<bool>(
-                                                          future: SharedPreferencesHelper.isInWishlist(
-                                                            product.id.toString(),
-                                                          ),
-                                                          builder: (context, snapshot) {
-                                                            final isInWishlist = snapshot.data ?? false;
-
+                                                          future:
+                                                              SharedPreferencesHelper.isInWishlist(
+                                                                product.id
+                                                                    .toString(),
+                                                              ),
+                                                          builder: (
+                                                            context,
+                                                            snapshot,
+                                                          ) {
+                                                            final isInWishlist =
+                                                                snapshot.data ??
+                                                                false;
                                                             return GestureDetector(
                                                               onTap: () async {
                                                                 if (isInWishlist) {
                                                                   await SharedPreferencesHelper.removeFromWishlist(
-                                                                    product.id.toString(),
+                                                                    product.id
+                                                                        .toString(),
                                                                   );
-                                                                  widget.onWishlistChanged?.call('Product Removed From Wishlist');
+                                                                  widget
+                                                                      .onWishlistChanged
+                                                                      ?.call(
+                                                                        'Product Removed From Wishlist',
+                                                                      );
                                                                 } else {
                                                                   await SharedPreferencesHelper.addToWishlist(
-                                                                    product.id.toString(),
+                                                                    product.id
+                                                                        .toString(),
                                                                   );
-                                                                  widget.onWishlistChanged?.call('Product Added To Wishlist');
+                                                                  widget
+                                                                      .onWishlistChanged
+                                                                      ?.call(
+                                                                        'Product Added To Wishlist',
+                                                                      );
                                                                 }
                                                                 setState(() {});
                                                               },
@@ -505,10 +607,9 @@ class _SearchGridviewState extends State<SearchGridview>
                                                     milliseconds: 300,
                                                   ),
                                                   opacity:
-                                                      _isHoveredList[index] &&
-                                                              !isOutOfStock
+                                                      _isHoveredList[index]
                                                           ? 1.0
-                                                          : 0.0,
+                                                          : 0.0, // Show on hover
                                                   child: Container(
                                                     width: imageWidth * 0.95,
                                                     height: imageHeight * 0.35,
@@ -522,7 +623,7 @@ class _SearchGridviewState extends State<SearchGridview>
                                                         ),
                                                     decoration: BoxDecoration(
                                                       color: const Color(
-                                                        0xFF3E5B84,
+                                                        0xFF30578E,
                                                       ).withOpacity(0.8),
                                                     ),
                                                     child: Column(
@@ -535,7 +636,7 @@ class _SearchGridviewState extends State<SearchGridview>
                                                       children: [
                                                         CralikaFont(
                                                           text: product.name,
-                                                          maxLines: 1,
+                                                          maxLines: 2,
                                                           fontWeight:
                                                               FontWeight.w400,
                                                           color: Colors.white,
@@ -545,11 +646,8 @@ class _SearchGridviewState extends State<SearchGridview>
                                                               imageWidth *
                                                               0.002,
                                                         ),
-                                                        SizedBox(
-                                                          height:
-                                                              imageHeight *
-                                                              0.03,
-                                                        ),
+                                                        SizedBox(height: imageHeight * 0.01),
+
                                                         BarlowText(
                                                           text:
                                                               "Rs. ${product.price.toStringAsFixed(2)}",
@@ -559,96 +657,103 @@ class _SearchGridviewState extends State<SearchGridview>
                                                           fontSize: 16,
                                                           lineHeight: 1.0,
                                                         ),
-                                                        SizedBox(
-                                                          height:
-                                                              imageHeight *
-                                                              0.03,
-                                                        ),
-                                                        Row(
-                                                          children: [
-                                                            GestureDetector(
-                                                              onTap:
-                                                                  isOutOfStock
-                                                                      ? null
-                                                                      : () {
-                                                                        context.go(
-                                                                          AppRoutes.productDetails(
-                                                                            product.id,
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                              child: BarlowText(
-                                                                text: "VIEW",
-                                                                color:
-                                                                    Colors
-                                                                        .white,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                fontSize: 16,
-                                                                lineHeight: 1.0,
-                                                                enableHoverBackground:
-                                                                    true,
-                                                                hoverBackgroundColor:
-                                                                    Colors
-                                                                        .white,
-                                                                hoverTextColor:
-                                                                    const Color(
-                                                                      0xFF3E5B84,
-                                                                    ),
-                                                              ),
-                                                            ),
-                                                            SizedBox(
-                                                              width:
-                                                                  imageWidth *
-                                                                  0.02,
-                                                            ),
-                                                            BarlowText(
-                                                              text: " / ",
-                                                              color:
-                                                                  Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              fontSize: 16,
-                                                              lineHeight: 1.0,
-                                                            ),
-                                                            SizedBox(
-                                                              width:
-                                                                  imageWidth *
-                                                                  0.02,
-                                                            ),
-                                                            GestureDetector(
-                                                              onTap:
-                                                                  isOutOfStock
-                                                                      ? null
-                                                                      : () {
-                                                                        showDialog(
-                                                                          context:
-                                                                              context,
-                                                                          barrierColor:
-                                                                              Colors.transparent,
-                                                                          builder: (
-                                                                            BuildContext
-                                                                            context,
-                                                                          ) {
-                                                                            cartNotifier.refresh();
+                                                        SizedBox(height: imageHeight * 0.04),
 
-                                                                            return CartPanel(
-                                                                              productId:
-                                                                                  product.id,
-                                                                            );
-                                                                          },
-                                                                        );
-                                                                        widget
-                                                                            .onWishlistChanged
-                                                                            ?.call(
-                                                                              'Product Added To Cart',
-                                                                            );
-                                                                      },
-                                                              child: BarlowText(
-                                                                text:
-                                                                    "ADD TO CART",
+                                                        if (isOutOfStock)
+                                                          Row(
+                                                            children: [
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  context.go(
+                                                                    AppRoutes.productDetails(
+                                                                     product.id,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                                child: BarlowText(
+                                                                  text: "VIEW",
+                                                                  color: Colors.white,
+                                                                  fontWeight: FontWeight.w600,
+                                                                  fontSize: 16,
+                                                                  lineHeight: 1.0,
+                                                                  enableHoverBackground: true,
+                                                                  hoverBackgroundColor: Colors.white,
+                                                                  hoverTextColor: Color(0xFF30578E),
+                                                                ),
+                                                              ),
+                                                              SizedBox(width: imageWidth * 0.02),
+                                                              Text(
+                                                                "/",
+                                                                style: TextStyle(
+                                                                  color: Colors.white,
+                                                                  fontFamily:
+                                                                  GoogleFonts.barlow().fontFamily,
+                                                                  fontWeight: FontWeight.w600,
+                                                                  fontSize: 15,
+                                                                  height: 1.0,
+                                                                ),
+                                                              ),
+                                                              SizedBox(width: imageWidth * 0.02),
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  widget.onWishlistChanged?.call(
+                                                                    "We'll notify you when this product is back in stock.",
+                                                                  );
+                                                                },
+                                                                child: BarlowText(
+                                                                  text: "NOTIFY ME",
+                                                                  color: Colors.white,
+                                                                  fontWeight: FontWeight.w600,
+                                                                  fontSize: 16,
+                                                                  lineHeight: 1.0,
+                                                                  enableHoverBackground: true,
+                                                                  hoverBackgroundColor: Colors.white,
+                                                                  hoverTextColor: Color(0xFF30578E),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          )
+                                                        else
+                                                          Row(
+                                                            children: [
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  context.go(
+                                                                    AppRoutes.productDetails(
+                                                                      product
+                                                                          .id,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                                child: BarlowText(
+                                                                  text: "VIEW",
+                                                                  color:
+                                                                      Colors
+                                                                          .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize: 16,
+                                                                  lineHeight:
+                                                                      1.0,
+                                                                  enableHoverBackground:
+                                                                      true,
+                                                                  hoverBackgroundColor:
+                                                                      Colors
+                                                                          .white,
+                                                                  hoverTextColor:
+                                                                      const Color(
+                                                                        0xFF30578E,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                width:
+                                                                    imageWidth *
+                                                                    0.02,
+                                                              ),
+                                                              BarlowText(
+                                                                text: " / ",
                                                                 color:
                                                                     Colors
                                                                         .white,
@@ -657,19 +762,63 @@ class _SearchGridviewState extends State<SearchGridview>
                                                                         .w600,
                                                                 fontSize: 16,
                                                                 lineHeight: 1.0,
-                                                                enableHoverBackground:
-                                                                    true,
-                                                                hoverBackgroundColor:
-                                                                    Colors
-                                                                        .white,
-                                                                hoverTextColor:
-                                                                    const Color(
-                                                                      0xFF3E5B84,
-                                                                    ),
                                                               ),
-                                                            ),
-                                                          ],
-                                                        ),
+                                                              SizedBox(
+                                                                width:
+                                                                    imageWidth *
+                                                                    0.02,
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    barrierColor:
+                                                                        Colors
+                                                                            .transparent,
+                                                                    builder: (
+                                                                      BuildContext
+                                                                      context,
+                                                                    ) {
+                                                                      cartNotifier
+                                                                          .refresh();
+                                                                      return CartPanel(
+                                                                        productId:
+                                                                            product.id,
+                                                                      );
+                                                                    },
+                                                                  );
+                                                                  widget
+                                                                      .onWishlistChanged
+                                                                      ?.call(
+                                                                        'Product Added To Cart',
+                                                                      );
+                                                                },
+                                                                child: BarlowText(
+                                                                  text:
+                                                                      "ADD TO CART",
+                                                                  color:
+                                                                      Colors
+                                                                          .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize: 16,
+                                                                  lineHeight:
+                                                                      1.0,
+                                                                  enableHoverBackground:
+                                                                      true,
+                                                                  hoverBackgroundColor:
+                                                                      Colors
+                                                                          .white,
+                                                                  hoverTextColor:
+                                                                      const Color(
+                                                                        0xFF30578E,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
                                                       ],
                                                     ),
                                                   ),

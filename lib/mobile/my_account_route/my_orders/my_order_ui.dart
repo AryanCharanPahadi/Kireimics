@@ -61,7 +61,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                   children: [
                     BarlowText(
                       text: "My Account",
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
@@ -70,7 +70,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                       enableUnderlineForActiveRoute:
                           true, // Enable underline when active
                       decorationColor: Color(
-                        0xFF3E5B84,
+                        0xFF30578E,
                       ), // Color of the underline
                       onTap: () {
                         context.go(AppRoutes.myAccount);
@@ -80,7 +80,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
 
                     BarlowText(
                       text: "My Orders",
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
@@ -88,7 +88,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                       enableUnderlineForActiveRoute:
                           true, // Enable underline when active
                       decorationColor: Color(
-                        0xFF3E5B84,
+                        0xFF30578E,
                       ), // Color of the underline
                       onTap: () {
                         context.go(AppRoutes.myOrder);
@@ -98,7 +98,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
 
                     BarlowText(
                       text: "Wishlist",
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
@@ -250,7 +250,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.5,
                           letterSpacing: 0,
-                          color: const Color(0xFF3E5B84),
+                          color: const Color(0xFF30578E),
                         ),
                       ),
                     ],

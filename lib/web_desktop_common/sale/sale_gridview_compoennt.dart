@@ -330,7 +330,7 @@ class _SaleProductGridItemState extends State<SaleProductGridItem>
                             vertical: imageHeight * 0.02,
                           ),
                           decoration: BoxDecoration(
-                            color: Color(0xFF3E5B84).withOpacity(0.8),
+                            color: Color(0xFF30578E).withOpacity(0.8),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -378,7 +378,7 @@ class _SaleProductGridItemState extends State<SaleProductGridItem>
                                       lineHeight: 1.0,
                                       enableHoverBackground: true,
                                       hoverBackgroundColor: Colors.white,
-                                      hoverTextColor: Color(0xFF3E5B84),
+                                      hoverTextColor: Color(0xFF30578E),
                                     ),
                                   ),
                                   SizedBox(width: imageWidth * 0.02),
@@ -430,7 +430,7 @@ class _SaleProductGridItemState extends State<SaleProductGridItem>
                                       lineHeight: 1.0,
                                       enableHoverBackground: true,
                                       hoverBackgroundColor: Colors.white,
-                                      hoverTextColor: Color(0xFF3E5B84),
+                                      hoverTextColor: Color(0xFF30578E),
                                     ),
                                   ),
                                 ],

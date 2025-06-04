@@ -245,7 +245,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                             () => Checkbox(
                               value: controller.isChecked.value,
                               onChanged: controller.toggleCheckbox,
-                              activeColor: Color(0xFF3E5B84),
+                              activeColor: Color(0xFF30578E),
                             ),
                           ),
                           SizedBox(width: 11),
@@ -306,7 +306,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                                     fontSize: 16,
                                     lineHeight: 1.0,
                                     letterSpacing: 0.64,
-                                    color: const Color(0xFF3E5B84),
+                                    color: const Color(0xFF30578E),
                                     backgroundColor: const Color(0xFFb9d6ff),
                                   ),
                                 ),

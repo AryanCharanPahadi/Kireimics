@@ -8,12 +8,14 @@ import '../app_routes/routes.dart';
 class CartEmpty extends StatelessWidget {
   final String cralikaText;
   final String barlowText;
+  final bool hideBrowseButton; // NEW PARAMETER
 
   const CartEmpty({
     super.key,
     this.cralikaText = "Your cart is empty!",
     this.barlowText =
-        "What are you waiting for? Browse our wide range of products and bring home something new to love!",
+    "What are you waiting for? Browse our wide range of products and bring home something new to love!",
+    this.hideBrowseButton = false, // DEFAULT: SHOW BUTTON
   });
 
   @override
@@ -35,18 +37,21 @@ class CartEmpty extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 15),
-        GestureDetector(
-          onTap: () {
-            context.go(AppRoutes.catalog);
-          },
-          child: BarlowText(
-            text: "BROWSE OUR CATALOG",
-            backgroundColor: const Color(0xFFb9d6ff),
-            color: const Color(0xFF3E5B84),
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+
+        // CONDITIONAL BROWSE BUTTON
+        if (!hideBrowseButton)
+          GestureDetector(
+            onTap: () {
+              context.go(AppRoutes.catalog);
+            },
+            child: BarlowText(
+              text: "BROWSE OUR CATALOG",
+              backgroundColor: const Color(0xFFb9d6ff),
+              color: const Color(0xFF30578E),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
       ],
     );
   }

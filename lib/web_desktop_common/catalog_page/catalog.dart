@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/text_fonts/custom_text.dart';
-import 'package:kireimics/component/app_routes/routes.dart';
-import 'package:kireimics/web_desktop_common/collection/collection_modal.dart';
 import '../../component/no_result_found/no_order_yet.dart';
-import '../../component/no_result_found/no_product_yet.dart';
 import '../catalog_sale_gridview/catalog_controller1.dart';
 import '../catalog_sale_gridview/catalog_sale_gridview.dart';
 import '../catalog_sale_gridview/catalog_sale_navigation.dart';
@@ -18,6 +14,7 @@ class CatalogPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(CatalogPageController());
+
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1400;
 
@@ -42,7 +39,10 @@ class CatalogPage extends StatelessWidget {
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: Padding(
-                    padding: EdgeInsets.only(left: isLargeScreen ? 545 : 453),
+                    padding: EdgeInsets.only(
+                      left: isLargeScreen ? 545 : 453,
+                      right: isLargeScreen ? 172 : 0, // Updated line
+                    ),
                     child: Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
@@ -59,15 +59,14 @@ class CatalogPage extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(
                           top: 41,
-                          right: 90,
                           left: 46,
                           bottom: 41,
-                        ),
+                        ), // Removed right padding here to avoid double-padding
                         child: BarlowText(
                           text: controller.currentDescription.value,
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF414141),
+                          color: const Color(0xFF414141),
                         ),
                       ),
                     ),
@@ -121,7 +120,7 @@ class CatalogPage extends StatelessWidget {
                                 },
                                 child: BarlowText(
                                   text: "Sort / New",
-                                  color: const Color(0xFF3E5B84),
+                                  color: const Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
@@ -135,7 +134,7 @@ class CatalogPage extends StatelessWidget {
                                 },
                                 child: BarlowText(
                                   text: "Sort / New",
-                                  color: const Color(0xFF3E5B84),
+                                  color: const Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
@@ -151,7 +150,7 @@ class CatalogPage extends StatelessWidget {
                                 child: BarlowText(
                                   text:
                                       "Filter / ${controller.currentFilter.value}",
-                                  color: const Color(0xFF3E5B84),
+                                  color: const Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
@@ -180,9 +179,9 @@ class CatalogPage extends StatelessWidget {
                       ),
                       child: Center(
                         child: CartEmpty(
-                          cralikaText: "Oops! No items found.",
+                          cralikaText: "No products here yet!",
                           barlowText:
-                              "Looks like you haven’t added anything yet. Let’s go shopping!",
+                          "Try another category, hopefully you'll find something you like there!",
                         ),
                       ),
                     )
@@ -345,7 +344,7 @@ class CatalogPage extends StatelessWidget {
                 text: option['label'] as String,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: const Color(0xFF3E5B84),
+                color: const Color(0xFF30578E),
                 hoverBackgroundColor: const Color(0xFFb9d6ff),
                 enableHoverBackground: true,
               ),
@@ -412,7 +411,7 @@ class CatalogPage extends StatelessWidget {
                 text: option['label'] as String,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: const Color(0xFF3E5B84),
+                color: const Color(0xFF30578E),
                 hoverBackgroundColor: const Color(0xFFb9d6ff),
                 enableHoverBackground: true,
               ),

@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
 import 'package:http/http.dart' as http;
 import 'package:kireimics/component/app_routes/routes.dart';
+import 'package:kireimics/web_desktop_common/add_address_ui/select_address.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../web_desktop_common/add_address_ui/add_address_ui.dart';
@@ -20,8 +21,8 @@ import 'dart:js' as js;
 import 'checkout_controller.dart';
 
 class CheckoutPageWeb extends StatefulWidget {
-  const CheckoutPageWeb({super.key});
-
+  final Function(String)? onWishlistChanged; // Callback to notify parent
+  const CheckoutPageWeb({super.key, this.onWishlistChanged});
   @override
   State<CheckoutPageWeb> createState() => _CheckoutPageWebState();
 }
@@ -33,10 +34,6 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
   late double subtotal;
   final double deliveryCharge = 50.0;
   late double total;
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController mobileController = TextEditingController();
 
   Future<bool> isUserLoggedIn() async {
     String? userData = await SharedPreferencesHelper.getUserData();
@@ -47,7 +44,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    checkoutController.loadUserData();
     checkoutController.loadAddressData();
     final route = GoRouter.of(context).routerDelegate.currentConfiguration;
     final uri = Uri.parse(route.uri.toString());
@@ -57,32 +54,6 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
     // Extract and print product IDs
     final productIds = uri.queryParameters['productIds']?.split(',') ?? [];
     print('Product IDs: $productIds');
-  }
-
-  Future<void> _loadUserData() async {
-    String? storedUser = await SharedPreferencesHelper.getUserData();
-
-    if (storedUser != null) {
-      List<String> userDetails = storedUser.split(', ');
-
-      if (userDetails.length >= 4) {
-        List<String> nameParts = userDetails[1].split(' ');
-        String firstName = nameParts.isNotEmpty ? nameParts[0] : '';
-        String lastName =
-            nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
-        String phone = userDetails[2];
-        String email = userDetails[3];
-
-        if (mounted) {
-          setState(() {
-            firstNameController.text = firstName;
-            lastNameController.text = lastName;
-            emailController.text = email;
-            mobileController.text = phone;
-          });
-        }
-      }
-    }
   }
 
   @override
@@ -116,7 +87,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                 children: [
                   BarlowText(
                     text: "My Cart",
-                    color: const Color(0xFF3E5B84),
+                    color: const Color(0xFF30578E),
                     fontSize: (16 * (contentWidth / 600)).clamp(12, 16),
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
@@ -127,18 +98,18 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                     'assets/icons/right_icon.svg',
                     width: 24 * (contentWidth / 600),
                     height: 24 * (contentWidth / 600),
-                    color: const Color(0xFF3E5B84),
+                    color: const Color(0xFF30578E),
                   ),
                   const SizedBox(width: 9),
                   BarlowText(
                     text: "View Details",
-                    color: const Color(0xFF3E5B84),
+                    color: const Color(0xFF30578E),
                     fontSize: (16 * (contentWidth / 600)).clamp(12, 16),
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
                     route: AppRoutes.checkOut,
                     enableUnderlineForActiveRoute: true,
-                    decorationColor: const Color(0xFF3E5B84),
+                    decorationColor: const Color(0xFF30578E),
                     onTap: () {},
                   ),
                 ],
@@ -253,7 +224,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                                 fontWeight: FontWeight.w600,
                                 fontSize: (14 * fontScale).clamp(12, 14),
                                 lineHeight: 1.5,
-                                color: const Color(0xFF3E5B84),
+                                color: const Color(0xFF30578E),
                               ),
                             ),
                           ],
@@ -283,24 +254,28 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
               child: Column(
                 children: [
                   customTextFormField(
-                    hintText: "FIRST NAME*",
+                    hintText: "FIRST NAME",
                     fontScale: fontScale,
-                    controller: firstNameController,
+                    controller: checkoutController.firstNameController,
+                    isRequired: true,
                   ),
                   customTextFormField(
-                    hintText: "LAST NAME*",
+                    hintText: "LAST NAME",
                     fontScale: fontScale,
-                    controller: lastNameController,
+                    controller: checkoutController.lastNameController,
+                    isRequired: true,
                   ),
                   customTextFormField(
-                    hintText: "EMAIL*",
+                    hintText: "EMAIL",
                     fontScale: fontScale,
-                    controller: emailController,
+                    controller: checkoutController.emailController,
+                    isRequired: true,
                   ),
                   customTextFormField(
-                    hintText: "ADDRESS LINE 1*",
+                    hintText: "ADDRESS LINE 1",
                     fontScale: fontScale,
                     controller: checkoutController.address1Controller,
+                    isRequired: true,
                   ),
                   customTextFormField(
                     hintText: "ADDRESS LINE 2",
@@ -311,17 +286,19 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                     children: [
                       Expanded(
                         child: customTextFormField(
-                          hintText: "ZIP*",
+                          hintText: "ZIP",
                           fontScale: fontScale,
                           controller: checkoutController.zipController,
+                          isRequired: true,
                         ),
                       ),
                       SizedBox(width: 32 * fontScale),
                       Expanded(
                         child: customTextFormField(
-                          hintText: "STATE*",
+                          hintText: "STATE",
                           fontScale: fontScale,
                           controller: checkoutController.stateController,
+                          isRequired: true,
                         ),
                       ),
                     ],
@@ -330,17 +307,19 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                     children: [
                       Expanded(
                         child: customTextFormField(
-                          hintText: "CITY*",
+                          hintText: "CITY",
                           fontScale: fontScale,
                           controller: checkoutController.cityController,
+                          isRequired: true,
                         ),
                       ),
                       SizedBox(width: 32 * fontScale),
                       Expanded(
                         child: customTextFormField(
-                          hintText: "PHONE*",
+                          hintText: "PHONE",
                           fontScale: fontScale,
-                          controller: mobileController,
+                          controller: checkoutController.mobileController,
+                          isRequired: true,
                         ),
                       ),
                     ],
@@ -385,7 +364,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                                   TextSpan(
                                     text: "Privacy Policy",
                                     style: const TextStyle(
-                                      color: Color(0xFF3E5B84),
+                                      color: Color(0xFF30578E),
                                     ),
                                     recognizer:
                                         TapGestureRecognizer()
@@ -398,7 +377,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                                   TextSpan(
                                     text: "Shipping Policy",
                                     style: const TextStyle(
-                                      color: Color(0xFF3E5B84),
+                                      color: Color(0xFF30578E),
                                     ),
                                     recognizer:
                                         TapGestureRecognizer()
@@ -421,7 +400,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                       children: [
                         BarlowText(
                           text:
-                              checkoutController.addressExists == false
+                              checkoutController.addressExists == true
                                   ? 'UPDATE ADDRESS'
                                   : 'ADD ADDRESS',
                           color: const Color(0xFF30578E),
@@ -430,19 +409,24 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                           lineHeight: 1.0,
                           letterSpacing: 0.64,
                           enableHoverUnderline: true,
-                          decorationColor: const Color(0xFF3E5B84),
+                          decorationColor: const Color(0xFF30578E),
                           onTap: () {
                             if (!hasAddress) {
                               showDialog(
                                 context: context,
                                 barrierColor: Colors.transparent,
                                 builder: (BuildContext context) {
-                                  return AddAddressUi();
+                                  return SelectAddress();
                                 },
                               );
                             } else {
-                              // Handle update address logic here
-                            }
+                              showDialog(
+                                context: context,
+                                barrierColor: Colors.transparent,
+                                builder: (BuildContext context) {
+                                  return AddAddressUi();
+                                },
+                              );                            }
                           },
                         ),
                       ],
@@ -463,123 +447,11 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
 
     // ... other imports
 
-    void openRazorpayCheckout() async {
-      print('openRazorpayCheckout called'); // Debug print
-      if (!kIsWeb) {
-        print('Not running on web platform'); // Debug print
-        return;
-      }
-
-      // Check if openRazorpay is available
-      if (!js.context.hasProperty('openRazorpay')) {
-        print('Error: openRazorpay function not found in JavaScript context');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error: Payment system not initialized'),
-          ),
-        );
-        return;
-      }
-
-      // Generate a mock order ID for testing
-      final orderId = 'ORDER_${DateTime.now().millisecondsSinceEpoch}';
-
-      final options = {
-        'key': 'rzp_test_PKUyVj9nF0FvA7',
-        'amount': (total * 100).toInt(),
-        'currency': 'INR',
-        'name': 'Kireimics',
-        'description': 'Payment for order',
-        'prefill': {
-          'name': firstNameController.text,
-          'email': emailController.text,
-          'contact': mobileController.text,
-        },
-        'notes': {'address': 'Customer address'},
-        'handler': js.allowInterop((response) async {
-          // Convert the JavaScript response object to a JSON string
-          final responseJson = js.context['JSON'].callMethod('stringify', [
-            response,
-          ]);
-
-          // Extract payment details from response
-          final paymentId = response['razorpay_payment_id'] ?? 'N/A';
-          final orderIdResponse = response['razorpay_order_id'] ?? orderId;
-          final signature = response['razorpay_signature'] ?? 'N/A';
-          final amount = total; // From the outer scope
-          final status = 'success'; // Since handler is called on success
-
-          // Print client-side response
-          print('=== Payment Successful ===');
-          print('Payment ID: $paymentId');
-          print('Order ID: $orderIdResponse');
-          print('Signature: $signature');
-          print('Amount: $amount INR');
-          print('Status: $status');
-          print('Raw Client-Side Response: $responseJson');
-
-          // Fetch full payment details from PHP server
-          try {
-            final serverResponse = await http.get(
-              Uri.parse(
-                'http://localhost/17000ft/payment_details.php?payment_id=$paymentId',
-              ),
-            );
-
-            if (serverResponse.statusCode == 200) {
-              final paymentDetails = jsonDecode(serverResponse.body);
-              print('=== Full Payment Details ===');
-              print('Full Raw Response: ${jsonEncode(paymentDetails)}');
-              print('Mode of Payment: ${paymentDetails['method'] ?? 'N/A'}');
-              print('Payment ID: ${paymentDetails['id'] ?? 'N/A'}');
-              print('Order ID: ${paymentDetails['order_id'] ?? 'N/A'}');
-              print(
-                'Amount: ${(paymentDetails['amount'] / 100).toStringAsFixed(2)} ${paymentDetails['currency'] ?? 'N/A'}',
-              );
-              print('Status: ${paymentDetails['status'] ?? 'N/A'}');
-              print(
-                'Created At: ${DateTime.fromMillisecondsSinceEpoch((paymentDetails['created_at'] * 1000) ?? 0)}',
-              );
-            } else {
-              print('Failed to fetch payment details: ${serverResponse.body}');
-            }
-          } catch (e) {
-            print('Error fetching payment details: $e');
-          }
-
-          // Navigate to payment result route
-          context.go(
-            '${AppRoutes.paymentResult}?success=true&orderId=$orderId&amount=$total',
-          );
-        }),
-        'modal': {
-          'ondismiss': js.allowInterop(() {
-            print('Payment modal dismissed'); // Debug print
-            context.go(
-              '${AppRoutes.paymentResult}?success=false&orderId=$orderId&amount=$total',
-            );
-          }),
-        },
-      };
-
-      print('Razorpay options: $options'); // Debug print
-
-      try {
-        print('Calling js.context.callMethod for openRazorpay'); // Debug print
-        js.context.callMethod('openRazorpay', [js.JsObject.jsify(options)]);
-      } catch (e) {
-        print('Error initiating payment: $e'); // Debug print
-        // context.go(
-        //   '${AppRoutes.paymentResult}?success=false&orderId=$orderId&amount=$total',
-        // );
-      }
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Container(
-          color: const Color(0xFF3E5B84),
+          color: const Color(0xFF30578E),
           width: containerWidth,
           child: Padding(
             padding: EdgeInsets.symmetric(
@@ -694,13 +566,42 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
             SizedBox(height: 24 * fontScale),
             BarlowText(
               text: "MAKE PAYMENT",
-              color: const Color(0xFF3E5B84),
+              color: const Color(0xFF30578E),
               fontWeight: FontWeight.w600,
               fontSize: (16 * fontScale).clamp(12, 16),
               lineHeight: 1.0,
               letterSpacing: 0.64 * fontScale,
               backgroundColor: Color(0xFFb9d6ff),
-              onTap: openRazorpayCheckout,
+              hoverTextColor: Color(0xFF2876E4),
+              onTap: () {
+                if (!isChecked && !checkoutController.addressExists.value) {
+                  widget.onWishlistChanged?.call(
+                    'Please agree to the Privacy and Shipping Policy',
+                  );
+
+                  return;
+                }
+                if (checkoutController.firstNameController.text.isEmpty ||
+                    checkoutController.emailController.text.isEmpty ||
+                    checkoutController.address1Controller.text.isEmpty ||
+                    checkoutController.zipController.text.isEmpty ||
+                    checkoutController.stateController.text.isEmpty ||
+                    checkoutController.cityController.text.isEmpty ||
+                    checkoutController.mobileController.text.isEmpty) {
+                  widget.onWishlistChanged?.call(
+                    'Please fill in all required fields',
+                  );
+
+                  return;
+                }
+                final orderId =
+                    'ORDER_${DateTime.now().millisecondsSinceEpoch}';
+                checkoutController.openRazorpayCheckout(
+                  context,
+                  total,
+                  orderId,
+                );
+              },
             ),
           ],
         ),
@@ -712,21 +613,37 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
     required String hintText,
     TextEditingController? controller,
     required double fontScale,
+    bool isRequired = false, // New parameter to control asterisk visibility
   }) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 8 * fontScale),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Hint text positioned on the left
+          // Hint text with optional red asterisk
           Positioned(
             left: 0,
-            child: Text(
-              hintText,
-              style: GoogleFonts.barlow(
-                fontWeight: FontWeight.w400,
-                fontSize: (14 * fontScale).clamp(14, 18),
-                color: const Color(0xFF414141),
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: hintText,
+                    style: GoogleFonts.barlow(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 14,
+                      color: const Color(0xFF414141),
+                    ),
+                  ),
+                  if (isRequired)
+                    TextSpan(
+                      text: ' *',
+                      style: GoogleFonts.barlow(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                        color: Colors.red,
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -746,12 +663,6 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                 borderSide: BorderSide(color: Color(0xFF414141)),
               ),
               hintText: '',
-              hintStyle: GoogleFonts.barlow(
-                fontWeight: FontWeight.w400,
-                fontSize: (14 * fontScale).clamp(14, 18),
-                height: 1.0,
-                color: const Color(0xFF414141),
-              ),
               contentPadding: EdgeInsets.symmetric(
                 vertical: 8 * fontScale,
                 horizontal: 8 * fontScale,
@@ -759,7 +670,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
             ),
             style: GoogleFonts.barlow(
               fontWeight: FontWeight.w400,
-              fontSize: (14 * fontScale).clamp(14, 18),
+              fontSize: 14,
               color: Colors.black,
             ),
           ),

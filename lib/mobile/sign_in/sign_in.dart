@@ -197,7 +197,7 @@ class _SignInMobileState extends State<SignInMobile> {
                               fontSize: 16,
                               lineHeight: 1.0,
                               letterSpacing: 0.64,
-                              color: Color(0xFF3E5B84),
+                              color: Color(0xFF30578E),
                               backgroundColor: Color(0xFFb9d6ff),
                             ),
                           ),
@@ -219,7 +219,7 @@ class _SignInMobileState extends State<SignInMobile> {
                                   TextSpan(
                                     text: 'Privacy Policy',
                                     style: TextStyle(
-                                      color: Color(0xFF3E5B84),
+                                      color: Color(0xFF30578E),
                                       fontWeight: FontWeight.w600,
                                     ),
                                     recognizer:
@@ -232,7 +232,7 @@ class _SignInMobileState extends State<SignInMobile> {
                                   TextSpan(
                                     text: 'Shipping Policy',
                                     style: TextStyle(
-                                      color: Color(0xFF3E5B84),
+                                      color: Color(0xFF30578E),
                                       fontWeight: FontWeight.w600,
                                     ),
                                     recognizer:
@@ -335,7 +335,7 @@ class _SignInMobileState extends State<SignInMobile> {
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                             lineHeight: 1.5,
-                            color: const Color(0xFF3E5B84),
+                            color: const Color(0xFF30578E),
                           ),
                         ),
                       ],
@@ -414,7 +414,7 @@ class _SignInMobileState extends State<SignInMobile> {
                             obscureText
                                 ? Icons.visibility_off
                                 : Icons.visibility,
-                            color: const Color(0xFF3E5B84),
+                            color: const Color(0xFF30578E),
                           ),
                           onPressed: () {
                             setState(() {

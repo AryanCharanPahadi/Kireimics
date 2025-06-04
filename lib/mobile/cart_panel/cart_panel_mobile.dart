@@ -109,7 +109,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF3E5B84)));
+      return Center(child: CircularProgressIndicator(color: Color(0xFF30578E)));
     }
 
     if (errorMessage.isNotEmpty) {
@@ -229,7 +229,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                                 IconButton(
                                                   icon: Icon(
                                                     Icons.remove,
-                                                    color: Color(0xFF3E5B84),
+                                                    color: Color(0xFF30578E),
                                                   ),
                                                   onPressed:
                                                       value > 1
@@ -256,7 +256,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                                 IconButton(
                                                   icon: Icon(
                                                     Icons.add,
-                                                    color: Color(0xFF3E5B84),
+                                                    color: Color(0xFF30578E),
                                                   ),
                                                   onPressed:
                                                       stock != null &&
@@ -293,7 +293,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                         },
                                         child: BarlowText(
                                           text: "REMOVE",
-                                          color: Color(0xFF3E5B84),
+                                          color: Color(0xFF30578E),
                                           fontWeight: FontWeight.w600,
                                           fontSize: 14,
                                         ),
@@ -310,7 +310,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                     if (index != productList.length - 1)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Divider(color: Color(0xFF3E5B84)),
+                        child: Divider(color: Color(0xFF30578E)),
                       ),
                   ],
                 );
@@ -387,7 +387,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                         },
                         child: BarlowText(
                           text: "PROCEED TO CHECKOUT",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
                           lineHeight: 1.0,

@@ -141,7 +141,7 @@ class _CustomSidebarState extends State<CustomSidebar> {
                                   color:
                                       item == "SALE"
                                           ? const Color(0xFFF46856)
-                                          : const Color(0xFF3E5B84),
+                                          : const Color(0xFF30578E),
                                   background:
                                       (item == "SALE" &&
                                               (isHovered || isSelected))
@@ -161,7 +161,7 @@ class _CustomSidebarState extends State<CustomSidebar> {
                         );
                       }).toList(),
                       const SizedBox(height: 22),
-                      const Divider(color: Color(0xFF3E5B84), thickness: 1),
+                      const Divider(color: Color(0xFF30578E), thickness: 1),
                     ],
                   ),
                 ),
@@ -189,7 +189,7 @@ class _CustomSidebarState extends State<CustomSidebar> {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 4.0),
                           child: SvgPicture.asset(
-                            'assets/sidebar/instagram.svg',
+                            'assets/sidebar/newInstagram.svg',
                             width: 18,
                             height: 18,
                             color: _iconColor1,
@@ -219,7 +219,7 @@ class _CustomSidebarState extends State<CustomSidebar> {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 4.0),
                           child: SvgPicture.asset(
-                            'assets/sidebar/email.svg',
+                            'assets/sidebar/newEmail.svg',
                             width: 18,
                             height: 18,
                             color: _iconColor2,

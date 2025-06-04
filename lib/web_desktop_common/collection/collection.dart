@@ -80,16 +80,13 @@ class _CollectionGridState extends State<CollectionGrid> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          collection.name ?? 'Unnamed Collection',
-                          style: const TextStyle(
-                            fontFamily: 'Cralika',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20,
-                            height: 36 / 20,
-                            letterSpacing: 0.04 * 20,
-                            color: Color(0xFF0D2C54),
-                          ),
+                        CralikaFont(
+                        text:   collection.name ?? 'Unnamed Collection',
+                          fontWeight: FontWeight.w400,
+                          fontSize: 20,
+                          lineHeight: 36 / 20,
+                          letterSpacing: 0.04 * 20,
+                          color: Color(0xFF30578E),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -100,7 +97,7 @@ class _CollectionGridState extends State<CollectionGrid> {
                             fontSize: 14,
                             height: 1.0,
                             letterSpacing: 0.0,
-                            color: const Color(0xFF3E5B84),
+                            color: const Color(0xFF30578E),
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -110,13 +107,13 @@ class _CollectionGridState extends State<CollectionGrid> {
                           fontSize: 16,
                           lineHeight: 1.0,
                           letterSpacing: 0.04 * 16,
-                          color: const Color(0xFF0D2C54),
+                          color: const Color(0xFF30578E),
                           enableHoverBackground: true,
-                          hoverBackgroundColor: const Color(0xFF3E5B84),
+                          hoverBackgroundColor: const Color(0xFF30578E),
                           hoverTextColor: Colors.white,
                           onTap: () {
                             context.go(
-                              AppRoutes.idCollectionView(collection.id!),
+                              '${AppRoutes.idCollectionView(collection.id!)}?collection_name=${collection.name}',
                             );
                           },
                         ),

@@ -81,13 +81,13 @@ class _SignupState extends State<Signup> {
                                 onTap: () => Navigator.of(context).pop(),
                                 child: BarlowText(
                                   text: "Close",
-                                  color: Color(0xFF3E5B84),
+                                  color: Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16.0,
                                   lineHeight: 1.0,
                                   letterSpacing: 0.64,
-                                  hoverBackgroundColor: Color(0xFFb9d6ff),
-                                  enableHoverBackground: true,
+                                  enableHoverUnderline: true,
+                                  decorationColor: const Color(0xFF30578E),
                                 ),
                               ),
                               if (showSuccessBanner || showErrorBanner)
@@ -259,7 +259,7 @@ class _SignupState extends State<Signup> {
                                             fontSize: 16,
                                             lineHeight: 1.0,
                                             letterSpacing: 0.64,
-                                            color: Color(0xFF3E5B84),
+                                            color: Color(0xFF30578E),
                                             backgroundColor: Color(0xFFb9d6ff),
                                           ),
                                         ),
@@ -284,7 +284,7 @@ class _SignupState extends State<Signup> {
                                                 TextSpan(
                                                   text: 'Privacy Policy',
                                                   style: TextStyle(
-                                                    color: Color(0xFF3E5B84),
+                                                    color: Color(0xFF30578E),
                                                     fontWeight: FontWeight.w600,
                                                   ),
                                                   recognizer:
@@ -310,7 +310,7 @@ class _SignupState extends State<Signup> {
                                                 TextSpan(
                                                   text: 'Shipping Policy',
                                                   style: TextStyle(
-                                                    color: Color(0xFF3E5B84),
+                                                    color: Color(0xFF30578E),
                                                     fontWeight: FontWeight.w600,
                                                   ),
                                                   recognizer:
@@ -425,7 +425,7 @@ class _SignupState extends State<Signup> {
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                                 lineHeight: 1.5,
-                                color: Color(0xFF3E5B84),
+                                color: Color(0xFF30578E),
                                 hoverBackgroundColor: Color(0xFFb9d6ff),
                                 enableHoverBackground: true,
                               ),
@@ -501,7 +501,7 @@ class _SignupState extends State<Signup> {
                             obscureText
                                 ? Icons.visibility_off
                                 : Icons.visibility,
-                            color: const Color(0xFF3E5B84),
+                            color: const Color(0xFF30578E),
                           ),
                           onPressed: () {
                             setState(() {

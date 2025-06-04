@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import '../../component/google_sign_in/auth.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/app_routes/routes.dart' show AppRoutes;
 import '../../component/shared_preferences/shared_preferences.dart';
+import '../../web/checkout/checkout_controller.dart';
 import '../../web_desktop_common/login_signup/login/login_page.dart';
 import '../../web_desktop_common/login_signup/signup/signup.dart';
 
@@ -121,7 +124,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
             text: "My Account",
             fontWeight: FontWeight.w600,
             fontSize: 16,
-            color: Color(0xFF3E5B84),
+            color: Color(0xFF30578E),
             hoverBackgroundColor: Color(0xFFb9d6ff),
             enableHoverBackground: true,
           ),
@@ -140,7 +143,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
             text: "My Orders",
             fontWeight: FontWeight.w600,
             fontSize: 16,
-            color: Color(0xFF3E5B84),
+            color: Color(0xFF30578E),
             hoverBackgroundColor: Color(0xFFb9d6ff),
             enableHoverBackground: true,
           ),
@@ -159,7 +162,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
             text: "My Wishlist",
             fontWeight: FontWeight.w600,
             fontSize: 16,
-            color: Color(0xFF3E5B84),
+            color: Color(0xFF30578E),
             hoverBackgroundColor: Color(0xFFb9d6ff),
             enableHoverBackground: true,
           ),
@@ -167,7 +170,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
       ),
       const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
-        child: Divider(color: Color(0xFF3E5B84)),
+        child: Divider(color: Color(0xFF30578E)),
       ),
       GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -179,6 +182,9 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
 
           // Clear custom shared user data
           await SharedPreferencesHelper.clearUserData();
+          // Refresh CheckoutController
+          final checkoutController = Get.find<CheckoutController>();
+          checkoutController.reset();
 
           // Navigate to home
           context.go(AppRoutes.home);
@@ -227,7 +233,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                     ),
                   ),
                 ),
@@ -237,7 +243,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
-                    color: Color(0xFF3E5B84),
+                    color: Color(0xFF30578E),
                   ),
                 ),
                 const SizedBox(width: 8), // spacing between Log In and Sign Up
@@ -260,7 +266,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                     ),
                   ),
                 ),
@@ -269,7 +275,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Divider(color: Color(0xFF3E5B84)),
+            child: Divider(color: Color(0xFF30578E)),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -293,7 +299,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
                 text: "My Account",
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: Color(0xFF3E5B84),
+                color: Color(0xFF30578E),
                 hoverBackgroundColor: Color(0xFFb9d6ff),
 
                 enableHoverBackground: true,
@@ -323,7 +329,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
                 text: "My Orders",
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: Color(0xFF3E5B84),
+                color: Color(0xFF30578E),
                 hoverBackgroundColor: Color(0xFFb9d6ff),
 
                 enableHoverBackground: true,
@@ -353,7 +359,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
                 text: "My Wishlist",
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: Color(0xFF3E5B84),
+                color: Color(0xFF30578E),
                 hoverBackgroundColor: Color(0xFFb9d6ff),
 
                 enableHoverBackground: true,

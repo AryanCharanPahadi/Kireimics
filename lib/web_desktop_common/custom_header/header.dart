@@ -91,7 +91,7 @@ class _HeaderState extends State<Header> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 44),
                   child: Image.asset(
-                    'assets/header/fullLogoNew.png',
+                    'assets/header/newLogoMain.png',
                     height: 31,
                     width: 180,
                   ),
@@ -136,11 +136,11 @@ class _HeaderState extends State<Header> {
                                           TextField(
                                             controller: _searchController,
                                             focusNode: _searchFocusNode,
-                                            cursorColor: Color(0xFF3E5B84),
+                                            cursorColor: Color(0xFF30578E),
 
                                             style: TextStyle(
                                               fontSize: 14,
-                                              color: const Color(0xFF3E5B84),
+                                              color: const Color(0xFF30578E),
                                               fontWeight: FontWeight.w400,
                                               fontFamily:
                                                   GoogleFonts.barlow()
@@ -168,6 +168,7 @@ class _HeaderState extends State<Header> {
                                     },
                                     child: _buildIcon(
                                       'assets/icons/closeIcon.svg',
+
                                       14,
                                       14,
                                       onTap: null,
@@ -179,7 +180,7 @@ class _HeaderState extends State<Header> {
                           // Search icon (only shown when search field is hidden)
                           if (!showSearchField)
                             _buildIcon(
-                              'assets/header/IconSearch.svg',
+                              'assets/header/newSearch.svg',
                               18,
                               18,
                               onTap: () {
@@ -209,7 +210,7 @@ class _HeaderState extends State<Header> {
                           }
                         },
                         child: _buildIcon(
-                          'assets/header/IconWishlist.svg',
+                          'assets/header/newWishlist.svg',
                           18,
                           15,
                         ),
@@ -227,14 +228,14 @@ class _HeaderState extends State<Header> {
                           });
                         },
                         child: _buildIcon(
-                          'assets/header/IconProfile.svg',
+                          'assets/header/newPerson.svg',
                           18,
                           16,
                         ),
                       ),
                       const SizedBox(width: 32),
                       _buildIcon(
-                        'assets/header/IconCart.svg',
+                        'assets/header/newCart.svg',
                         20,
                         19,
                         onTap: () {

@@ -149,7 +149,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
                                 SizedBox(height: 47),
                                 BarlowText(
                                   text: "VIEW DETAILS",
-                                  color: Color(0xFF3E5B84),
+                                  color: Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
                                 ),
@@ -159,7 +159,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
                         ],
                       ),
                     ),
-                    Divider(color: Color(0xFF3E5B84)),
+                    Divider(color: Color(0xFF30578E)),
                     SizedBox(height: 10),
                   ],
                 );
@@ -323,7 +323,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                                 lineHeight: 1.5,
-                                color: Color(0xFF3E5B84),
+                                color: Color(0xFF30578E),
                               ),
                             ),
                           ],

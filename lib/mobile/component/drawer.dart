@@ -286,7 +286,8 @@ class _DrawerMobileState extends State<DrawerMobile>
                         FutureBuilder<bool>(
                           future: _isLoggedIn(),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return const SizedBox.shrink();
                             } else {
                               bool isLoggedIn = snapshot.data ?? false;
@@ -298,9 +299,13 @@ class _DrawerMobileState extends State<DrawerMobile>
                                     // Perform logout operations
                                     await signOutGoogle(); // Sign out from Google
                                     await SharedPreferencesHelper.clearUserData(); // Clear user data
-                                    context.go(AppRoutes.home); // Navigate to home
+                                    context.go(
+                                      AppRoutes.home,
+                                    ); // Navigate to home
                                   } else {
-                                    context.go(AppRoutes.logIn); // Navigate to login
+                                    context.go(
+                                      AppRoutes.logIn,
+                                    ); // Navigate to login
                                   }
                                 },
                               );

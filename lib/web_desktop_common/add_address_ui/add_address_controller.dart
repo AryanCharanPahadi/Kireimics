@@ -78,7 +78,7 @@ class AddAddressController extends GetxController {
               "name": "${address['first_name']} ${address['last_name']}",
               "address": "${address['address1']}, ${address['address2']}",
               "postalCode": address['pincode'],
-              "country": address['state'],
+              "state": address['state'],
               "first_name": address['first_name'],
               "last_name": address['last_name'],
               "email": address['email'],
@@ -111,7 +111,7 @@ class AddAddressController extends GetxController {
     addressLine1Controller.text = address['address1'] ?? '';
     addressLine2Controller.text = address['address2'] ?? '';
     zipController.text = address['postalCode'] ?? '';
-    stateController.text = address['country'] ?? '';
+    stateController.text = address['state'] ?? '';
     cityController.text = address['city'] ?? '';
     isChecked.value = address['default_address'] ?? 0;
   }
@@ -194,6 +194,7 @@ class AddAddressController extends GetxController {
                   : "Address added successfully";
           await fetchAddress();
           checkoutController.loadAddressData();
+          Navigator.of(context).pop();
           clearForm();
 
           return true;

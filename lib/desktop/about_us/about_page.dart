@@ -51,6 +51,7 @@ class _AboutPageDesktopState extends State<AboutPageDesktop> {
                           Padding(
                             padding: EdgeInsets.only(
                               left: leftPadding,
+
                               top: screenHeight * 0.04,
                             ),
                             child: Container(
@@ -264,7 +265,7 @@ class _AboutPageDesktopState extends State<AboutPageDesktop> {
             text: entry.key,
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF3E5B84),
+            color: const Color(0xFF30578E),
           ),
         ),
       );

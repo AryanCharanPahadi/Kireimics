@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kireimics/component/app_routes/routes.dart';
 
 import '../../../component/api_helper/api_helper.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
+import '../../../web/checkout/checkout_controller.dart';
 
 class LoginController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -51,7 +54,23 @@ class LoginController {
 
             emailController.clear();
             passwordController.clear();
-            context.go(AppRoutes.myAccount);
+            // Check if the current route is the checkout route
+            final currentRoute =
+                GoRouter.of(
+                  context,
+                ).routeInformationProvider.value.uri.toString();
+            if (currentRoute.contains(AppRoutes.checkOut)) {
+              final CheckoutController checkoutController = Get.put(
+                CheckoutController(),
+              );
+              checkoutController.loadUserData();
+              checkoutController.loadAddressData();
+              // If on checkout route, pop the current screen (e.g., login dialog or page)
+              Navigator.of(context).pop();
+            } else {
+              // Otherwise, navigate to the myAccount route
+              context.go(AppRoutes.myAccount);
+            }
             print('Login successful, user: $userDetails');
             return true;
           }

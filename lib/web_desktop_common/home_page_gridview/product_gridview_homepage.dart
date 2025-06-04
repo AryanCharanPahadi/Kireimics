@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../component/api_helper/api_helper.dart';
 import '../../component/cart_length/cart_loader.dart';
 import '../../component/text_fonts/custom_text.dart';
@@ -137,20 +138,14 @@ class _ProductGridItemState extends State<ProductGridItem>
         final isOutOfStock = quantity == 0;
 
         return MouseRegion(
-          onEnter:
-              isOutOfStock
-                  ? null
-                  : (_) {
-                    setState(() => _isHovered = true);
-                    _controller.forward();
-                  },
-          onExit:
-              isOutOfStock
-                  ? null
-                  : (_) {
-                    setState(() => _isHovered = false);
-                    _controller.reverse();
-                  },
+          onEnter: (_) {
+            setState(() => _isHovered = true);
+            _controller.forward();
+          },
+          onExit: (_) {
+            setState(() => _isHovered = false);
+            _controller.reverse();
+          },
           child: LayoutBuilder(
             builder: (context, constraints) {
               double imageWidth = constraints.maxWidth;
@@ -196,6 +191,7 @@ class _ProductGridItemState extends State<ProductGridItem>
                           ), // Shadow overlay
                         ),
                       ),
+                    // Rest of your Positioned widgets and UI remain unchanged
                     Positioned(
                       top: imageHeight * 0.04,
                       left: imageWidth * 0.05,
@@ -216,7 +212,6 @@ class _ProductGridItemState extends State<ProductGridItem>
                           double paddingVertical = getResponsiveValue(6, 10);
 
                           if (isOutOfStock) {
-                            // Only return the Out of Stock image, nothing else
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -224,16 +219,44 @@ class _ProductGridItemState extends State<ProductGridItem>
                                   alignment: Alignment.centerLeft,
                                   child: SvgPicture.asset(
                                     "assets/home_page/outofstock.svg",
-                                    height: 32,
+                                    height: 25,
+                                    width: 25,
                                   ),
                                 ),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: SvgPicture.asset(
-                                    "assets/home_page/IconWishlistEmpty.svg",
-                                    width: 23,
-                                    height: 20,
+                                FutureBuilder<bool>(
+                                  future: SharedPreferencesHelper.isInWishlist(
+                                    widget.product.id.toString(),
                                   ),
+                                  builder: (context, snapshot) {
+                                    final isInWishlist = snapshot.data ?? false;
+                                    return GestureDetector(
+                                      onTap: () async {
+                                        if (isInWishlist) {
+                                          await SharedPreferencesHelper.removeFromWishlist(
+                                            widget.product.id.toString(),
+                                          );
+                                          widget.onWishlistChanged?.call(
+                                            'Product Removed From Wishlist',
+                                          );
+                                        } else {
+                                          await SharedPreferencesHelper.addToWishlist(
+                                            widget.product.id.toString(),
+                                          );
+                                          widget.onWishlistChanged?.call(
+                                            'Product Added To Wishlist',
+                                          );
+                                        }
+                                        setState(() {});
+                                      },
+                                      child: SvgPicture.asset(
+                                        isInWishlist
+                                            ? 'assets/home_page/IconWishlist.svg'
+                                            : 'assets/home_page/IconWishlistEmpty.svg',
+                                        width: 23,
+                                        height: 20,
+                                      ),
+                                    );
+                                  },
                                 ),
                               ],
                             );
@@ -356,7 +379,7 @@ class _ProductGridItemState extends State<ProductGridItem>
                       right: imageWidth * 0.02,
                       child: AnimatedOpacity(
                         duration: const Duration(milliseconds: 300),
-                        opacity: _isHovered && !isOutOfStock ? 1.0 : 0.0,
+                        opacity: _isHovered ? 1.0 : 0.0, // Show on hover
                         child: Container(
                           width: imageWidth * 0.95,
                           height: imageHeight * 0.35,
@@ -365,7 +388,7 @@ class _ProductGridItemState extends State<ProductGridItem>
                             vertical: imageHeight * 0.02,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF3E5B84).withOpacity(0.8),
+                            color: const Color(0xFF30578E).withOpacity(0.8),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,76 +412,125 @@ class _ProductGridItemState extends State<ProductGridItem>
                                 fontSize: 14,
                                 lineHeight: 1.0,
                               ),
-                              SizedBox(height: imageHeight * 0.03),
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap:
-                                        isOutOfStock
-                                            ? null
-                                            : () {
-                                              context.go(
-                                                AppRoutes.productDetails(
-                                                  widget.product.id,
-                                                ),
-                                              );
-                                            },
-                                    child: BarlowText(
-                                      text: "VIEW",
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                      lineHeight: 1.0,
-                                      enableHoverBackground: true,
-                                      hoverBackgroundColor: Colors.white,
-                                      hoverTextColor: const Color(0xFF3E5B84),
+                              SizedBox(height: imageHeight * 0.04),
+                              if (isOutOfStock)
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        context.go(
+                                          AppRoutes.productDetails(
+                                            widget.product.id,
+                                          ),
+                                        );
+                                      },
+                                      child: BarlowText(
+                                        text: "VIEW",
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                        lineHeight: 1.0,
+                                        enableHoverBackground: true,
+                                        hoverBackgroundColor: Colors.white,
+                                        hoverTextColor: Color(0xFF30578E),
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: imageWidth * 0.02),
-                                  BarlowText(
-                                    text: " / ",
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    lineHeight: 1.0,
-                                  ),
-                                  SizedBox(width: imageWidth * 0.02),
-                                  GestureDetector(
-                                    onTap:
-                                        isOutOfStock
-                                            ? null
-                                            : () {
-                                              showDialog(
-                                                context: context,
-                                                barrierColor:
-                                                    Colors.transparent,
-                                                builder: (
-                                                  BuildContext context,
-                                                ) {
-                                                  cartNotifier.refresh();
-                                                  return CartPanel(
-                                                    productId:
-                                                        widget.product.id,
-                                                  );
-                                                },
-                                              );
-                                              widget.onWishlistChanged?.call(
-                                                'Product Added To Cart',
-                                              );
-                                            },
-                                    child: BarlowText(
-                                      text: "ADD TO CART",
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                      lineHeight: 1.0,
-                                      enableHoverBackground: true,
-                                      hoverBackgroundColor: Colors.white,
-                                      hoverTextColor: const Color(0xFF3E5B84),
+                                    SizedBox(width: imageWidth * 0.02),
+                                    Text(
+                                      "/",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily:
+                                            GoogleFonts.barlow().fontFamily,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                        height: 1.0,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    SizedBox(width: imageWidth * 0.02),
+                                    GestureDetector(
+                                      onTap: () {
+                                        widget.onWishlistChanged?.call(
+                                          "We'll notify you when this product is back in stock.",
+                                        );
+                                      },
+                                      child: BarlowText(
+                                        text: "NOTIFY ME",
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                        lineHeight: 1.0,
+                                        enableHoverBackground: true,
+                                        hoverBackgroundColor: Colors.white,
+                                        hoverTextColor: Color(0xFF30578E),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        context.go(
+                                          AppRoutes.productDetails(
+                                            widget.product.id,
+                                          ),
+                                        );
+                                      },
+                                      child: BarlowText(
+                                        text: "VIEW",
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                        lineHeight: 1.0,
+                                        enableHoverBackground: true,
+                                        hoverBackgroundColor: Colors.white,
+                                        hoverTextColor: Color(0xFF30578E),
+                                      ),
+                                    ),
+                                    SizedBox(width: imageWidth * 0.02),
+                                    Text(
+                                      "/",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily:
+                                            GoogleFonts.barlow().fontFamily,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                        height: 1.0,
+                                      ),
+                                    ),
+                                    SizedBox(width: imageWidth * 0.02),
+                                    GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          barrierColor: Colors.transparent,
+                                          builder: (BuildContext context) {
+                                            cartNotifier.refresh();
+                                            return CartPanel(
+                                              productId: widget.product.id,
+                                            );
+                                          },
+                                        );
+                                        widget.onWishlistChanged?.call(
+                                          'Product Added To Cart',
+                                        );
+                                      },
+                                      child: BarlowText(
+                                        text: "ADD TO CART",
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                        lineHeight: 1.0,
+                                        enableHoverBackground: true,
+                                        hoverBackgroundColor: Colors.white,
+                                        hoverTextColor: Color(0xFF30578E),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                             ],
                           ),
                         ),

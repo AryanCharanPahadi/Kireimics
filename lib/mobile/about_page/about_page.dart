@@ -254,7 +254,7 @@ class _AboutPageState extends State<AboutPage> {
             text: entry.key,
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF3E5B84),
+            color: const Color(0xFF30578E),
           ),
         ),
       );

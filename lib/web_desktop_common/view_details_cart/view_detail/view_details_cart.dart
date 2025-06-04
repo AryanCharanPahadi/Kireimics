@@ -42,7 +42,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
                         onTap: () => Navigator.of(context).pop(),
                         child: BarlowText(
                           text: "Close",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontWeight: FontWeight.w600,
                           fontSize: 16.0,
                           lineHeight: 1.0,
@@ -173,7 +173,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
                                             SizedBox(height: 35),
                                             BarlowText(
                                               text: "VIEW DETAILS",
-                                              color: Color(0xFF3E5B84),
+                                              color: Color(0xFF30578E),
                                               fontWeight: FontWeight.w600,
                                               fontSize: 16,
                                             ),
@@ -183,7 +183,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
                                     ],
                                   ),
                                 ),
-                                Divider(color: Color(0xFF3E5B84)),
+                                Divider(color: Color(0xFF30578E)),
                                 SizedBox(height: 10),
                               ],
                             );
@@ -365,7 +365,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
                                             fontWeight: FontWeight.w600,
                                             fontSize: 14,
                                             lineHeight: 1.5,
-                                            color: Color(0xFF3E5B84),
+                                            color: Color(0xFF30578E),
                                             hoverBackgroundColor: Color(
                                               0xFFb9d6ff,
                                             ),

@@ -45,7 +45,7 @@ class CatalogNavigation extends StatelessWidget {
               },
               child: BarlowText(
                 text: name,
-                color: const Color(0xFF3E5B84),
+                color: const Color(0xFF30578E),
                 fontWeight: fontWeight, // Use fontWeight from parameter
                 fontSize: fontSize, // Use fontSize from parameter
                 lineHeight: 1.0,
@@ -55,8 +55,11 @@ class CatalogNavigation extends StatelessWidget {
                         ? TextDecoration.underline
                         : TextDecoration.none,
                 decorationThickness: 2.0,
-                decorationColor: const Color(0xFF3E5B84),
+                decorationColor: const Color(0xFF30578E),
                 enableHoverUnderline: true,
+                hoverTextColor: Color(
+                  0xFF2876E4,
+                ),
               ),
             );
           }).toList();

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kireimics/component/text_fonts/custom_text.dart';
 import '../../component/app_routes/routes.dart';
+import '../../component/google_sign_in/auth.dart';
 import '../../component/no_result_found/no_order_yet.dart';
 import '../../component/no_result_found/no_product_yet.dart';
 
@@ -29,11 +30,14 @@ class CollectionProductPage extends StatefulWidget {
 class _CollectionProductPageState extends State<CollectionProductPage>
     with TickerProviderStateMixin {
   List<AnimationController> _controllers = [];
-
+  late String collectionName = '';
   @override
   void initState() {
     super.initState();
     final controller = Get.put(CollectionViewController());
+    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
+    final uri = Uri.parse(route.uri.toString());
+    collectionName = uri.queryParameters['collection_name'] ?? 'No Collection';
     // Fetch products based on the current filter or category
     if (controller.currentFilter.value == 'All') {
       controller.fetchProducts(widget.productIds);
@@ -73,7 +77,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                     children: [
                       BarlowText(
                         text: "Catalog",
-                        color: const Color(0xFF3E5B84),
+                        color: const Color(0xFF30578E),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         lineHeight: 1.0,
@@ -87,18 +91,18 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                         'assets/icons/right_icon.svg',
                         width: 24,
                         height: 24,
-                        color: const Color(0xFF3E5B84),
+                        color: const Color(0xFF30578E),
                       ),
                       const SizedBox(width: 9),
                       BarlowText(
                         text: "Collections",
-                        color: const Color(0xFF3E5B84),
+                        color: const Color(0xFF30578E),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         lineHeight: 1.0,
                         route: AppRoutes.checkOut,
                         enableUnderlineForActiveRoute: true,
-                        decorationColor: const Color(0xFF3E5B84),
+                        decorationColor: const Color(0xFF30578E),
                         onTap: () {},
                       ),
 
@@ -107,16 +111,12 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                         'assets/icons/right_icon.svg',
                         width: 24,
                         height: 24,
-                        color: const Color(0xFF3E5B84),
+                        color: const Color(0xFF30578E),
                       ),
                       const SizedBox(width: 9),
                       BarlowText(
-                        text:
-                            controller.productList.isNotEmpty
-                                ? controller.productList[0].collectionName ??
-                                    'No Collection'
-                                : 'No Collection',
-                        color: const Color(0xFF3E5B84),
+                        text: collectionName,
+                        color: const Color(0xFF30578E),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         lineHeight: 1.0,
@@ -130,7 +130,10 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: Padding(
-                    padding: EdgeInsets.only(left: isLargeScreen ? 545 : 453),
+                    padding: EdgeInsets.only(
+                      left: isLargeScreen ? 545 : 453,
+                      right: isLargeScreen ? 172 : 0, // Updated line
+                    ),
                     child: Column(
                       children: [
                         Container(
@@ -211,7 +214,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                               },
                               child: BarlowText(
                                 text: "Sort / New",
-                                color: const Color(0xFF3E5B84),
+                                color: const Color(0xFF30578E),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                               ),
@@ -226,7 +229,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                               child: BarlowText(
                                 text:
                                     "Filter / ${controller.currentFilter.value}",
-                                color: const Color(0xFF3E5B84),
+                                color: const Color(0xFF30578E),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                               ),
@@ -373,7 +376,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                 text: option['label'] as String,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: const Color(0xFF3E5B84),
+                color: const Color(0xFF30578E),
                 hoverBackgroundColor: const Color(0xFFb9d6ff),
                 enableHoverBackground: true,
               ),
@@ -431,7 +434,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                 text: option['label'] as String,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: const Color(0xFF3E5B84),
+                color: const Color(0xFF30578E),
                 hoverBackgroundColor: const Color(0xFFb9d6ff),
                 enableHoverBackground: true,
               ),

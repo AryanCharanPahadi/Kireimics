@@ -52,7 +52,9 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
 
     if (formKey.currentState!.validate()) {
       String formattedDate = getFormattedDate();
-      print("Input values: firstName=${firstNameController.text}, lastName=${lastNameController.text}, phone=${mobileController.text}, updatedAt=$formattedDate");
+      print(
+        "Input values: firstName=${firstNameController.text}, lastName=${lastNameController.text}, phone=${mobileController.text}, updatedAt=$formattedDate",
+      );
 
       try {
         final response = await ApiHelper.editRegisterUser(
@@ -91,6 +93,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
     widget.onWishlistChanged?.call(signupMessage);
     return false;
   }
+
   Future<void> _loadUserData() async {
     String? storedUser = await SharedPreferencesHelper.getUserData();
 
@@ -206,14 +209,14 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                           children: [
                             BarlowText(
                               text: "My Account",
-                              color: Color(0xFF3E5B84),
+                              color: Color(0xFF30578E),
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               lineHeight: 1.0,
                               letterSpacing: 1 * 0.04,
                               route: AppRoutes.myAccount,
                               enableUnderlineForActiveRoute: true,
-                              decorationColor: Color(0xFF3E5B84),
+                              decorationColor: Color(0xFF30578E),
                               onTap: () {
                                 context.go(AppRoutes.myAccount);
                               },
@@ -221,13 +224,13 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                             SizedBox(width: 32),
                             BarlowText(
                               text: "My Orders",
-                              color: Color(0xFF3E5B84),
+                              color: Color(0xFF30578E),
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               lineHeight: 1.0,
                               route: AppRoutes.myOrder,
                               enableUnderlineForActiveRoute: true,
-                              decorationColor: Color(0xFF3E5B84),
+                              decorationColor: Color(0xFF30578E),
                               onTap: () {
                                 context.go(AppRoutes.myOrder);
                               },
@@ -235,7 +238,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                             SizedBox(width: 32),
                             BarlowText(
                               text: "Wishlist",
-                              color: Color(0xFF3E5B84),
+                              color: Color(0xFF30578E),
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               lineHeight: 1.0,
@@ -541,7 +544,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                                                                 letterSpacing:
                                                                     0.0,
                                                                 color: Color(
-                                                                  0xFF3E5B84,
+                                                                  0xFF30578E,
                                                                 ),
                                                                 hoverBackgroundColor:
                                                                     Color(
@@ -580,7 +583,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                                                                 letterSpacing:
                                                                     0.0,
                                                                 color: Color(
-                                                                  0xFF3E5B84,
+                                                                  0xFF30578E,
                                                                 ),
                                                               ),
                                                               BarlowText(
@@ -593,7 +596,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                                                                 letterSpacing:
                                                                     0.0,
                                                                 color: Color(
-                                                                  0xFF3E5B84,
+                                                                  0xFF30578E,
                                                                 ),
                                                                 hoverBackgroundColor:
                                                                     Color(

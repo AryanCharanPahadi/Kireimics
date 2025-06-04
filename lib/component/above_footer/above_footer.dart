@@ -100,7 +100,7 @@ class _AboveFooterState extends State<AboveFooter> {
                   fontSize: fontSize,
                   height: 36 / fontSize,
                   letterSpacing: 0.04 * fontSize,
-                  color: Color(0xFF3E5B84),
+                  color: Color(0xFF30578E),
                 ),
               ),
               SizedBox(width: 8),

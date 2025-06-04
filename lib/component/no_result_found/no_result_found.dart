@@ -36,7 +36,7 @@ class BrowseOurCatalog extends StatelessWidget {
           child: BarlowText(
             text: "BROWSE OUR CATALOG",
             backgroundColor: Color(0xFFb9d6ff),
-            color: Color(0xFF3E5B84),
+            color: Color(0xFF30578E),
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),

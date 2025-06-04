@@ -310,14 +310,14 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
   Widget _buildNavItem(String text, String route, BuildContext context) {
     return BarlowText(
       text: text,
-      color: const Color(0xFF3E5B84),
+      color: const Color(0xFF30578E),
       fontSize: 16,
       fontWeight: FontWeight.w600,
       lineHeight: 1.0,
       letterSpacing: 1 * 0.04,
       route: route,
       enableUnderlineForActiveRoute: true,
-      decorationColor: const Color(0xFF3E5B84),
+      decorationColor: const Color(0xFF30578E),
       onTap: () => context.go(route),
     );
   }
@@ -352,8 +352,8 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
                   : onAction,
           child: BarlowText(
             text: actionText,
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            fontSize: 20,
             lineHeight: 1.0,
             letterSpacing: 0.04 * 16,
             color: const Color(0xFF414141),
@@ -579,7 +579,7 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
           fontWeight: FontWeight.w600,
           fontSize: 16,
           lineHeight: 1.5,
-          color: const Color(0xFF3E5B84),
+          color: const Color(0xFF30578E),
           hoverBackgroundColor: const Color(0xFFb9d6ff),
           enableHoverBackground: true,
         ),

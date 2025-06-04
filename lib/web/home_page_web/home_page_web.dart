@@ -29,7 +29,7 @@ class _HomePageWebState extends State<HomePageWeb>
   final ProductController productController = Get.put(ProductController());
   final FocusNode _messageFocusNode = FocusNode();
   final FocusNode _anotherMessageFocusNode = FocusNode();
-  bool _isHovered = false; // Track hover state for image
+// Track hover state for image
   Future<void> _initializeWishlistStates() async {
     // This will be called after products are loaded
     if (mounted) setState(() {});
@@ -245,7 +245,7 @@ class _HomePageWebState extends State<HomePageWeb>
                                         letterSpacing: 0.64,
                                         backgroundColor: Color(0xFFb9d6ff),
                                         enableHoverBackground: true,
-                                        color: Color(0xFF3E5B84),
+                                        color: Color(0xFF30578E),
                                         hoverTextColor: Color(0xFFb9d6ff),
                                       ),
                                     ),
@@ -333,13 +333,11 @@ class _HomePageWebState extends State<HomePageWeb>
                                   child: MouseRegion(
                                     onEnter: (_) {
                                       setState(() {
-                                        _isHovered = true;
                                       });
                                       _controller.forward();
                                     },
                                     onExit: (_) {
                                       setState(() {
-                                        _isHovered = false;
                                       });
                                       _controller.reverse();
                                     },
@@ -453,7 +451,7 @@ class _HomePageWebState extends State<HomePageWeb>
                                             fontSize: 14,
                                             height: 1.0,
                                             letterSpacing: 0.0,
-                                            color: Color(0xFF3E5B84),
+                                            color: Color(0xFF30578E),
                                           ),
                                         ),
                                       ),
@@ -469,7 +467,7 @@ class _HomePageWebState extends State<HomePageWeb>
                                           color: const Color(0xFF0D2C54),
                                           enableHoverBackground: true,
                                           hoverBackgroundColor: Color(
-                                            0xFF3E5B84,
+                                            0xFF30578E,
                                           ),
                                           hoverTextColor: Colors.white,
                                           onTap: () async {

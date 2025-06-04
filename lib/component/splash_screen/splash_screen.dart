@@ -16,7 +16,7 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _animation;
 
   final List<Color> _colors = [
-    const Color(0xFF3E5B84), // Blue (base)
+    const Color(0xFF30578E), // Blue (base)
     const Color(0xFFF46856),
     const Color(0xFFFFBC5A),
   ];

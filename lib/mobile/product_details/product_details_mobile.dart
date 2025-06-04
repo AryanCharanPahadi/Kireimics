@@ -143,7 +143,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF3E5B84)));
+      return Center(child: CircularProgressIndicator(color: Color(0xFF30578E)));
     }
 
     if (errorMessage.isNotEmpty) {
@@ -174,7 +174,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                   children: [
                     BarlowText(
                       text: "Catalog",
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
@@ -188,13 +188,13 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       'assets/icons/right_icon.svg',
                       width: 20,
                       height: 20,
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                     ),
                     SizedBox(width: 9.0),
 
                     BarlowText(
                       text: product!.catName,
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
@@ -218,13 +218,13 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       'assets/icons/right_icon.svg',
                       width: 20,
                       height: 20,
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                     ),
                     SizedBox(width: 9.0),
 
                     BarlowText(
                       text: "View Details",
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
@@ -232,7 +232,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       enableUnderlineForActiveRoute:
                           true, // Enable underline when active
                       decorationColor: Color(
-                        0xFF3E5B84,
+                        0xFF30578E,
                       ), // Color of the underline
                       onTap: () {},
                     ),
@@ -300,7 +300,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       fontSize: 16, // 32px
                       lineHeight: 1.0,
                       letterSpacing: 1 * 0.04, // 4% of 32px
-                      color: Color(0xFF3E5B84),
+                      color: Color(0xFF30578E),
                     ),
 
                     SizedBox(height: 14),
@@ -350,7 +350,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       },
                       child: BarlowText(
                         text: "ADD TO CART",
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                         fontWeight: FontWeight.w600, // 400 weight
                         fontSize: 14, // 32px
                         lineHeight: 1.0,
@@ -392,7 +392,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                           },
                           child: BarlowText(
                             text: "WISHLIST",
-                            color: Color(0xFF3E5B84),
+                            color: Color(0xFF30578E),
                             fontWeight: FontWeight.w600, // 400 weight
                             fontSize: 14, // 32px
                             lineHeight: 1.0,
@@ -501,7 +501,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                         fontSize: 14,
                         lineHeight: 1.0,
                         letterSpacing: 0.64,
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                         backgroundColor: Color(0xFFb9d6ff),
                       ),
                     ),
@@ -814,7 +814,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                                         fontWeight: FontWeight.w400,
                                         fontSize: 14,
                                         height: 1.2,
-                                        color: const Color(0xFF3E5B84),
+                                        color: const Color(0xFF30578E),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -827,9 +827,9 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                                       color:
                                           isOutOfStock
                                               ? const Color(
-                                                0xFF3E5B84,
+                                                0xFF30578E,
                                               ).withOpacity(0.5)
-                                              : const Color(0xFF3E5B84),
+                                              : const Color(0xFF30578E),
                                       onTap:
                                           isOutOfStock
                                               ? null

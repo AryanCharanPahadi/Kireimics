@@ -92,7 +92,7 @@ class PaymentResultPage extends StatelessWidget {
                           text: 'Order Details',
                           fontWeight: FontWeight.w600,
                           fontSize: (18 * fontScale).clamp(16, 18),
-                          color: const Color(0xFF3E5B84),
+                          color: const Color(0xFF30578E),
                         ),
                         SizedBox(height: 8 * fontScale),
                         Row(
@@ -157,7 +157,7 @@ class PaymentResultPage extends StatelessWidget {
                           ),
                           child: BarlowText(
                             text: "Retry Payment",
-                            color: const Color(0xFF3E5B84),
+                            color: const Color(0xFF30578E),
                             fontWeight: FontWeight.w600,
                             fontSize: (16 * fontScale).clamp(12, 16),
                             lineHeight: 1.0,
@@ -177,7 +177,7 @@ class PaymentResultPage extends StatelessWidget {
                           vertical: 8 * fontScale,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3E5B84),
+                          color: const Color(0xFF30578E),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: BarlowText(

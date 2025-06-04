@@ -45,7 +45,7 @@ class _FooterState extends State<Footer> {
             child: Column(
               children: [
                 SizedBox(height: 45),
-                Divider(color: Color(0xFF3E5B84)),
+                Divider(color: Color(0xFF30578E)),
                 SizedBox(height: 30),
 
                 Column(
@@ -62,10 +62,10 @@ class _FooterState extends State<Footer> {
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                         letterSpacing: 0.64,
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                         route: AppRoutes.shippingPolicy,
                         enableUnderlineForActiveRoute: true,
-                        decorationColor: Color(0xFF3E5B84),
+                        decorationColor: Color(0xFF30578E),
                       ),
                     ),
                     SizedBox(height: 20),
@@ -80,10 +80,10 @@ class _FooterState extends State<Footer> {
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                         letterSpacing: 0.64,
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                         route: AppRoutes.privacyPolicy,
                         enableUnderlineForActiveRoute: true,
-                        decorationColor: Color(0xFF3E5B84),
+                        decorationColor: Color(0xFF30578E),
                       ),
                     ),
                     SizedBox(height: 20),
@@ -97,10 +97,10 @@ class _FooterState extends State<Footer> {
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                         letterSpacing: 0.64,
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                         route: AppRoutes.contactUs,
                         enableUnderlineForActiveRoute: true,
-                        decorationColor: Color(0xFF3E5B84),
+                        decorationColor: Color(0xFF30578E),
                       ),
                     ),
                   ],
@@ -172,7 +172,7 @@ class _FooterState extends State<Footer> {
                                 fontWeight: FontWeight.w400,
                                 fontSize: 16,
                                 letterSpacing: 0.04,
-                                color: Color(0xFF3e5b84),
+                                color: Color(0xFF30578E),
                               ),
                             ),
                             TextSpan(
@@ -221,7 +221,7 @@ class _FooterState extends State<Footer> {
                         Padding(
                           padding: const EdgeInsets.only(left: 4.0),
                           child: SvgPicture.asset(
-                            'assets/sidebar/instagram.svg',
+                            'assets/sidebar/newInstagram.svg',
                             width: 18,
                             height: 18,
                           ),
@@ -230,7 +230,7 @@ class _FooterState extends State<Footer> {
                         Padding(
                           padding: const EdgeInsets.only(left: 4.0),
                           child: SvgPicture.asset(
-                            'assets/sidebar/email.svg',
+                            'assets/sidebar/newEmail.svg',
                             width: 18,
                             height: 14,
                           ),

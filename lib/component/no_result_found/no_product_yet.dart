@@ -14,7 +14,7 @@ class NoProductYet extends StatelessWidget {
         BarlowText(
           text: "We haven't added anything here yet. But we will soon!",
           // backgroundColor: Color(0xFFb9d6ff),
-          color: Color(0xFF3E5B84),
+          color: Color(0xFF30578E),
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),

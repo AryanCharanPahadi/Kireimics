@@ -110,7 +110,7 @@ class _CartPanelState extends State<CartPanel> {
     final isLargeScreen = screenWidth > 1400;
 
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF3E5B84)));
+      return Center(child: CircularProgressIndicator(color: Color(0xFF30578E)));
     }
 
     if (errorMessage.isNotEmpty) {
@@ -145,15 +145,13 @@ class _CartPanelState extends State<CartPanel> {
                       onTap: () => Navigator.of(context).pop(),
                       child: BarlowText(
                         text: "Close",
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                         fontWeight: FontWeight.w600,
                         fontSize: 16.0,
                         lineHeight: 1.0,
                         letterSpacing: 0.64,
                         enableHoverUnderline: true,
-                        decorationColor: const Color(
-                          0xFF3E5B84,
-                        ),
+                        decorationColor: const Color(0xFF30578E),
                       ),
                     ),
                     SizedBox(height: 33),
@@ -215,7 +213,7 @@ class _CartPanelState extends State<CartPanel> {
                                                   child: BarlowText(
                                                     text: product.name,
                                                     fontWeight: FontWeight.w400,
-                                                    fontSize: 20,
+                                                    fontSize: 16,
                                                     lineHeight: 1.0,
                                                     letterSpacing: 0.0,
                                                     color:
@@ -226,7 +224,7 @@ class _CartPanelState extends State<CartPanel> {
                                                   ),
                                                 ),
                                                 SizedBox(width: 12),
-                                                CralikaFont(
+                                                BarlowText(
                                                   text:
                                                       isOutOfStock
                                                           ? "Out of Stock"
@@ -256,7 +254,7 @@ class _CartPanelState extends State<CartPanel> {
                                                         icon: Icon(
                                                           Icons.remove,
                                                           color: Color(
-                                                            0xFF3E5B84,
+                                                            0xFF30578E,
                                                           ),
                                                         ),
                                                         onPressed:
@@ -290,7 +288,7 @@ class _CartPanelState extends State<CartPanel> {
                                                         icon: Icon(
                                                           Icons.add,
                                                           color: Color(
-                                                            0xFF3E5B84,
+                                                            0xFF30578E,
                                                           ),
                                                         ),
                                                         onPressed:
@@ -330,7 +328,7 @@ class _CartPanelState extends State<CartPanel> {
                                               },
                                               child: BarlowText(
                                                 text: "REMOVE",
-                                                color: Color(0xFF3E5B84),
+                                                color: Color(0xFF30578E),
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 16,
                                               ),
@@ -341,7 +339,7 @@ class _CartPanelState extends State<CartPanel> {
                                     ],
                                   ),
                                 ),
-                                Divider(color: Color(0xFF3E5B84)),
+                                Divider(color: Color(0xFF30578E)),
                                 SizedBox(height: 10),
                               ],
                             );
@@ -372,11 +370,11 @@ class _CartPanelState extends State<CartPanel> {
                                   lineHeight: 1.0,
                                   letterSpacing: 0,
                                 ),
-                                CralikaFont(
+                                BarlowText(
                                   text:
                                       "Rs ${calculateTotal().toStringAsFixed(2)}",
                                   color: Color(0xFF414141),
-                                  fontSize: isLargeScreen ? 27 : 20,
+                                  fontSize: isLargeScreen ? 27 : 24,
                                   fontWeight: FontWeight.w400,
                                   lineHeight: 1.0,
                                 ),
@@ -412,12 +410,15 @@ class _CartPanelState extends State<CartPanel> {
                                 },
                                 child: BarlowText(
                                   text: "PROCEED TO CHECKOUT",
-                                  color: Color(0xFF3E5B84),
+                                  color: Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                   lineHeight: 1.0,
                                   letterSpacing: 1 * 0.04,
                                   backgroundColor: Color(0xFFb9d6ff),
+                                  hoverTextColor: Color(
+                                    0xFF2876E4,
+                                  ), // Changes to blue on hover
                                 ),
                               ),
                             ),

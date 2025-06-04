@@ -164,7 +164,7 @@ class _CatalogViewAllState extends State<CatalogViewAll>
                       child: const BarlowText(
                         text: "BROWSE OUR CATALOG",
                         backgroundColor: Color(0xFFb9d6ff),
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                         fontSize: 17,
                       ),
                     ),
@@ -190,7 +190,7 @@ class _CatalogViewAllState extends State<CatalogViewAll>
                         text: "${productList.length} PRODUCT FOUND",
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                       ),
                       SizedBox(height: 20),
                       GridView.builder(
@@ -455,7 +455,7 @@ class _CatalogViewAllState extends State<CatalogViewAll>
                                                 ),
                                                 decoration: BoxDecoration(
                                                   color: const Color(
-                                                    0xFF3E5B84,
+                                                    0xFF30578E,
                                                   ).withOpacity(0.8),
                                                 ),
                                                 child: Column(
@@ -517,7 +517,7 @@ class _CatalogViewAllState extends State<CatalogViewAll>
                                                                 Colors.white,
                                                             hoverTextColor:
                                                                 Color(
-                                                                  0xFF3E5B84,
+                                                                  0xFF30578E,
                                                                 ),
                                                           ),
                                                         ),
@@ -589,7 +589,7 @@ class _CatalogViewAllState extends State<CatalogViewAll>
                                                                 Colors.white,
                                                             hoverTextColor:
                                                                 Color(
-                                                                  0xFF3E5B84,
+                                                                  0xFF30578E,
                                                                 ),
                                                           ),
                                                         ),

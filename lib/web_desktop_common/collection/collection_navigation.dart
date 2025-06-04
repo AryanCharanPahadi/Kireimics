@@ -47,7 +47,7 @@ class CollectionNavigation extends StatelessWidget {
           },
           child: BarlowText(
             text: name,
-            color: const Color(0xFF3E5B84),
+            color: const Color(0xFF30578E),
             fontWeight: fontWeight,
             fontSize: fontSize,
             lineHeight: 1.0,
@@ -56,7 +56,7 @@ class CollectionNavigation extends StatelessWidget {
                 ? TextDecoration.underline
                 : TextDecoration.none,
             decorationThickness: 2.0,
-            decorationColor: const Color(0xFF3E5B84),
+            decorationColor: const Color(0xFF30578E),
           ),
         );
       }).toList();

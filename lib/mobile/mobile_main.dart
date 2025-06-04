@@ -539,7 +539,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                               children: [
                                 BarlowText(
                                   text: "Rs. ${_total.toStringAsFixed(2)}",
-                                  color: Color(0xFF3E5B84),
+                                  color: Color(0xFF30578E),
                                   fontSize: 20,
                                   fontWeight: FontWeight.w600,
                                   lineHeight: 1.0,
@@ -548,7 +548,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                 SizedBox(height: 8),
                                 BarlowText(
                                   text: "MAKE PAYMENT",
-                                  color: Color(0xFF3E5B84),
+                                  color: Color(0xFF30578E),
                                   fontSize: 20,
                                   fontWeight: FontWeight.w600,
                                   backgroundColor: Color(0xFFB9D6FF),

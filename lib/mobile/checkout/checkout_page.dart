@@ -109,7 +109,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                       children: [
                         BarlowText(
                           text: "My Cart",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
@@ -122,13 +122,13 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                           'assets/icons/right_icon.svg',
                           width: 20,
                           height: 20,
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                         ),
                         SizedBox(width: 9.0),
 
                         BarlowText(
                           text: "View Details",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
@@ -136,7 +136,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                           enableUnderlineForActiveRoute:
                               true, // Enable underline when active
                           decorationColor: Color(
-                            0xFF3E5B84,
+                            0xFF30578E,
                           ), // Color of the underline
                           onTap: () {},
                         ),
@@ -235,7 +235,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                           fontWeight: FontWeight.w600,
                                           fontSize: 12,
                                           lineHeight: 1.5,
-                                          color: Color(0xFF3E5B84),
+                                          color: Color(0xFF30578E),
                                         ),
                                       ),
                                     ],
@@ -315,7 +315,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                     isChecked = value ?? false;
                                   });
                                 },
-                                activeColor: Color(0xFF3E5B84),
+                                activeColor: Color(0xFF30578E),
                               ),
                               SizedBox(width: 5),
                               Expanded(
@@ -344,7 +344,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                         TextSpan(
                                           text: "Privacy Policy",
                                           style: TextStyle(
-                                            color: Color(0xFF3E5B84),
+                                            color: Color(0xFF30578E),
                                             fontFamily:
                                                 GoogleFonts.barlow().fontFamily,
                                           ),
@@ -353,7 +353,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                         TextSpan(
                                           text: "Shipping Policy",
                                           style: TextStyle(
-                                            color: Color(0xFF3E5B84),
+                                            color: Color(0xFF30578E),
                                             fontFamily:
                                                 GoogleFonts.barlow().fontFamily,
                                           ),
@@ -379,7 +379,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           // width: 346,
 
                           // height: 243,

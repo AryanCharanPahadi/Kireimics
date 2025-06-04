@@ -33,6 +33,7 @@ class _LoginMobileState extends State<LoginMobile> {
     loginController.passwordController.clear();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -127,7 +128,7 @@ class _LoginMobileState extends State<LoginMobile> {
                                         isChecked = value ?? false;
                                       });
                                     },
-                                    activeColor: Color(0xFF3E5B84),
+                                    activeColor: Color(0xFF30578E),
                                   ),
                                   BarlowText(
                                     text: "Remember Me",
@@ -145,7 +146,7 @@ class _LoginMobileState extends State<LoginMobile> {
                             children: [
                               BarlowText(
                                 text: "Forgot Password?",
-                                color: Color(0xFF3E5B84),
+                                color: Color(0xFF30578E),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                                 lineHeight: 1.0,
@@ -194,7 +195,7 @@ class _LoginMobileState extends State<LoginMobile> {
                                   fontSize: 14,
                                   lineHeight: 1.0,
                                   letterSpacing: 0.64,
-                                  color: Color(0xFF3E5B84),
+                                  color: Color(0xFF30578E),
                                   backgroundColor: Color(0xFFb9d6ff),
                                 ),
                               ),
@@ -291,7 +292,7 @@ class _LoginMobileState extends State<LoginMobile> {
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                           lineHeight: 1.5,
-                          color: const Color(0xFF3E5B84),
+                          color: const Color(0xFF30578E),
                         ),
                       ),
                     ],
@@ -368,7 +369,7 @@ class _LoginMobileState extends State<LoginMobile> {
                             obscureText
                                 ? Icons.visibility_off
                                 : Icons.visibility,
-                            color: const Color(0xFF3E5B84),
+                            color: const Color(0xFF30578E),
                           ),
                           onPressed: () {
                             setState(() {

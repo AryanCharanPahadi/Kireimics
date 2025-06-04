@@ -280,7 +280,7 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                           letterSpacing: 0.64,
                                           backgroundColor: Color(0xFFb9d6ff),
                                           enableHoverBackground: true,
-                                          color: Color(0xFF3E5B84),
+                                          color: Color(0xFF30578E),
                                           hoverTextColor: Color(0xFFb9d6ff),
                                         ),
                                       ),
@@ -523,7 +523,7 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                             fontSize: 14,
                                             height: 1.0,
                                             letterSpacing: 0.0,
-                                            color: Color(0xFF3E5B84),
+                                            color: Color(0xFF30578E),
                                           ),
                                         ),
                                       ),
@@ -539,7 +539,7 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                           color: const Color(0xFF0D2C54),
                                           enableHoverBackground: true,
                                           hoverBackgroundColor: Color(
-                                            0xFF3E5B84,
+                                            0xFF30578E,
                                           ),
                                           hoverTextColor: Colors.white,
                                           onTap: () async {

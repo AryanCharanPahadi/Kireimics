@@ -72,7 +72,7 @@ class _HomePageMobileState extends State<HomePageMobile> {
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Divider(color: Color(0xFF3E5B84)),
+          child: Divider(color: Color(0xFF30578E)),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 32),
@@ -369,7 +369,7 @@ class _HomePageMobileState extends State<HomePageMobile> {
                                       fontSize: 16,
                                       lineHeight: 1.2,
                                       letterSpacing: 0.64,
-                                      color: Color(0xFF3E5B84),
+                                      color: Color(0xFF30578E),
                                       maxLines: 1,
                                     ),
                                     const SizedBox(height: 8),
@@ -381,7 +381,7 @@ class _HomePageMobileState extends State<HomePageMobile> {
                                         fontWeight: FontWeight.w400,
                                         fontSize: 14,
                                         height: 1.2,
-                                        color: const Color(0xFF3E5B84),
+                                        color: const Color(0xFF30578E),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -406,9 +406,9 @@ class _HomePageMobileState extends State<HomePageMobile> {
                                           color:
                                               isOutOfStock
                                                   ? const Color(
-                                                    0xFF3E5B84,
+                                                    0xFF30578E,
                                                   ).withOpacity(0.5)
-                                                  : const Color(0xFF3E5B84),
+                                                  : const Color(0xFF30578E),
                                         ),
                                       ),
                                     ),

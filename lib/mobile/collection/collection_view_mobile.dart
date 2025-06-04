@@ -62,7 +62,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                     children: [
                       BarlowText(
                         text: "Catalog",
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         lineHeight: 1.0,
@@ -78,13 +78,13 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                         'assets/icons/right_icon.svg',
                         width: 20,
                         height: 20,
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                       ),
                       SizedBox(width: 9.0),
 
                       BarlowText(
                         text: "Collections",
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         lineHeight: 1.0,
@@ -95,7 +95,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                         'assets/icons/right_icon.svg',
                         width: 20,
                         height: 20,
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                       ),
                       SizedBox(width: 9.0),
 
@@ -105,7 +105,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                 ? controller.productList[0].collectionName ??
                                     'No Collection'
                                 : 'No Collection',
-                        color: Color(0xFF3E5B84),
+                        color: Color(0xFF30578E),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         lineHeight: 1.0,
@@ -174,7 +174,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                 const SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.only(left: 14, right: 14),
-                  child: Divider(color: Color(0xFF3E5B84), height: 1),
+                  child: Divider(color: Color(0xFF30578E), height: 1),
                 ),
                 const SizedBox(height: 22),
                 Padding(
@@ -190,7 +190,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                         },
                         child: BarlowText(
                           text: "Sort / New",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                           lineHeight: 1.0,
@@ -206,7 +206,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                         },
                         child: BarlowText(
                           text: "Filter / ${controller.currentFilter.value}",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                           lineHeight: 1.0,
@@ -584,7 +584,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                 fontSize: 16,
                                                 lineHeight: 1.2,
                                                 letterSpacing: 0.64,
-                                                color: Color(0xFF3E5B84),
+                                                color: Color(0xFF30578E),
                                                 maxLines: 1,
                                               ),
                                               const SizedBox(height: 8),
@@ -597,7 +597,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                   fontSize: 14,
                                                   height: 1.2,
                                                   color: const Color(
-                                                    0xFF3E5B84,
+                                                    0xFF30578E,
                                                   ),
                                                 ),
                                               ),
@@ -623,10 +623,10 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                     color:
                                                         isOutOfStock
                                                             ? const Color(
-                                                              0xFF3E5B84,
+                                                              0xFF30578E,
                                                             ).withOpacity(0.5)
                                                             : const Color(
-                                                              0xFF3E5B84,
+                                                              0xFF30578E,
                                                             ),
                                                   ),
                                                 ),
@@ -727,7 +727,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                 text: option['label'] as String,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: const Color(0xFF3E5B84),
+                color: const Color(0xFF30578E),
                 hoverBackgroundColor: const Color(0xFFb9d6ff),
                 enableHoverBackground: true,
               ),
@@ -785,7 +785,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                 text: option['label'] as String,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: const Color(0xFF3E5B84),
+                color: const Color(0xFF30578E),
                 hoverBackgroundColor: const Color(0xFFb9d6ff),
                 enableHoverBackground: true,
               ),

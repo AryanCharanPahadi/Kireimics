@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPreferencesHelper {
   static const String _productIdsKey = 'cart_product_ids';
   static const _wishlistKey = 'wishlist_items';
-
+  static const String _selectedAddressKey = 'selectedAddress';
   // Save a new product ID (append to existing ones, avoid duplicates)
   static Future<void> addProductId(int productId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -110,6 +110,23 @@ class SharedPreferencesHelper {
       print('Error parsing user ID: $e');
       return null;
     }
+  }
+
+  static Future<void> saveSelectedAddress(String address) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_selectedAddressKey, address);
+  }
+
+  // Get selected address
+  static Future<String?> getSelectedAddress() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_selectedAddressKey);
+  }
+
+  // Clear selected address
+  static Future<void> clearSelectedAddress() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_selectedAddressKey);
   }
 
 }

@@ -10,14 +10,62 @@ import '../../component/utilities/url_launcher.dart';
 import 'contact_us_controller.dart';
 
 class ContactUsDesktop extends StatefulWidget {
-  const ContactUsDesktop({super.key});
-
+  final Function(String)? onWishlistChanged; // Callback to notify parent
+  const ContactUsDesktop({super.key, this.onWishlistChanged});
   @override
   State<ContactUsDesktop> createState() => _ContactUsDesktopState();
 }
 
 class _ContactUsDesktopState extends State<ContactUsDesktop> {
   final ContactController contactController = ContactController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _anotherMessageController =
+      TextEditingController();
+  final FocusNode _messageFocusNode = FocusNode();
+  final FocusNode _anotherMessageFocusNode = FocusNode();
+  bool isLoading = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _messageController.dispose();
+    _anotherMessageController.dispose();
+    _messageFocusNode.dispose();
+    _anotherMessageFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _submitForm() {
+    // Check validation in order of priority
+    if (_nameController.text.isEmpty) {
+      widget.onWishlistChanged?.call('Please enter your name');
+      return;
+    }
+
+    if (_emailController.text.isEmpty) {
+      widget.onWishlistChanged?.call('Please enter your email');
+      return;
+    }
+
+    if (!RegExp(
+      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+    ).hasMatch(_emailController.text)) {
+      widget.onWishlistChanged?.call('Please enter a valid email');
+      return;
+    }
+
+    if (_messageController.text.isEmpty) {
+      widget.onWishlistChanged?.call('Please enter a message');
+      return;
+    }
+
+    // If all validations pass
+    widget.onWishlistChanged?.call('Form submitted successfully!');
+  }
 
   @override
   void initState() {
@@ -40,9 +88,13 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 389, top: 35),
+              padding: EdgeInsets.only(
+                left: 395, // Fixed left padding (30%)
+                top: 35,
+                right: 266, // Fixed right padding
+              ),
               child: Container(
-                width: MediaQuery.of(context).size.width - 389,
+                width: MediaQuery.of(context).size.width - (395 + 266),
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: const AssetImage("assets/home_page/background.png"),
@@ -54,14 +106,12 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: 40,
-                    left: 47,
-                    bottom: 40,
-                    right: 50,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 40,
+                    horizontal: 47,
                   ),
                   child: Text(
-                    contactController.contactData!['band_text'] ??
+                    contactController.contactData?['band_text'] ??
                         "/Looking for gifting options, or want to get a piece commissioned? Let's connect and create something wonderful/",
                     textAlign: TextAlign.left,
                     style: TextStyle(
@@ -78,7 +128,7 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
             ),
             const SizedBox(height: 32),
             Padding(
-              padding: const EdgeInsets.only(left: 389, top: 35),
+              padding: const EdgeInsets.only(left: 395, top: 35),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [CralikaFont(text: "Contact Us", fontSize: 28)],
@@ -88,7 +138,7 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
             SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Padding(
-                padding: const EdgeInsets.only(left: 389, right: 192),
+                padding: const EdgeInsets.only(left: 395, right: 266),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,34 +149,39 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                         BarlowText(
                           text:
                               "Our address:\n${contactController.contactData!['address'].toString()}",
-                          fontSize: 14,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
                         ),
                         const SizedBox(height: 24),
                         InkWell(
                           onTap:
-                              () => UrlLauncherHelper.launchURL(context,
+                              () => UrlLauncherHelper.launchURL(
+                                context,
                                 "tel:${contactController.contactData!['phone'].toString()}",
                               ),
                           child: BarlowText(
                             text:
                                 contactController.contactData!['phone']
                                     .toString(),
-                            decoration: TextDecoration.underline,
-                            fontSize: 14,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF30578E),
                           ),
                         ),
                         const SizedBox(height: 24),
                         InkWell(
                           onTap:
-                              () => UrlLauncherHelper.launchURL(context,
+                              () => UrlLauncherHelper.launchURL(
+                                context,
                                 "mailto:${contactController.contactData!['email'].toString()}",
                               ),
                           child: BarlowText(
                             text:
                                 contactController.contactData!['email']
                                     .toString(),
-                            fontSize: 14,
-                            decoration: TextDecoration.underline,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF30578E),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -147,16 +202,31 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                           const SizedBox(height: 10),
                           customTextFormField(hintText: "YOUR EMAIL"),
                           const SizedBox(height: 10),
-                          customTextFormField(hintText: "MESSAGE"),
+                          customTextFormField(
+                            hintText: "MESSAGE",
+                            isMessageField: true,
+                            focusNode: _messageFocusNode,
+                            nextFocusNode: _anotherMessageFocusNode,
+                          ),
                           const SizedBox(height: 10),
-                          customTextFormField(hintText: ""),
+                          customTextFormField(
+                            hintText: "",
+                            isMessageField: true,
+                            controller: _anotherMessageController,
+                            focusNode: _anotherMessageFocusNode,
+                            maxLength: 40,
+                          ),
                           const SizedBox(height: 24),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: SvgPicture.asset(
-                              "assets/home_page/submit.svg",
-                              height: 19,
-                              width: 58,
+                          GestureDetector(
+                            onTap: _submitForm,
+
+                            child: Align(
+                              alignment: Alignment.bottomRight,
+                              child: SvgPicture.asset(
+                                "assets/home_page/submit.svg",
+                                height: 19,
+                                width: 58,
+                              ),
                             ),
                           ),
                         ],
@@ -168,7 +238,7 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
             ),
             const SizedBox(height: 32),
             Padding(
-              padding: const EdgeInsets.only(left: 389, top: 35),
+              padding: const EdgeInsets.only(left: 395, top: 35),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [CralikaFont(text: "FAQ's", fontSize: 28)],
@@ -178,7 +248,7 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
             Container(
               width: MediaQuery.of(context).size.width,
               child: Padding(
-                padding: const EdgeInsets.only(left: 389, right: 192),
+                padding: const EdgeInsets.only(left: 395, right: 266),
                 child: ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
@@ -269,48 +339,82 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
   List<Widget> _buildSocialLinks(String socialJson) {
     try {
       final Map<String, dynamic> socialLinks = jsonDecode(socialJson);
-      return socialLinks.entries.map((entry) {
+      final entries = socialLinks.entries.toList();
+
+      return List<Widget>.generate(entries.length, (index) {
+        final entry = entries[index];
+        final isLast = index == entries.length - 1;
+
         return Padding(
           padding: const EdgeInsets.only(right: 10),
           child: InkWell(
-            onTap: () => UrlLauncherHelper.launchURL(context,entry.value),
-            child: BarlowText(
-              text: entry.key,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF3E5B84),
+            onTap: () => UrlLauncherHelper.launchURL(context, entry.value),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BarlowText(
+                  text: entry.key,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF30578E),
+                ),
+                if (!isLast) ...[
+                  SizedBox(width: 14),
+                  BarlowText(
+                    text: '/',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF30578E),
+                  ),
+                ],
+              ],
             ),
           ),
         );
-      }).toList();
+      });
     } catch (e) {
       debugPrint("Error parsing social links: $e");
       return []; // Return empty list if parsing fails
     }
   }
 
-
   Widget customTextFormField({
     required String hintText,
     TextEditingController? controller,
+    bool isMessageField = false,
+    int? maxLength,
+    FocusNode? focusNode,
+    FocusNode? nextFocusNode,
   }) {
+    final int? effectiveMaxLength = isMessageField ? 25 : maxLength;
+
     return Stack(
       children: [
         // Hint text positioned on the left
         Positioned(
           left: 0,
-          top: 16, // Adjust this value to align vertically
+          top: 16,
           child: Text(
             hintText,
-            style: GoogleFonts.barlow(fontSize: 14, color: Color(0xFF414141)),
+            style: GoogleFonts.barlow(
+              fontSize: 14,
+              color: const Color(0xFF414141),
+            ),
           ),
         ),
-        // Text field with right-aligned input
         TextFormField(
           controller: controller,
+          focusNode: focusNode,
           cursorColor: Colors.black,
-          textAlign: TextAlign.right, // Align user input to the right
+          textAlign: TextAlign.right,
+          maxLength: effectiveMaxLength,
+          onChanged: (value) {
+            if (isMessageField && value.length == 25 && nextFocusNode != null) {
+              nextFocusNode!.requestFocus();
+            }
+          },
           decoration: InputDecoration(
+            counterText: '', // hides the maxLength counter
             hintStyle: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w400,
@@ -326,7 +430,7 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
             contentPadding: const EdgeInsets.only(bottom: 5),
           ),
           style: TextStyle(
-            color: Color(0xFF414141),
+            color: const Color(0xFF414141),
             fontFamily: GoogleFonts.barlow().fontFamily,
           ),
         ),

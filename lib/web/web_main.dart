@@ -159,9 +159,7 @@ class _LandingPageWebState extends State<LandingPageWeb>
     AppRoutes.about: (_) => const AboutPageWeb(),
     AppRoutes.shippingPolicy: (_) => const ShippingPolicy(),
     AppRoutes.privacyPolicy: (_) => const PrivacyPolicy(),
-    AppRoutes.contactUs: (_) => const ContactUs(),
     // AppRoutes.collection: (_) => const Collection(),
-    AppRoutes.checkOut: (_) => const CheckoutPageWeb(),
     AppRoutes.myOrder: (_) => const MyOrderUiWeb(),
 
     '/cart': (id) => CartPanel(productId: int.tryParse(id ?? '0') ?? 0),
@@ -181,6 +179,10 @@ class _LandingPageWebState extends State<LandingPageWeb>
           (_) => CatalogPage(onWishlistChanged: _showNotification),
       AppRoutes.myAccount:
           (_) => MyAccountUiWeb(onWishlistChanged: _showNotification),
+      AppRoutes.checkOut:
+          (_) => CheckoutPageWeb(onWishlistChanged: _showNotification),
+      AppRoutes.contactUs: (_) =>  ContactUs(onWishlistChanged: _showNotification),
+
 
       '/product':
           (id) => ProductDetails(

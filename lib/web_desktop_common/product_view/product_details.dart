@@ -8,6 +8,7 @@ import 'package:kireimics/component/text_fonts/custom_text.dart';
 import 'package:kireimics/component/app_routes/routes.dart';
 import '../../component/api_helper/api_helper.dart';
 import '../../component/cart_length/cart_loader.dart';
+import '../../component/no_result_found/no_order_yet.dart';
 import '../../component/no_result_found/no_product_yet.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
@@ -156,7 +157,7 @@ class _ProductDetailsState extends State<ProductDetails>
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1400;
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF3E5B84)));
+      return Center(child: CircularProgressIndicator(color: Color(0xFF30578E)));
     }
 
     if (errorMessage.isNotEmpty) {
@@ -190,7 +191,7 @@ class _ProductDetailsState extends State<ProductDetails>
                 child: Padding(
                   padding: EdgeInsets.only(
                     left: isLargeScreen ? 580 : 490,
-                    right: isLargeScreen ? screenWidth * 0.15 : 0,
+                    right: isLargeScreen ? 170 : 0,
                   ),
                   child: Container(
                     decoration: BoxDecoration(
@@ -250,7 +251,7 @@ class _ProductDetailsState extends State<ProductDetails>
               Padding(
                 padding: EdgeInsets.only(
                   left: isLargeScreen ? 512 : 100.0,
-                  right: isLargeScreen ? screenWidth * 0.15 : 38,
+                  right: isLargeScreen ? 170 : 38,
                 ),
                 child: Container(
                   // color: Colors.red,
@@ -277,15 +278,12 @@ class _ProductDetailsState extends State<ProductDetails>
                               onTap: () {
                                 final controller = Get.put(
                                   CatalogPageController(),
-                                ); // Access the controller
+                                );
                                 controller.selectedCategoryId.value =
-                                    product!.catId; // Update selectedCategoryId
+                                    product!.catId;
                                 context.go(
-                                  AppRoutes
-                                      .catalog, // Navigate to the CatalogPage route
-                                  extra: {
-                                    'categoryId': product!.catId,
-                                  }, // Pass categoryId as extra data if needed
+                                  AppRoutes.catalog,
+                                  extra: {'categoryId': product!.catId},
                                 );
                               },
                               child: BarlowText(
@@ -295,7 +293,7 @@ class _ProductDetailsState extends State<ProductDetails>
                                 fontSize: 16,
                                 lineHeight: 1.0,
                                 letterSpacing: 0.64,
-                                color: Color(0xFF3E5B84),
+                                color: Color(0xFF30578E),
                                 backgroundColor: Color(0xFFb9d6ff),
                               ),
                             ),
@@ -307,7 +305,14 @@ class _ProductDetailsState extends State<ProductDetails>
                             onTap: () {
                               // context.go(AppRoutes.catalog);
                             },
-                            child: Center(child: NoProductYet()),
+                            child: Center(
+                              child: CartEmpty(
+                                cralikaText: "No products here yet!",
+                                hideBrowseButton: true,
+                                barlowText:
+                                    "Try another category, hopefully you'll find something you like there!",
+                              ),
+                            ),
                           )
                           : Row(
                             children: List.generate(
@@ -337,26 +342,18 @@ class _ProductDetailsState extends State<ProductDetails>
                                       final isOutOfStock = quantity == 0;
 
                                       return MouseRegion(
-                                        onEnter:
-                                            isOutOfStock
-                                                ? null
-                                                : (_) {
-                                                  setState(() {
-                                                    _isHoveredList[index] =
-                                                        true;
-                                                  });
-                                                  _controller.forward();
-                                                },
-                                        onExit:
-                                            isOutOfStock
-                                                ? null
-                                                : (_) {
-                                                  setState(() {
-                                                    _isHoveredList[index] =
-                                                        false;
-                                                  });
-                                                  _controller.reverse();
-                                                },
+                                        onEnter: (_) {
+                                          setState(() {
+                                            _isHoveredList[index] = true;
+                                          });
+                                          _controller.forward();
+                                        },
+                                        onExit: (_) {
+                                          setState(() {
+                                            _isHoveredList[index] = false;
+                                          });
+                                          _controller.reverse();
+                                        },
                                         child: SizedBox(
                                           height: 342,
                                           width: 297,
@@ -368,9 +365,10 @@ class _ProductDetailsState extends State<ProductDetails>
                                                   builder: (context, child) {
                                                     return Transform.scale(
                                                       scale:
-                                                          _isHoveredList[index]
+                                                          _isHoveredList[index] &&
+                                                                  !isOutOfStock
                                                               ? _animation.value
-                                                              : 1.0,
+                                                              : 1.0, // No scaling for out-of-stock
                                                       child: Image.network(
                                                         relatedProduct
                                                             .thumbnail,
@@ -424,7 +422,6 @@ class _ProductDetailsState extends State<ProductDetails>
                                                         );
 
                                                     if (isOutOfStock) {
-                                                      // Only return the Out of Stock image, nothing else
                                                       return Row(
                                                         mainAxisAlignment:
                                                             MainAxisAlignment
@@ -443,10 +440,60 @@ class _ProductDetailsState extends State<ProductDetails>
                                                             alignment:
                                                                 Alignment
                                                                     .centerRight,
-                                                            child: SvgPicture.asset(
-                                                              "assets/home_page/IconWishlistEmpty.svg",
-                                                              width: 23,
-                                                              height: 20,
+                                                            child: FutureBuilder<
+                                                              bool
+                                                            >(
+                                                              future: SharedPreferencesHelper.isInWishlist(
+                                                                relatedProduct
+                                                                    .id
+                                                                    .toString(),
+                                                              ),
+                                                              builder: (
+                                                                context,
+                                                                snapshot,
+                                                              ) {
+                                                                final isInWishlist =
+                                                                    snapshot
+                                                                        .data ??
+                                                                    false;
+                                                                return GestureDetector(
+                                                                  onTap: () async {
+                                                                    if (isInWishlist) {
+                                                                      await SharedPreferencesHelper.removeFromWishlist(
+                                                                        relatedProduct
+                                                                            .id
+                                                                            .toString(),
+                                                                      );
+                                                                      widget
+                                                                          .onWishlistChanged
+                                                                          ?.call(
+                                                                            'Product Removed From Wishlist',
+                                                                          );
+                                                                    } else {
+                                                                      await SharedPreferencesHelper.addToWishlist(
+                                                                        relatedProduct
+                                                                            .id
+                                                                            .toString(),
+                                                                      );
+                                                                      widget
+                                                                          .onWishlistChanged
+                                                                          ?.call(
+                                                                            'Product Added To Wishlist',
+                                                                          );
+                                                                    }
+                                                                    setState(
+                                                                      () {},
+                                                                    );
+                                                                  },
+                                                                  child: SvgPicture.asset(
+                                                                    isInWishlist
+                                                                        ? 'assets/home_page/IconWishlist.svg'
+                                                                        : 'assets/home_page/IconWishlistEmpty.svg',
+                                                                    width: 23,
+                                                                    height: 20,
+                                                                  ),
+                                                                );
+                                                              },
                                                             ),
                                                           ),
                                                         ],
@@ -461,12 +508,12 @@ class _ProductDetailsState extends State<ProductDetails>
                                                         Builder(
                                                           builder: (context) {
                                                             final List<Widget>
-                                                            badgeWidgets = [];
+                                                            badges = [];
 
                                                             if (relatedProduct
                                                                     .isMakerChoice ==
                                                                 1) {
-                                                              badgeWidgets.add(
+                                                              badges.add(
                                                                 SvgPicture.asset(
                                                                   "assets/home_page/maker_choice.svg",
                                                                   height: 50,
@@ -477,19 +524,18 @@ class _ProductDetailsState extends State<ProductDetails>
                                                             if (quantity !=
                                                                     null &&
                                                                 quantity < 2) {
-                                                              if (badgeWidgets
-                                                                  .isNotEmpty) {
-                                                                badgeWidgets
-                                                                    .add(
-                                                                      SizedBox(
-                                                                        height:
-                                                                            10,
-                                                                      ),
-                                                                    );
-                                                              }
-                                                              badgeWidgets.add(
+                                                              if (badges
+                                                                  .isNotEmpty)
+                                                                badges.add(
+                                                                  SizedBox(
+                                                                    height: 10,
+                                                                  ),
+                                                                );
+                                                              badges.add(
                                                                 SvgPicture.asset(
                                                                   "assets/home_page/fewPiecesLeft.svg",
+                                                                  height: 25,
+                                                                  width: 25,
                                                                 ),
                                                               );
                                                             }
@@ -497,17 +543,14 @@ class _ProductDetailsState extends State<ProductDetails>
                                                             if (relatedProduct
                                                                     .discount !=
                                                                 0) {
-                                                              if (badgeWidgets
-                                                                  .isNotEmpty) {
-                                                                badgeWidgets
-                                                                    .add(
-                                                                      SizedBox(
-                                                                        height:
-                                                                            10,
-                                                                      ),
-                                                                    );
-                                                              }
-                                                              badgeWidgets.add(
+                                                              if (badges
+                                                                  .isNotEmpty)
+                                                                badges.add(
+                                                                  SizedBox(
+                                                                    height: 10,
+                                                                  ),
+                                                                );
+                                                              badges.add(
                                                                 ElevatedButton(
                                                                   onPressed:
                                                                       null,
@@ -516,7 +559,7 @@ class _ProductDetailsState extends State<ProductDetails>
                                                                       vertical:
                                                                           paddingVertical,
                                                                       horizontal:
-                                                                          32,
+                                                                          30,
                                                                     ),
                                                                     backgroundColor:
                                                                         const Color(
@@ -556,8 +599,7 @@ class _ProductDetailsState extends State<ProductDetails>
                                                               crossAxisAlignment:
                                                                   CrossAxisAlignment
                                                                       .start,
-                                                              children:
-                                                                  badgeWidgets,
+                                                              children: badges,
                                                             );
                                                           },
                                                         ),
@@ -576,7 +618,6 @@ class _ProductDetailsState extends State<ProductDetails>
                                                             final isInWishlist =
                                                                 snapshot.data ??
                                                                 false;
-
                                                             return GestureDetector(
                                                               onTap: () async {
                                                                 if (isInWishlist) {
@@ -628,10 +669,9 @@ class _ProductDetailsState extends State<ProductDetails>
                                                     milliseconds: 300,
                                                   ),
                                                   opacity:
-                                                      _isHoveredList[index] &&
-                                                              !isOutOfStock
+                                                      _isHoveredList[index]
                                                           ? 1.0
-                                                          : 0.0,
+                                                          : 0.0, // Show on hover
                                                   child: Container(
                                                     width: 282,
                                                     height: 120,
@@ -642,7 +682,7 @@ class _ProductDetailsState extends State<ProductDetails>
                                                     ),
                                                     decoration: BoxDecoration(
                                                       color: Color(
-                                                        0xFF3E5B84,
+                                                        0xFF30578E,
                                                       ).withOpacity(0.8),
                                                     ),
                                                     child: Column(
@@ -657,15 +697,15 @@ class _ProductDetailsState extends State<ProductDetails>
                                                           text:
                                                               relatedProduct
                                                                   .name,
-                                                          maxLines: 1,
+                                                          maxLines: 2,
                                                           fontWeight:
                                                               FontWeight.w400,
                                                           color: Colors.white,
-                                                          fontSize: 20,
+                                                          fontSize: 16,
                                                           lineHeight: 1.2,
                                                           letterSpacing: 0.80,
                                                         ),
-                                                        SizedBox(height: 8),
+                                                        SizedBox(height: 5),
                                                         BarlowText(
                                                           text:
                                                               "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
@@ -676,98 +716,192 @@ class _ProductDetailsState extends State<ProductDetails>
                                                           lineHeight: 1.0,
                                                         ),
                                                         SizedBox(height: 14),
-                                                        Row(
-                                                          children: [
-                                                            GestureDetector(
-                                                              onTap:
-                                                                  isOutOfStock
-                                                                      ? null
-                                                                      : () {
-                                                                        context.go(
-                                                                          AppRoutes.productDetails(
+                                                        if (isOutOfStock)
+                                                          Row(
+                                                            children: [
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  context.go(
+                                                                    AppRoutes.productDetails(
+                                                                      relatedProduct
+                                                                          .id,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                                child: BarlowText(
+                                                                  text: "VIEW",
+                                                                  color:
+                                                                      Colors
+                                                                          .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize: 16,
+                                                                  lineHeight:
+                                                                      1.0,
+                                                                  enableHoverBackground:
+                                                                      true,
+                                                                  hoverBackgroundColor:
+                                                                      Colors
+                                                                          .white,
+                                                                  hoverTextColor:
+                                                                      Color(
+                                                                        0xFF30578E,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 5,
+                                                              ),
+                                                              Text(
+                                                                "/",
+                                                                style: TextStyle(
+                                                                  color:
+                                                                      Colors
+                                                                          .white,
+                                                                  fontFamily:
+                                                                      GoogleFonts.barlow()
+                                                                          .fontFamily,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize: 15,
+                                                                  height: 1.0,
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 5,
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  widget
+                                                                      .onWishlistChanged
+                                                                      ?.call(
+                                                                        "We'll notify you when this product is back in stock.",
+                                                                      );
+                                                                },
+                                                                child: BarlowText(
+                                                                  text:
+                                                                      "NOTIFY ME",
+                                                                  color:
+                                                                      Colors
+                                                                          .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize: 16,
+                                                                  lineHeight:
+                                                                      1.0,
+                                                                  enableHoverBackground:
+                                                                      true,
+                                                                  hoverBackgroundColor:
+                                                                      Colors
+                                                                          .white,
+                                                                  hoverTextColor:
+                                                                      Color(
+                                                                        0xFF30578E,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          )
+                                                        else
+                                                          Row(
+                                                            children: [
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  context.go(
+                                                                    AppRoutes.productDetails(
+                                                                      relatedProduct
+                                                                          .id,
+                                                                    ),
+                                                                  );
+                                                                },
+                                                                child: BarlowText(
+                                                                  text: "VIEW",
+                                                                  color:
+                                                                      Colors
+                                                                          .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize: 16,
+                                                                  lineHeight:
+                                                                      1.0,
+                                                                  enableHoverBackground:
+                                                                      true,
+                                                                  hoverBackgroundColor:
+                                                                      Colors
+                                                                          .white,
+                                                                  hoverTextColor:
+                                                                      const Color(
+                                                                        0xFF30578E,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 5,
+                                                              ),
+                                                              BarlowText(
+                                                                text: " / ",
+                                                                color:
+                                                                    Colors
+                                                                        .white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 16,
+                                                                lineHeight: 1.0,
+                                                              ),
+                                                              SizedBox(
+                                                                width: 5,
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    barrierColor:
+                                                                        Colors
+                                                                            .transparent,
+                                                                    builder: (
+                                                                      BuildContext
+                                                                      context,
+                                                                    ) {
+                                                                      cartNotifier
+                                                                          .refresh();
+                                                                      return CartPanel(
+                                                                        productId:
                                                                             relatedProduct.id,
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                              child: BarlowText(
-                                                                text: "VIEW",
-                                                                color:
-                                                                    Colors
-                                                                        .white,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                fontSize: 16,
-                                                                lineHeight: 1.0,
-                                                                enableHoverBackground:
-                                                                    true,
-                                                                hoverBackgroundColor:
-                                                                    Colors
-                                                                        .white,
-                                                                hoverTextColor:
-                                                                    const Color(
-                                                                      0xFF3E5B84,
-                                                                    ),
+                                                                      );
+                                                                    },
+                                                                  );
+                                                                },
+                                                                child: BarlowText(
+                                                                  text:
+                                                                      "ADD TO CART",
+                                                                  color:
+                                                                      Colors
+                                                                          .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize: 16,
+                                                                  lineHeight:
+                                                                      1.0,
+                                                                  enableHoverBackground:
+                                                                      true,
+                                                                  hoverBackgroundColor:
+                                                                      Colors
+                                                                          .white,
+                                                                  hoverTextColor:
+                                                                      const Color(
+                                                                        0xFF30578E,
+                                                                      ),
+                                                                ),
                                                               ),
-                                                            ),
-                                                            SizedBox(width: 5),
-                                                            BarlowText(
-                                                              text: " / ",
-                                                              color:
-                                                                  Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              fontSize: 16,
-                                                              lineHeight: 1.0,
-                                                            ),
-                                                            SizedBox(width: 5),
-                                                            GestureDetector(
-                                                              onTap:
-                                                                  isOutOfStock
-                                                                      ? null
-                                                                      : () {
-                                                                        showDialog(
-                                                                          context:
-                                                                              context,
-                                                                          barrierColor:
-                                                                              Colors.transparent,
-                                                                          builder: (
-                                                                            BuildContext
-                                                                            context,
-                                                                          ) {
-                                                                            cartNotifier.refresh();
-                                                                            return CartPanel(
-                                                                              productId:
-                                                                                  relatedProduct.id,
-                                                                            );
-                                                                          },
-                                                                        );
-                                                                      },
-                                                              child: BarlowText(
-                                                                text:
-                                                                    "ADD TO CART",
-                                                                color:
-                                                                    Colors
-                                                                        .white,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                fontSize: 16,
-                                                                lineHeight: 1.0,
-                                                                enableHoverBackground:
-                                                                    true,
-                                                                hoverBackgroundColor:
-                                                                    Colors
-                                                                        .white,
-                                                                hoverTextColor:
-                                                                    const Color(
-                                                                      0xFF3E5B84,
-                                                                    ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
+                                                            ],
+                                                          ),
                                                       ],
                                                     ),
                                                   ),
@@ -810,7 +944,7 @@ class _ProductDetailsState extends State<ProductDetails>
                       children: [
                         BarlowText(
                           text: "Catalog",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
@@ -824,13 +958,13 @@ class _ProductDetailsState extends State<ProductDetails>
                           'assets/icons/right_icon.svg',
                           width: 24,
                           height: 24,
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                         ),
                         SizedBox(width: 9.0),
 
                         BarlowText(
                           text: product!.catName,
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
@@ -854,13 +988,13 @@ class _ProductDetailsState extends State<ProductDetails>
                           'assets/icons/right_icon.svg',
                           width: 24,
                           height: 24,
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                         ),
                         SizedBox(width: 9.0),
 
                         BarlowText(
                           text: "View Details",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
@@ -868,7 +1002,7 @@ class _ProductDetailsState extends State<ProductDetails>
                           enableUnderlineForActiveRoute:
                               true, // Enable underline when active
                           decorationColor: Color(
-                            0xFF3E5B84,
+                            0xFF30578E,
                           ), // Color of the underline
                           onTap: () {},
                         ),
@@ -953,7 +1087,7 @@ class _ProductDetailsState extends State<ProductDetails>
                               fontSize: 16, // 32px
                               lineHeight: 1.0,
                               letterSpacing: 1 * 0.04, // 4% of 32px
-                              color: Color(0xFF3E5B84),
+                              color: Color(0xFF30578E),
                             ),
 
                             SizedBox(height: 14),
@@ -1012,7 +1146,7 @@ class _ProductDetailsState extends State<ProductDetails>
 
                               child: BarlowText(
                                 text: "ADD TO CART",
-                                color: Color(0xFF3E5B84),
+                                color: Color(0xFF30578E),
                                 fontWeight: FontWeight.w600, // 400 weight
                                 fontSize: 16, // 32px
                                 lineHeight: 1.0,
@@ -1061,7 +1195,7 @@ class _ProductDetailsState extends State<ProductDetails>
                                   },
                                   child: BarlowText(
                                     text: "WISHLIST",
-                                    color: const Color(0xFF3E5B84),
+                                    color: const Color(0xFF30578E),
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16,
                                     lineHeight: 1.0,

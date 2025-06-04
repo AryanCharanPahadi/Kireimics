@@ -22,7 +22,7 @@ class Footer extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(
         left: isLargeScreen ? 140 : 29,
-        right: isLargeScreen ? 139 : 24,
+        right: isLargeScreen ? 172 : 24,
       ),
       child: SizedBox(
         height: 320,
@@ -50,7 +50,7 @@ class Footer extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 15, right: 15, top: 50),
-                  child: Divider(color: Color(0xFF3E5B84), thickness: 1),
+                  child: Divider(color: Color(0xFF30578E), thickness: 1),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -71,10 +71,10 @@ class Footer extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                                 letterSpacing: 0.64,
-                                color: Color(0xFF3E5B84),
+                                color: Color(0xFF30578E),
                                 route: AppRoutes.shippingPolicy,
                                 enableUnderlineForActiveRoute: true,
-                                decorationColor: Color(0xFF3E5B84),
+                                decorationColor: Color(0xFF30578E),
                               ),
                             ),
                             SizedBox(height: 15),
@@ -86,10 +86,10 @@ class Footer extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                                 letterSpacing: 0.64,
-                                color: Color(0xFF3E5B84),
+                                color: Color(0xFF30578E),
                                 route: AppRoutes.privacyPolicy,
                                 enableUnderlineForActiveRoute: true,
-                                decorationColor: Color(0xFF3E5B84),
+                                decorationColor: Color(0xFF30578E),
                               ),
                             ),
                             SizedBox(height: 15),
@@ -101,10 +101,10 @@ class Footer extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                                 letterSpacing: 0.64,
-                                color: Color(0xFF3E5B84),
+                                color: Color(0xFF30578E),
                                 route: AppRoutes.contactUs,
                                 enableUnderlineForActiveRoute: true,
-                                decorationColor: Color(0xFF3E5B84),
+                                decorationColor: Color(0xFF30578E),
                               ),
                             ),
                           ],
@@ -183,7 +183,7 @@ class Footer extends StatelessWidget {
                                     fontWeight: FontWeight.w400,
                                     fontSize: 16,
                                     letterSpacing: 0.04,
-                                    color: Color(0xFF3e5b84),
+                                    color: Color(0xFF30578E),
                                   ),
                                 ),
                                 TextSpan(

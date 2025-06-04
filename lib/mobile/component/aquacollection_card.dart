@@ -123,7 +123,7 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                           fontSize: 18,
                           lineHeight: 1.0,
                           letterSpacing: 0.72,
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                         ),
                         SizedBox(height: 8),
                         BarlowText(
@@ -132,7 +132,7 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                           fontSize: 14,
                           lineHeight: 1.0,
                           letterSpacing: 0.56,
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                         ),
                       ],
                     ),
@@ -145,7 +145,7 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                           fontSize: 14,
                           lineHeight: 1.0,
                           letterSpacing: 0.0,
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           onTap: () async {
                             if (bannerId != null) {
                               context.go(AppRoutes.idCollectionView(bannerId!));

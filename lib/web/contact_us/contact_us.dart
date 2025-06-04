@@ -11,14 +11,62 @@ import '../../component/utilities/url_launcher.dart';
 import 'contact_us_controller.dart';
 
 class ContactUs extends StatefulWidget {
-  const ContactUs({super.key});
-
+  final Function(String)? onWishlistChanged; // Callback to notify parent
+  const ContactUs({super.key, this.onWishlistChanged});
   @override
   State<ContactUs> createState() => _ContactUsState();
 }
 
 class _ContactUsState extends State<ContactUs> {
   final ContactController contactController = ContactController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _anotherMessageController =
+      TextEditingController();
+  final FocusNode _messageFocusNode = FocusNode();
+  final FocusNode _anotherMessageFocusNode = FocusNode();
+  bool isLoading = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _messageController.dispose();
+    _anotherMessageController.dispose();
+    _messageFocusNode.dispose();
+    _anotherMessageFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _submitForm() {
+    // Check validation in order of priority
+    if (_nameController.text.isEmpty) {
+      widget.onWishlistChanged?.call('Please enter your name');
+      return;
+    }
+
+    if (_emailController.text.isEmpty) {
+      widget.onWishlistChanged?.call('Please enter your email');
+      return;
+    }
+
+    if (!RegExp(
+      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+    ).hasMatch(_emailController.text)) {
+      widget.onWishlistChanged?.call('Please enter a valid email');
+      return;
+    }
+
+    if (_messageController.text.isEmpty) {
+      widget.onWishlistChanged?.call('Please enter a message');
+      return;
+    }
+
+    // If all validations pass
+    widget.onWishlistChanged?.call('Form submitted successfully!');
+  }
 
   @override
   void initState() {
@@ -103,7 +151,8 @@ class _ContactUsState extends State<ContactUs> {
                         BarlowText(
                           text:
                               "Our address:\n${contactController.contactData!['address'].toString()}",
-                          fontSize: 14,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
                         ),
                         const SizedBox(height: 24),
                         InkWell(
@@ -116,8 +165,9 @@ class _ContactUsState extends State<ContactUs> {
                             text:
                                 contactController.contactData!['phone']
                                     .toString(),
-                            decoration: TextDecoration.underline,
-                            fontSize: 14,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF30578E),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -131,8 +181,9 @@ class _ContactUsState extends State<ContactUs> {
                             text:
                                 contactController.contactData!['email']
                                     .toString(),
-                            fontSize: 14,
-                            decoration: TextDecoration.underline,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF30578E),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -153,16 +204,31 @@ class _ContactUsState extends State<ContactUs> {
                           const SizedBox(height: 10),
                           customTextFormField(hintText: "YOUR EMAIL"),
                           const SizedBox(height: 10),
-                          customTextFormField(hintText: "MESSAGE"),
+                          customTextFormField(
+                            hintText: "MESSAGE",
+                            isMessageField: true,
+                            focusNode: _messageFocusNode,
+                            nextFocusNode: _anotherMessageFocusNode,
+                          ),
                           const SizedBox(height: 10),
-                          customTextFormField(hintText: ""),
+                          customTextFormField(
+                            hintText: "",
+                            isMessageField: true,
+                            controller: _anotherMessageController,
+                            focusNode: _anotherMessageFocusNode,
+                            maxLength: 40,
+                          ),
                           const SizedBox(height: 24),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: SvgPicture.asset(
-                              "assets/home_page/submit.svg",
-                              height: 19,
-                              width: 58,
+                          GestureDetector(
+                            onTap: _submitForm,
+
+                            child: Align(
+                              alignment: Alignment.bottomRight,
+                              child: SvgPicture.asset(
+                                "assets/home_page/submit.svg",
+                                height: 19,
+                                width: 58,
+                              ),
                             ),
                           ),
                         ],
@@ -278,20 +344,39 @@ class _ContactUsState extends State<ContactUs> {
   List<Widget> _buildSocialLinks(String socialJson) {
     try {
       final Map<String, dynamic> socialLinks = jsonDecode(socialJson);
-      return socialLinks.entries.map((entry) {
+      final entries = socialLinks.entries.toList();
+
+      return List<Widget>.generate(entries.length, (index) {
+        final entry = entries[index];
+        final isLast = index == entries.length - 1;
+
         return Padding(
           padding: const EdgeInsets.only(right: 10),
           child: InkWell(
             onTap: () => UrlLauncherHelper.launchURL(context, entry.value),
-            child: BarlowText(
-              text: entry.key,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF3E5B84),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BarlowText(
+                  text: entry.key,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF30578E),
+                ),
+                if (!isLast) ...[
+                  SizedBox(width: 14),
+                  BarlowText(
+                    text: '/',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF30578E),
+                  ),
+                ],
+              ],
             ),
           ),
         );
-      }).toList();
+      });
     } catch (e) {
       debugPrint("Error parsing social links: $e");
       return []; // Return empty list if parsing fails
@@ -301,24 +386,40 @@ class _ContactUsState extends State<ContactUs> {
   Widget customTextFormField({
     required String hintText,
     TextEditingController? controller,
+    bool isMessageField = false,
+    int? maxLength,
+    FocusNode? focusNode,
+    FocusNode? nextFocusNode,
   }) {
+    final int? effectiveMaxLength = isMessageField ? 25 : maxLength;
+
     return Stack(
       children: [
         // Hint text positioned on the left
         Positioned(
           left: 0,
-          top: 16, // Adjust this value to align vertically
+          top: 16,
           child: Text(
             hintText,
-            style: GoogleFonts.barlow(fontSize: 14, color: Color(0xFF414141)),
+            style: GoogleFonts.barlow(
+              fontSize: 14,
+              color: const Color(0xFF414141),
+            ),
           ),
         ),
-        // Text field with right-aligned input
         TextFormField(
           controller: controller,
+          focusNode: focusNode,
           cursorColor: Colors.black,
-          textAlign: TextAlign.right, // Align user input to the right
+          textAlign: TextAlign.right,
+          maxLength: effectiveMaxLength,
+          onChanged: (value) {
+            if (isMessageField && value.length == 25 && nextFocusNode != null) {
+              nextFocusNode!.requestFocus();
+            }
+          },
           decoration: InputDecoration(
+            counterText: '', // hides the maxLength counter
             hintStyle: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w400,
@@ -334,7 +435,7 @@ class _ContactUsState extends State<ContactUs> {
             contentPadding: const EdgeInsets.only(bottom: 5),
           ),
           style: TextStyle(
-            color: Color(0xFF414141),
+            color: const Color(0xFF414141),
             fontFamily: GoogleFonts.barlow().fontFamily,
           ),
         ),

@@ -4,6 +4,11 @@ import 'dart:convert';
 import '../../component/api_helper/api_helper.dart';
 
 class ContactController {
+
+
+
+
+
   Map<String, dynamic>? contactData;
   List<Map<String, String>> faqData = [];
   bool isLoading = true;

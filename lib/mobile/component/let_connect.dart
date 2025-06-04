@@ -183,7 +183,7 @@ class _LetConnectState extends State<LetConnect> {
                             letterSpacing: 0.64,
                             backgroundColor: Color(0xFFb9d6ff),
                             enableHoverBackground: true,
-                            color: Color(0xFF3E5B84),
+                            color: Color(0xFF30578E),
                             hoverTextColor: Color(0xFFb9d6ff),
                           ),
                         ),

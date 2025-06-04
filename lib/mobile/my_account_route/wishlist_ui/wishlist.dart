@@ -109,7 +109,7 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF3E5B84)));
+      return Center(child: CircularProgressIndicator(color: Color(0xFF30578E)));
     }
 
     if (errorMessage.isNotEmpty) {
@@ -148,14 +148,14 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                   children: [
                     BarlowText(
                       text: "My Account",
-                      color: const Color(0xFF3E5B84),
+                      color: const Color(0xFF30578E),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
                       letterSpacing: 1 * 0.04,
                       route: AppRoutes.myAccount,
                       enableUnderlineForActiveRoute: true,
-                      decorationColor: const Color(0xFF3E5B84),
+                      decorationColor: const Color(0xFF30578E),
                       onTap: () {
                         context.go(AppRoutes.myAccount);
                       },
@@ -163,13 +163,13 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                     const SizedBox(width: 32),
                     BarlowText(
                       text: "My Orders",
-                      color: const Color(0xFF3E5B84),
+                      color: const Color(0xFF30578E),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
                       route: AppRoutes.myOrder,
                       enableUnderlineForActiveRoute: true,
-                      decorationColor: const Color(0xFF3E5B84),
+                      decorationColor: const Color(0xFF30578E),
                       onTap: () {
                         context.go(AppRoutes.myOrder);
                       },
@@ -177,13 +177,13 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                     const SizedBox(width: 32),
                     BarlowText(
                       text: "Wishlist",
-                      color: const Color(0xFF3E5B84),
+                      color: const Color(0xFF30578E),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
                       route: AppRoutes.wishlist,
                       enableUnderlineForActiveRoute: true,
-                      decorationColor: const Color(0xFF3E5B84),
+                      decorationColor: const Color(0xFF30578E),
                       onTap: () {
                         context.go(AppRoutes.wishlist);
                       },
@@ -510,7 +510,7 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                             fontSize: 16,
                                             lineHeight: 1.2,
                                             letterSpacing: 0.64,
-                                            color: Color(0xFF3E5B84),
+                                            color: Color(0xFF30578E),
                                             maxLines: 1,
                                           ),
                                           const SizedBox(height: 8),
@@ -520,7 +520,7 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                             fontWeight: FontWeight.w400,
                                             fontSize: 14,
                                             lineHeight: 1.2,
-                                            color: const Color(0xFF3E5B84),
+                                            color: const Color(0xFF30578E),
                                           ),
                                           const SizedBox(height: 8),
                                           GestureDetector(
@@ -543,9 +543,9 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                               color:
                                               isOutOfStock
                                                   ? const Color(
-                                                0xFF3E5B84,
+                                                0xFF30578E,
                                               ).withOpacity(0.5)
-                                                  : const Color(0xFF3E5B84),
+                                                  : const Color(0xFF30578E),
                                             ),
                                           ),
                                         ],

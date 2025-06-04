@@ -215,20 +215,20 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                       children: [
                         BarlowText(
                           text: "My Account",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
                           letterSpacing: 1 * 0.04,
                           route: AppRoutes.myAccount,
                           enableUnderlineForActiveRoute: true,
-                          decorationColor: Color(0xFF3E5B84),
+                          decorationColor: Color(0xFF30578E),
                           onTap: () {},
                         ),
                         SizedBox(width: 32),
                         BarlowText(
                           text: "My Orders",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
@@ -239,7 +239,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                         SizedBox(width: 32),
                         BarlowText(
                           text: "Wishlist",
-                          color: Color(0xFF3E5B84),
+                          color: Color(0xFF30578E),
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
@@ -520,7 +520,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                                                             lineHeight: 1.5,
                                                             letterSpacing: 0.0,
                                                             color: Color(
-                                                              0xFF3E5B84,
+                                                              0xFF30578E,
                                                             ),
                                                             onTap: () {
                                                               Navigator.push(
@@ -547,7 +547,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                                                             lineHeight: 1.5,
                                                             letterSpacing: 0.0,
                                                             color: Color(
-                                                              0xFF3E5B84,
+                                                              0xFF30578E,
                                                             ),
                                                           ),
                                                           GestureDetector(
@@ -575,7 +575,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                                                               letterSpacing:
                                                                   0.0,
                                                               color: Color(
-                                                                0xFF3E5B84,
+                                                                0xFF30578E,
                                                               ),
                                                             ),
                                                           ),

@@ -314,7 +314,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                         style: ElevatedButton.styleFrom(
                                           padding: EdgeInsets.symmetric(
                                             vertical: paddingVertical,
-                                            horizontal: 30,
+                                            horizontal: 27,
                                           ),
                                           backgroundColor: const Color(
                                             0xFFF46856,
@@ -401,7 +401,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                             vertical: imageHeight * 0.02,
                           ),
                           decoration: BoxDecoration(
-                            color: Color(0xFF3E5B84).withOpacity(0.8),
+                            color: Color(0xFF30578E).withOpacity(0.8),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -429,22 +429,58 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                               ),
                               SizedBox(height: imageHeight * 0.04),
                               if (isOutOfStock)
-                                GestureDetector(
-                                  onTap: () {
-                                    widget.onWishlistChanged?.call(
-                                      "We'll notify you when this product is back in stock.",
-                                    );
-                                  },
-                                  child: BarlowText(
-                                    text: "NOTIFY ME",
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    lineHeight: 1.0,
-                                    enableHoverBackground: true,
-                                    hoverBackgroundColor: Colors.white,
-                                    hoverTextColor: Color(0xFF3E5B84),
-                                  ),
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        context.go(
+                                          AppRoutes.productDetails(
+                                            widget.product.id,
+                                          ),
+                                        );
+                                      },
+                                      child: BarlowText(
+                                        text: "VIEW",
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                        lineHeight: 1.0,
+                                        enableHoverBackground: true,
+                                        hoverBackgroundColor: Colors.white,
+                                        hoverTextColor: Color(0xFF30578E),
+                                      ),
+                                    ),
+                                    SizedBox(width: imageWidth * 0.02),
+                                    Text(
+                                      "/",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily:
+                                            GoogleFonts.barlow().fontFamily,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                        height: 1.0,
+                                      ),
+                                    ),
+                                    SizedBox(width: imageWidth * 0.02),
+                                    GestureDetector(
+                                      onTap: () {
+                                        widget.onWishlistChanged?.call(
+                                          "We'll notify you when this product is back in stock.",
+                                        );
+                                      },
+                                      child: BarlowText(
+                                        text: "NOTIFY ME",
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                        lineHeight: 1.0,
+                                        enableHoverBackground: true,
+                                        hoverBackgroundColor: Colors.white,
+                                        hoverTextColor: Color(0xFF30578E),
+                                      ),
+                                    ),
+                                  ],
                                 )
                               else
                                 Row(
@@ -465,7 +501,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                         lineHeight: 1.0,
                                         enableHoverBackground: true,
                                         hoverBackgroundColor: Colors.white,
-                                        hoverTextColor: Color(0xFF3E5B84),
+                                        hoverTextColor: Color(0xFF30578E),
                                       ),
                                     ),
                                     SizedBox(width: imageWidth * 0.02),
@@ -509,7 +545,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                         lineHeight: 1.0,
                                         enableHoverBackground: true,
                                         hoverBackgroundColor: Colors.white,
-                                        hoverTextColor: Color(0xFF3E5B84),
+                                        hoverTextColor: Color(0xFF30578E),
                                       ),
                                     ),
                                   ],

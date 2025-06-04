@@ -65,14 +65,14 @@ class _MyOrderUiDesktopState extends State<MyOrderUiDesktop> {
                   children: [
                     BarlowText(
                       text: "My Account",
-                      color: const Color(0xFF3E5B84),
+                      color: const Color(0xFF30578E),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
                       letterSpacing: 1 * 0.04,
                       route: AppRoutes.myAccount,
                       enableUnderlineForActiveRoute: true,
-                      decorationColor: const Color(0xFF3E5B84),
+                      decorationColor: const Color(0xFF30578E),
                       onTap: () {
                         context.go(AppRoutes.myAccount);
                       },
@@ -81,13 +81,13 @@ class _MyOrderUiDesktopState extends State<MyOrderUiDesktop> {
 
                     BarlowText(
                       text: "My Orders",
-                      color: const Color(0xFF3E5B84),
+                      color: const Color(0xFF30578E),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
                       route: AppRoutes.myOrder,
                       enableUnderlineForActiveRoute: true,
-                      decorationColor: const Color(0xFF3E5B84),
+                      decorationColor: const Color(0xFF30578E),
                       onTap: () {
                         context.go(AppRoutes.myOrder);
                       },
@@ -96,7 +96,7 @@ class _MyOrderUiDesktopState extends State<MyOrderUiDesktop> {
 
                     BarlowText(
                       text: "Wishlist",
-                      color: const Color(0xFF3E5B84),
+                      color: const Color(0xFF30578E),
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
@@ -235,7 +235,7 @@ class _MyOrderUiDesktopState extends State<MyOrderUiDesktop> {
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.5,
                           letterSpacing: 0,
-                          color: const Color(0xFF3E5B84),
+                          color: const Color(0xFF30578E),
                           hoverBackgroundColor: Color(0xFFb9d6ff),
 
                           enableHoverBackground: true,

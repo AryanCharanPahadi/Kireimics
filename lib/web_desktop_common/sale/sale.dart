@@ -38,8 +38,10 @@ class Sale extends StatelessWidget {
                 Container(
                   width: MediaQuery.of(context).size.width,
                   child: Padding(
-                    padding: EdgeInsets.only(left: isLargeScreen ? 545 : 453),
-                    child: Container(
+                    padding: EdgeInsets.only(
+                      left: isLargeScreen ? 545 : 453,
+                      right: isLargeScreen ? 172 : 0, // Updated line
+                    ),                    child: Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
                           image: const AssetImage(
@@ -116,7 +118,7 @@ class Sale extends StatelessWidget {
                                 },
                                 child: BarlowText(
                                   text: "Sort / New",
-                                  color: const Color(0xFF3E5B84),
+                                  color: const Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
@@ -131,7 +133,7 @@ class Sale extends StatelessWidget {
                                 },
                                 child: BarlowText(
                                   text: "Sort / New",
-                                  color: const Color(0xFF3E5B84),
+                                  color: const Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
@@ -147,7 +149,7 @@ class Sale extends StatelessWidget {
                                 child: BarlowText(
                                   text:
                                       "Filter / ${saleController.currentFilter.value}",
-                                  color: const Color(0xFF3E5B84),
+                                  color: const Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
@@ -324,7 +326,7 @@ class Sale extends StatelessWidget {
                 text: option['label'] as String,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: const Color(0xFF3E5B84),
+                color: const Color(0xFF30578E),
                 hoverBackgroundColor: const Color(0xFFb9d6ff),
                 enableHoverBackground: true,
               ),
@@ -378,7 +380,7 @@ class Sale extends StatelessWidget {
                 text: option['label'] as String,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: const Color(0xFF3E5B84),
+                color: const Color(0xFF30578E),
                 hoverBackgroundColor: const Color(0xFFb9d6ff),
                 enableHoverBackground: true,
               ),
