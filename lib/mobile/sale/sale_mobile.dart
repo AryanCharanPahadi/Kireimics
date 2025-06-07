@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/no_result_found/no_product_yet.dart';
 import 'package:kireimics/mobile/collection/collection.dart';
 import 'package:kireimics/web_desktop_common/sale/sale_controller.dart';
+import '../../component/no_result_found/no_order_yet.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/app_routes/routes.dart';
 import '../../web_desktop_common/catalog_sale_gridview/catalog_sale_navigation.dart';
@@ -75,8 +76,8 @@ class SaleMobile extends StatelessWidget {
                     child: CralikaFont(
                       text:
                           saleController.isCollectionView.value
-                              ? "${saleController.collectionList.length} ${(saleController.collectionList.length == 1 || saleController.collectionList.length == 0) ? 'Collection' : 'Collections'}"
-                              : "${saleController.filteredProductList.length} ${(saleController.filteredProductList.length == 1 || saleController.filteredProductList.length == 0) ? 'Product' : 'Products'}",
+                              ? "${saleController.collectionList.length} ${(saleController.collectionList.length == 1 || saleController.collectionList.length == 0) ? 'Collections' : 'Collections'}"
+                              : "${saleController.filteredProductList.length} ${(saleController.filteredProductList.length == 1 || saleController.filteredProductList.length == 0) ? 'Products' : 'Products'}",
                       fontWeight: FontWeight.w400,
                       fontSize: 20,
                     ),
@@ -86,6 +87,8 @@ class SaleMobile extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 22),
                   child: CatalogNavigation(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     selectedCategoryId: saleController.selectedCategoryId.value,
                     onCategorySelected: saleController.updateCategory,
                     fetchAllProducts: saleController.fetchAllProducts,
@@ -156,7 +159,14 @@ class SaleMobile extends StatelessWidget {
                             top: 20,
                             right: 22,
                           ),
-                          child: NoProductYet(),
+                          child: Center(
+                            child: CartEmpty(
+                              cralikaText: "No Collections here yet!",
+                              hideBrowseButton: true,
+                              barlowText:
+                                  "Try another category, hopefully you'll\nfind something you like there!",
+                            ),
+                          ),
                         )
                         : Padding(
                           padding: const EdgeInsets.only(top: 32),
@@ -171,7 +181,14 @@ class SaleMobile extends StatelessWidget {
                         top: 20,
                         right: 22,
                       ),
-                      child: NoProductYet(),
+                      child: Center(
+                        child: CartEmpty(
+                          cralikaText: "No products here yet!",
+                          hideBrowseButton: true,
+                          barlowText:
+                              "Try another category, hopefully you'll\nfind something you like there!",
+                        ),
+                      ),
                     )
                     : Padding(
                       padding: const EdgeInsets.only(top: 32),
@@ -192,15 +209,15 @@ class SaleMobile extends StatelessWidget {
                                     double width =
                                         MediaQuery.of(context).size.width;
                                     if (width > 320 && width <= 410) {
-                                      return 0.53;
+                                      return 0.50;
                                     } else if (width > 410 && width <= 500) {
-                                      return 0.59;
+                                      return 0.55;
                                     } else if (width > 500 && width <= 600) {
-                                      return 0.62;
+                                      return 0.59;
                                     } else if (width > 600 && width <= 700) {
-                                      return 0.65;
+                                      return 0.62;
                                     } else if (width > 700 && width <= 800) {
-                                      return 0.67;
+                                      return 0.65;
                                     } else {
                                       return 0.50;
                                     }
@@ -447,7 +464,7 @@ class SaleMobile extends StatelessWidget {
                                                 lineHeight: 1.2,
                                                 letterSpacing: 0.64,
                                                 color: Color(0xFF30578E),
-                                                maxLines: 1,
+                                                maxLines: 2,
                                               ),
                                               const SizedBox(height: 8),
                                               Text(
@@ -515,7 +532,7 @@ class SaleMobile extends StatelessWidget {
                 saleController.showSortMenu.value
                     ? Positioned(
                       right: 50,
-                      top: 350,
+                      top: 320,
                       child: Container(
                         width: 180,
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -533,7 +550,7 @@ class SaleMobile extends StatelessWidget {
                 saleController.showFilterMenu.value
                     ? Positioned(
                       right: 16,
-                      top: 350,
+                      top: 320,
                       child: Container(
                         width: 180,
                         padding: const EdgeInsets.symmetric(vertical: 16),

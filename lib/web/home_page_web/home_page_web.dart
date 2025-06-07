@@ -15,8 +15,13 @@ import '../../web_desktop_common/home_page_gridview/product_gridview_homepage.da
 import '../../component/above_footer/above_footer.dart';
 
 class HomePageWeb extends StatefulWidget {
-  final Function(String)? onWishlistChanged; // Callback to notify parent
-  const HomePageWeb({super.key, this.onWishlistChanged});
+  final Function(String)? onWishlistChanged;
+  final Function(String)? onErrorWishlistChanged;
+  const HomePageWeb({
+    super.key,
+    this.onWishlistChanged,
+    this.onErrorWishlistChanged,
+  });
   @override
   State<HomePageWeb> createState() => _HomePageWebState();
 }
@@ -29,7 +34,7 @@ class _HomePageWebState extends State<HomePageWeb>
   final ProductController productController = Get.put(ProductController());
   final FocusNode _messageFocusNode = FocusNode();
   final FocusNode _anotherMessageFocusNode = FocusNode();
-// Track hover state for image
+  // Track hover state for image
   Future<void> _initializeWishlistStates() async {
     // This will be called after products are loaded
     if (mounted) setState(() {});
@@ -58,29 +63,35 @@ class _HomePageWebState extends State<HomePageWeb>
   void _submitForm() {
     // Check validation in order of priority
     if (_nameController.text.isEmpty) {
-      widget.onWishlistChanged?.call('Please enter your name');
+      widget.onErrorWishlistChanged?.call('Please enter your name');
       return;
     }
 
     if (_emailController.text.isEmpty) {
-      widget.onWishlistChanged?.call('Please enter your email');
+      widget.onErrorWishlistChanged?.call('Please enter your email');
       return;
     }
 
     if (!RegExp(
       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
     ).hasMatch(_emailController.text)) {
-      widget.onWishlistChanged?.call('Please enter a valid email');
+      widget.onErrorWishlistChanged?.call('Please enter a valid email');
       return;
     }
 
     if (_messageController.text.isEmpty) {
-      widget.onWishlistChanged?.call('Please enter a message');
+      widget.onErrorWishlistChanged?.call('Please enter a message');
       return;
     }
 
     // If all validations pass
     widget.onWishlistChanged?.call('Form submitted successfully!');
+
+    // Clear the fields
+    _nameController.clear();
+    _emailController.clear();
+    _messageController.clear();
+    _anotherMessageController.clear();
   }
 
   String bannerImg = '';
@@ -231,7 +242,7 @@ class _HomePageWebState extends State<HomePageWeb>
                                         hintText: "",
                                         controller: _anotherMessageController,
                                         focusNode: _anotherMessageFocusNode,
-                                        maxLength: 40,
+                                        maxLength: 100,
                                       ),
                                     ),
                                     const SizedBox(height: 24),
@@ -332,13 +343,11 @@ class _HomePageWebState extends State<HomePageWeb>
                                   ),
                                   child: MouseRegion(
                                     onEnter: (_) {
-                                      setState(() {
-                                      });
+                                      setState(() {});
                                       _controller.forward();
                                     },
                                     onExit: (_) {
-                                      setState(() {
-                                      });
+                                      setState(() {});
                                       _controller.reverse();
                                     },
                                     child: AnimatedBuilder(

@@ -134,38 +134,6 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
     super.dispose();
   }
 
-  void _handleNotifyMe() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text("Notify Me"),
-            content: Text(
-              "We'll notify you when this product is back in stock.",
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text("CANCEL"),
-              ),
-              TextButton(
-                onPressed: () {
-                  // TODO: Implement actual notification subscription logic
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        "You'll be notified when this product is back in stock.",
-                      ),
-                    ),
-                  );
-                },
-                child: Text("NOTIFY ME"),
-              ),
-            ],
-          ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -193,21 +161,38 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                         child: AnimatedBuilder(
                           animation: _animation,
                           builder: (context, child) {
+                            Widget imageWidget = Image.network(
+                              widget.product.thumbnail,
+                              fit: BoxFit.cover,
+                            );
+
+                            // Apply grayscale filter if out of stock
+                            if (isOutOfStock) {
+                              imageWidget = ColorFiltered(
+                                colorFilter: const ColorFilter.matrix(<double>[
+                                  0.2126, 0.7152, 0.0722, 0, 0, // red
+                                  0.2126, 0.7152, 0.0722, 0, 0, // green
+                                  0.2126, 0.7152, 0.0722, 0, 0, // blue
+                                  0, 0, 0, 1, 0, // alpha
+                                ]),
+                                child: imageWidget,
+                              );
+                            }
+
                             return Transform.scale(
                               scale: _animation.value,
-                              child: Image.network(
-                                widget.product.thumbnail,
-                                fit: BoxFit.cover,
-                              ),
+                              child: imageWidget,
                             );
                           },
                         ),
                       ),
                     ),
-                    if (isOutOfStock)
-                      Positioned.fill(
-                        child: Container(color: Colors.black.withOpacity(0.5)),
-                      ),
+
+                    // if (isOutOfStock)
+                    //   Positioned.fill(
+                    //     child: Container(color: Colors.black.withOpacity(0.3)), // slight dark overlay
+                    //   ),
+
                     Positioned(
                       top: imageHeight * 0.04,
                       left: imageWidth * 0.05,

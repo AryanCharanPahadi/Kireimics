@@ -177,7 +177,7 @@ class _MyOrderUiDesktopState extends State<MyOrderUiDesktop> {
                   ),
                   BarlowText(
                     text: order['status'],
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w600,
                     fontSize: 14,
                     lineHeight: 1.4,
                     letterSpacing: 0,
@@ -233,7 +233,7 @@ class _MyOrderUiDesktopState extends State<MyOrderUiDesktop> {
                           text: "VIEW DETAILS",
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          lineHeight: 1.5,
+                          lineHeight: 1.0,
                           letterSpacing: 0,
                           color: const Color(0xFF30578E),
                           hoverBackgroundColor: Color(0xFFb9d6ff),

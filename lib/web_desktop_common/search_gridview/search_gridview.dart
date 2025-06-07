@@ -287,46 +287,51 @@ class _SearchGridviewState extends State<SearchGridview>
                                               Positioned.fill(
                                                 child: ClipRect(
                                                   child: AnimatedBuilder(
-                                                    animation:
-                                                        _animations[index],
+                                                    animation: _animations[index],
                                                     builder: (context, child) {
+                                                      double scale = _isHoveredList[index]
+                                                          ? _animations[index].value
+                                                          : 1.0;
+
+                                                      Widget imageWidget = AnimatedZoomImage(
+                                                        imageUrl: product.thumbnail,
+                                                      );
+
+                                                      // Apply grayscale filter if out of stock
+                                                      if (isOutOfStock) {
+                                                        imageWidget = ColorFiltered(
+                                                          colorFilter: const ColorFilter.matrix(<double>[
+                                                            0.2126, 0.7152, 0.0722, 0, 0,
+                                                            0.2126, 0.7152, 0.0722, 0, 0,
+                                                            0.2126, 0.7152, 0.0722, 0, 0,
+                                                            0, 0, 0, 1, 0,
+                                                          ]),
+                                                          child: imageWidget,
+                                                        );
+                                                      }
+
                                                       return Transform.scale(
-                                                        scale:
-                                                            _isHoveredList[index] &&
-                                                                    !isOutOfStock
-                                                                ? _animations[index]
-                                                                    .value
-                                                                : 1.0, // No scaling for out-of-stock
+                                                        scale: scale,
                                                         child: GestureDetector(
-                                                          onTap:
-                                                              isOutOfStock
-                                                                  ? null
-                                                                  : () {
-                                                                    context.go(
-                                                                      AppRoutes.productDetails(
-                                                                        product
-                                                                            .id,
-                                                                      ),
-                                                                    );
-                                                                  },
-                                                          child: AnimatedZoomImage(
-                                                            imageUrl:
-                                                                product
-                                                                    .thumbnail,
-                                                          ),
+                                                          onTap: () {
+                                                            context.go(
+                                                              AppRoutes.productDetails(product.id),
+                                                            );
+                                                          },
+                                                          child: imageWidget,
                                                         ),
                                                       );
                                                     },
                                                   ),
                                                 ),
                                               ),
-                                              if (isOutOfStock)
-                                                Positioned.fill(
-                                                  child: Container(
-                                                    color: Colors.black
-                                                        .withOpacity(0.5),
-                                                  ),
-                                                ),
+                                              // if (isOutOfStock)
+                                              //   Positioned.fill(
+                                              //     child: Container(
+                                              //       color: Colors.black
+                                              //           .withOpacity(0.5),
+                                              //     ),
+                                              //   ),
                                               Positioned(
                                                 top: imageHeight * 0.04,
                                                 left: imageWidth * 0.05,

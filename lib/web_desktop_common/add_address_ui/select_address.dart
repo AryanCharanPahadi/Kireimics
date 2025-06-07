@@ -40,25 +40,31 @@ class _SelectAddressState extends State<SelectAddress> {
   // Method to save selected address to SharedPreferences and update CheckoutController
   Future<void> _saveSelectedAddress(Map<String, dynamic> address) async {
     try {
-      // Format the address data to store in SharedPreferences
-      final addressData = {
-        'address1': address['address']?.toString() ?? '',
-        'address2': address['address2']?.toString() ?? '',
-        'pincode': address['postalCode']?.toString() ?? '',
-        'state': address['state']?.toString() ?? '', // Ensure state is included
-        'city': address['city']?.toString() ?? '',
-      };
+      // Ensure the address has an ID
+      if (address['id'] == null) {
+        print('Error: Address ID is missing');
+        return;
+      }
 
-      final addressString = jsonEncode(addressData);
+      // Print the selected address ID
+      print('Selected Address ID: ${address['id']}');
 
-      await SharedPreferencesHelper.saveSelectedAddress(addressString);
+      // Save only the address ID to SharedPreferences
+      await SharedPreferencesHelper.saveSelectedAddress(
+        address['id'].toString(),
+      );
 
-      // Update CheckoutController text controllers
-      checkoutController.address1Controller.text = addressData['address1']!;
-      checkoutController.address2Controller.text = addressData['address2']!;
-      checkoutController.zipController.text = addressData['pincode']!;
-      checkoutController.stateController.text = addressData['state']!;
-      checkoutController.cityController.text = addressData['city']!;
+      // Update CheckoutController with address details (still needed for UI)
+      checkoutController.address1Controller.text =
+          address['address']?.toString() ?? '';
+      checkoutController.address2Controller.text =
+          address['address2']?.toString() ?? '';
+      checkoutController.zipController.text =
+          address['postalCode']?.toString() ?? '';
+      checkoutController.stateController.text =
+          address['state']?.toString() ?? '';
+      checkoutController.cityController.text =
+          address['city']?.toString() ?? '';
       checkoutController.addressExists(true);
 
       // Show success toast (uncomment if needed)
@@ -68,7 +74,6 @@ class _SelectAddressState extends State<SelectAddress> {
       Navigator.of(context).pop();
     } catch (e) {
       print('Error saving selected address: $e');
-      // CustomToast.showError(context, 'Failed to select address');
     }
   }
 
@@ -108,8 +113,8 @@ class _SelectAddressState extends State<SelectAddress> {
                               fontSize: 16.0,
                               lineHeight: 1.0,
                               letterSpacing: 0.64,
-                              enableHoverUnderline: true,
-                              decorationColor: const Color(0xFF30578E),
+                              hoverTextColor: const Color(0xFF2876E4),
+
                             ),
                           ),
                         ],
@@ -319,6 +324,10 @@ class _SelectAddressState extends State<SelectAddress> {
                                                               enableHoverBackground:
                                                                   true,
                                                               onTap: () {
+                                                                Navigator.of(
+                                                                  context,
+                                                                ).pop();
+
                                                                 showDialog(
                                                                   context:
                                                                       context,
@@ -402,6 +411,7 @@ class _SelectAddressState extends State<SelectAddress> {
                           backgroundColor: Color(0xFFb9d6ff),
                           hoverTextColor: Color(0xFF2876E4),
                           onTap: () {
+                            Navigator.of(context).pop();
                             showDialog(
                               context: context,
                               barrierColor: Colors.transparent,

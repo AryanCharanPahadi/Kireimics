@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../component/text_fonts/custom_text.dart';
+import '../../component/utilities/url_launcher.dart';
 import '../../web/about_us/about_us_controller.dart';
 
 class AboutPage extends StatefulWidget {
@@ -237,28 +238,61 @@ class _AboutPageState extends State<AboutPage> {
     return const Center(child: Text('No Image'));
   }
 
-  List<Widget> _buildSocialLinks(String socialMediaJson) {
-    Map<String, dynamic> socialLinks = {};
+  List<Widget> _buildSocialLinks(String socialJson) {
     try {
-      socialLinks = jsonDecode(socialMediaJson) as Map<String, dynamic>;
-    } catch (e) {
-      print('Error decoding social_media: $e');
-    }
+      final Map<String, dynamic> socialLinks = jsonDecode(socialJson);
+      final entries = socialLinks.entries.toList();
 
-    return socialLinks.entries.map((entry) {
-      return Padding(
-        padding: const EdgeInsets.only(right: 10),
-        child: InkWell(
-          onTap: () => _launchURL(entry.value),
-          child: BarlowText(
-            text: entry.key,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF30578E),
+      return List<Widget>.generate(entries.length, (index) {
+        final entry = entries[index];
+        final isLast = index == entries.length - 1;
+
+        String value = entry.value;
+        final keyLower = entry.key.toLowerCase();
+
+        // Prefix for email or phone
+        if (keyLower.contains('email') && !value.startsWith('mailto:')) {
+          value = 'mailto:$value';
+        } else if (keyLower.contains('phone') || keyLower.contains('tel')) {
+          if (!value.startsWith('tel:')) {
+            value = 'tel:$value';
+          }
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: InkWell(
+            onTap: () => UrlLauncherHelper.launchURL(context, value),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BarlowText(
+                  text: entry.key,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF30578E),
+                  enableUnderlineForActiveRoute: true,
+                  decorationColor: Color(0xFF30578E),
+                  hoverTextColor: const Color(0xFF2876E4),
+                ),
+                if (!isLast) ...[
+                  SizedBox(width: 14),
+                  BarlowText(
+                    text: '/',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF30578E),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-      );
-    }).toList();
+        );
+      });
+    } catch (e) {
+      debugPrint("Error parsing social links: $e");
+      return []; // Return empty list if parsing fails
+    }
   }
 
   Future<void> _launchURL(String url) async {

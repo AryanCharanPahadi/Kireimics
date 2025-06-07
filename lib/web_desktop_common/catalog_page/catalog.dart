@@ -58,6 +58,7 @@ class CatalogPage extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.only(
+                          right: 90,
                           top: 41,
                           left: 46,
                           bottom: 41,
@@ -137,6 +138,9 @@ class CatalogPage extends StatelessWidget {
                                   color: const Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
+                                  enableUnderlineForActiveRoute: true,
+                                  decorationColor: Color(0xFF30578E),
+                                  hoverTextColor: const Color(0xFF2876E4),
                                 ),
                               ),
                             SizedBox(width: 24),
@@ -153,6 +157,9 @@ class CatalogPage extends StatelessWidget {
                                   color: const Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
+                                  enableUnderlineForActiveRoute: true,
+                                  decorationColor: Color(0xFF30578E),
+                                  hoverTextColor: const Color(0xFF2876E4),
                                 ),
                               ),
                           ],
@@ -174,15 +181,13 @@ class CatalogPage extends StatelessWidget {
                         controller.collectionList.isEmpty
                     ? Padding(
                       padding: EdgeInsets.only(
-                        left: isLargeScreen ? 389 : 292,
+                        left: isLargeScreen ? 613 : 516,
                         top: 80,
                       ),
-                      child: Center(
-                        child: CartEmpty(
-                          cralikaText: "No products here yet!",
-                          barlowText:
-                          "Try another category, hopefully you'll find something you like there!",
-                        ),
+                      child: CartEmpty(
+                        cralikaText: "No products here yet!",
+                        barlowText:
+                            "Try another category, hopefully you'll find something you like there!",
                       ),
                     )
                     : controller.productList.isEmpty &&
@@ -190,17 +195,15 @@ class CatalogPage extends StatelessWidget {
                             'collections'
                     ? Padding(
                       padding: EdgeInsets.only(
-                        left: isLargeScreen ? 389 : 292,
+                        left: isLargeScreen ? 613 : 516,
                         top: 80,
                       ),
-                      child: Center(
-                        child: SizedBox(
-                          width: 344,
-                          child: CartEmpty(
-                            cralikaText: "No products here yet!",
-                            barlowText:
-                                "Try another category, hopefully you'll find something you like there!",
-                          ),
+                      child: SizedBox(
+                        width: 344,
+                        child: CartEmpty(
+                          cralikaText: "No products here yet!",
+                          barlowText:
+                              "Try another category, hopefully you'll find something you like there!",
                         ),
                       ),
                     )

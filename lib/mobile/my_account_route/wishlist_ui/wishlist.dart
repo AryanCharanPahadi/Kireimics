@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kireimics/component/no_result_found/no_order_yet.dart';
 import '../../../component/api_helper/api_helper.dart';
 import '../../../component/no_result_found/no_result_found.dart';
 import '../../../component/text_fonts/custom_text.dart';
@@ -22,6 +23,10 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
   bool isLoading = true;
   String errorMessage = "";
   final List<bool> _isHoveredList = [];
+  Future<bool> _isLoggedIn() async {
+    String? userData = await SharedPreferencesHelper.getUserData();
+    return userData != null && userData.isNotEmpty;
+  }
 
   @override
   void initState() {
@@ -66,7 +71,9 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
       widget.onWishlistChanged?.call('Product Removed From Wishlist');
       // Immediately remove the product from productList to update GridView
       setState(() {
-        final index = productList.indexWhere((p) => p.id.toString() == productId);
+        final index = productList.indexWhere(
+          (p) => p.id.toString() == productId,
+        );
         if (index != -1) {
           productList.removeAt(index);
           _isHoveredList.removeAt(index);
@@ -207,9 +214,10 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                     if (productList.isEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: BrowseOurCatalog(
-                          browserText:
-                          "Browse our catalog and heart the items you like! They will appear here.",
+                        child: CartEmpty(
+                          cralikaText: "No product added!",
+                          barlowText:
+                              "Browse our catalog and heart the items you like! They will appear here.",
                         ),
                       )
                     else
@@ -220,28 +228,28 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                           shrinkWrap: true,
                           padding: EdgeInsets.zero,
                           gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 24,
-                            mainAxisSpacing: 5,
-                            childAspectRatio: () {
-                              double width =
-                                  MediaQuery.of(context).size.width;
-                              if (width > 320 && width <= 410) {
-                                return 0.53;
-                              } else if (width > 410 && width <= 500) {
-                                return 0.59;
-                              } else if (width > 500 && width <= 600) {
-                                return 0.62;
-                              } else if (width > 600 && width <= 700) {
-                                return 0.65;
-                              } else if (width > 700 && width <= 800) {
-                                return 0.67;
-                              } else {
-                                return 0.50;
-                              }
-                            }(),
-                          ),
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 24,
+                                mainAxisSpacing: 5,
+                                childAspectRatio: () {
+                                  double width =
+                                      MediaQuery.of(context).size.width;
+                                  if (width > 320 && width <= 410) {
+                                    return 0.53;
+                                  } else if (width > 410 && width <= 500) {
+                                    return 0.59;
+                                  } else if (width > 500 && width <= 600) {
+                                    return 0.62;
+                                  } else if (width > 600 && width <= 700) {
+                                    return 0.65;
+                                  } else if (width > 700 && width <= 800) {
+                                    return 0.67;
+                                  } else {
+                                    return 0.50;
+                                  }
+                                }(),
+                              ),
                           itemCount: productList.length,
                           itemBuilder: (context, index) {
                             final product = productList[index];
@@ -251,13 +259,13 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                             final imageHeight = imageWidth * 1.2;
                             final maxWidth = 800;
                             final cappedWidth =
-                            screenWidth > maxWidth
-                                ? (maxWidth / 2) - 24
-                                : imageWidth;
+                                screenWidth > maxWidth
+                                    ? (maxWidth / 2) - 24
+                                    : imageWidth;
                             final cappedHeight =
-                            screenWidth > maxWidth
-                                ? ((maxWidth / 2) - 24) * 1.2
-                                : imageHeight;
+                                screenWidth > maxWidth
+                                    ? ((maxWidth / 2) - 24) * 1.2
+                                    : imageHeight;
 
                             return FutureBuilder<int?>(
                               future: fetchStockQuantity(product.id.toString()),
@@ -275,32 +283,54 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                         children: [
                                           Positioned.fill(
                                             child: GestureDetector(
-                                              onTap:
-                                              isOutOfStock
-                                                  ? null
-                                                  : () {
+                                              onTap: () {
                                                 context.go(
                                                   AppRoutes.productDetails(
                                                     product.id,
                                                   ),
                                                 );
                                               },
-                                              child: Image.network(
-                                                product.thumbnail,
-                                                width: cappedWidth,
-                                                height: cappedHeight,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                          if (isOutOfStock)
-                                            Positioned.fill(
-                                              child: Container(
-                                                color: Colors.black.withOpacity(
-                                                  0.5,
+                                              child: ColorFiltered(
+                                                colorFilter:
+                                                    isOutOfStock
+                                                        ? const ColorFilter.matrix(
+                                                          [
+                                                            0.2126,
+                                                            0.7152,
+                                                            0.0722,
+                                                            0,
+                                                            0,
+                                                            0.2126,
+                                                            0.7152,
+                                                            0.0722,
+                                                            0,
+                                                            0,
+                                                            0.2126,
+                                                            0.7152,
+                                                            0.0722,
+                                                            0,
+                                                            0,
+                                                            0,
+                                                            0,
+                                                            0,
+                                                            1,
+                                                            0,
+                                                          ],
+                                                        )
+                                                        : const ColorFilter.mode(
+                                                          Colors.transparent,
+                                                          BlendMode.multiply,
+                                                        ),
+                                                child: Image.network(
+                                                  product.thumbnail,
+                                                  width: cappedWidth,
+                                                  height: cappedHeight,
+                                                  fit: BoxFit.cover,
                                                 ),
                                               ),
                                             ),
+                                          ),
+
                                           Positioned(
                                             top: 10,
                                             left: 10,
@@ -309,17 +339,17 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                               builder: (context, constraints) {
                                                 bool isMobile =
                                                     constraints.maxWidth < 800;
-
                                                 if (isOutOfStock) {
+                                                  // Only show out-of-stock image and wishlist icon
                                                   return Row(
                                                     mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
                                                     children: [
                                                       Align(
                                                         alignment:
-                                                        Alignment
-                                                            .centerLeft,
+                                                            Alignment
+                                                                .centerLeft,
                                                         child: SvgPicture.asset(
                                                           "assets/home_page/outofstock.svg",
                                                           height: 24,
@@ -327,12 +357,45 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                       ),
                                                       Align(
                                                         alignment:
-                                                        Alignment
-                                                            .centerRight,
-                                                        child: SvgPicture.asset(
-                                                          "assets/home_page/IconWishlistEmpty.svg",
-                                                          width: 23,
-                                                          height: 20,
+                                                            Alignment
+                                                                .centerRight,
+                                                        child: FutureBuilder<
+                                                          bool
+                                                        >(
+                                                          future:
+                                                              SharedPreferencesHelper.isInWishlist(
+                                                                product.id
+                                                                    .toString(),
+                                                              ),
+                                                          builder: (
+                                                            context,
+                                                            snapshot,
+                                                          ) {
+                                                            final isInWishlist =
+                                                                snapshot.data ??
+                                                                false;
+                                                            return GestureDetector(
+                                                              onTap: () {
+                                                                toggleWishlist(
+                                                                  product.id
+                                                                      .toString(),
+                                                                );
+                                                              },
+                                                              child: SvgPicture.asset(
+                                                                isInWishlist
+                                                                    ? 'assets/home_page/IconWishlist.svg'
+                                                                    : 'assets/home_page/IconWishlistEmpty.svg',
+                                                                width:
+                                                                    isMobile
+                                                                        ? 20
+                                                                        : 24,
+                                                                height:
+                                                                    isMobile
+                                                                        ? 18
+                                                                        : 20,
+                                                              ),
+                                                            );
+                                                          },
                                                         ),
                                                       ),
                                                     ],
@@ -341,7 +404,7 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
 
                                                 return Row(
                                                   crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     Builder(
                                                       builder: (context) {
@@ -349,15 +412,15 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                         badges = [];
 
                                                         if (product
-                                                            .isMakerChoice ==
+                                                                .isMakerChoice ==
                                                             1) {
                                                           badges.add(
                                                             SvgPicture.asset(
                                                               "assets/home_page/maker_choice.svg",
                                                               height:
-                                                              isMobile
-                                                                  ? 40
-                                                                  : 32,
+                                                                  isMobile
+                                                                      ? 40
+                                                                      : 32,
                                                             ),
                                                           );
                                                         }
@@ -374,9 +437,9 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                             SvgPicture.asset(
                                                               "assets/home_page/fewPiecesMobile.svg",
                                                               height:
-                                                              isMobile
-                                                                  ? 28
-                                                                  : 32,
+                                                                  isMobile
+                                                                      ? 28
+                                                                      : 32,
                                                             ),
                                                           );
                                                         }
@@ -393,49 +456,49 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                             ElevatedButton(
                                                               onPressed: null,
                                                               style: ElevatedButton.styleFrom(
-                                                                padding: const EdgeInsets.symmetric(
-                                                                  horizontal:
-                                                                  30,
-                                                                  vertical:
-                                                                  0,
-                                                                ),
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          30,
+                                                                      vertical:
+                                                                          0,
+                                                                    ),
                                                                 backgroundColor:
-                                                                const Color(
-                                                                  0xFFF46856,
-                                                                ),
+                                                                    const Color(
+                                                                      0xFFF46856,
+                                                                    ),
                                                                 disabledBackgroundColor:
-                                                                const Color(
-                                                                  0xFFF46856,
-                                                                ),
+                                                                    const Color(
+                                                                      0xFFF46856,
+                                                                    ),
                                                                 disabledForegroundColor:
-                                                                Colors
-                                                                    .white,
+                                                                    Colors
+                                                                        .white,
                                                                 elevation: 0,
                                                                 side:
-                                                                BorderSide
-                                                                    .none,
+                                                                    BorderSide
+                                                                        .none,
                                                                 minimumSize:
-                                                                const Size(
-                                                                  0,
-                                                                  33,
-                                                                ),
+                                                                    const Size(
+                                                                      0,
+                                                                      33,
+                                                                    ),
                                                               ),
                                                               child: Text(
                                                                 "${product.discount}% OFF",
                                                                 style: TextStyle(
                                                                   fontFamily:
-                                                                  GoogleFonts.barlow()
-                                                                      .fontFamily,
-                                                                  fontSize:
-                                                                  10,
+                                                                      GoogleFonts.barlow()
+                                                                          .fontFamily,
+                                                                  fontSize: 10,
                                                                   fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
+                                                                      FontWeight
+                                                                          .w600,
                                                                   color:
-                                                                  Colors
-                                                                      .white,
+                                                                      Colors
+                                                                          .white,
                                                                   letterSpacing:
-                                                                  0.48,
+                                                                      0.48,
                                                                 ),
                                                               ),
                                                             ),
@@ -444,8 +507,8 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
 
                                                         return Column(
                                                           crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
+                                                              CrossAxisAlignment
+                                                                  .start,
                                                           children: badges,
                                                         );
                                                       },
@@ -453,22 +516,19 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                     Spacer(),
                                                     FutureBuilder<bool>(
                                                       future:
-                                                      SharedPreferencesHelper.isInWishlist(
-                                                        product.id
-                                                            .toString(),
-                                                      ),
+                                                          SharedPreferencesHelper.isInWishlist(
+                                                            product.id
+                                                                .toString(),
+                                                          ),
                                                       builder: (
-                                                          context,
-                                                          snapshot,
-                                                          ) {
+                                                        context,
+                                                        snapshot,
+                                                      ) {
                                                         final isInWishlist =
                                                             snapshot.data ??
-                                                                false;
+                                                            false;
                                                         return GestureDetector(
-                                                          onTap:
-                                                          isOutOfStock
-                                                              ? null
-                                                              : () {
+                                                          onTap: () {
                                                             toggleWishlist(
                                                               product.id
                                                                   .toString(),
@@ -479,13 +539,13 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                                 ? 'assets/home_page/IconWishlist.svg'
                                                                 : 'assets/home_page/IconWishlistEmpty.svg',
                                                             width:
-                                                            isMobile
-                                                                ? 20
-                                                                : 24,
+                                                                isMobile
+                                                                    ? 20
+                                                                    : 24,
                                                             height:
-                                                            isMobile
-                                                                ? 18
-                                                                : 20,
+                                                                isMobile
+                                                                    ? 18
+                                                                    : 20,
                                                           ),
                                                         );
                                                       },
@@ -502,7 +562,7 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                         children: [
                                           CralikaFont(
                                             text: product.name,
@@ -516,7 +576,7 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                           const SizedBox(height: 8),
                                           BarlowText(
                                             text:
-                                            "Rs. ${product.price.toStringAsFixed(2)}",
+                                                "Rs. ${product.price.toStringAsFixed(2)}",
                                             fontWeight: FontWeight.w400,
                                             fontSize: 14,
                                             lineHeight: 1.2,
@@ -525,27 +585,40 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                           const SizedBox(height: 8),
                                           GestureDetector(
                                             onTap:
-                                            isOutOfStock
-                                                ? null
-                                                : () {
-                                              context.go(
-                                                AppRoutes.cartDetails(
-                                                  product.id,
-                                                ),
-                                              );
-                                            },
-                                            child: BarlowText(
-                                              text: "ADD TO CART",
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 14,
-                                              lineHeight: 1.2,
-                                              letterSpacing: 0.56,
-                                              color:
+                                                isOutOfStock
+                                                    ? () async {
+                                                      bool isLoggedIn =
+                                                          await _isLoggedIn();
+
+                                                      if (isLoggedIn) {
+                                                        widget.onWishlistChanged
+                                                            ?.call(
+                                                              "We'll notify you when this product is back in stock.",
+                                                            );
+                                                      } else {
+                                                        context.go(
+                                                          AppRoutes.logIn,
+                                                        );
+                                                      }
+                                                    }
+                                                    : () {
+                                                      context.go(
+                                                        AppRoutes.cartDetails(
+                                                          product.id,
+                                                        ),
+                                                      );
+                                                    },
+                                            child: Text(
                                               isOutOfStock
-                                                  ? const Color(
-                                                0xFF30578E,
-                                              ).withOpacity(0.5)
-                                                  : const Color(0xFF30578E),
+                                                  ? "NOTIFY ME"
+                                                  : "ADD TO CART",
+                                              style: GoogleFonts.barlow(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                                height: 1.2,
+                                                letterSpacing: 0.56,
+                                                color: const Color(0xFF30578E),
+                                              ),
                                             ),
                                           ),
                                         ],

@@ -22,9 +22,16 @@ import '../../web_desktop_common/component/animation_gridview.dart';
 
 class HomePageDesktop extends StatefulWidget {
   final Function(String)? onWishlistChanged; // Callback to notify parent
+  final Function(String)? onErrorWishlistChanged;
+
   final Function()? onPageLoaded; // Add this callback
 
-  const HomePageDesktop({super.key, this.onWishlistChanged, this.onPageLoaded});
+  const HomePageDesktop({
+    super.key,
+    this.onWishlistChanged,
+    this.onPageLoaded,
+    this.onErrorWishlistChanged,
+  });
   @override
   State<HomePageDesktop> createState() => _HomePageDesktopState();
 }
@@ -37,7 +44,7 @@ class _HomePageDesktopState extends State<HomePageDesktop>
   final ProductController controller = Get.put(ProductController());
   late AnimationController _imageAnimationController;
   late Animation<double> _imageAnimation;
-  bool _isImageHovered = false; // Track hover state for the main image
+  // Track hover state for the main image
   List<bool> _isHoveredList = [];
   List<bool> _wishlistStates = [];
 
@@ -121,29 +128,35 @@ class _HomePageDesktopState extends State<HomePageDesktop>
   void _submitForm() {
     // Check validation in order of priority
     if (_nameController.text.isEmpty) {
-      widget.onWishlistChanged?.call('Please enter your name');
+      widget.onErrorWishlistChanged?.call('Please enter your name');
       return;
     }
 
     if (_emailController.text.isEmpty) {
-      widget.onWishlistChanged?.call('Please enter your email');
+      widget.onErrorWishlistChanged?.call('Please enter your email');
       return;
     }
 
     if (!RegExp(
       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
     ).hasMatch(_emailController.text)) {
-      widget.onWishlistChanged?.call('Please enter a valid email');
+      widget.onErrorWishlistChanged?.call('Please enter a valid email');
       return;
     }
 
     if (_messageController.text.isEmpty) {
-      widget.onWishlistChanged?.call('Please enter a message');
+      widget.onErrorWishlistChanged?.call('Please enter a message');
       return;
     }
 
     // If all validations pass
     widget.onWishlistChanged?.call('Form submitted successfully!');
+
+    // Clear the fields
+    _nameController.clear();
+    _emailController.clear();
+    _messageController.clear();
+    _anotherMessageController.clear();
   }
 
   @override
@@ -260,7 +273,7 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                             "", // Empty hint text for continuation
                                         controller: _anotherMessageController,
                                         focusNode: _anotherMessageFocusNode,
-                                        maxLength: 40,
+                                        maxLength: 100,
                                       ),
                                     ),
                                     const SizedBox(

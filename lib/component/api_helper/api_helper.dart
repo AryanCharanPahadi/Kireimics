@@ -12,6 +12,21 @@ class ApiHelper {
   static const String baseUrlC = "https://vedvika.com/v1/apis/common/";
 
   // Fetch data from API
+
+  static Future<Map<String, dynamic>?> fetchGeneralLinks() async {
+    final response = await http.get(
+      Uri.parse("$baseUrlC/general_links/get_general_links.php"),
+    );
+
+    if (response.statusCode == 200) {
+      print(jsonDecode(response.body)[0]);
+      return jsonDecode(response.body)[0];
+    } else {
+      print("Error: ${response.statusCode}");
+      return null;
+    }
+  }
+
   static Future<Map<String, dynamic>?> fetchContactData() async {
     final response = await http.get(
       Uri.parse("$baseUrlC/contact/get_contact.php"),
@@ -414,8 +429,10 @@ class ApiHelper {
       return {'error': true, 'message': 'Network error: $e'};
     }
   }
+
   static Future<Map<String, dynamic>> getDefaultAddress(int userId) async {
-    final url = 'https://vedvika.com/v1/apis/frontend/user_address/get_default_address.php?created_by=$userId';
+    final url =
+        'https://vedvika.com/v1/apis/frontend/user_address/get_default_address.php?created_by=$userId';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {

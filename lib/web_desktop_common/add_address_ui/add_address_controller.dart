@@ -41,19 +41,30 @@ class AddAddressController extends GetxController {
     }
   }
 
-  void deleteAddress(String addressId) async {
-    String? userId = await SharedPreferencesHelper.getUserId();
+  Future<bool> deleteAddress(String addressId) async {
+    try {
+      String? userId = await SharedPreferencesHelper.getUserId();
+      if (userId == null) {
+        print('Failed: User ID not found');
+        return false; // Return false if userId is null
+      }
 
-    final result = await ApiHelper.deleteUserAddress(
-      addressId: addressId,
-      userId: userId.toString(),
-    );
+      final result = await ApiHelper.deleteUserAddress(
+        addressId: addressId,
+        userId: userId,
+      );
 
-    if (result['error'] == false) {
-      print('Server Message: ${result['message']}');
-      await fetchAddress(); // Refresh address list after deletion
-    } else {
-      print('Failed: ${result['message']}');
+      if (result['error'] == false) {
+        print('Server Message: ${result['message']}');
+        await fetchAddress(); // Refresh address list after deletion
+        return true; // Return true on successful deletion
+      } else {
+        print('Failed: ${result['message']}');
+        return false; // Return false on API error
+      }
+    } catch (e) {
+      print('Error deleting address: $e');
+      return false; // Return false on any exception
     }
   }
 
@@ -194,7 +205,9 @@ class AddAddressController extends GetxController {
                   : "Address added successfully";
           await fetchAddress();
           checkoutController.loadAddressData();
-          Navigator.of(context).pop();
+          Future.delayed(const Duration(seconds: 2), () {
+            Navigator.of(context).pop();
+          });
           clearForm();
 
           return true;

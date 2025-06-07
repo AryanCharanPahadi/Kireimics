@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kireimics/component/no_result_found/no_order_yet.dart';
 import 'package:kireimics/component/no_result_found/no_result_found.dart';
 import '../../component/api_helper/api_helper.dart';
 import '../../component/cart_length/cart_loader.dart';
@@ -49,8 +50,7 @@ class _WishlistUiState extends State<WishlistUi> {
 
       setState(() {
         productList = fetchedProducts;
-        _isHoveredList.clear();
-        _isHoveredList.addAll(List.filled(fetchedProducts.length, false));
+        _isHoveredList = List.filled(fetchedProducts.length, false);
         isLoading = false;
       });
     } catch (e) {
@@ -172,6 +172,7 @@ class _WishlistUiState extends State<WishlistUi> {
                       onTap: () {
                         context.go(AppRoutes.myAccount);
                       },
+                      hoverTextColor: const Color(0xFF2876E4),
                     ),
                     const SizedBox(width: 32),
                     BarlowText(
@@ -186,6 +187,7 @@ class _WishlistUiState extends State<WishlistUi> {
                       onTap: () {
                         context.go(AppRoutes.myOrder);
                       },
+                      hoverTextColor: const Color(0xFF2876E4),
                     ),
                     const SizedBox(width: 32),
                     BarlowText(
@@ -200,6 +202,7 @@ class _WishlistUiState extends State<WishlistUi> {
                       onTap: () {
                         context.go(AppRoutes.wishlist);
                       },
+                      hoverTextColor: const Color(0xFF2876E4),
                     ),
                   ],
                 ),
@@ -219,8 +222,9 @@ class _WishlistUiState extends State<WishlistUi> {
                     const SizedBox(height: 24),
                     if (productList.isEmpty)
                       Center(
-                        child: BrowseOurCatalog(
-                          browserText:
+                        child: CartEmpty(
+                          cralikaText: "No product added!",
+                          barlowText:
                               "Browse our catalog and heart the items you like! They will appear here.",
                         ),
                       )
@@ -252,13 +256,13 @@ class _WishlistUiState extends State<WishlistUi> {
 
                                 return MouseRegion(
                                   onEnter:
-                                      (_) => setState(() {
-                                        _isHoveredList[index] = true;
-                                      }),
+                                      (_) => setState(
+                                        () => _isHoveredList[index] = true,
+                                      ),
                                   onExit:
-                                      (_) => setState(() {
-                                        _isHoveredList[index] = false;
-                                      }),
+                                      (_) => setState(
+                                        () => _isHoveredList[index] = false,
+                                      ),
                                   child: LayoutBuilder(
                                     builder: (context, constraints) {
                                       double imageWidth = constraints.maxWidth;
@@ -285,32 +289,74 @@ class _WishlistUiState extends State<WishlistUi> {
                                                       ),
                                                   transformAlignment:
                                                       Alignment.center,
-                                                  child: Image.network(
-                                                    product.thumbnail,
-                                                    fit: BoxFit.cover,
-                                                    width: double.infinity,
-                                                    height: double.infinity,
-                                                    errorBuilder:
-                                                        (
-                                                          context,
-                                                          error,
-                                                          stackTrace,
-                                                        ) => const Icon(
-                                                          Icons.broken_image,
-                                                          size: 50,
-                                                          color: Colors.grey,
-                                                        ),
+                                                  child: GestureDetector(
+                                                    onTap:
+                                                        isOutOfStock
+                                                            ? null
+                                                            : () {
+                                                              context.go(
+                                                                AppRoutes.productDetails(
+                                                                  product.id,
+                                                                ),
+                                                              );
+                                                            },
+                                                    child: ColorFiltered(
+                                                      colorFilter:
+                                                          isOutOfStock
+                                                              ? const ColorFilter.matrix(
+                                                                [
+                                                                  0.2126,
+                                                                  0.7152,
+                                                                  0.0722,
+                                                                  0,
+                                                                  0,
+                                                                  0.2126,
+                                                                  0.7152,
+                                                                  0.0722,
+                                                                  0,
+                                                                  0,
+                                                                  0.2126,
+                                                                  0.7152,
+                                                                  0.0722,
+                                                                  0,
+                                                                  0,
+                                                                  0,
+                                                                  0,
+                                                                  0,
+                                                                  1,
+                                                                  0,
+                                                                ],
+                                                              )
+                                                              : const ColorFilter.mode(
+                                                                Colors
+                                                                    .transparent,
+                                                                BlendMode
+                                                                    .multiply,
+                                                              ),
+                                                      child: Image.network(
+                                                        product.thumbnail,
+                                                        fit: BoxFit.cover,
+                                                        width: double.infinity,
+                                                        height: double.infinity,
+                                                        errorBuilder:
+                                                            (
+                                                              context,
+                                                              error,
+                                                              stackTrace,
+                                                            ) => const Icon(
+                                                              Icons
+                                                                  .broken_image,
+                                                              size: 50,
+                                                              color:
+                                                                  Colors.grey,
+                                                            ),
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                            if (isOutOfStock)
-                                              Positioned.fill(
-                                                child: Container(
-                                                  color: Colors.black
-                                                      .withOpacity(0.5),
-                                                ),
-                                              ),
+
                                             Positioned(
                                               top: imageHeight * 0.04,
                                               left: imageWidth * 0.05,
@@ -360,38 +406,27 @@ class _WishlistUiState extends State<WishlistUi> {
                                                           alignment:
                                                               Alignment
                                                                   .centerRight,
-                                                          child: FutureBuilder<
-                                                            bool
-                                                          >(
-                                                            future:
-                                                                SharedPreferencesHelper.isInWishlist(
-                                                                  product.id
-                                                                      .toString(),
-                                                                ),
-                                                            builder: (
-                                                              context,
-                                                              snapshot,
-                                                            ) {
-                                                              final isInWishlist =
-                                                                  snapshot
-                                                                      .data ??
-                                                                  false;
-                                                              return GestureDetector(
-                                                                onTap: () {
-                                                                  toggleWishlist(
-                                                                    product.id
-                                                                        .toString(),
-                                                                  );
-                                                                },
-                                                                child: SvgPicture.asset(
-                                                                  isInWishlist
-                                                                      ? 'assets/home_page/IconWishlist.svg'
-                                                                      : 'assets/home_page/IconWishlistEmpty.svg',
-                                                                  width: 23,
-                                                                  height: 20,
-                                                                ),
+                                                          child: GestureDetector(
+                                                            onTap: () {
+                                                              toggleWishlist(
+                                                                product.id
+                                                                    .toString(),
                                                               );
                                                             },
+                                                            child: SvgPicture.asset(
+                                                              productList.any(
+                                                                    (p) =>
+                                                                        p.id
+                                                                            .toString() ==
+                                                                        product
+                                                                            .id
+                                                                            .toString(),
+                                                                  )
+                                                                  ? 'assets/home_page/IconWishlist.svg'
+                                                                  : 'assets/home_page/IconWishlistEmpty.svg',
+                                                              width: 23,
+                                                              height: 20,
+                                                            ),
                                                           ),
                                                         ),
                                                       ],
@@ -500,53 +535,26 @@ class _WishlistUiState extends State<WishlistUi> {
                                                         },
                                                       ),
                                                       Spacer(),
-                                                      FutureBuilder<bool>(
-                                                        future:
-                                                            SharedPreferencesHelper.isInWishlist(
-                                                              product.id
-                                                                  .toString(),
-                                                            ),
-                                                        builder: (
-                                                          context,
-                                                          snapshot,
-                                                        ) {
-                                                          final isInWishlist =
-                                                              snapshot.data ??
-                                                              false;
-                                                          return GestureDetector(
-                                                            onTap: () async {
-                                                              if (isInWishlist) {
-                                                                await SharedPreferencesHelper.removeFromWishlist(
-                                                                  product.id
-                                                                      .toString(),
-                                                                );
-                                                                widget
-                                                                    .onWishlistChanged
-                                                                    ?.call(
-                                                                      'Product Removed From Wishlist',
-                                                                    );
-                                                              } else {
-                                                                await SharedPreferencesHelper.addToWishlist(
-                                                                  product.id
-                                                                      .toString(),
-                                                                );
-                                                                widget
-                                                                    .onWishlistChanged
-                                                                    ?.call(
-                                                                      'Product Added To Wishlist',
-                                                                    );
-                                                              }
-                                                              setState(() {});
-                                                            },
-                                                            child: SvgPicture.asset(
-                                                              isInWishlist
-                                                                  ? 'assets/home_page/IconWishlist.svg'
-                                                                  : 'assets/home_page/IconWishlistEmpty.svg',
-                                                              width: 23,
-                                                              height: 20,
-                                                            ),
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          toggleWishlist(
+                                                            product.id
+                                                                .toString(),
                                                           );
                                                         },
+                                                        child: SvgPicture.asset(
+                                                          productList.any(
+                                                                (p) =>
+                                                                    p.id
+                                                                        .toString() ==
+                                                                    product.id
+                                                                        .toString(),
+                                                              )
+                                                              ? 'assets/home_page/IconWishlist.svg'
+                                                              : 'assets/home_page/IconWishlistEmpty.svg',
+                                                          width: 23,
+                                                          height: 20,
+                                                        ),
                                                       ),
                                                     ],
                                                   );
@@ -564,7 +572,7 @@ class _WishlistUiState extends State<WishlistUi> {
                                                 opacity:
                                                     _isHoveredList[index]
                                                         ? 1.0
-                                                        : 0.0, // Show on hover
+                                                        : 0.0,
                                                 child: Container(
                                                   width: imageWidth * 0.95,
                                                   height: imageHeight * 0.35,

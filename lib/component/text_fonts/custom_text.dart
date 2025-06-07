@@ -62,7 +62,7 @@ class CralikaFont extends StatelessWidget {
   const CralikaFont({
     Key? key,
     required this.text,
-    this.fontSize = 24,
+    this.fontSize = 25,
     this.fontWeight = FontWeight.w700,
     this.letterSpacing = 0.96,
     this.lineHeight = 36 / 24,
@@ -84,7 +84,7 @@ class CralikaFont extends StatelessWidget {
       style: TextStyle(
         fontFamily: "Cralika",
         fontWeight: fontWeight,
-        fontSize: fontSize,
+        fontSize: fontSize + 1,
         height: lineHeight,
         letterSpacing: letterSpacing,
         color: color,
@@ -101,11 +101,11 @@ class BarlowText extends StatefulWidget {
   final double lineHeight;
   final double letterSpacing;
   final Color color;
-  final Color? backgroundColor; // Independent background color for text only
+  final Color? backgroundColor;
   final TextAlign textAlign;
   final bool softWrap;
   final VoidCallback? onTap;
-  final int? maxLines; // New parameter for maximum number of lines
+  final int? maxLines;
 
   // Decoration properties
   final TextDecoration? decoration;
@@ -124,8 +124,10 @@ class BarlowText extends StatefulWidget {
   final Color? hoverBackgroundColor;
   final bool enableHoverBackground;
   final Color? hoverTextColor;
-  final bool enableHoverUnderline; // Changed to default false
+  final bool enableHoverUnderline;
   final TextDecoration? hoverDecoration;
+  final Color? hoverDecorationColor; // ✅ New hover underline color
+
   static final String fontFamily = GoogleFonts.barlow().fontFamily ?? 'Barlow';
 
   const BarlowText({
@@ -153,8 +155,9 @@ class BarlowText extends StatefulWidget {
     this.hoverBackgroundColor,
     this.enableHoverBackground = false,
     this.hoverTextColor,
-    this.enableHoverUnderline = false, // Changed to default false
+    this.enableHoverUnderline = false,
     this.hoverDecoration,
+    this.hoverDecorationColor, // ✅
   });
 
   @override
@@ -175,12 +178,18 @@ class _BarlowTextState extends State<BarlowText> {
     final isActive = _isCurrentRoute(context);
 
     TextDecoration? decoration;
+    Color? decorationColor;
+
     if (isActive && widget.enableUnderlineForActiveRoute) {
       decoration = widget.activeUnderlineDecoration ?? TextDecoration.underline;
+      decorationColor = widget.decorationColor;
     } else if (_isHovering && widget.enableHoverUnderline) {
       decoration = widget.hoverDecoration ?? TextDecoration.underline;
+      decorationColor =
+          widget.hoverDecorationColor; // ✅ Apply hover underline color
     } else {
       decoration = widget.decoration;
+      decorationColor = widget.decorationColor;
     }
 
     return GestureDetector(
@@ -189,18 +198,14 @@ class _BarlowTextState extends State<BarlowText> {
           (widget.route != null ? () => context.go(widget.route!) : null),
       child: MouseRegion(
         onEnter: (_) {
-          if (widget.enableHoverBackground || widget.enableHoverUnderline) {
-            setState(() {
-              _isHovering = true;
-            });
-          }
+          setState(() {
+            _isHovering = true;
+          });
         },
         onExit: (_) {
-          if (widget.enableHoverBackground || widget.enableHoverUnderline) {
-            setState(() {
-              _isHovering = false;
-            });
-          }
+          setState(() {
+            _isHovering = false;
+          });
         },
         child: Text(
           widget.text,
@@ -228,7 +233,7 @@ class _BarlowTextState extends State<BarlowText> {
             decoration: decoration,
             decorationStyle: widget.decorationStyle,
             decorationThickness: widget.decorationThickness,
-            decorationColor: widget.decorationColor,
+            decorationColor: decorationColor,
           ),
         ),
       ),

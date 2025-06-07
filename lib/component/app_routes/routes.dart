@@ -18,6 +18,7 @@ class AppRoutes {
   static const String logIn = '/log-in';
   static const String signIn = '/sign-in';
   static const String addAddress = '/add-address';
+  static const String forgetPassword = '/forget-password';
   static const String paymentResult = '/payment-result'; // New route
   static const String addToCart = '/cart/:id';
   static String cartDetails(int id) => '/cart/$id'; // for navigation

@@ -14,11 +14,17 @@ import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/utilities/utility.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_controller.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_ui.dart';
+import '../../../web_desktop_common/add_address_ui/delete_address.dart';
 
 class MyAccountUiDesktop extends StatefulWidget {
   final Function(String)? onWishlistChanged; // Callback to notify parent
+  final Function(String)? onErrorWishlistChanged; // Callback to notify parent
 
-  const MyAccountUiDesktop({super.key, this.onWishlistChanged});
+  const MyAccountUiDesktop({
+    super.key,
+    this.onWishlistChanged,
+    this.onErrorWishlistChanged,
+  });
 
   @override
   State<MyAccountUiDesktop> createState() => _MyAccountUiDesktopState();
@@ -30,28 +36,6 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
   final AddAddressController addAddressController = Get.put(
     AddAddressController(),
   );
-  String? _addressIdToDelete; // Track address ID for deletion
-  bool _showDeleteConfirmation = false; // Track banner visibility
-  void _showDeleteConfirmationBanner(String addressId) {
-    setState(() {
-      _addressIdToDelete = addressId;
-      _showDeleteConfirmation = true;
-    });
-  }
-
-  void _hideDeleteConfirmationBanner() {
-    setState(() {
-      _addressIdToDelete = null;
-      _showDeleteConfirmation = false;
-    });
-  }
-
-  void _confirmDelete() {
-    if (_addressIdToDelete != null) {
-      addAddressController.deleteAddress(_addressIdToDelete!);
-      _hideDeleteConfirmationBanner();
-    }
-  }
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -59,11 +43,18 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
 
   Future<bool> handleSignUp(BuildContext context) async {
     String? userId = await SharedPreferencesHelper.getUserId();
+    print("User ID: $userId");
 
-    print("this is the user id $userId");
+    if (userId == null || userId.isEmpty) {
+      widget.onErrorWishlistChanged?.call("User ID is missing");
+      return false;
+    }
 
     if (formKey.currentState!.validate()) {
       String formattedDate = getFormattedDate();
+      print(
+        "Input values: firstName=${firstNameController.text}, lastName=${lastNameController.text}, phone=${mobileController.text}, updatedAt=$formattedDate",
+      );
 
       try {
         final response = await ApiHelper.editRegisterUser(
@@ -74,52 +65,33 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
           updatedAt: formattedDate,
         );
 
-        // Print the full API response
         print("Signup Response: $response");
 
         if (response['error'] == true) {
-          // Display error message
-          signupMessage = response['message'] ?? "Failed to update details";
-          widget.onWishlistChanged?.call(
-            signupMessage,
-          ); // Optional: Keep if parent needs it
+          String errorMessage =
+              response['message'] ?? "Failed to update details";
+          widget.onErrorWishlistChanged?.call(errorMessage);
           return false;
         } else {
-          // Save updated user data to SharedPreferences
           String userData =
-              "${userId}, ${firstNameController.text.trim()} ${lastNameController.text.trim()}, ${mobileController.text.trim()}, ${emailController.text.trim()}";
+              "$userId, ${firstNameController.text.trim()} ${lastNameController.text.trim()}, ${mobileController.text.trim()}, ${emailController.text.trim()}";
           await SharedPreferencesHelper.saveUserData(userData);
-          print("Saved user data to SharedPreferences: $userData");
+          print("Saved user data: $userData");
 
-          // Reload user data to update UI
           await _loadUserData();
-
-          // Toggle editing state off
-          if (mounted) {
-            setState(() {
-              isEditing = false;
-            });
-          }
-
-          // Show success message
-          widget.onWishlistChanged?.call(
-            'Updated Successfully',
-          ); // Optional: Keep if parent needs it
+          widget.onWishlistChanged?.call('Updated Successfully');
           return true;
         }
       } catch (e) {
         print("Signup exception: $e");
-        signupMessage = "An error occurred during update";
-        widget.onWishlistChanged?.call(
-          signupMessage,
-        ); // Optional: Keep if parent needs it
+        widget.onErrorWishlistChanged?.call(
+          "An error occurred during update: $e",
+        );
         return false;
       }
     }
-    signupMessage = "Please fill all fields correctly";
-    widget.onWishlistChanged?.call(
-      signupMessage,
-    ); // Optional: Keep if parent needs it
+
+    widget.onErrorWishlistChanged?.call("Please fill all fields correctly");
     return false;
   }
 
@@ -285,24 +257,6 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
             ),
           ),
         ),
-
-        if (_showDeleteConfirmation)
-          Positioned(
-            top: 0,
-            right: 24,
-            child: NotificationBanner(
-              message: "Are you sure you want to delete this address?",
-              iconPath: "assets/icons/i_icons.svg",
-              bannerColor: const Color(0xFF2876E4),
-              textColor: Colors.black,
-              confirmation: true,
-              yesText: "Yes",
-              noText: "No",
-              onYes: _confirmDelete,
-              onNo: _hideDeleteConfirmationBanner,
-              onClose: _hideDeleteConfirmationBanner,
-            ),
-          ),
       ],
     );
   }
@@ -352,12 +306,15 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
                   : onAction,
           child: BarlowText(
             text: actionText,
-            fontWeight: FontWeight.w400,
-            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
             lineHeight: 1.0,
             letterSpacing: 0.04 * 16,
-            color: const Color(0xFF414141),
+            color: Color(0xFF3E5B84),
             backgroundColor: Color(0xFFb9d6ff),
+            decorationColor: const Color(0xFF30578E),
+            hoverTextColor: const Color(0xFF2876E4),
+            hoverDecorationColor: Color(0xFF2876E4),
           ),
         ),
       ],
@@ -537,8 +494,15 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
                                           }),
                                           const Text(" / "),
                                           _buildActionButton("DELETE", () {
-                                            _showDeleteConfirmationBanner(
-                                              address["id"].toString(),
+                                            showDialog(
+                                              context: context,
+                                              barrierColor: Colors.transparent,
+                                              builder: (BuildContext context) {
+                                                return DeleteAddress(
+                                                  addressId:
+                                                      address["id"].toString(),
+                                                ); // Pass address ID
+                                              },
                                             );
                                           }),
                                         ],

@@ -5,9 +5,8 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
 import 'package:kireimics/component/app_routes/routes.dart';
-
+import 'package:kireimics/web_desktop_common/add_address_ui/delete_address.dart';
 import '../../../component/api_helper/api_helper.dart';
-import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../component/utilities/utility.dart';
@@ -16,8 +15,13 @@ import '../../../web_desktop_common/add_address_ui/add_address_ui.dart';
 
 class MyAccountUiWeb extends StatefulWidget {
   final Function(String)? onWishlistChanged; // Callback to notify parent
+  final Function(String)? onErrorWishlistChanged; // Callback to notify parent
 
-  const MyAccountUiWeb({super.key, this.onWishlistChanged});
+  const MyAccountUiWeb({
+    super.key,
+    this.onWishlistChanged,
+    this.onErrorWishlistChanged,
+  });
 
   @override
   State<MyAccountUiWeb> createState() => _MyAccountUiWebState();
@@ -28,8 +32,6 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController mobileController = TextEditingController();
-  String? _addressIdToDelete; // Track address ID for deletion
-  bool _showDeleteConfirmation = false; // Track banner visibility
   bool isEditing = false; // Track edit state
 
   // Get the AddAddressController instance
@@ -45,8 +47,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
     print("User ID: $userId");
 
     if (userId == null || userId.isEmpty) {
-      signupMessage = "User ID is missing";
-      widget.onWishlistChanged?.call(signupMessage);
+      widget.onErrorWishlistChanged?.call("User ID is missing");
       return false;
     }
 
@@ -68,8 +69,9 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
         print("Signup Response: $response");
 
         if (response['error'] == true) {
-          signupMessage = response['message'] ?? "Failed to update details";
-          widget.onWishlistChanged?.call(signupMessage);
+          String errorMessage =
+              response['message'] ?? "Failed to update details";
+          widget.onErrorWishlistChanged?.call(errorMessage);
           return false;
         } else {
           String userData =
@@ -83,14 +85,14 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
         }
       } catch (e) {
         print("Signup exception: $e");
-        signupMessage = "An error occurred during update: $e";
-        widget.onWishlistChanged?.call(signupMessage);
+        widget.onErrorWishlistChanged?.call(
+          "An error occurred during update: $e",
+        );
         return false;
       }
     }
 
-    signupMessage = "Please fill all fields correctly";
-    widget.onWishlistChanged?.call(signupMessage);
+    widget.onErrorWishlistChanged?.call("Please fill all fields correctly");
     return false;
   }
 
@@ -129,27 +131,6 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
   void initState() {
     super.initState();
     _loadUserData();
-  }
-
-  void _showDeleteConfirmationBanner(String addressId) {
-    setState(() {
-      _addressIdToDelete = addressId;
-      _showDeleteConfirmation = true;
-    });
-  }
-
-  void _hideDeleteConfirmationBanner() {
-    setState(() {
-      _addressIdToDelete = null;
-      _showDeleteConfirmation = false;
-    });
-  }
-
-  void _confirmDelete() {
-    if (_addressIdToDelete != null) {
-      addAddressController.deleteAddress(_addressIdToDelete!);
-      _hideDeleteConfirmationBanner();
-    }
   }
 
   void _toggleEditing() {
@@ -220,6 +201,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                               onTap: () {
                                 context.go(AppRoutes.myAccount);
                               },
+                              hoverTextColor: const Color(0xFF2876E4),
                             ),
                             SizedBox(width: 32),
                             BarlowText(
@@ -234,6 +216,8 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                               onTap: () {
                                 context.go(AppRoutes.myOrder);
                               },
+                              hoverTextColor: const Color(0xFF2876E4),
+
                             ),
                             SizedBox(width: 32),
                             BarlowText(
@@ -245,6 +229,8 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                               onTap: () {
                                 context.go(AppRoutes.wishlist);
                               },
+                              hoverTextColor: const Color(0xFF2876E4),
+
                             ),
                           ],
                         ),
@@ -289,8 +275,11 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                                   fontSize: 16,
                                   lineHeight: 1.0,
                                   letterSpacing: 0.04 * 16,
-                                  color: Color(0xFF414141),
+                                  color: Color(0xFF3E5B84),
                                   backgroundColor: Color(0xFFb9d6ff),
+                                  decorationColor: const Color(0xFF30578E),
+                                  hoverTextColor: const Color(0xFF2876E4),
+                                  hoverDecorationColor: Color(0xFF2876E4),
                                 ),
                               ),
                             ],
@@ -370,8 +359,11 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                                 fontSize: 16,
                                 lineHeight: 1.0,
                                 letterSpacing: 0.04 * 16,
-                                color: Color(0xFF414141),
+                                color: Color(0xFF3E5B84),
                                 backgroundColor: Color(0xFFb9d6ff),
+                                decorationColor: const Color(0xFF30578E),
+                                hoverTextColor: const Color(0xFF2876E4),
+                                hoverDecorationColor: Color(0xFF2876E4),
                               ),
                             ),
                           ],
@@ -521,7 +513,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                                                           SizedBox(height: 3),
                                                           BarlowText(
                                                             text:
-                                                                "${address["postalCode"]} - ${address["country"]}",
+                                                                "${address["postalCode"]} - ${address["city"]}",
                                                             fontWeight:
                                                                 FontWeight.w400,
                                                             fontSize: 14,
@@ -550,6 +542,9 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                                                                     Color(
                                                                       0xFFb9d6ff,
                                                                     ),
+                                                                decorationColor: const Color(0xFF30578E),
+                                                                hoverTextColor: const Color(0xFF2876E4),
+                                                                hoverDecorationColor: Color(0xFF2876E4),
                                                                 enableHoverBackground:
                                                                     true,
                                                                 onTap: () {
@@ -588,6 +583,9 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                                                               ),
                                                               BarlowText(
                                                                 text: "DELETE",
+                                                                decorationColor: const Color(0xFF30578E),
+                                                                hoverTextColor: const Color(0xFF2876E4),
+                                                                hoverDecorationColor: Color(0xFF2876E4),
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .w600,
@@ -605,9 +603,21 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                                                                 enableHoverBackground:
                                                                     true,
                                                                 onTap: () {
-                                                                  _showDeleteConfirmationBanner(
-                                                                    address["id"]
-                                                                        .toString(),
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    barrierColor:
+                                                                        Colors
+                                                                            .transparent,
+                                                                    builder: (
+                                                                      BuildContext
+                                                                      context,
+                                                                    ) {
+                                                                      return DeleteAddress(
+                                                                        addressId:
+                                                                            address["id"].toString(),
+                                                                      ); // Pass address ID
+                                                                    },
                                                                   );
                                                                 },
                                                               ),
@@ -632,24 +642,6 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
             ],
           ),
         ),
-
-        if (_showDeleteConfirmation)
-          Positioned(
-            top: 0,
-            right: 24,
-            child: NotificationBanner(
-              message: "Are you sure you want to delete this address?",
-              iconPath: "assets/icons/i_icons.svg",
-              bannerColor: const Color(0xFF2876E4),
-              textColor: Colors.black,
-              confirmation: true,
-              yesText: "Yes",
-              noText: "No",
-              onYes: _confirmDelete,
-              onNo: _hideDeleteConfirmationBanner,
-              onClose: _hideDeleteConfirmationBanner,
-            ),
-          ),
       ],
     );
   }

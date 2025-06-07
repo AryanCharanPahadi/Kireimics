@@ -74,10 +74,6 @@ class CustomTextFormField extends StatelessWidget {
             focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.white),
             ),
-            errorStyle: TextStyle(
-              color: Colors.red,
-              fontFamily: GoogleFonts.barlow().fontFamily,
-            ),
           ),
           style: TextStyle(
             color: Colors.white,

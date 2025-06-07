@@ -8,14 +8,24 @@ import '../app_routes/routes.dart';
 class CartEmpty extends StatelessWidget {
   final String cralikaText;
   final String barlowText;
-  final bool hideBrowseButton; // NEW PARAMETER
+  final bool hideBrowseButton;
+
+  // NEW FONT SIZE PARAMETERS
+  final double cralikaFontSize;
+  final double barlowFontSize;
+  final double browseButtonFontSize;
 
   const CartEmpty({
     super.key,
     this.cralikaText = "Your cart is empty!",
     this.barlowText =
     "What are you waiting for? Browse our wide range of products and bring home something new to love!",
-    this.hideBrowseButton = false, // DEFAULT: SHOW BUTTON
+    this.hideBrowseButton = false,
+
+    // DEFAULT FONT SIZES
+    this.cralikaFontSize = 20,
+    this.barlowFontSize = 16,
+    this.browseButtonFontSize = 16,
   });
 
   @override
@@ -26,29 +36,35 @@ class CartEmpty extends StatelessWidget {
         const SizedBox(height: 20),
         CralikaFont(
           text: cralikaText,
-          fontSize: 20,
+          fontSize: cralikaFontSize,
           fontWeight: FontWeight.w400,
         ),
         const SizedBox(height: 10),
         BarlowText(
           text: barlowText,
-          fontSize: 16,
+          fontSize: barlowFontSize,
           fontWeight: FontWeight.w400,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 15),
-
-        // CONDITIONAL BROWSE BUTTON
         if (!hideBrowseButton)
           GestureDetector(
             onTap: () {
-              context.go(AppRoutes.catalog);
+              final router = GoRouter.of(context);
+              final currentRoute =
+              router.routeInformationProvider.value.uri.toString();
+
+              if (currentRoute.contains(AppRoutes.catalog)) {
+                context.pop(); // Already on catalog → pop back
+              } else {
+                context.go(AppRoutes.catalog); // Not on catalog → navigate
+              }
             },
             child: BarlowText(
               text: "BROWSE OUR CATALOG",
               backgroundColor: const Color(0xFFb9d6ff),
               color: const Color(0xFF30578E),
-              fontSize: 16,
+              fontSize: browseButtonFontSize,
               fontWeight: FontWeight.w600,
             ),
           ),

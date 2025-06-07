@@ -204,7 +204,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                         text:
                                             isOutOfStock
                                                 ? "Out of Stock"
-                                                : "Rs ${product.price}",
+                                                : "Rs ${product.price.toStringAsFixed(2)}",
                                         fontWeight: FontWeight.w400,
                                         fontSize: 16,
                                         lineHeight: 1.0,
@@ -346,7 +346,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                           letterSpacing: 0,
                         ),
                       ),
-                      CralikaFont(
+                      BarlowText(
                         text: "Rs ${calculateTotal().toStringAsFixed(2)}",
                         color: Color(0xFF414141),
                         fontSize: 24,
@@ -365,7 +365,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: CralikaFont(
+                    child: BarlowText(
                       text: "Rs ${calculateTotal().toStringAsFixed(2)}",
                       color: Color(0xFF414141),
                       fontSize: 20,

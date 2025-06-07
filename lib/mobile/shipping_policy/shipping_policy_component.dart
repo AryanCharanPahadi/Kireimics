@@ -74,7 +74,7 @@ class _ShippingPolicyMobileState extends State<ShippingPolicyMobile> {
                     children: [
                       CralikaFont(
                         text: section.title,
-                        fontSize: 20,
+                        fontSize: 21,
                         fontWeight: FontWeight.w400,
                         letterSpacing: 0.8, // 4% of 20px = 0.8
                         lineHeight: 27 / 20, // Line height calculation

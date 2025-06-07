@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kireimics/web_desktop_common/catalog_page/catalog.dart';
 import 'package:kireimics/web/checkout/checkout_page.dart';
@@ -13,10 +12,10 @@ import '../component/app_routes/routes.dart';
 import '../web_desktop_common/add_address_ui/add_address_ui.dart';
 import '../web_desktop_common/cart/cart_panel.dart';
 import '../web_desktop_common/catalog_sale_gridview/catalog_view_all.dart';
-import '../web_desktop_common/collection/collection.dart';
 import '../web_desktop_common/collection/collection_view.dart';
 import '../web_desktop_common/component/profile_dropdown.dart';
 import '../web_desktop_common/component/scrollable_header.dart';
+import '../web_desktop_common/login_signup/forget_password/forget_password_page.dart';
 import '../web_desktop_common/product_view/product_details.dart';
 import '../web_desktop_common/sidebar/custom_sidebar.dart';
 import '../web_desktop_common/custom_header/header.dart';
@@ -53,6 +52,7 @@ class _LandingPageWebState extends State<LandingPageWeb>
   final ValueNotifier<bool> _showSideAddress = ValueNotifier(false);
   final ValueNotifier<bool> _showSideCartDetails = ValueNotifier(false);
   final ValueNotifier<String?> _notificationMessage = ValueNotifier(null);
+  final ValueNotifier<String?> _notificationErrorMessage = ValueNotifier(null);
 
   // Animation controller and animations
   late AnimationController _animationController;
@@ -125,6 +125,7 @@ class _LandingPageWebState extends State<LandingPageWeb>
     _showSideAddress.dispose();
     _showSideCartDetails.dispose();
     _notificationMessage.dispose();
+    _notificationErrorMessage.dispose();
     super.dispose();
   }
 
@@ -155,6 +156,15 @@ class _LandingPageWebState extends State<LandingPageWeb>
     });
   }
 
+  void _showErrorNotification(String message) {
+    _notificationErrorMessage.value = message;
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        _notificationErrorMessage.value = null;
+      }
+    });
+  }
+
   final Map<String, Widget Function(String?)> _basePageMap = {
     AppRoutes.about: (_) => const AboutPageWeb(),
     AppRoutes.shippingPolicy: (_) => const ShippingPolicy(),
@@ -168,21 +178,39 @@ class _LandingPageWebState extends State<LandingPageWeb>
   Map<String, Widget Function(String?)> get _pageMap {
     return {
       ..._basePageMap,
-      AppRoutes.home: (_) => HomePageWeb(onWishlistChanged: _showNotification),
+      AppRoutes.home:
+          (_) => HomePageWeb(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
       AppRoutes.searchQuery:
           (_) => SearchGridview(onWishlistChanged: _showNotification),
       AppRoutes.sale: (_) => Sale(onWishlistChanged: _showNotification),
+      AppRoutes.forgetPassword:
+          (_) => ForgetPasswordPage(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
 
       AppRoutes.wishlist:
           (_) => WishlistUi(onWishlistChanged: _showNotification),
       AppRoutes.catalog:
           (_) => CatalogPage(onWishlistChanged: _showNotification),
       AppRoutes.myAccount:
-          (_) => MyAccountUiWeb(onWishlistChanged: _showNotification),
+          (_) => MyAccountUiWeb(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
       AppRoutes.checkOut:
-          (_) => CheckoutPageWeb(onWishlistChanged: _showNotification),
-      AppRoutes.contactUs: (_) =>  ContactUs(onWishlistChanged: _showNotification),
-
+          (_) => CheckoutPageWeb(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
+      AppRoutes.contactUs:
+          (_) => ContactUs(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
 
       '/product':
           (id) => ProductDetails(
@@ -402,6 +430,8 @@ class _LandingPageWebState extends State<LandingPageWeb>
 
   @override
   Widget build(BuildContext context) {
+    final isForgetPasswordRoute = _selectedPage == AppRoutes.forgetPassword;
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -439,8 +469,13 @@ class _LandingPageWebState extends State<LandingPageWeb>
                       controller: _scrollController,
                       child: Column(
                         children: [
-                          const ScrollableHeader(),
-                          SizedBox(height: _isHeaderVisible ? 99 : 0),
+                          if (!isForgetPasswordRoute) const ScrollableHeader(),
+                          SizedBox(
+                            height:
+                                _isHeaderVisible && !isForgetPasswordRoute
+                                    ? 99
+                                    : 0,
+                          ),
                           Row(
                             children: [
                               (_selectedPage == '/product' ||
@@ -452,42 +487,46 @@ class _LandingPageWebState extends State<LandingPageWeb>
                                   : _pageMap[_selectedPage]!(null),
                             ],
                           ),
-
                           const SizedBox(height: 5),
-                          Footer(onItemSelected: _onFooterItemSelected),
+                          if (!isForgetPasswordRoute)
+                            Footer(onItemSelected: _onFooterItemSelected),
                         ],
                       ),
                     ),
-                    const Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: ScrollableHeader(),
-                    ),
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 200),
-                      top: _isHeaderVisible ? 32 : -99,
-                      left: 0,
-                      right: 0,
-                      child: Header(
-                        onProfileDropdownChanged: _handleProfileDropdownChanged,
+                    if (!isForgetPasswordRoute)
+                      const Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: ScrollableHeader(),
                       ),
-                    ),
-                    CustomSidebar(
-                      sidebarItems: _sidebarItems,
-                      selectedItem: _getSelectedItemFromRoute(_selectedPage),
-                      onItemSelected: _onSidebarItemSelected,
-                      scrollController: _scrollController,
-                    ),
-                    Positioned(
-                      bottom: 20,
-                      right: 50,
-                      child: SvgPicture.asset(
-                        "assets/chat_bot/chat.svg",
-                        width: 40,
-                        height: 40,
+                    if (!isForgetPasswordRoute)
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 200),
+                        top: _isHeaderVisible ? 32 : -99,
+                        left: 0,
+                        right: 0,
+                        child: Header(
+                          onProfileDropdownChanged:
+                              _handleProfileDropdownChanged,
+                        ),
                       ),
-                    ),
+                    if (!isForgetPasswordRoute)
+                      CustomSidebar(
+                        sidebarItems: _sidebarItems,
+                        selectedItem: _getSelectedItemFromRoute(_selectedPage),
+                        onItemSelected: _onSidebarItemSelected,
+                        scrollController: _scrollController,
+                      ),
+                    // Positioned(
+                    //   bottom: 20,
+                    //   right: 50,
+                    //   child: SvgPicture.asset(
+                    //     "assets/chat_bot/chat.svg",
+                    //     width: 40,
+                    //     height: 40,
+                    //   ),
+                    // ),
                     ValueListenableBuilder<bool>(
                       valueListenable: _showSideContainer,
                       builder: (context, show, _) {
@@ -530,12 +569,33 @@ class _LandingPageWebState extends State<LandingPageWeb>
                               top: 50,
                               right: 24,
                               child: NotificationBanner(
-                                textColor: Colors.black,
+                                textColor: Color(0xFF28292A),
                                 message: message,
-                                iconPath: "assets/icons/i_icons.svg",
-                                bannerColor: const Color(0xFF2876E4),
+                                iconPath: "assets/icons/success.svg",
+                                bannerColor: const Color(0xFF268FA2),
                                 onClose: () {
                                   _notificationMessage.value =
+                                      null; // This will close the banner
+                                },
+                              ),
+                            )
+                            : const SizedBox.shrink();
+                      },
+                    ),
+                    ValueListenableBuilder<String?>(
+                      valueListenable: _notificationErrorMessage,
+                      builder: (context, message, _) {
+                        return message != null
+                            ? Positioned(
+                              top: 50,
+                              right: 24,
+                              child: NotificationBanner(
+                                textColor: Color(0xFF28292A),
+                                message: message,
+                                iconPath: "assets/icons/error.svg",
+                                bannerColor: const Color(0xFFF46856),
+                                onClose: () {
+                                  _notificationErrorMessage.value =
                                       null; // This will close the banner
                                 },
                               ),

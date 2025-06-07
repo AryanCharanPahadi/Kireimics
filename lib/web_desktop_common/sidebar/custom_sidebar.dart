@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
 import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 import 'package:http/http.dart' as http;
 
+import '../../component/general_links/general_links_contrller.dart';
 import '../../component/utilities/url_launcher.dart';
 
 class CustomSidebar extends StatefulWidget {
@@ -37,37 +38,20 @@ class _CustomSidebarState extends State<CustomSidebar> {
   String emailLink = '';
   String instagramLink = '';
 
-  Future getSocialMediaLinks() async {
-    final response = await http.get(
-      Uri.parse(
-        "https://vedvika.com/v1/apis/common/general_links/get_general_links.php",
-      ),
-    );
-
-    var data = jsonDecode(response.body.toString());
-
-    if (response.statusCode == 200) {
-      setState(() {
-        socialMediaLinks = data[0]['social_media_links'];
-        instagramLink = jsonDecode(socialMediaLinks)['Instagram'];
-        emailLink = jsonDecode(socialMediaLinks)['Email'];
-      });
-      // print(socialMediaLinks);
-      // print(instagramLink);
-      // print(emailLink);
-    }
-  }
+  late GeneralLinksController _generalLinksController;
 
   @override
   void initState() {
     super.initState();
-    getSocialMediaLinks();
+    _generalLinksController = GeneralLinksController();
+    _generalLinksController.getGeneralLinks();
     widget.scrollController.addListener(_handleScroll);
   }
 
   @override
   void dispose() {
     widget.scrollController.removeListener(_handleScroll);
+    _generalLinksController.dispose();
     super.dispose();
   }
 
@@ -141,6 +125,8 @@ class _CustomSidebarState extends State<CustomSidebar> {
                                   color:
                                       item == "SALE"
                                           ? const Color(0xFFF46856)
+                                          : isHovered && !isSelected
+                                          ? Color(0xFF2876E4)
                                           : const Color(0xFF30578E),
                                   background:
                                       (item == "SALE" &&
@@ -183,9 +169,10 @@ class _CustomSidebarState extends State<CustomSidebar> {
                         onTap: () {
                           UrlLauncherHelper.launchURL(
                             context,
-                            instagramLink.toString(),
-                          ); // Replace with your Instagram URL
+                            _generalLinksController.instagramLink,
+                          );
                         },
+
                         child: Padding(
                           padding: const EdgeInsets.only(left: 4.0),
                           child: SvgPicture.asset(
@@ -213,9 +200,10 @@ class _CustomSidebarState extends State<CustomSidebar> {
                         onTap: () {
                           UrlLauncherHelper.launchURL(
                             context,
-                            emailLink.toString(),
-                          ); // Replace with your email address
+                            'mailto:${_generalLinksController.emailLink}',
+                          );
                         },
+
                         child: Padding(
                           padding: const EdgeInsets.only(left: 4.0),
                           child: SvgPicture.asset(

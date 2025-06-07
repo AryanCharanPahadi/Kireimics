@@ -75,6 +75,8 @@ class Footer extends StatelessWidget {
                                 route: AppRoutes.shippingPolicy,
                                 enableUnderlineForActiveRoute: true,
                                 decorationColor: Color(0xFF30578E),
+                                hoverTextColor: const Color(0xFF2876E4),
+
                               ),
                             ),
                             SizedBox(height: 15),
@@ -90,6 +92,8 @@ class Footer extends StatelessWidget {
                                 route: AppRoutes.privacyPolicy,
                                 enableUnderlineForActiveRoute: true,
                                 decorationColor: Color(0xFF30578E),
+                                hoverTextColor: const Color(0xFF2876E4),
+
                               ),
                             ),
                             SizedBox(height: 15),
@@ -105,6 +109,8 @@ class Footer extends StatelessWidget {
                                 route: AppRoutes.contactUs,
                                 enableUnderlineForActiveRoute: true,
                                 decorationColor: Color(0xFF30578E),
+                                hoverTextColor: const Color(0xFF2876E4),
+
                               ),
                             ),
                           ],

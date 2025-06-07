@@ -150,8 +150,8 @@ class _CartPanelState extends State<CartPanel> {
                         fontSize: 16.0,
                         lineHeight: 1.0,
                         letterSpacing: 0.64,
-                        enableHoverUnderline: true,
-                        decorationColor: const Color(0xFF30578E),
+                        hoverTextColor: const Color(0xFF2876E4),
+
                       ),
                     ),
                     SizedBox(height: 33),
@@ -213,7 +213,7 @@ class _CartPanelState extends State<CartPanel> {
                                                   child: BarlowText(
                                                     text: product.name,
                                                     fontWeight: FontWeight.w400,
-                                                    fontSize: 16,
+                                                    fontSize: 18,
                                                     lineHeight: 1.0,
                                                     letterSpacing: 0.0,
                                                     color:
@@ -228,9 +228,9 @@ class _CartPanelState extends State<CartPanel> {
                                                   text:
                                                       isOutOfStock
                                                           ? "Out of Stock"
-                                                          : "Rs ${product.price}",
+                                                          : "Rs ${product.price.toStringAsFixed(2)}",
                                                   fontWeight: FontWeight.w400,
-                                                  fontSize: 16,
+                                                  fontSize: 18,
                                                   lineHeight: 1.0,
                                                   letterSpacing: 0.0,
                                                   color:
@@ -331,6 +331,9 @@ class _CartPanelState extends State<CartPanel> {
                                                 color: Color(0xFF30578E),
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 16,
+                                                decorationColor: const Color(0xFF30578E),
+                                                hoverTextColor: const Color(0xFF2876E4),
+
                                               ),
                                             ),
                                           ],
@@ -385,28 +388,41 @@ class _CartPanelState extends State<CartPanel> {
                               alignment: Alignment.centerRight,
                               child: GestureDetector(
                                 onTap: () {
-                                  final subtotal = calculateTotal();
-                                  // Create comma-separated strings for product IDs, names, and prices
-                                  final productIds = productList
-                                      .map((product) => product.id.toString())
-                                      .join(',');
-                                  final productNames = productList
-                                      .map(
-                                        (product) =>
-                                            Uri.encodeComponent(product.name),
-                                      )
-                                      .join(',');
-                                  final productPrices = productList
-                                      .map(
-                                        (product) => product.price
-                                            .toString()
-                                            .replaceAll(',', ''),
-                                      )
-                                      .join(',');
-                                  // Navigate to checkout with subtotal, product IDs, names, and prices
-                                  context.go(
-                                    '${AppRoutes.checkOut}?subtotal=${subtotal.toStringAsFixed(2)}&productIds=$productIds&productNames=$productNames&productPrices=$productPrices',
-                                  );
+                                  final router = GoRouter.of(context);
+                                  final currentRoute =
+                                      router.routeInformationProvider.value.uri
+                                          .toString();
+
+                                  if (currentRoute.contains(
+                                    AppRoutes.checkOut,
+                                  )) {
+                                    // If already on the checkout page, just pop
+                                    context.pop();
+                                  } else {
+                                    final subtotal = calculateTotal();
+
+                                    final productIds = productList
+                                        .map((product) => product.id.toString())
+                                        .join(',');
+                                    final productNames = productList
+                                        .map(
+                                          (product) =>
+                                              Uri.encodeComponent(product.name),
+                                        )
+                                        .join(',');
+                                    final productPrices = productList
+                                        .map(
+                                          (product) => product.price
+                                              .toString()
+                                              .replaceAll(',', ''),
+                                        )
+                                        .join(',');
+
+                                    context.go(
+                                      '${AppRoutes.checkOut}?subtotal=${subtotal.toStringAsFixed(2)}'
+                                      '&productIds=$productIds&productNames=$productNames&productPrices=$productPrices',
+                                    );
+                                  }
                                 },
                                 child: BarlowText(
                                   text: "PROCEED TO CHECKOUT",
@@ -419,6 +435,8 @@ class _CartPanelState extends State<CartPanel> {
                                   hoverTextColor: Color(
                                     0xFF2876E4,
                                   ), // Changes to blue on hover
+                                  decorationColor: const Color(0xFF30578E),
+                                  hoverDecorationColor: Color(0xFF2876E4),
                                 ),
                               ),
                             ),

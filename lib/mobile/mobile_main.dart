@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:kireimics/mobile/address_page/add_address_ui/add_address_ui.dart';
@@ -24,6 +25,7 @@ import 'package:kireimics/component/above_footer/above_footer.dart';
 import 'package:kireimics/component/app_routes/routes.dart';
 import '../component/notification_toast/custom_toast.dart';
 import '../component/text_fonts/custom_text.dart';
+import '../web/checkout/checkout_controller.dart';
 import 'about_page/about_page.dart';
 import 'cart_panel/cart_panel_mobile.dart';
 import 'catalog/catalog.dart';
@@ -48,6 +50,8 @@ class LandingPageMobile extends StatefulWidget {
 class _LandingPageMobileState extends State<LandingPageMobile>
     with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
+  final CheckoutController checkoutController = Get.put(CheckoutController());
+
   double _lastScrollOffset = 0.0;
   bool _isScrollingUp = false;
   bool _showStickyColumn1 = false;
@@ -106,9 +110,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
     AppRoutes.about: (_) => const AboutPage(),
     AppRoutes.shippingPolicy: (_) => const ShippingPolicyMobile(),
     AppRoutes.privacyPolicy: (_) => const PrivacyPolicyMobile(),
-    AppRoutes.contactUs: (_) => const ContactUsComponent(),
     AppRoutes.viewDetails: (_) => const ViewDetailsUiMobile(),
-    AppRoutes.checkOut: (_) => const CheckoutPageMobile(),
     AppRoutes.myOrder: (_) => const MyOrderUiMobile(),
   };
 
@@ -116,13 +118,30 @@ class _LandingPageMobileState extends State<LandingPageMobile>
     return {
       ..._basePageMap,
       AppRoutes.home:
-          (_) => HomePageMobile(onWishlistChanged: _showNotification),
+          (_) => HomePageMobile(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
       AppRoutes.catalog:
           (_) => CatalogMobileComponent(onWishlistChanged: _showNotification),
       AppRoutes.sale: (_) => SaleMobile(onWishlistChanged: _showNotification),
       AppRoutes.logIn: (_) => LoginMobile(onWishlistChanged: _showNotification),
       AppRoutes.signIn:
-          (_) => SignInMobile(onWishlistChanged: _showNotification),
+          (_) => SignInMobile(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
+      AppRoutes.contactUs:
+          (_) => ContactUsComponent(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
+      AppRoutes.checkOut:
+          (_) => CheckoutPageMobile(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
+
       AppRoutes.wishlist:
           (_) => WishlistUiMobile(onWishlistChanged: _showNotification),
       AppRoutes.searchQuery:
@@ -165,6 +184,15 @@ class _LandingPageMobileState extends State<LandingPageMobile>
     });
   }
 
+  void _showErrorNotification(String message) {
+    _notificationErrorMessage.value = message;
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        _notificationErrorMessage.value = null;
+      }
+    });
+  }
+
   String _getPageFromRoute(String route) {
     if (route.startsWith('/product/')) return '/product';
     if (route.startsWith('/cart/')) return '/cart';
@@ -175,6 +203,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
   }
 
   final ValueNotifier<String?> _notificationMessage = ValueNotifier(null);
+  final ValueNotifier<String?> _notificationErrorMessage = ValueNotifier(null);
 
   @override
   void dispose() {
@@ -500,67 +529,216 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                         !isSignInRoute &&
                         !isAddAddressRoute &&
                         !isViewDetailsRoute)
-                      Positioned(
-                        left: 300,
-                        bottom: 60,
-                        right: 10,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SvgPicture.asset(
-                              "assets/chat_bot/chat.svg",
-                              width: 36,
-                              height: 36,
-                            ),
-                          ],
-                        ),
-                      ),
+                      // Positioned(
+                      //   left: 300,
+                      //   bottom: 60,
+                      //   right: 10,
+                      //   child: Stack(
+                      //     alignment: Alignment.center,
+                      //     children: [
+                      //       SvgPicture.asset(
+                      //         "assets/chat_bot/chat.svg",
+                      //         width: 36,
+                      //         height: 36,
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      // Make Payment Container for Checkout Route
+                      if (isCheckoutRoute)
+                        Positioned(
+                          bottom: 0, // Position at the bottom
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            height: 100,
+                            color: Colors.white.withOpacity(0.8),
 
-                    // Make Payment Container for Checkout Route
-                    if (isCheckoutRoute)
-                      Positioned(
-                        bottom: 0, // Position at the bottom
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: 100,
-                          color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 22.0,
+                                top: 21,
+                                bottom: 28,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  BarlowText(
+                                    text: "Rs. ${_total.toStringAsFixed(2)}",
+                                    color: Color(0xFF30578E),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w400,
+                                    lineHeight: 1.0,
+                                    letterSpacing: 1 * 0.04, // 4% of 32px
+                                  ),
+                                  SizedBox(height: 8),
+                                  BarlowText(
+                                    text: "MAKE PAYMENT",
+                                    color: Color(0xFF30578E),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    backgroundColor: Color(0xFFB9D6FF),
+                                    lineHeight: 1.0,
+                                    letterSpacing: 1 * 0.04, // 4% of 32px
+                                    onTap: () {
+                                      // Check if user is not logged in and hasn't agreed to policies
 
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 22.0,
-                              top: 21,
-                              bottom: 28,
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                BarlowText(
-                                  text: "Rs. ${_total.toStringAsFixed(2)}",
-                                  color: Color(0xFF30578E),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  lineHeight: 1.0,
-                                  letterSpacing: 1 * 0.04, // 4% of 32px
-                                ),
-                                SizedBox(height: 8),
-                                BarlowText(
-                                  text: "MAKE PAYMENT",
-                                  color: Color(0xFF30578E),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  backgroundColor: Color(0xFFB9D6FF),
-                                  lineHeight: 1.0,
-                                  letterSpacing: 1 * 0.04, // 4% of 32px
-                                  onTap: openRazorpayCheckout,
-                                ),
-                              ],
+                                      // Sequential validation of required fields
+                                      if (checkoutController
+                                          .firstNameController
+                                          .text
+                                          .isEmpty) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call(
+                                              'Please enter your first name',
+                                            );
+                                        return;
+                                      }
+                                      if (checkoutController
+                                              .firstNameController
+                                              .text
+                                              .length <
+                                          2) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call('First name too short');
+                                        return;
+                                      }
+                                      if (checkoutController
+                                          .lastNameController
+                                          .text
+                                          .isEmpty) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call(
+                                              'Please enter your last name',
+                                            );
+                                        return;
+                                      }
+                                      if (checkoutController
+                                              .lastNameController
+                                              .text
+                                              .length <
+                                          2) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call('Last name too short');
+                                        return;
+                                      }
+                                      if (checkoutController
+                                          .emailController
+                                          .text
+                                          .isEmpty) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call('Please enter your email');
+                                        return;
+                                      }
+                                      if (!RegExp(
+                                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                      ).hasMatch(
+                                        checkoutController.emailController.text,
+                                      )) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call(
+                                              'Please enter a valid email',
+                                            );
+                                        return;
+                                      }
+                                      if (checkoutController
+                                          .address1Controller
+                                          .text
+                                          .isEmpty) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call(
+                                              'Please enter your ADDRESS LINE 1',
+                                            );
+                                        return;
+                                      }
+                                      if (checkoutController
+                                          .zipController
+                                          .text
+                                          .isEmpty) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call('Please enter your Zip');
+                                        return;
+                                      }
+                                      if (checkoutController
+                                          .stateController
+                                          .text
+                                          .isEmpty) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call('Please enter your state');
+                                        return;
+                                      }
+                                      if (checkoutController
+                                          .cityController
+                                          .text
+                                          .isEmpty) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call('Please enter your city');
+                                        return;
+                                      }
+                                      if (checkoutController
+                                          .mobileController
+                                          .text
+                                          .isEmpty) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call(
+                                              'Please enter your phone number',
+                                            );
+                                        return;
+                                      }
+                                      if (!RegExp(
+                                        r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$',
+                                      ).hasMatch(
+                                        checkoutController
+                                            .mobileController
+                                            .text,
+                                      )) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call(
+                                              'Please enter a valid phone number',
+                                            );
+                                        return;
+                                      }
+                                      if (!checkoutController.isChecked &&
+                                          !checkoutController
+                                              .addressExists
+                                              .value) {
+                                        checkoutController
+                                            .onErrorWishlistChanged
+                                            ?.call(
+                                              'Please agree to the Privacy and Shipping Policy',
+                                            );
+                                        return;
+                                      }
+
+                                      // Proceed to payment if all validations pass
+                                      final orderId =
+                                          'ORDER_${DateTime.now().millisecondsSinceEpoch}';
+                                      checkoutController.openRazorpayCheckout(
+                                        context,
+                                        _total,
+                                        orderId,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
                     ValueListenableBuilder<String?>(
                       valueListenable: _notificationMessage,
@@ -568,14 +746,37 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                         return message != null
                             ? Positioned(
                               top: 30,
+                              right: 05,
+                              child: NotificationBanner(
+                                textColor: Color(0xFF28292A),
+                                message: message,
+                                iconPath: "assets/icons/success.svg",
+                                bannerColor: const Color(0xFF268FA2),
+                                onClose: () {
+                                  _notificationMessage.value =
+                                      null; // This will close the banner
+                                },
+                              ),
+                            )
+                            : const SizedBox.shrink();
+                      },
+                    ),
+
+                    ValueListenableBuilder<String?>(
+                      valueListenable: _notificationErrorMessage,
+                      builder: (context, message, _) {
+                        return message != null
+                            ? Positioned(
+                              top: 30,
                               right: 5,
                               child: NotificationBanner(
-                                textColor: Colors.black,
+                                textColor: Color(0xFF28292A),
                                 message: message,
-                                iconPath: "assets/icons/i_icons.svg",
-                                bannerColor: const Color(0xFF2876E4),
+                                iconPath: "assets/icons/error.svg",
+                                bannerColor: const Color(0xFFF46856),
                                 onClose: () {
-                                  _notificationMessage.value = null;
+                                  _notificationErrorMessage.value =
+                                      null; // This will close the banner
                                 },
                               ),
                             )

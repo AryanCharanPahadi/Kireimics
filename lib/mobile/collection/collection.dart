@@ -33,11 +33,42 @@ class _CollectionMobileState extends State<CollectionMobile> {
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   padding: EdgeInsets.zero,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 1,
                     crossAxisSpacing: 24,
                     mainAxisSpacing: 5,
-                    childAspectRatio: 1.17,
+                    childAspectRatio: () {
+                      double width = MediaQuery.of(context).size.width;
+                      if (width > 300 && width <= 337) {
+                        return 1.0;
+                      } else if (width > 338 && width <= 350) {
+                        return 1.1;
+                      } else if (width > 351 && width <= 360) {
+                        return 1.1;
+                      } else if (width > 361 && width <= 370) {
+                        return 1.2;
+                      } else if (width > 371 && width <= 400) {
+                        return 1.2;
+                      } else if (width > 401 && width <= 450) {
+                        return 1.4;
+                      } else if (width > 451 && width <= 500) {
+                        return 1.6;
+                      } else if (width > 501 && width <= 550) {
+                        return 1.7;
+                      } else if (width > 551 && width <= 600) {
+                        return 1.8;
+                      } else if (width > 601 && width <= 650) {
+                        return 2.0;
+                      } else if (width > 651 && width <= 700) {
+                        return 2.1;
+                      } else if (width > 701 && width <= 750) {
+                        return 2.2;
+                      } else if (width > 751 && width <= 800) {
+                        return 2.4;
+                      } else {
+                        return 0.50;
+                      }
+                    }(),
                   ),
                   itemCount: widget.collectionList.length,
                   itemBuilder: (context, index) {
@@ -94,17 +125,17 @@ class _CollectionMobileState extends State<CollectionMobile> {
                                 const SizedBox(height: 10),
 
                                 BarlowText(
-                                 text:  "VIEW",
+                                  text: "VIEW",
                                   fontSize: 14,
+                                  fontWeight: FontWeight.w600,
                                   lineHeight: 1.2,
                                   letterSpacing: 0.56,
                                   color: const Color(0xFF30578E),
-                                  onTap: () async {
+                                  onTap: () {
                                     context.go(
-                                      AppRoutes.idCollectionView(collection.id!),
+                                      '${AppRoutes.idCollectionView(collection.id!)}?collection_name=${collection.name}',
                                     );
                                   },
-
                                 ),
                               ],
                             ),

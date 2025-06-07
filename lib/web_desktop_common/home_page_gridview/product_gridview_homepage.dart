@@ -174,8 +174,38 @@ class _ProductGridItemState extends State<ProductGridItem>
                                             ),
                                           );
                                         },
-                                child: AnimatedZoomImage(
-                                  imageUrl: widget.product.thumbnail,
+                                child: ColorFiltered(
+                                  colorFilter:
+                                      isOutOfStock
+                                          ? const ColorFilter.matrix(<double>[
+                                            0.2126,
+                                            0.7152,
+                                            0.0722,
+                                            0,
+                                            0,
+                                            0.2126,
+                                            0.7152,
+                                            0.0722,
+                                            0,
+                                            0,
+                                            0.2126,
+                                            0.7152,
+                                            0.0722,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            1,
+                                            0,
+                                          ])
+                                          : const ColorFilter.mode(
+                                            Colors.transparent,
+                                            BlendMode.multiply,
+                                          ),
+                                  child: AnimatedZoomImage(
+                                    imageUrl: widget.product.thumbnail,
+                                  ),
                                 ),
                               ),
                             );
@@ -183,14 +213,7 @@ class _ProductGridItemState extends State<ProductGridItem>
                         ),
                       ),
                     ),
-                    if (isOutOfStock)
-                      Positioned.fill(
-                        child: Container(
-                          color: Colors.black.withOpacity(
-                            0.5,
-                          ), // Shadow overlay
-                        ),
-                      ),
+
                     // Rest of your Positioned widgets and UI remain unchanged
                     Positioned(
                       top: imageHeight * 0.04,

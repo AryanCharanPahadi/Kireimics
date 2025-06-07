@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/no_result_found/no_product_yet.dart';
 import '../../component/app_routes/routes.dart';
+import '../../component/no_result_found/no_order_yet.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../web_desktop_common/catalog_sale_gridview/catalog_controller1.dart';
@@ -12,9 +13,19 @@ import '../../web_desktop_common/catalog_sale_gridview/catalog_sale_navigation.d
 import '../../web_desktop_common/collection/collection_modal.dart';
 import '../collection/collection.dart';
 
-class CatalogMobileComponent extends StatelessWidget {
+class CatalogMobileComponent extends StatefulWidget {
   final Function(String)? onWishlistChanged;
   const CatalogMobileComponent({super.key, this.onWishlistChanged});
+
+  @override
+  State<CatalogMobileComponent> createState() => _CatalogMobileComponentState();
+}
+
+class _CatalogMobileComponentState extends State<CatalogMobileComponent> {
+  Future<bool> _isLoggedIn() async {
+    String? userData = await SharedPreferencesHelper.getUserData();
+    return userData != null && userData.isNotEmpty;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,8 +90,8 @@ class CatalogMobileComponent extends StatelessWidget {
                     child: CralikaFont(
                       text:
                           isCollectionView
-                              ? "${controller.collectionList.length} ${(controller.collectionList.length == 1 || controller.collectionList.length == 0) ? 'Collection' : 'Collections'}"
-                              : "${controller.productList.length} ${(controller.productList.length == 1 || controller.productList.length == 0) ? 'Product' : 'Products'}",
+                              ? "${controller.collectionList.length} ${(controller.collectionList.length == 1 || controller.collectionList.length == 0) ? 'Collections' : 'Collections'}"
+                              : "${controller.productList.length} ${(controller.productList.length == 1 || controller.productList.length == 0) ? 'Products' : 'Products'}",
                       fontWeight: FontWeight.w400,
                       fontSize: 20,
                     ),
@@ -90,7 +101,7 @@ class CatalogMobileComponent extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 22),
                   child: CatalogNavigation(
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     selectedCategoryId: controller.selectedCategoryId.value,
                     onCategorySelected: controller.onCategorySelected,
@@ -161,7 +172,14 @@ class CatalogMobileComponent extends StatelessWidget {
                             top: 20,
                             right: 22,
                           ),
-                          child: NoProductYet(),
+                          child: Center(
+                            child: CartEmpty(
+                              cralikaText: "No Collections here yet!",
+                              hideBrowseButton: true,
+                              barlowText:
+                                  "Try another category, hopefully you'll\nfind something you like there!",
+                            ),
+                          ),
                         )
                         : Padding(
                           padding: const EdgeInsets.only(top: 32),
@@ -176,7 +194,14 @@ class CatalogMobileComponent extends StatelessWidget {
                         top: 20,
                         right: 22,
                       ),
-                      child: NoProductYet(),
+                      child: Center(
+                        child: CartEmpty(
+                          cralikaText: "No products here yet!",
+                          hideBrowseButton: true,
+                          barlowText:
+                              "Try another category, hopefully you'll\nfind something you like there!",
+                        ),
+                      ),
                     )
                     : Padding(
                       padding: const EdgeInsets.only(top: 32),
@@ -197,15 +222,15 @@ class CatalogMobileComponent extends StatelessWidget {
                                     double width =
                                         MediaQuery.of(context).size.width;
                                     if (width > 320 && width <= 410) {
-                                      return 0.53;
+                                      return 0.50;
                                     } else if (width > 410 && width <= 500) {
-                                      return 0.59;
+                                      return 0.55;
                                     } else if (width > 500 && width <= 600) {
-                                      return 0.62;
+                                      return 0.59;
                                     } else if (width > 600 && width <= 700) {
-                                      return 0.65;
+                                      return 0.62;
                                     } else if (width > 700 && width <= 800) {
-                                      return 0.67;
+                                      return 0.65;
                                     } else {
                                       return 0.50;
                                     }
@@ -260,21 +285,47 @@ class CatalogMobileComponent extends StatelessWidget {
                                                             ),
                                                           );
                                                         },
-                                                child: Image.network(
-                                                  product.thumbnail,
-                                                  width: cappedWidth,
-                                                  height: cappedHeight,
-                                                  fit: BoxFit.cover,
+                                                child: ColorFiltered(
+                                                  colorFilter:
+                                                      isOutOfStock
+                                                          ? const ColorFilter.matrix(
+                                                            [
+                                                              0.2126,
+                                                              0.7152,
+                                                              0.0722,
+                                                              0,
+                                                              0,
+                                                              0.2126,
+                                                              0.7152,
+                                                              0.0722,
+                                                              0,
+                                                              0,
+                                                              0.2126,
+                                                              0.7152,
+                                                              0.0722,
+                                                              0,
+                                                              0,
+                                                              0,
+                                                              0,
+                                                              0,
+                                                              1,
+                                                              0,
+                                                            ],
+                                                          )
+                                                          : const ColorFilter.mode(
+                                                            Colors.transparent,
+                                                            BlendMode.multiply,
+                                                          ),
+                                                  child: Image.network(
+                                                    product.thumbnail,
+                                                    width: cappedWidth,
+                                                    height: cappedHeight,
+                                                    fit: BoxFit.cover,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                            if (isOutOfStock)
-                                              Positioned.fill(
-                                                child: Container(
-                                                  color: Colors.black
-                                                      .withOpacity(0.5),
-                                                ),
-                                              ),
+
                                             Positioned(
                                               top: 10,
                                               left: 10,
@@ -289,6 +340,7 @@ class CatalogMobileComponent extends StatelessWidget {
                                                       800;
 
                                                   if (isOutOfStock) {
+                                                    // Only show out-of-stock image and wishlist icon
                                                     return Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -307,10 +359,65 @@ class CatalogMobileComponent extends StatelessWidget {
                                                           alignment:
                                                               Alignment
                                                                   .centerRight,
-                                                          child: SvgPicture.asset(
-                                                            "assets/home_page/IconWishlistEmpty.svg",
-                                                            width: 23,
-                                                            height: 20,
+                                                          child: FutureBuilder<
+                                                            bool
+                                                          >(
+                                                            future:
+                                                                SharedPreferencesHelper.isInWishlist(
+                                                                  product.id
+                                                                      .toString(),
+                                                                ),
+                                                            builder: (
+                                                              context,
+                                                              snapshot,
+                                                            ) {
+                                                              final isInWishlist =
+                                                                  snapshot
+                                                                      .data ??
+                                                                  false;
+
+                                                              return GestureDetector(
+                                                                onTap: () async {
+                                                                  if (isInWishlist) {
+                                                                    await SharedPreferencesHelper.removeFromWishlist(
+                                                                      product.id
+                                                                          .toString(),
+                                                                    );
+                                                                    widget
+                                                                        .onWishlistChanged
+                                                                        ?.call(
+                                                                          'Product Removed From Wishlist',
+                                                                        );
+                                                                  } else {
+                                                                    await SharedPreferencesHelper.addToWishlist(
+                                                                      product.id
+                                                                          .toString(),
+                                                                    );
+                                                                    widget
+                                                                        .onWishlistChanged
+                                                                        ?.call(
+                                                                          'Product Added To Wishlist',
+                                                                        );
+                                                                  }
+                                                                  setState(
+                                                                    () {},
+                                                                  );
+                                                                },
+                                                                child: SvgPicture.asset(
+                                                                  isInWishlist
+                                                                      ? 'assets/home_page/IconWishlist.svg'
+                                                                      : 'assets/home_page/IconWishlistEmpty.svg',
+                                                                  width:
+                                                                      isMobile
+                                                                          ? 20
+                                                                          : 24,
+                                                                  height:
+                                                                      isMobile
+                                                                          ? 18
+                                                                          : 20,
+                                                                ),
+                                                              );
+                                                            },
                                                           ),
                                                         ),
                                                       ],
@@ -458,18 +565,22 @@ class CatalogMobileComponent extends StatelessWidget {
                                                                               .id
                                                                               .toString(),
                                                                         );
-                                                                        onWishlistChanged?.call(
-                                                                          'Product Removed From Wishlist',
-                                                                        );
+                                                                        widget
+                                                                            .onWishlistChanged
+                                                                            ?.call(
+                                                                              'Product Removed From Wishlist',
+                                                                            );
                                                                       } else {
                                                                         await SharedPreferencesHelper.addToWishlist(
                                                                           product
                                                                               .id
                                                                               .toString(),
                                                                         );
-                                                                        onWishlistChanged?.call(
-                                                                          'Product Added To Wishlist',
-                                                                        );
+                                                                        widget
+                                                                            .onWishlistChanged
+                                                                            ?.call(
+                                                                              'Product Added To Wishlist',
+                                                                            );
                                                                       }
                                                                       controller.toggleWishlistState(
                                                                         index,
@@ -516,7 +627,7 @@ class CatalogMobileComponent extends StatelessWidget {
                                                 lineHeight: 1.2,
                                                 letterSpacing: 0.64,
                                                 color: Color(0xFF30578E),
-                                                maxLines: 1,
+                                                maxLines: 2,
                                               ),
                                               const SizedBox(height: 8),
                                               Text(
@@ -536,7 +647,22 @@ class CatalogMobileComponent extends StatelessWidget {
                                               GestureDetector(
                                                 onTap:
                                                     isOutOfStock
-                                                        ? null
+                                                        ? () async {
+                                                          bool isLoggedIn =
+                                                              await _isLoggedIn();
+
+                                                          if (isLoggedIn) {
+                                                            widget
+                                                                .onWishlistChanged
+                                                                ?.call(
+                                                                  "We'll notify you when this product is back in stock.",
+                                                                );
+                                                          } else {
+                                                            context.go(
+                                                              AppRoutes.logIn,
+                                                            );
+                                                          }
+                                                        }
                                                         : () {
                                                           context.go(
                                                             AppRoutes.cartDetails(
@@ -545,20 +671,17 @@ class CatalogMobileComponent extends StatelessWidget {
                                                           );
                                                         },
                                                 child: Text(
-                                                  "ADD TO CART",
+                                                  isOutOfStock
+                                                      ? "NOTIFY ME"
+                                                      : "ADD TO CART",
                                                   style: GoogleFonts.barlow(
                                                     fontWeight: FontWeight.w600,
                                                     fontSize: 14,
                                                     height: 1.2,
                                                     letterSpacing: 0.56,
-                                                    color:
-                                                        isOutOfStock
-                                                            ? const Color(
-                                                              0xFF30578E,
-                                                            ).withOpacity(0.5)
-                                                            : const Color(
-                                                              0xFF30578E,
-                                                            ),
+                                                    color: const Color(
+                                                      0xFF30578E,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
@@ -584,7 +707,7 @@ class CatalogMobileComponent extends StatelessWidget {
                 controller.showSortMenu.value
                     ? Positioned(
                       right: 50,
-                      top: 320,
+                      top: 370,
                       child: Container(
                         width: 180,
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -605,7 +728,7 @@ class CatalogMobileComponent extends StatelessWidget {
                 controller.showFilterMenu.value
                     ? Positioned(
                       right: 16,
-                      top: 320,
+                      top: 370,
                       child: Container(
                         width: 180,
                         padding: const EdgeInsets.symmetric(vertical: 16),

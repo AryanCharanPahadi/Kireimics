@@ -22,7 +22,12 @@ import 'package:kireimics/utils/razorpay_js.dart';
 
 class CheckoutPageDesktop extends StatefulWidget {
   final Function(String)? onWishlistChanged; // Callback to notify parent
-  const CheckoutPageDesktop({super.key, this.onWishlistChanged});
+  final Function(String)? onErrorWishlistChanged; // Callback to notify parent
+  const CheckoutPageDesktop({
+    super.key,
+    this.onWishlistChanged,
+    this.onErrorWishlistChanged,
+  });
   @override
   State<CheckoutPageDesktop> createState() => _CheckoutPageDesktopState();
 }
@@ -85,23 +90,23 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                   BarlowText(
                     text: "My Cart",
                     color: const Color(0xFF30578E),
-                    fontSize: (16 * fontScale).clamp(16, 20),
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
                     letterSpacing: 0.04 * fontScale,
                   ),
-                  SizedBox(width: 9 * fontScale),
+                  SizedBox(width: 9),
                   SvgPicture.asset(
                     'assets/icons/right_icon.svg',
-                    width: 24 * fontScale,
-                    height: 24 * fontScale,
+                    width: 24,
+                    height: 24,
                     color: const Color(0xFF30578E),
                   ),
-                  SizedBox(width: 9 * fontScale),
+                  SizedBox(width: 9),
                   BarlowText(
                     text: "View Details",
                     color: const Color(0xFF30578E),
-                    fontSize: (16 * fontScale).clamp(16, 20),
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
                     route: AppRoutes.checkOut,
@@ -151,7 +156,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
             CralikaFont(
               text: "Checkout",
               fontWeight: FontWeight.w400,
-              fontSize: (32 * fontScale).clamp(32, 40),
+              fontSize: 32,
               lineHeight: 36 / 32,
               letterSpacing: 1.28 * fontScale,
               color: const Color(0xFF414141),
@@ -201,7 +206,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                             BarlowText(
                               text: "Already have an account?",
                               fontWeight: FontWeight.w400,
-                              fontSize: (20 * fontScale).clamp(20, 24),
+                              fontSize: 20,
                               lineHeight: 1.0,
                               color: const Color(0xFF000000),
                             ),
@@ -218,11 +223,14 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                               child: BarlowText(
                                 text: "LOG IN NOW",
                                 fontWeight: FontWeight.w600,
-                                fontSize: (14 * fontScale).clamp(14, 18),
+                                fontSize: 16,
                                 lineHeight: 1.5,
                                 color: const Color(0xFF30578E),
                                 hoverBackgroundColor: const Color(0xFFb9d6ff),
                                 enableHoverBackground: true,
+                                decorationColor: const Color(0xFF30578E),
+                                hoverTextColor: const Color(0xFF2876E4),
+                                hoverDecorationColor: Color(0xFF2876E4),
                               ),
                             ),
                           ],
@@ -249,186 +257,217 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
             ],
             SizedBox(
               width: containerWidth,
-              child: Column(
-                children: [
-                  customTextFormField(
-                    hintText: "FIRST NAME",
-                    fontScale: fontScale,
-                    controller: checkoutController.firstNameController,
-                    isRequired: true,
-                  ),
-                  customTextFormField(
-                    hintText: "LAST NAME",
-                    fontScale: fontScale,
-                    controller: checkoutController.lastNameController,
-                    isRequired: true,
-                  ),
-                  customTextFormField(
-                    hintText: "EMAIL",
-                    fontScale: fontScale,
-                    controller: checkoutController.emailController,
-                    isRequired: true,
-                  ),
-                  customTextFormField(
-                    hintText: "ADDRESS LINE 1",
-                    fontScale: fontScale,
-                    controller: checkoutController.address1Controller,
-                    isRequired: true,
-                  ),
-                  customTextFormField(
-                    hintText: "ADDRESS LINE 2",
-                    fontScale: fontScale,
-                    controller: checkoutController.address2Controller,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: customTextFormField(
-                          hintText: "ZIP",
-                          fontScale: fontScale,
-                          controller: checkoutController.zipController,
-                          isRequired: true,
-                        ),
-                      ),
-                      SizedBox(width: 32 * fontScale),
-                      Expanded(
-                        child: customTextFormField(
-                          hintText: "STATE",
-                          fontScale: fontScale,
-                          controller: checkoutController.stateController,
-                          isRequired: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: customTextFormField(
-                          hintText: "CITY",
-                          fontScale: fontScale,
-                          controller: checkoutController.cityController,
-                          isRequired: true,
-                        ),
-                      ),
-                      SizedBox(width: 32 * fontScale),
-                      Expanded(
-                        child: customTextFormField(
-                          hintText: "PHONE",
-                          fontScale: fontScale,
-                          controller: checkoutController.mobileController,
-                          isRequired: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 24),
-                  if (!isLoggedIn) ...[
+              child: Form(
+                child: Column(
+                  children: [
+                    customTextFormField(
+                      hintText: "FIRST NAME",
+                      fontScale: fontScale,
+                      controller: checkoutController.firstNameController,
+                      isRequired: true,
+                    ),
+                    customTextFormField(
+                      hintText: "LAST NAME",
+                      fontScale: fontScale,
+                      controller: checkoutController.lastNameController,
+                      isRequired: true,
+                    ),
+                    customTextFormField(
+                      hintText: "EMAIL",
+                      fontScale: fontScale,
+                      controller: checkoutController.emailController,
+                      isRequired: true,
+                    ),
+                    customTextFormField(
+                      hintText: "ADDRESS LINE 1",
+                      fontScale: fontScale,
+                      controller: checkoutController.address1Controller,
+                      isRequired: true,
+                    ),
+                    customTextFormField(
+                      hintText: "ADDRESS LINE 2",
+                      fontScale: fontScale,
+                      controller: checkoutController.address2Controller,
+                    ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              isChecked = !isChecked;
-                            });
-                          },
-                          child: SvgPicture.asset(
-                            isChecked
-                                ? "assets/icons/filledCheckbox.svg"
-                                : "assets/icons/emptyCheckbox.svg",
-                            height: 23,
-                            width: 23,
+                        Expanded(
+                          child: customTextFormField(
+                            hintText: "ZIP",
+                            fontScale: fontScale,
+                            controller: checkoutController.zipController,
+                            isRequired: true,
+                            onChanged: (value) {
+                              if (value.length == 6) {
+                                checkoutController.fetchPincodeData(value);
+                              } else {
+                                checkoutController.stateController.text = '';
+                                checkoutController.cityController.text = '';
+                              }
+                            },
                           ),
                         ),
-                        SizedBox(width: 19 * fontScale),
+                        SizedBox(width: 32 * fontScale),
                         Expanded(
-                          child: RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontFamily: 'Barlow',
-                                fontWeight: FontWeight.w400,
-                                fontSize: (14 * fontScale).clamp(12, 14),
-                                height: 1.5,
-                                color: const Color(0xFF414141),
-                              ),
-                              children: [
-                                const TextSpan(
-                                  text:
-                                      "By selecting this checkbox, you are agreeing to our ",
-                                ),
-                                TextSpan(
-                                  text: "Privacy Policy",
-                                  style: const TextStyle(
-                                    color: Color(0xFF30578E),
-                                  ),
-                                  recognizer:
-                                      TapGestureRecognizer()
-                                        ..onTap =
-                                            () => context.go(
-                                              AppRoutes.privacyPolicy,
-                                            ),
-                                ),
-                                const TextSpan(text: " & "),
-                                TextSpan(
-                                  text: "Shipping Policy",
-                                  style: const TextStyle(
-                                    color: Color(0xFF30578E),
-                                  ),
-                                  recognizer:
-                                      TapGestureRecognizer()
-                                        ..onTap =
-                                            () => context.go(
-                                              AppRoutes.shippingPolicy,
-                                            ),
-                                ),
-                                const TextSpan(text: "."),
-                              ],
+                          child: Obx(
+                            () => customTextFormField(
+                              hintText:
+                                  checkoutController.isPincodeLoading.value
+                                      ? "Loading..."
+                                      : "STATE",
+                              enabled:
+                                  !checkoutController.isPincodeLoading.value,
+                              fontScale: fontScale,
+                              controller: checkoutController.stateController,
+                              isRequired: true,
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ] else ...[
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        BarlowText(
-                          text:
-                              checkoutController.addressExists == true
-                                  ? 'UPDATE ADDRESS'
-                                  : 'ADD ADDRESS',
-                          color: const Color(0xFF30578E),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          lineHeight: 1.0,
-                          letterSpacing: 0.64,
-                          enableHoverUnderline: true,
-                          decorationColor: const Color(0xFF30578E),
-                          onTap: () {
-                            if (!hasAddress) {
-                              showDialog(
-                                context: context,
-                                barrierColor: Colors.transparent,
-                                builder: (BuildContext context) {
-                                  return SelectAddress();
-                                },
-                              );
-                            } else {
-                              showDialog(
-                                context: context,
-                                barrierColor: Colors.transparent,
-                                builder: (BuildContext context) {
-                                  return AddAddressUi();
-                                },
-                              );
-                            }
-                          },
+                        Expanded(
+                          child: Obx(
+                            () => customTextFormField(
+                              hintText:
+                                  checkoutController.isPincodeLoading.value
+                                      ? "Loading..."
+                                      : "CITY",
+                              enabled:
+                                  !checkoutController.isPincodeLoading.value,
+                              fontScale: fontScale,
+                              controller: checkoutController.cityController,
+                              isRequired: true,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 32 * fontScale),
+                        Expanded(
+                          child: customTextFormField(
+                            hintText: "PHONE",
+                            fontScale: fontScale,
+                            controller: checkoutController.mobileController,
+                            isRequired: true,
+                          ),
                         ),
                       ],
                     ),
+                    SizedBox(height: 24),
+                    if (!isLoggedIn) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isChecked = !isChecked;
+                              });
+                            },
+                            child: SvgPicture.asset(
+                              isChecked
+                                  ? "assets/icons/filledCheckbox.svg"
+                                  : "assets/icons/emptyCheckbox.svg",
+                              height: 24,
+                              width: 24,
+                            ),
+                          ),
+                          SizedBox(width: 19),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  fontFamily: 'Barlow',
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14,
+                                  height: 1.5,
+                                  color: const Color(0xFF414141),
+                                ),
+                                children: [
+                                  const TextSpan(
+                                    text:
+                                        "By selecting this checkbox, you are agreeing to our ",
+                                  ),
+                                  TextSpan(
+                                    text: "Privacy Policy",
+                                    style: const TextStyle(
+                                      color: Color(0xFF30578E),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    recognizer:
+                                        TapGestureRecognizer()
+                                          ..onTap =
+                                              () => context.go(
+                                                AppRoutes.privacyPolicy,
+                                              ),
+                                  ),
+                                  const TextSpan(text: " & "),
+                                  TextSpan(
+                                    text: "Shipping Policy",
+                                    style: const TextStyle(
+                                      color: Color(0xFF30578E),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    recognizer:
+                                        TapGestureRecognizer()
+                                          ..onTap =
+                                              () => context.go(
+                                                AppRoutes.shippingPolicy,
+                                              ),
+                                  ),
+                                  const TextSpan(text: "."),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          BarlowText(
+                            text:
+                                checkoutController.addressExists == true
+                                    ? 'UPDATE ADDRESS'
+                                    : 'ADD ADDRESS',
+                            color: const Color(0xFF30578E),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            lineHeight: 1.0,
+                            letterSpacing: 0.64,
+                            decorationColor: const Color(0xFF30578E),
+                            hoverBackgroundColor: Color(0xFFb9d6ff),
+                            enableHoverBackground: true,
+                            hoverTextColor: const Color(0xFF2876E4),
+                            hoverDecorationColor: Color(0xFF2876E4),
+                            onTap: () {
+                              if (!hasAddress) {
+                                showDialog(
+                                  context: context,
+                                  barrierColor: Colors.transparent,
+                                  builder: (BuildContext context) {
+                                    return SelectAddress();
+                                  },
+                                );
+                              } else {
+                                showDialog(
+                                  context: context,
+                                  barrierColor: Colors.transparent,
+                                  builder: (BuildContext context) {
+                                    return AddAddressUi();
+                                  },
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ],
@@ -462,7 +501,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                   text: "Order Details",
                   color: const Color(0xFFFFFFFF),
                   fontWeight: FontWeight.w400,
-                  fontSize: (20 * fontScale).clamp(20, 24),
+                  fontSize: 20,
                   lineHeight: 36 / 20,
                   letterSpacing: 0.8 * fontScale,
                 ),
@@ -474,7 +513,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                       text: "Item Total",
                       color: const Color(0xFFFFFFFF),
                       fontWeight: FontWeight.w400,
-                      fontSize: (16 * fontScale).clamp(16, 20),
+                      fontSize: 16,
                       lineHeight: 36 / 16,
                       letterSpacing: 0.64 * fontScale,
                     ),
@@ -482,7 +521,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                       text: "Rs. ${subtotal.toStringAsFixed(2)}",
                       color: const Color(0xFFFFFFFF),
                       fontWeight: FontWeight.w400,
-                      fontSize: (16 * fontScale).clamp(16, 20),
+                      fontSize: 16,
                       lineHeight: 36 / 16,
                       letterSpacing: 0.64 * fontScale,
                     ),
@@ -496,7 +535,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                       text: "Shipping & Taxes",
                       color: const Color(0xFFFFFFFF),
                       fontWeight: FontWeight.w400,
-                      fontSize: (16 * fontScale).clamp(16, 20),
+                      fontSize: 16,
                       lineHeight: 36 / 16,
                       letterSpacing: 0.64 * fontScale,
                     ),
@@ -504,7 +543,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                       text: "Rs. ${deliveryCharge.toStringAsFixed(2)}",
                       color: const Color(0xFFFFFFFF),
                       fontWeight: FontWeight.w400,
-                      fontSize: (16 * fontScale).clamp(16, 20),
+                      fontSize: 16,
                       lineHeight: 36 / 16,
                       letterSpacing: 0.64 * fontScale,
                     ),
@@ -520,7 +559,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                       text: "Subtotal",
                       color: const Color(0xFFFFFFFF),
                       fontWeight: FontWeight.w400,
-                      fontSize: (16 * fontScale).clamp(16, 20),
+                      fontSize: 20,
                       lineHeight: 36 / 16,
                       letterSpacing: 0.64 * fontScale,
                     ),
@@ -528,7 +567,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                       text: "Rs. ${total.toStringAsFixed(2)}",
                       color: const Color(0xFFFFFFFF),
                       fontWeight: FontWeight.w400,
-                      fontSize: (16 * fontScale).clamp(16, 20),
+                      fontSize: 24,
                       lineHeight: 36 / 16,
                       letterSpacing: 0.64 * fontScale,
                     ),
@@ -555,11 +594,16 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
               child: BarlowText(
                 text: "VIEW CART",
                 fontWeight: FontWeight.w600,
-                fontSize: (16 * fontScale).clamp(16, 20),
+                color: Color(0xFF30578E),
+
+                fontSize: 16,
                 lineHeight: 1.0,
                 letterSpacing: 0.64 * fontScale,
                 hoverBackgroundColor: const Color(0xFFb9d6ff),
                 enableHoverBackground: true,
+                decorationColor: const Color(0xFF30578E),
+                hoverTextColor: const Color(0xFF2876E4),
+                hoverDecorationColor: Color(0xFF2876E4),
               ),
             ),
             SizedBox(height: 24 * fontScale),
@@ -567,33 +611,92 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
               text: "MAKE PAYMENT",
               color: const Color(0xFF30578E),
               fontWeight: FontWeight.w600,
-              fontSize: (16 * fontScale).clamp(16, 20),
+              fontSize: 16,
               lineHeight: 1.0,
               letterSpacing: 0.64 * fontScale,
               backgroundColor: Color(0xFFb9d6ff),
               hoverTextColor: Color(0xFF2876E4), // Changes to blue on hover
 
               onTap: () {
+                // Check if user is not logged in and hasn't agreed to policies
+
+                // Sequential validation of required fields
+                if (checkoutController.firstNameController.text.isEmpty) {
+                  widget.onErrorWishlistChanged?.call(
+                    'Please enter your first name',
+                  );
+                  return;
+                }
+                if (checkoutController.firstNameController.text.length < 2) {
+                  widget.onErrorWishlistChanged?.call('First name too short');
+                  return;
+                }
+                if (checkoutController.lastNameController.text.isEmpty) {
+                  widget.onErrorWishlistChanged?.call(
+                    'Please enter your last name',
+                  );
+                  return;
+                }
+                if (checkoutController.lastNameController.text.length < 2) {
+                  widget.onErrorWishlistChanged?.call('Last name too short');
+                  return;
+                }
+                if (checkoutController.emailController.text.isEmpty) {
+                  widget.onErrorWishlistChanged?.call(
+                    'Please enter your email',
+                  );
+                  return;
+                }
+                if (!RegExp(
+                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                ).hasMatch(checkoutController.emailController.text)) {
+                  widget.onErrorWishlistChanged?.call(
+                    'Please enter a valid email',
+                  );
+                  return;
+                }
+                if (checkoutController.address1Controller.text.isEmpty) {
+                  widget.onErrorWishlistChanged?.call(
+                    'Please enter your ADDRESS LINE 1',
+                  );
+                  return;
+                }
+                if (checkoutController.zipController.text.isEmpty) {
+                  widget.onErrorWishlistChanged?.call('Please enter your Zip');
+                  return;
+                }
+                if (checkoutController.stateController.text.isEmpty) {
+                  widget.onErrorWishlistChanged?.call(
+                    'Please enter your state',
+                  );
+                  return;
+                }
+                if (checkoutController.cityController.text.isEmpty) {
+                  widget.onErrorWishlistChanged?.call('Please enter your city');
+                  return;
+                }
+                if (checkoutController.mobileController.text.isEmpty) {
+                  widget.onErrorWishlistChanged?.call(
+                    'Please enter your phone number',
+                  );
+                  return;
+                }
+                if (!RegExp(
+                  r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$',
+                ).hasMatch(checkoutController.mobileController.text)) {
+                  widget.onErrorWishlistChanged?.call(
+                    'Please enter a valid phone number',
+                  );
+                  return;
+                }
                 if (!isChecked && !checkoutController.addressExists.value) {
-                  widget.onWishlistChanged?.call(
+                  widget.onErrorWishlistChanged?.call(
                     'Please agree to the Privacy and Shipping Policy',
                   );
-
                   return;
                 }
-                if (checkoutController.firstNameController.text.isEmpty ||
-                    checkoutController.emailController.text.isEmpty ||
-                    checkoutController.address1Controller.text.isEmpty ||
-                    checkoutController.zipController.text.isEmpty ||
-                    checkoutController.stateController.text.isEmpty ||
-                    checkoutController.cityController.text.isEmpty ||
-                    checkoutController.mobileController.text.isEmpty) {
-                  widget.onWishlistChanged?.call(
-                    'Please fill in all required fields',
-                  );
 
-                  return;
-                }
+                // Proceed to payment if all validations pass
                 final orderId =
                     'ORDER_${DateTime.now().millisecondsSinceEpoch}';
                 checkoutController.openRazorpayCheckout(
@@ -612,8 +715,10 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
   Widget customTextFormField({
     required String hintText,
     TextEditingController? controller,
+    bool enabled = true,
+    Function(String)? onChanged,
     required double fontScale,
-    bool isRequired = false, // New parameter to control asterisk visibility
+    bool isRequired = false,
   }) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 8 * fontScale),
@@ -652,6 +757,8 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
             controller: controller,
             textAlign: TextAlign.right,
             cursorColor: const Color(0xFF414141),
+            enabled: enabled,
+            onChanged: onChanged,
             decoration: InputDecoration(
               border: const UnderlineInputBorder(
                 borderSide: BorderSide(color: Color(0xFF414141)),

@@ -4,6 +4,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kireimics/web_desktop_common/thankyou_page/thankyou.dart';
 
+import 'component/no_found_page/404_page.dart';
 import 'component/responsive_route_screen/responsive_layout.dart';
 import 'component/app_routes/routes.dart';
 import 'component/splash_screen/splash_screen.dart';
@@ -59,10 +60,23 @@ class MyApp extends StatelessWidget {
             final amount =
                 double.tryParse(state.uri.queryParameters['amount'] ?? '0') ??
                 0.0;
+            final orderDateString =
+                state.uri.queryParameters['orderDate'] ??
+                DateTime.now().toIso8601String();
+            DateTime orderDate;
+            try {
+              orderDate = DateTime.parse(orderDateString);
+            } catch (e) {
+              print('Error parsing orderDate: $e');
+              orderDate =
+                  DateTime.now(); // Fallback to current time if parsing fails
+            }
+
             return PaymentResultPage(
               isSuccess: isSuccess,
               orderId: orderId,
               amount: amount,
+              orderDate: orderDate,
             );
           },
         ),
@@ -71,6 +85,14 @@ class MyApp extends StatelessWidget {
           builder:
               (context, state) =>
                   const ResponsiveLayout(initialRoute: AppRoutes.about),
+        ),
+
+        GoRoute(
+          path: AppRoutes.forgetPassword,
+          builder:
+              (context, state) => const ResponsiveLayout(
+                initialRoute: AppRoutes.forgetPassword,
+              ),
         ),
 
         GoRoute(
@@ -212,12 +234,18 @@ class MyApp extends StatelessWidget {
             );
           },
         ),
+
+        GoRoute(
+          path: '/:path(.*)', // Wildcard to match any undefined route
+          builder: (context, state) => const NoFoundPage(),
+        ),
       ],
     );
 
     return GetMaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Kireimics',
+
       routerDelegate: router.routerDelegate,
       routeInformationParser: router.routeInformationParser,
       routeInformationProvider: router.routeInformationProvider,

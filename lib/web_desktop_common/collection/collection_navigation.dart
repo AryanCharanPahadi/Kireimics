@@ -57,6 +57,9 @@ class CollectionNavigation extends StatelessWidget {
                 : TextDecoration.none,
             decorationThickness: 2.0,
             decorationColor: const Color(0xFF30578E),
+            enableHoverUnderline: true,
+            hoverTextColor: const Color(0xFF2876E4),
+            hoverDecorationColor: Color(0xFF2876E4),
           ),
         );
       }).toList();

@@ -26,6 +26,10 @@ class _GridviewSearchState extends State<GridviewSearch> {
   List<bool> _wishlistStates = [];
   String _currentQuery = '';
   bool _initialized = false;
+  Future<bool> _isLoggedIn() async {
+    String? userData = await SharedPreferencesHelper.getUserData();
+    return userData != null && userData.isNotEmpty;
+  }
 
   @override
   void initState() {
@@ -229,29 +233,52 @@ class _GridviewSearchState extends State<GridviewSearch> {
                                 Positioned.fill(
                                   child: GestureDetector(
                                     onTap:
-                                        isOutOfStock
-                                            ? null
-                                            : () {
+                                      () {
                                               context.go(
                                                 AppRoutes.productDetails(
                                                   product.id,
                                                 ),
                                               );
                                             },
-                                    child: Image.network(
-                                      product.thumbnail,
-                                      width: cappedWidth,
-                                      height: cappedHeight,
-                                      fit: BoxFit.cover,
+                                    child: ColorFiltered(
+                                      colorFilter:
+                                          isOutOfStock
+                                              ? const ColorFilter.matrix([
+                                                0.2126,
+                                                0.7152,
+                                                0.0722,
+                                                0,
+                                                0,
+                                                0.2126,
+                                                0.7152,
+                                                0.0722,
+                                                0,
+                                                0,
+                                                0.2126,
+                                                0.7152,
+                                                0.0722,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                1,
+                                                0,
+                                              ])
+                                              : const ColorFilter.mode(
+                                                Colors.transparent,
+                                                BlendMode.multiply,
+                                              ),
+                                      child: Image.network(
+                                        product.thumbnail,
+                                        width: cappedWidth,
+                                        height: cappedHeight,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                if (isOutOfStock)
-                                  Positioned.fill(
-                                    child: Container(
-                                      color: Colors.black.withOpacity(0.5),
-                                    ),
-                                  ),
+
                                 Positioned(
                                   top: 10,
                                   left: 10,
@@ -262,7 +289,7 @@ class _GridviewSearchState extends State<GridviewSearch> {
                                           constraints.maxWidth < 800;
 
                                       if (isOutOfStock) {
-                                        // Only return the Out of Stock image, nothing else
+                                        // Only show out-of-stock image and wishlist icon
                                         return Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
@@ -276,10 +303,46 @@ class _GridviewSearchState extends State<GridviewSearch> {
                                             ),
                                             Align(
                                               alignment: Alignment.centerRight,
-                                              child: SvgPicture.asset(
-                                                "assets/home_page/IconWishlistEmpty.svg",
-                                                width: 23,
-                                                height: 20,
+                                              child: FutureBuilder<bool>(
+                                                future:
+                                                    SharedPreferencesHelper.isInWishlist(
+                                                      product.id.toString(),
+                                                    ),
+                                                builder: (context, snapshot) {
+                                                  final isInWishlist =
+                                                      snapshot.data ?? false;
+
+                                                  return GestureDetector(
+                                                    onTap: () async {
+                                                      if (isInWishlist) {
+                                                        await SharedPreferencesHelper.removeFromWishlist(
+                                                          product.id.toString(),
+                                                        );
+                                                        widget.onWishlistChanged
+                                                            ?.call(
+                                                              'Product Removed From Wishlist',
+                                                            );
+                                                      } else {
+                                                        await SharedPreferencesHelper.addToWishlist(
+                                                          product.id.toString(),
+                                                        );
+                                                        widget.onWishlistChanged
+                                                            ?.call(
+                                                              'Product Added To Wishlist',
+                                                            );
+                                                      }
+                                                      setState(() {});
+                                                    },
+                                                    child: SvgPicture.asset(
+                                                      isInWishlist
+                                                          ? 'assets/home_page/IconWishlist.svg'
+                                                          : 'assets/home_page/IconWishlistEmpty.svg',
+                                                      width: isMobile ? 20 : 24,
+                                                      height:
+                                                          isMobile ? 18 : 20,
+                                                    ),
+                                                  );
+                                                },
                                               ),
                                             ),
                                           ],
@@ -457,7 +520,18 @@ class _GridviewSearchState extends State<GridviewSearch> {
                                   GestureDetector(
                                     onTap:
                                         isOutOfStock
-                                            ? null
+                                            ? () async {
+                                              bool isLoggedIn =
+                                                  await _isLoggedIn();
+
+                                              if (isLoggedIn) {
+                                                widget.onWishlistChanged?.call(
+                                                  "We'll notify you when this product is back in stock.",
+                                                );
+                                              } else {
+                                                context.go(AppRoutes.logIn);
+                                              }
+                                            }
                                             : () {
                                               context.go(
                                                 AppRoutes.cartDetails(
@@ -465,18 +539,17 @@ class _GridviewSearchState extends State<GridviewSearch> {
                                                 ),
                                               );
                                             },
-                                    child: BarlowText(
-                                      text: "ADD TO CART",
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                      lineHeight: 1.2,
-                                      letterSpacing: 0.56,
-                                      color:
-                                          isOutOfStock
-                                              ? const Color(
-                                                0xFF30578E,
-                                              ).withOpacity(0.5)
-                                              : const Color(0xFF30578E),
+                                    child: Text(
+                                      isOutOfStock
+                                          ? "NOTIFY ME"
+                                          : "ADD TO CART",
+                                      style: GoogleFonts.barlow(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        height: 1.2,
+                                        letterSpacing: 0.56,
+                                        color: const Color(0xFF30578E),
+                                      ),
                                     ),
                                   ),
                                 ],

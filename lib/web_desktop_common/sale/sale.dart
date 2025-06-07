@@ -41,7 +41,8 @@ class Sale extends StatelessWidget {
                     padding: EdgeInsets.only(
                       left: isLargeScreen ? 545 : 453,
                       right: isLargeScreen ? 172 : 0, // Updated line
-                    ),                    child: Container(
+                    ),
+                    child: Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
                           image: const AssetImage(
@@ -136,6 +137,9 @@ class Sale extends StatelessWidget {
                                   color: const Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
+                                  enableUnderlineForActiveRoute: true,
+                                  decorationColor: Color(0xFF30578E),
+                                  hoverTextColor: const Color(0xFF2876E4),
                                 ),
                               ),
                             SizedBox(width: 24),
@@ -152,6 +156,9 @@ class Sale extends StatelessWidget {
                                   color: const Color(0xFF30578E),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
+                                  enableUnderlineForActiveRoute: true,
+                                  decorationColor: Color(0xFF30578E),
+                                  hoverTextColor: const Color(0xFF2876E4),
                                 ),
                               ),
                           ],
@@ -172,30 +179,26 @@ class Sale extends StatelessWidget {
                         saleController.collectionList.isEmpty
                     ? Padding(
                       padding: EdgeInsets.only(
-                        left: isLargeScreen ? 389 : 292,
+                        left: isLargeScreen ? 613 : 516,
                         top: 80,
                       ),
-                      child: Center(
-                        child: CartEmpty(
-                          cralikaText: "No products here yet!",
-                          barlowText:
-                              "Try another category, hopefully you'll find something you like there!",
-                        ),
+                      child: CartEmpty(
+                        cralikaText: "No products here yet!",
+                        barlowText:
+                            "Try another category, hopefully you'll find something you like there!",
                       ),
                     )
                     : saleController.filteredProductList.isEmpty &&
                         !saleController.isCollectionView.value
                     ? Padding(
                       padding: EdgeInsets.only(
-                        left: isLargeScreen ? 389 : 292,
+                        left: isLargeScreen ? 613 : 516,
                         top: 80,
                       ),
-                      child: Center(
-                        child: CartEmpty(
-                          cralikaText: "No products here yet!",
-                          barlowText:
-                              "Try another category, hopefully you'll find something you like there!",
-                        ),
+                      child: CartEmpty(
+                        cralikaText: "No products here yet!",
+                        barlowText:
+                            "Try another category, hopefully you'll find something you like there!",
                       ),
                     )
                     : SizedBox(

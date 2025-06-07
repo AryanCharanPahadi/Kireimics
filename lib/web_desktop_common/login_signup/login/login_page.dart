@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kireimics/web_desktop_common/login_signup/forget_password/forget_password.dart';
 
 import '../../../component/google_sign_in/google_sign_in_button.dart';
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../component/notification_toast/custom_toast.dart';
-import '../../../component/app_routes/routes.dart';
 import '../../../component/utilities/utility.dart';
 import '../signup/signup.dart' show Signup;
 import 'login_controller.dart';
@@ -50,312 +49,362 @@ class _LoginPageState extends State<LoginPage> {
             width: MediaQuery.of(context).size.width > 1400 ? 550 : 504,
             child: Material(
               color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 32.0, top: 22, right: 44),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.of(context).pop(),
-                            child: BarlowText(
-                              text: "Close",
-                              color: Color(0xFF30578E),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16.0,
-                              lineHeight: 1.0,
-                              letterSpacing: 0.64,
-                              enableHoverUnderline: true,
-                              decorationColor: const Color(0xFF30578E),
-                            ),
-                          ),
-                          if (showSuccessBanner || showErrorBanner)
-                            NotificationBanner(
-                              message:
-                                  showSuccessBanner
-                                      ? "Logged in successfully!"
-                                      : errorMessage,
-                              bannerColor:
-                                  showSuccessBanner ? Colors.green : Colors.red,
-                              textColor: Colors.black,
-                              onClose: () {
-                                setState(() {
-                                  showSuccessBanner = false;
-                                  showErrorBanner = false;
-                                });
-                              },
-                            ),
-                        ],
-                      ),
-                      SizedBox(height: 33),
-                      CralikaFont(
-                        text: "Log In",
-                        color: Color(0xFF414141),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 32.0,
-                        lineHeight: 1.0,
-                        letterSpacing: 0.128,
-                      ),
-                      SizedBox(height: 8),
-                      BarlowText(
-                        text:
-                            "Log in to your Kireimics account for a quick checkout.",
-                        fontWeight: FontWeight.w400,
-                        fontSize: 16,
-                        lineHeight: 1.0,
-                        letterSpacing: 0.0,
-                      ),
-                      SizedBox(height: 32),
-                      Form(
-                        key: loginController.formKey,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 32.0,
+                          top: 22,
+                          right: 44,
+                        ),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            customTextFormField(
-                              hintText: "EMAIL",
-                              controller: loginController.emailController,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your email';
-                                }
-                                if (!RegExp(
-                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                ).hasMatch(value)) {
-                                  return 'Please enter a valid email';
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(height: 32),
-
-                            customTextFormField(
-                              hintText: "PASSWORD",
-                              controller: loginController.passwordController,
-                              isPassword: true, // Add isPassword flag
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your password';
-                                }
-                                if (value.length < 8) {
-                                  return 'Password must be at least 8 characters';
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(height: 32),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              isChecked = !isChecked;
-                                            });
-                                          },
-                                          child: SvgPicture.asset(
-                                            isChecked
-                                                ? "assets/icons/filledCheckbox.svg"
-                                                : "assets/icons/emptyCheckbox.svg",
-                                            height: 15,
-                                            width: 15,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        BarlowText(
-                                          text: "Remember Me",
-                                          color: Color(0xFF414141),
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 14,
-                                          lineHeight: 1.0,
-                                          letterSpacing: 0.0,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    BarlowText(
-                                      text: "Forgot Password?",
-                                      color: Color(0xFF30578E),
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                      lineHeight: 1.0,
-                                      letterSpacing: 0.64,
-                                      hoverBackgroundColor: Color(0xFFb9d6ff),
-                                      enableHoverBackground: true,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 30),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Column(
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () async {
-                                        bool success = await loginController
-                                            .handleLogin(context);
-                                        if (mounted) {
-                                          setState(() {
-                                            if (success) {
-                                              showSuccessBanner = true;
-                                              showErrorBanner = false;
-                                            } else {
-                                              showSuccessBanner = false;
-                                              showErrorBanner = true;
-                                              errorMessage =
-                                                  loginController.loginMessage;
-                                            }
-                                          });
-                                          if (success) {
-                                            Future.delayed(
-                                              const Duration(seconds: 3),
-                                              () {
-                                                if (mounted) {
-                                                  setState(() {
-                                                    showSuccessBanner = false;
-                                                  });
-                                                }
-                                              },
-                                            );
-                                          }
-                                        }
-                                      },
-                                      child: BarlowText(
-                                        text: "LOG IN",
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        lineHeight: 1.0,
-                                        letterSpacing: 0.64,
-                                        color: Color(0xFF30578E),
-                                        backgroundColor: Color(0xFFb9d6ff),
-                                      ),
-                                    ),
-                                    SizedBox(height: 30),
-                                    BarlowText(
-                                      text: "Or",
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 16,
-                                      lineHeight: 1.0,
-                                      letterSpacing: 0.0,
-                                      color: Color(0xFF414141),
-                                    ),
-                                    SizedBox(height: 16),
-                                    Row(
-                                      children: [
-                                        SizedBox(width: 24),
-
-                                        GoogleSignInButton(
-                                          functionName: 'signInWithGoogle',
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 40),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0xFFDDEAFF).withOpacity(0.6),
-                              offset: Offset(20, 20),
-                              blurRadius: 20,
-                            ),
-                          ],
-                          border: Border.all(
-                            color: Color(0xFFDDEAFF),
-                            width: 1,
-                          ),
-                        ),
-                        height: 83,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: 16.0,
-                            top: 13,
-                            bottom: 13,
-                            right: 10,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                height: 56,
-                                width: 56,
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFDDEAFF),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(
-                                  child: SvgPicture.asset(
-                                    "assets/header/IconProfile.svg",
-                                    height: 27,
-                                    width: 25,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 24),
-                              Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  BarlowText(
-                                    text: "Don't have an account?",
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 20,
+                                GestureDetector(
+                                  onTap: () => Navigator.of(context).pop(),
+                                  child: BarlowText(
+                                    text: "Close",
+                                    color: Color(0xFF30578E),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16.0,
                                     lineHeight: 1.0,
-                                    color: Color(0xFF000000),
+                                    letterSpacing: 0.64,
+                                    enableUnderlineForActiveRoute: true,
+                                    decorationColor: Color(0xFF30578E),
+                                    hoverTextColor: const Color(0xFF2876E4),
                                   ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      Future.delayed(Duration.zero, () {
-                                        showDialog(
-                                          context: context,
-                                          barrierColor: Colors.transparent,
-                                          builder: (BuildContext context) {
-                                            return Signup();
-                                          },
-                                        );
+                                ),
+                                if (showSuccessBanner || showErrorBanner)
+                                  NotificationBanner(
+                                    iconPath:
+                                        showSuccessBanner
+                                            ? "assets/icons/success.svg"
+                                            : "assets/icons/error.svg",
+
+                                    message:
+                                        showSuccessBanner
+                                            ? "Logged in successfully!"
+                                            : errorMessage,
+                                    bannerColor:
+                                        showSuccessBanner
+                                            ? Color(0xFF268FA2)
+                                            : Color(0xFFF46856),
+                                    textColor: Color(0xFF28292A),
+                                    onClose: () {
+                                      setState(() {
+                                        showSuccessBanner = false;
+                                        showErrorBanner = false;
                                       });
                                     },
-                                    child: BarlowText(
-                                      text: "SIGN UP NOW",
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                      lineHeight: 1.5,
-                                      color: Color(0xFF30578E),
-                                      hoverBackgroundColor: Color(0xFFb9d6ff),
-                                      enableHoverBackground: true,
-                                    ),
+                                  ),
+                              ],
+                            ),
+                            SizedBox(height: 33),
+                            CralikaFont(
+                              text: "Log In",
+                              color: Color(0xFF414141),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 32.0,
+                              lineHeight: 1.0,
+                              letterSpacing: 0.128,
+                            ),
+                            SizedBox(height: 8),
+                            BarlowText(
+                              text:
+                                  "Log in to your Kireimics account for a quick checkout.",
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16,
+                              lineHeight: 1.0,
+                              letterSpacing: 0.0,
+                            ),
+                            SizedBox(height: 32),
+                            Form(
+                              key: loginController.formKey,
+                              child: Column(
+                                children: [
+                                  customTextFormField(
+                                    hintText: "EMAIL",
+                                    controller: loginController.emailController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter your email';
+                                      }
+                                      if (!RegExp(
+                                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                      ).hasMatch(value)) {
+                                        return 'Please enter a valid email';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  SizedBox(height: 32),
+
+                                  customTextFormField(
+                                    hintText: "PASSWORD",
+                                    controller:
+                                        loginController.passwordController,
+                                    isPassword: true, // Add isPassword flag
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter your password';
+                                      }
+                                      if (value.length < 8) {
+                                        return 'Password must be at least 8 characters';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  SizedBox(height: 32),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  setState(() {
+                                                    isChecked = !isChecked;
+                                                  });
+                                                },
+                                                child: SvgPicture.asset(
+                                                  isChecked
+                                                      ? "assets/icons/filledCheckbox.svg"
+                                                      : "assets/icons/emptyCheckbox.svg",
+                                                  height: 24,
+                                                  width: 24,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              BarlowText(
+                                                text: "Remember Me",
+                                                color: Color(0xFF414141),
+                                                fontWeight: FontWeight.w400,
+                                                fontSize: 14,
+                                                lineHeight: 1.0,
+                                                letterSpacing: 0.0,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          BarlowText(
+                                            text: "Forgot Password?",
+                                            color: Color(0xFF30578E),
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                            lineHeight: 1.0,
+                                            letterSpacing: 0.64,
+                                            enableUnderlineForActiveRoute: true,
+                                            decorationColor: Color(0xFF30578E),
+                                            hoverTextColor: const Color(
+                                              0xFF2876E4,
+                                            ),
+                                            onTap: () {
+                                              Navigator.of(context).pop();
+                                              showDialog(
+                                                context: context,
+                                                barrierColor:
+                                                    Colors.transparent,
+                                                builder: (
+                                                  BuildContext context,
+                                                ) {
+                                                  return ForgetPassword();
+                                                },
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 30),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () async {
+                                              bool success =
+                                                  await loginController
+                                                      .handleLogin(context);
+                                              if (mounted) {
+                                                setState(() {
+                                                  if (success) {
+                                                    showSuccessBanner = true;
+                                                    showErrorBanner = false;
+                                                  } else {
+                                                    showSuccessBanner = false;
+                                                    showErrorBanner = true;
+                                                    errorMessage =
+                                                        loginController
+                                                            .loginMessage;
+                                                  }
+                                                });
+                                                if (success) {
+                                                  Future.delayed(
+                                                    const Duration(seconds: 3),
+                                                    () {
+                                                      if (mounted) {
+                                                        setState(() {
+                                                          showSuccessBanner =
+                                                              false;
+                                                        });
+                                                      }
+                                                    },
+                                                  );
+                                                }
+                                              }
+                                            },
+                                            child: BarlowText(
+                                              text: "LOG IN",
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 16,
+                                              lineHeight: 1.0,
+                                              letterSpacing: 0.64,
+                                              color: Color(0xFF30578E),
+                                              backgroundColor: Color(
+                                                0xFFb9d6ff,
+                                              ),
+                                              decorationColor: const Color(
+                                                0xFF30578E,
+                                              ),
+                                              hoverTextColor: const Color(
+                                                0xFF2876E4,
+                                              ),
+                                              hoverDecorationColor: Color(
+                                                0xFF2876E4,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(height: 30),
+                                          BarlowText(
+                                            text: "Or",
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 16,
+                                            lineHeight: 1.0,
+                                            letterSpacing: 0.0,
+                                            color: Color(0xFF414141),
+                                          ),
+                                          SizedBox(height: 16),
+                                          Row(
+                                            children: [
+                                              SizedBox(width: 24),
+
+                                              GoogleSignInButton(
+                                                functionName:
+                                                    'signInWithGoogle',
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(height: 40),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 30),
-                    ],
+                    ),
                   ),
-                ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xFFDDEAFF).withOpacity(0.6),
+                          offset: Offset(20, 20),
+                          blurRadius: 20,
+                        ),
+                      ],
+                      border: Border.all(color: Color(0xFFDDEAFF), width: 1),
+                    ),
+                    height: 83,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: 16.0,
+                        top: 13,
+                        bottom: 13,
+                        right: 10,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 56,
+                            width: 56,
+                            decoration: BoxDecoration(
+                              color: Color(0xFFDDEAFF),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: SvgPicture.asset(
+                                "assets/header/IconProfile.svg",
+                                height: 27,
+                                width: 25,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 24),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BarlowText(
+                                text: "Don't have an account?",
+                                fontWeight: FontWeight.w400,
+                                fontSize: 20,
+                                lineHeight: 1.0,
+                                color: Color(0xFF000000),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Future.delayed(Duration.zero, () {
+                                    showDialog(
+                                      context: context,
+                                      barrierColor: Colors.transparent,
+                                      builder: (BuildContext context) {
+                                        return Signup();
+                                      },
+                                    );
+                                  });
+                                },
+                                child: BarlowText(
+                                  text: "SIGN UP NOW",
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  lineHeight: 1.5,
+                                  color: Color(0xFF30578E),
+                                  hoverBackgroundColor: Color(0xFFb9d6ff),
+                                  enableHoverBackground: true,
+                                  decorationColor: const Color(0xFF30578E),
+                                  hoverTextColor: const Color(0xFF2876E4),
+                                  hoverDecorationColor: Color(0xFF2876E4),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -416,25 +465,29 @@ class _LoginPageState extends State<LoginPage> {
                   letterSpacing: 0.0,
                   color: const Color(0xFF414141),
                 ),
-                contentPadding: const EdgeInsets.only(
-                  top: 16,
-                  right: 40, // Add padding for the eye icon
+                contentPadding: EdgeInsets.only(
+                  top: isPassword ? 16 : 10,
+                  right:
+                      isPassword
+                          ? 40
+                          : 0, // Conditionally add padding only if it's a password field
                 ),
+
                 suffixIcon:
                     isPassword
-                        ? IconButton(
-                          icon: Icon(
+                        ? GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              obscureText = !obscureText; // Toggle visibility
+                            });
+                          },
+                          child: Icon(
                             obscureText
                                 ? Icons.visibility_off
                                 : Icons.visibility,
                             color: const Color(0xFF30578E),
                             size: 20,
                           ),
-                          onPressed: () {
-                            setState(() {
-                              obscureText = !obscureText; // Toggle visibility
-                            });
-                          },
                         )
                         : null,
               ),

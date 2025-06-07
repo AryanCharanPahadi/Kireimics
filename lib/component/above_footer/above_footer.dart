@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../web_desktop_common/component/auto_scroll.dart'
     show AutoScrollImages;
+import '../general_links/general_links_contrller.dart';
 
 class AboveFooter extends StatefulWidget {
   final double fontSize;
@@ -32,30 +33,7 @@ class _AboveFooterState extends State<AboveFooter> {
     "assets/grouped_alphabet/s.svg",
   ];
 
-  String socialMediaLinks = '';
-  String emailLink = '';
-  String instagramLink = '';
-
-  Future getSocialMediaLinks() async {
-    final response = await http.get(
-      Uri.parse(
-        "https://vedvika.com/v1/apis/common/general_links/get_general_links.php",
-      ),
-    );
-
-    var data = jsonDecode(response.body.toString());
-
-    if (response.statusCode == 200) {
-      setState(() {
-        socialMediaLinks = data[0]['social_media_links'];
-        instagramLink = jsonDecode(socialMediaLinks)['Instagram'];
-        emailLink = jsonDecode(socialMediaLinks)['Email'];
-      });
-      print(socialMediaLinks);
-      print(instagramLink);
-      print(emailLink);
-    }
-  }
+  late GeneralLinksController _generalLinksController;
 
   final List<double> imageHeights = [
     16.0,
@@ -75,7 +53,8 @@ class _AboveFooterState extends State<AboveFooter> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getSocialMediaLinks();
+    _generalLinksController = GeneralLinksController();
+    _generalLinksController.getGeneralLinks();
   }
 
   @override
@@ -108,7 +87,7 @@ class _AboveFooterState extends State<AboveFooter> {
                 onTap:
                     () => UrlLauncherHelper.launchURL(
                       context,
-                      instagramLink.toString(),
+                      _generalLinksController.instagramLink,
                     ),
                 child: Image.asset(
                   "assets/above_footer/instag.png",

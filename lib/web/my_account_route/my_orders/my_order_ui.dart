@@ -76,6 +76,7 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                       onTap: () {
                         context.go(AppRoutes.myAccount);
                       },
+                      hoverTextColor: const Color(0xFF2876E4),
                     ),
                     const SizedBox(width: 32),
 
@@ -91,6 +92,7 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                       onTap: () {
                         context.go(AppRoutes.myOrder);
                       },
+                      hoverTextColor: const Color(0xFF2876E4),
                     ),
                     const SizedBox(width: 32),
 
@@ -103,6 +105,7 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                       onTap: () {
                         context.go(AppRoutes.wishlist);
                       },
+                      hoverTextColor: const Color(0xFF2876E4),
                     ),
                   ],
                 ),
@@ -177,7 +180,7 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                   ),
                   BarlowText(
                     text: order['status'],
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w600,
                     fontSize: 14,
                     lineHeight: 1.4,
                     letterSpacing: 0,
@@ -233,12 +236,11 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                           text: "VIEW DETAILS",
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          lineHeight: 1.5,
+                          lineHeight: 1.0,
                           letterSpacing: 0,
                           color: const Color(0xFF30578E),
-                          hoverBackgroundColor: Color(0xFFb9d6ff),
-
-                          enableHoverBackground: true,
+                          backgroundColor: Color(0xFFb9d6ff),
+                          hoverTextColor: Color(0xFF2876E4),
                         ),
                       ),
                     ],

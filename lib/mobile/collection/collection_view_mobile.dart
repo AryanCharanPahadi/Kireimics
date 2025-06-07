@@ -26,10 +26,15 @@ class CollectionViewMobile extends StatefulWidget {
 }
 
 class _CollectionViewMobileState extends State<CollectionViewMobile> {
+  late String collectionName = '';
+
   @override
   void initState() {
     super.initState();
     final controller = Get.put(CollectionViewController());
+    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
+    final uri = Uri.parse(route.uri.toString());
+    collectionName = uri.queryParameters['collection_name'] ?? 'No Collection';
     // Fetch products based on the current filter or category
     if (controller.currentFilter.value == 'All') {
       controller.fetchProducts(widget.productIds);
@@ -100,11 +105,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                       SizedBox(width: 9.0),
 
                       BarlowText(
-                        text:
-                            controller.productList.isNotEmpty
-                                ? controller.productList[0].collectionName ??
-                                    'No Collection'
-                                : 'No Collection',
+                        text: collectionName,
                         color: Color(0xFF30578E),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -325,21 +326,47 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                             ),
                                                           );
                                                         },
-                                                child: Image.network(
-                                                  product.thumbnail,
-                                                  width: cappedWidth,
-                                                  height: cappedHeight,
-                                                  fit: BoxFit.cover,
+                                                child: ColorFiltered(
+                                                  colorFilter:
+                                                      isOutOfStock
+                                                          ? const ColorFilter.matrix(
+                                                            [
+                                                              0.2126,
+                                                              0.7152,
+                                                              0.0722,
+                                                              0,
+                                                              0,
+                                                              0.2126,
+                                                              0.7152,
+                                                              0.0722,
+                                                              0,
+                                                              0,
+                                                              0.2126,
+                                                              0.7152,
+                                                              0.0722,
+                                                              0,
+                                                              0,
+                                                              0,
+                                                              0,
+                                                              0,
+                                                              1,
+                                                              0,
+                                                            ],
+                                                          )
+                                                          : const ColorFilter.mode(
+                                                            Colors.transparent,
+                                                            BlendMode.multiply,
+                                                          ),
+                                                  child: Image.network(
+                                                    product.thumbnail,
+                                                    width: cappedWidth,
+                                                    height: cappedHeight,
+                                                    fit: BoxFit.cover,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                            if (isOutOfStock)
-                                              Positioned.fill(
-                                                child: Container(
-                                                  color: Colors.black
-                                                      .withOpacity(0.5),
-                                                ),
-                                              ),
+
                                             Positioned(
                                               top: 10,
                                               left: 10,

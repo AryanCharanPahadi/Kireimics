@@ -1,4 +1,3 @@
-// lib/controller/address_controller.dart
 import 'dart:convert';
 import 'dart:js' as js;
 import 'package:flutter/material.dart';
@@ -12,6 +11,8 @@ import '../../component/app_routes/routes.dart';
 
 class CheckoutController extends GetxController {
   var isLoading = false.obs;
+  bool isChecked = false;
+
   var addressExists = false.obs;
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
@@ -23,6 +24,19 @@ class CheckoutController extends GetxController {
   final TextEditingController stateController = TextEditingController();
   final TextEditingController cityController = TextEditingController();
 
+  // Callbacks for wishlist changes
+  Function(String)? onWishlistChanged;
+  Function(String)? onErrorWishlistChanged;
+
+  // Method to set callbacks
+  void setCallbacks({
+    Function(String)? onWishlistChanged,
+    Function(String)? onErrorWishlistChanged,
+  }) {
+    this.onWishlistChanged = onWishlistChanged;
+    this.onErrorWishlistChanged = onErrorWishlistChanged;
+  }
+
   @override
   void onClose() {
     address1Controller.dispose();
@@ -33,12 +47,27 @@ class CheckoutController extends GetxController {
     super.onClose();
   }
 
+  var isPincodeLoading = false.obs;
+
+  Future<void> fetchPincodeData(String pincode) async {
+    try {
+      isPincodeLoading.value = true;
+      final data = await ApiHelper().fetchPincodeData(pincode);
+      stateController.text = data['state'] ?? '';
+      cityController.text = data['city'] ?? '';
+    } catch (e) {
+      stateController.text = '';
+      cityController.text = '';
+    } finally {
+      isPincodeLoading.value = false;
+    }
+  }
+
   Future<void> loadAddressData() async {
     isLoading(true);
     try {
-      // First, check SharedPreferences for selected address
       String? selectedAddress =
-          await SharedPreferencesHelper.getSelectedAddress();
+      await SharedPreferencesHelper.getSelectedAddress();
       if (selectedAddress != null) {
         final addressData = jsonDecode(selectedAddress);
 
@@ -50,7 +79,6 @@ class CheckoutController extends GetxController {
 
         addressExists(true);
       } else {
-        // If no selected address, fetch from API
         String? storedUser = await SharedPreferencesHelper.getUserData();
         if (storedUser != null) {
           List<String> userDetails = storedUser.split(', ');
@@ -85,7 +113,6 @@ class CheckoutController extends GetxController {
     }
   }
 
-  // Load user data from SharedPreferences
   Future<void> loadUserData() async {
     String? storedUser = await SharedPreferencesHelper.getUserData();
     if (storedUser != null) {
@@ -94,11 +121,10 @@ class CheckoutController extends GetxController {
         List<String> nameParts = userDetails[1].split(' ');
         String firstName = nameParts.isNotEmpty ? nameParts[0] : '';
         String lastName =
-            nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+        nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
         String phone = userDetails[2];
         String email = userDetails[3];
 
-        // Update text controllers
         firstNameController.text = firstName;
         lastNameController.text = lastName;
         emailController.text = email;
@@ -108,11 +134,11 @@ class CheckoutController extends GetxController {
   }
 
   void openRazorpayCheckout(
-    BuildContext context,
-    double total,
-    String orderId,
-  ) async {
-    print('openRazorpayCheckout called in CheckoutController'); // Debug print
+      BuildContext context,
+      double total,
+      String orderId,
+      ) async {
+    print('openRazorpayCheckout called in CheckoutController');
 
     if (!js.context.hasProperty('openRazorpay')) {
       print('Error: openRazorpay function not found in JavaScript context');
@@ -135,19 +161,16 @@ class CheckoutController extends GetxController {
       },
       'notes': {'address': 'Customer address'},
       'handler': js.allowInterop((response) async {
-        // Convert the JavaScript response object to a JSON string
         final responseJson = js.context['JSON'].callMethod('stringify', [
           response,
         ]);
 
-        // Extract payment details from response
         final paymentId = response['razorpay_payment_id'] ?? 'N/A';
         final orderIdResponse = response['razorpay_order_id'] ?? orderId;
         final signature = response['razorpay_signature'] ?? 'N/A';
         final amount = total;
         final status = 'success';
 
-        // Print client-side response
         print('=== Payment Successful ===');
         print('Payment ID: $paymentId');
         print('Order ID: $orderIdResponse');
@@ -156,7 +179,6 @@ class CheckoutController extends GetxController {
         print('Status: $status');
         print('Raw Client-Side Response: $responseJson');
 
-        // Fetch full payment details from PHP server
         try {
           final serverResponse = await http.get(
             Uri.parse(
@@ -185,14 +207,13 @@ class CheckoutController extends GetxController {
           print('Error fetching payment details: $e');
         }
 
-        // Navigate to payment result route
         context.go(
           '${AppRoutes.paymentResult}?success=true&orderId=$orderId&amount=$total',
         );
       }),
       'modal': {
         'ondismiss': js.allowInterop(() {
-          print('Payment modal dismissed'); // Debug print
+          print('Payment modal dismissed');
           context.go(
             '${AppRoutes.paymentResult}?success=false&orderId=$orderId&amount=$total',
           );
@@ -200,19 +221,16 @@ class CheckoutController extends GetxController {
       },
     };
 
-    print('Razorpay options: $options'); // Debug print
+    print('Razorpay options: $options');
 
     try {
-      print('Calling js.context.callMethod for openRazorpay'); // Debug print
+      print('Calling js.context.callMethod for openRazorpay');
       js.context.callMethod('openRazorpay', [js.JsObject.jsify(options)]);
     } catch (e) {
       print('Error initiating payment: $e');
-      // Optionally navigate to failure page
-      // context.go('${AppRoutes.paymentResult}?success=false&orderId=$orderId&amount=$total');
     }
   }
 
-  // Reset controller state
   void reset() {
     isLoading(false);
     addressExists(false);

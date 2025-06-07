@@ -11,7 +11,12 @@ import 'contact_us_controller.dart';
 
 class ContactUsDesktop extends StatefulWidget {
   final Function(String)? onWishlistChanged; // Callback to notify parent
-  const ContactUsDesktop({super.key, this.onWishlistChanged});
+  final Function(String)? onErrorWishlistChanged; // Callback to notify parent
+  const ContactUsDesktop({
+    super.key,
+    this.onWishlistChanged,
+    this.onErrorWishlistChanged,
+  });
   @override
   State<ContactUsDesktop> createState() => _ContactUsDesktopState();
 }
@@ -42,29 +47,34 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
   void _submitForm() {
     // Check validation in order of priority
     if (_nameController.text.isEmpty) {
-      widget.onWishlistChanged?.call('Please enter your name');
+      widget.onErrorWishlistChanged?.call('Please enter your name');
       return;
     }
 
     if (_emailController.text.isEmpty) {
-      widget.onWishlistChanged?.call('Please enter your email');
+      widget.onErrorWishlistChanged?.call('Please enter your email');
       return;
     }
 
     if (!RegExp(
       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
     ).hasMatch(_emailController.text)) {
-      widget.onWishlistChanged?.call('Please enter a valid email');
+      widget.onErrorWishlistChanged?.call('Please enter a valid email');
       return;
     }
 
     if (_messageController.text.isEmpty) {
-      widget.onWishlistChanged?.call('Please enter a message');
+      widget.onErrorWishlistChanged?.call('Please enter a message');
       return;
     }
 
     // If all validations pass
     widget.onWishlistChanged?.call('Form submitted successfully!');
+
+    // Clear the fields
+    _nameController.clear();
+    _emailController.clear();
+    _messageController.clear();
   }
 
   @override
@@ -166,6 +176,9 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF30578E),
+                            enableUnderlineForActiveRoute: true,
+                            decorationColor: Color(0xFF30578E),
+                            hoverTextColor: const Color(0xFF2876E4),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -182,6 +195,9 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF30578E),
+                            enableUnderlineForActiveRoute: true,
+                            decorationColor: Color(0xFF30578E),
+                            hoverTextColor: const Color(0xFF2876E4),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -194,42 +210,52 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                       ],
                     ),
                     SizedBox(
-                      width: 302,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          customTextFormField(hintText: "YOUR NAME"),
-                          const SizedBox(height: 10),
-                          customTextFormField(hintText: "YOUR EMAIL"),
-                          const SizedBox(height: 10),
-                          customTextFormField(
-                            hintText: "MESSAGE",
-                            isMessageField: true,
-                            focusNode: _messageFocusNode,
-                            nextFocusNode: _anotherMessageFocusNode,
-                          ),
-                          const SizedBox(height: 10),
-                          customTextFormField(
-                            hintText: "",
-                            isMessageField: true,
-                            controller: _anotherMessageController,
-                            focusNode: _anotherMessageFocusNode,
-                            maxLength: 40,
-                          ),
-                          const SizedBox(height: 24),
-                          GestureDetector(
-                            onTap: _submitForm,
+                      width: 462,
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            customTextFormField(
+                              hintText: "YOUR NAME",
+                              controller: _nameController,
+                            ),
+                            const SizedBox(height: 10),
+                            customTextFormField(
+                              hintText: "YOUR EMAIL",
+                              controller: _emailController,
+                            ),
+                            const SizedBox(height: 10),
+                            customTextFormField(
+                              hintText: "MESSAGE",
+                              isMessageField: true,
+                              focusNode: _messageFocusNode,
+                              nextFocusNode: _anotherMessageFocusNode,
+                              controller: _messageController,
+                            ),
+                            const SizedBox(height: 10),
+                            customTextFormField(
+                              hintText: "",
+                              isMessageField: true,
+                              controller: _anotherMessageController,
+                              focusNode: _anotherMessageFocusNode,
+                              maxLength: 40,
+                            ),
+                            const SizedBox(height: 24),
+                            GestureDetector(
+                              onTap: _submitForm,
 
-                            child: Align(
-                              alignment: Alignment.bottomRight,
-                              child: SvgPicture.asset(
-                                "assets/home_page/submit.svg",
-                                height: 19,
-                                width: 58,
+                              child: Align(
+                                alignment: Alignment.bottomRight,
+                                child: SvgPicture.asset(
+                                  "assets/home_page/submit.svg",
+                                  height: 25,
+                                  width: 70,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -345,10 +371,22 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
         final entry = entries[index];
         final isLast = index == entries.length - 1;
 
+        String value = entry.value;
+        final keyLower = entry.key.toLowerCase();
+
+        // Prefix for email or phone
+        if (keyLower.contains('email') && !value.startsWith('mailto:')) {
+          value = 'mailto:$value';
+        } else if (keyLower.contains('phone') || keyLower.contains('tel')) {
+          if (!value.startsWith('tel:')) {
+            value = 'tel:$value';
+          }
+        }
+
         return Padding(
           padding: const EdgeInsets.only(right: 10),
           child: InkWell(
-            onTap: () => UrlLauncherHelper.launchURL(context, entry.value),
+            onTap: () => UrlLauncherHelper.launchURL(context, value),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -357,6 +395,9 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF30578E),
+                  enableUnderlineForActiveRoute: true,
+                  decorationColor: Color(0xFF30578E),
+                  hoverTextColor: const Color(0xFF2876E4),
                 ),
                 if (!isLast) ...[
                   SizedBox(width: 14),

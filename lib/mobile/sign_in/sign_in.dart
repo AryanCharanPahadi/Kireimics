@@ -25,7 +25,12 @@ import '../../web_desktop_common/login_signup/signup/signup_controller.dart';
 
 class SignInMobile extends StatefulWidget {
   final Function(String)? onWishlistChanged; // Callback to notify parent
-  const SignInMobile({super.key, this.onWishlistChanged});
+  final Function(String)? onErrorWishlistChanged; // Callback to notify parent
+  const SignInMobile({
+    super.key,
+    this.onWishlistChanged,
+    this.onErrorWishlistChanged,
+  });
   @override
   State<SignInMobile> createState() => _SignInMobileState();
 }
@@ -105,6 +110,7 @@ class _SignInMobileState extends State<SignInMobile> {
                       return null;
                     },
                   ),
+                  SizedBox(height: 32),
                   customTextFormField(
                     hintText: "LAST NAME",
                     controller: signupController.lastNameController,
@@ -118,6 +124,8 @@ class _SignInMobileState extends State<SignInMobile> {
                       return null;
                     },
                   ),
+                  SizedBox(height: 32),
+
                   customTextFormField(
                     hintText: "EMAIL",
                     controller: signupController.emailController,
@@ -133,6 +141,8 @@ class _SignInMobileState extends State<SignInMobile> {
                       return null;
                     },
                   ),
+                  SizedBox(height: 32),
+
                   customTextFormField(
                     hintText: "PHONE",
                     controller: signupController.phoneController,
@@ -146,6 +156,8 @@ class _SignInMobileState extends State<SignInMobile> {
                       return null;
                     },
                   ),
+                  SizedBox(height: 32),
+
                   customTextFormField(
                     hintText: "CREATE PASSWORD",
                     controller: signupController.passwordController,
@@ -184,7 +196,7 @@ class _SignInMobileState extends State<SignInMobile> {
                                     showErrorBanner = true;
                                     errorMessage =
                                         signupController.signupMessage;
-                                    widget.onWishlistChanged?.call(
+                                    widget.onErrorWishlistChanged?.call(
                                       errorMessage,
                                     );
                                   }
@@ -209,7 +221,7 @@ class _SignInMobileState extends State<SignInMobile> {
                                 text: 'By signing up, you are agreeing to our ',
                                 style: TextStyle(
                                   fontFamily: GoogleFonts.barlow().fontFamily,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w400,
                                   fontSize: 14,
                                   height: 1.0,
                                   letterSpacing: 0.0,
@@ -221,6 +233,8 @@ class _SignInMobileState extends State<SignInMobile> {
                                     style: TextStyle(
                                       color: Color(0xFF30578E),
                                       fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      height: 1.5,
                                     ),
                                     recognizer:
                                         TapGestureRecognizer()
@@ -234,6 +248,8 @@ class _SignInMobileState extends State<SignInMobile> {
                                     style: TextStyle(
                                       color: Color(0xFF30578E),
                                       fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      height: 1.5,
                                     ),
                                     recognizer:
                                         TapGestureRecognizer()
@@ -333,7 +349,7 @@ class _SignInMobileState extends State<SignInMobile> {
                           child: BarlowText(
                             text: "LOG IN NOW",
                             fontWeight: FontWeight.w600,
-                            fontSize: 12,
+                            fontSize: 14,
                             lineHeight: 1.5,
                             color: const Color(0xFF30578E),
                           ),
@@ -350,15 +366,13 @@ class _SignInMobileState extends State<SignInMobile> {
       ),
     );
   }
-
   Widget customTextFormField({
     required String hintText,
     TextEditingController? controller,
     String? Function(String?)? validator,
     bool isPassword = false, // Add isPassword parameter
   }) {
-    bool obscureText =
-        isPassword; // Initially hide password if isPassword is true
+    bool obscureText = isPassword; // Initially hide password if isPassword is true
     return StatefulBuilder(
       builder: (context, setState) {
         return Stack(
@@ -379,10 +393,7 @@ class _SignInMobileState extends State<SignInMobile> {
               controller: controller,
               textAlign: TextAlign.right,
               cursorColor: const Color(0xFF414141),
-              obscureText:
-                  isPassword
-                      ? obscureText
-                      : false, // Apply obscureText for password
+              obscureText: isPassword ? obscureText : false, // Apply obscureText for password
               validator: validator,
               decoration: InputDecoration(
                 border: UnderlineInputBorder(
@@ -394,7 +405,16 @@ class _SignInMobileState extends State<SignInMobile> {
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: const Color(0xFF414141)),
                 ),
-                errorStyle: TextStyle(color: Colors.red),
+                errorBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: const Color(0xFF414141)), // Match normal border
+                ),
+                focusedErrorBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: const Color(0xFF414141)), // Match normal border
+                ),
+                errorStyle: TextStyle(
+                  height: 0, // Hide error message
+                  color: Colors.transparent, // Make error text invisible
+                ),
                 hintText: '',
                 hintStyle: GoogleFonts.barlow(
                   fontWeight: FontWeight.w400,
@@ -403,26 +423,23 @@ class _SignInMobileState extends State<SignInMobile> {
                   letterSpacing: 0.0,
                   color: const Color(0xFF414141),
                 ),
-                contentPadding: const EdgeInsets.only(
-                  top: 16,
-                  right: 40, // Add padding for the eye icon
+                contentPadding: EdgeInsets.only(
+                  top: isPassword ? 16 : 12,
+                  right: isPassword ? 40 : 0, // Add padding for the eye icon
                 ),
-                suffixIcon:
-                    isPassword
-                        ? IconButton(
-                          icon: Icon(
-                            obscureText
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: const Color(0xFF30578E),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              obscureText = !obscureText; // Toggle visibility
-                            });
-                          },
-                        )
-                        : null,
+                suffixIcon: isPassword
+                    ? IconButton(
+                  icon: Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: const Color(0xFF30578E),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      obscureText = !obscureText; // Toggle visibility
+                    });
+                  },
+                )
+                    : null,
               ),
               style: const TextStyle(color: Color(0xFF414141)),
             ),

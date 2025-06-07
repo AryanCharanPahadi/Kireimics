@@ -86,28 +86,35 @@ class _SignupState extends State<Signup> {
                                   fontSize: 16.0,
                                   lineHeight: 1.0,
                                   letterSpacing: 0.64,
-                                  enableHoverUnderline: true,
-                                  decorationColor: const Color(0xFF30578E),
+                                  enableUnderlineForActiveRoute: true,
+                                  decorationColor: Color(0xFF30578E),
+                                  hoverTextColor: const Color(0xFF2876E4),
                                 ),
                               ),
                               if (showSuccessBanner || showErrorBanner)
-                                NotificationBanner(
-                                  message:
-                                      showSuccessBanner
-                                          ? "Signed up successfully!"
-                                          : errorMessage,
-                                  bannerColor:
-                                      showSuccessBanner
-                                          ? Colors.green
-                                          : Colors.red,
-                                  textColor: Colors.black,
-                                  onClose: () {
-                                    setState(() {
-                                      showSuccessBanner = false;
-                                      showErrorBanner = false;
-                                    });
-                                  },
-                                ),
+                                if (showSuccessBanner || showErrorBanner)
+                                  NotificationBanner(
+                                    iconPath:
+                                        showSuccessBanner
+                                            ? "assets/icons/success.svg"
+                                            : "assets/icons/error.svg",
+
+                                    message:
+                                        showSuccessBanner
+                                            ? "Signed Up successfully!"
+                                            : errorMessage,
+                                    bannerColor:
+                                        showSuccessBanner
+                                            ? Color(0xFF268FA2)
+                                            : Color(0xFFF46856),
+                                    textColor: Color(0xFF28292A),
+                                    onClose: () {
+                                      setState(() {
+                                        showSuccessBanner = false;
+                                        showErrorBanner = false;
+                                      });
+                                    },
+                                  ),
                             ],
                           ),
                           SizedBox(height: 33),
@@ -428,6 +435,9 @@ class _SignupState extends State<Signup> {
                                 color: Color(0xFF30578E),
                                 hoverBackgroundColor: Color(0xFFb9d6ff),
                                 enableHoverBackground: true,
+                                decorationColor: const Color(0xFF30578E),
+                                hoverTextColor: const Color(0xFF2876E4),
+                                hoverDecorationColor: Color(0xFF2876E4),
                               ),
                             ),
                           ],
@@ -435,7 +445,6 @@ class _SignupState extends State<Signup> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 14),
                 ],
               ),
             ),
@@ -449,9 +458,10 @@ class _SignupState extends State<Signup> {
     required String hintText,
     TextEditingController? controller,
     String? Function(String?)? validator,
-    bool isPassword = false,
+    bool isPassword = false, // Add isPassword parameter
   }) {
-    bool obscureText = isPassword;
+    bool obscureText =
+        isPassword; // Initially hide password if isPassword is true
     return StatefulBuilder(
       builder: (context, setState) {
         return Stack(
@@ -472,7 +482,10 @@ class _SignupState extends State<Signup> {
               controller: controller,
               textAlign: TextAlign.right,
               cursorColor: const Color(0xFF414141),
-              obscureText: isPassword ? obscureText : false,
+              obscureText:
+                  isPassword
+                      ? obscureText
+                      : false, // Apply obscureText for password
               validator: validator,
               decoration: InputDecoration(
                 border: UnderlineInputBorder(
@@ -493,21 +506,25 @@ class _SignupState extends State<Signup> {
                   letterSpacing: 0.0,
                   color: const Color(0xFF414141),
                 ),
-                contentPadding: const EdgeInsets.only(right: 40),
+                contentPadding: const EdgeInsets.only(
+                  top: 16,
+                  right: 40, // Add padding for the eye icon
+                ),
                 suffixIcon:
                     isPassword
-                        ? IconButton(
-                          icon: Icon(
+                        ? GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              obscureText = !obscureText; // Toggle visibility
+                            });
+                          },
+                          child: Icon(
                             obscureText
                                 ? Icons.visibility_off
                                 : Icons.visibility,
                             color: const Color(0xFF30578E),
+                            size: 20,
                           ),
-                          onPressed: () {
-                            setState(() {
-                              obscureText = !obscureText;
-                            });
-                          },
                         )
                         : null,
               ),

@@ -232,7 +232,7 @@ class _Column1State extends State<Column1> {
       child: Column(
         children: [
           SizedBox(
-            height: 60,
+            height: 50,
             child: Padding(
               padding: EdgeInsets.only(
                 left: 14,
@@ -308,13 +308,13 @@ class _Column1State extends State<Column1> {
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 05),
           SizedBox(
-            height: 55,
+            height: 50,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Row(
                     children: [
@@ -372,14 +372,19 @@ class _Column1State extends State<Column1> {
                       ),
                       GestureDetector(
                         onTap: _toggleIcon,
-                        child: Icon(
-                          _showSearchIcon ? Icons.search : Icons.close,
-                          color: const Color(0xFF30578E),
-                          size: 20,
+                        child: SvgPicture.asset(
+                          _showSearchIcon
+                              ? 'assets/header/newSearch.svg'
+                              : 'assets/icons/closeIcon.svg',
+                          height: 17,
+                          width: 17,
+                          color: const Color(0xFF30578E), // remove this if SVG has its own colors
                         ),
                       ),
+
                     ],
                   ),
+                  const SizedBox(height: 05),
 
                   const Divider(color: Color(0xFF414141)),
                 ],

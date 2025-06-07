@@ -89,12 +89,12 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                   bannerImg.isNotEmpty
                       ? bannerImg
                       : 'https://via.placeholder.com/150', // Fallback image
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+                  // width: double.infinity,
+                  // fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      width: double.infinity,
-                      height: 200, // Adjust height as needed
+                      // width: 285,
+                      // height:180, // Adjust height as needed
                       color: Colors.grey[300],
                       child: Center(
                         child: Text(
@@ -126,6 +126,7 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                           color: Color(0xFF30578E),
                         ),
                         SizedBox(height: 8),
+
                         BarlowText(
                           text: "$bannerQuantity Pieces",
                           fontWeight: FontWeight.w400,
@@ -142,7 +143,7 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                         BarlowText(
                           text: "VIEW",
                           fontWeight: FontWeight.w400,
-                          fontSize: 14,
+                          fontSize: 16,
                           lineHeight: 1.0,
                           letterSpacing: 0.0,
                           color: Color(0xFF30578E),

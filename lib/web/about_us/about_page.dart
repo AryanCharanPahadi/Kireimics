@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/text_fonts/custom_text.dart';
 import 'package:kireimics/component/above_footer/above_footer.dart';
 import 'package:kireimics/web/about_us/about_us_controller.dart';
@@ -16,162 +15,188 @@ class AboutPageWeb extends StatelessWidget {
     final AboutUsController aboutUsController = Get.put(AboutUsController());
 
     return Obx(
-          () => aboutUsController.isLoading.value
-          ? const Center(child: CircularProgressIndicator())
-          : aboutUsController.errorMessage.value.isNotEmpty
-          ? Center(child: Text(aboutUsController.errorMessage.value))
-          : aboutUsController.profileData.value == null
-          ? const Center(child: Text('No Profile Data Found'))
-          : Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Column(
+      () =>
+          aboutUsController.isLoading.value
+              ? const Center(child: CircularProgressIndicator())
+              : aboutUsController.errorMessage.value.isNotEmpty
+              ? Center(child: Text(aboutUsController.errorMessage.value))
+              : aboutUsController.profileData.value == null
+              ? const Center(child: Text('No Profile Data Found'))
+              : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding:
-                    const EdgeInsets.only(left: 292, top: 35),
-                    child: Container(
-                      width:
-                      MediaQuery.of(context).size.width - 292,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: const AssetImage(
-                            "assets/home_page/background.png",
-                          ),
-                          fit: BoxFit.cover,
-                          colorFilter: ColorFilter.mode(
-                            const Color(0xFF238ca0).withOpacity(0.9),
-                            BlendMode.srcATop,
-                          ),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          top: 40,
-                          right: 445,
-                          left: 47,
-                          bottom: 40,
-                        ),
-                        child: Text(
-                          aboutUsController
-                              .profileData.value!['banner_text']
-                              ?.toString() ??
-                              'N/A',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            fontFamily:
-                            GoogleFonts.barlow().fontFamily,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20,
-                            height: 1.5,
-                            letterSpacing: 0.04 * 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(height: 500),
-                ],
-              ),
-              Positioned(
-                top: 100,
-                right: 112,
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 377),
-                  child: AspectRatio(
-                    aspectRatio: 3 / 4,
-                    child: _buildProfileImage(
-                        aboutUsController.profileData.value!),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 250,
-                left: 292,
-                right: 466,
-                child: SizedBox(
-                  width: 574,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Stack(
                     children: [
-                      CralikaFont(
-                        text: aboutUsController
-                            .profileData.value!['heading_1']
-                            ?.toString() ??
-                            'N/A',
-                        textAlign: TextAlign.left,
-                        fontWeight: FontWeight.w400,
-                        fontSize: 32,
-                        lineHeight: 36 / 32,
-                        letterSpacing: 32 * 0.04,
-                        color: const Color(0xFF414141),
+                      Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(
+                              left:
+                                  MediaQuery.of(context).size.width > 1400
+                                      ? 395
+                                      : 292,
+                              top: 35,
+                              right:
+                                  MediaQuery.of(context).size.width > 1400
+                                      ? 266
+                                      : 0,
+                            ),
+                            child: Container(
+                              width:
+                                  MediaQuery.of(context).size.width > 1400
+                                      ? MediaQuery.of(context).size.width -
+                                          (395 + 266)
+                                      : MediaQuery.of(context).size.width - 292,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: const AssetImage(
+                                    "assets/home_page/background.png",
+                                  ),
+                                  fit: BoxFit.cover,
+                                  colorFilter: ColorFilter.mode(
+                                    const Color(0xFF238ca0).withOpacity(0.9),
+                                    BlendMode.srcATop,
+                                  ),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  top: 40,
+                                  right:
+                                      MediaQuery.of(context).size.width > 1400
+                                          ? 540
+                                          : 445,
+                                  left: 47,
+                                  bottom: 40,
+                                ),
+                                child: BarlowText(
+                                  text:
+                                      aboutUsController
+                                          .profileData
+                                          .value!['banner_text']
+                                          ?.toString() ??
+                                      'N/A',
+                                  textAlign: TextAlign.left,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 20,
+                                  lineHeight: 1.5,
+                                  letterSpacing: 0.04 * 20,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(height: 500),
+                        ],
                       ),
-                      const SizedBox(height: 14),
-                      BarlowText(
-                        text: aboutUsController.profileData
-                            .value!['heading_1_content']
-                            ?.toString() ??
-                            'N/A',
-                        textAlign: TextAlign.left,
-                        fontWeight: FontWeight.w400,
-                        fontSize: 20,
-                        lineHeight: 1.0,
-                        letterSpacing: 0.0,
-                        color: const Color(0xFF414141),
-                      ),
-                      const SizedBox(height: 44),
-                      Row(
-                        children: _buildSocialLinks(
-                          aboutUsController
-                              .profileData.value!['social_media']
-                              ?.toString() ??
-                              '{}',
+                      Positioned(
+                        top: 100,
+                        right:
+                            MediaQuery.of(context).size.width > 1400
+                                ? 364
+                                : 112,
+                        child: Container(
+                          constraints: const BoxConstraints(maxHeight: 377),
+                          child: AspectRatio(
+                            aspectRatio: 3 / 4,
+                            child: _buildProfileImage(
+                              aboutUsController.profileData.value!,
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 44),
-                      Text(
-                        aboutUsController
-                            .profileData.value!['heading_2']
-                            ?.toString() ??
-                            'N/A',
-                        style: const TextStyle(
-                          fontFamily: "Cralika",
-                          fontWeight: FontWeight.w400,
-                          fontSize: 32,
-                          height: 1.7,
-                          letterSpacing: 0.96,
-                          color: Color(0xFF414141),
+                      Positioned(
+                        top: 250,
+                        left:
+                            MediaQuery.of(context).size.width > 1400
+                                ? 395
+                                : 292,
+                        right:
+                            MediaQuery.of(context).size.width > 1400
+                                ? 774
+                                : 466,
+                        child: SizedBox(
+                          width: 574,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CralikaFont(
+                                text:
+                                    aboutUsController
+                                        .profileData
+                                        .value!['heading_1']
+                                        ?.toString() ??
+                                    'N/A',
+                                textAlign: TextAlign.left,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 32,
+                                lineHeight: 36 / 32,
+                                letterSpacing: 32 * 0.04,
+                                color: const Color(0xFF414141),
+                              ),
+                              const SizedBox(height: 14),
+                              BarlowText(
+                                text:
+                                    aboutUsController
+                                        .profileData
+                                        .value!['heading_1_content']
+                                        ?.toString() ??
+                                    'N/A',
+                                textAlign: TextAlign.left,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 18,
+                                lineHeight: 1.0,
+                                letterSpacing: 0.0,
+                                color: const Color(0xFF414141),
+                              ),
+                              const SizedBox(height: 44),
+                              Row(
+                                children: _buildSocialLinks(
+                                  aboutUsController
+                                          .profileData
+                                          .value!['social_media']
+                                          ?.toString() ??
+                                      '{}',
+                                ),
+                              ),
+                              const SizedBox(height: 44),
+                              CralikaFont(
+                                text:
+                                    aboutUsController
+                                        .profileData
+                                        .value!['heading_2']
+                                        ?.toString() ??
+                                    'N/A',
+                                fontWeight: FontWeight.w400,
+                                fontSize: 32,
+                                lineHeight: 1.7,
+                                letterSpacing: 0.96,
+                                color: Color(0xFF414141),
+                              ),
+                              const SizedBox(height: 14),
+                              BarlowText(
+                                text:
+                                    aboutUsController
+                                        .profileData
+                                        .value!['heading_2_content']
+                                        ?.toString() ??
+                                    'N/A',
+                                fontWeight: FontWeight.w400,
+                                fontSize: 18,
+                                lineHeight: 1.0,
+                                letterSpacing: 0.0,
+                                color: const Color(0xFF414141),
+                              ),
+                              const SizedBox(height: 24),
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 14),
-                      Text(
-                        aboutUsController
-                            .profileData.value!['heading_2_content']
-                            ?.toString() ??
-                            'N/A',
-                        style: TextStyle(
-                          fontFamily:
-                          GoogleFonts.barlow().fontFamily,
-                          fontWeight: FontWeight.w400,
-                          fontSize: 20,
-                          height: 1.0,
-                          letterSpacing: 0.0,
-                          color: const Color(0xFF414141),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
                     ],
                   ),
-                ),
+                  const AboveFooter(),
+                ],
               ),
-            ],
-          ),
-          const AboveFooter(),
-        ],
-      ),
     );
   }
 
@@ -207,28 +232,49 @@ class AboutPageWeb extends StatelessWidget {
     return const Center(child: Text('No Image'));
   }
 
-  List<Widget> _buildSocialLinks(String socialMediaJson) {
-    Map<String, dynamic> socialLinks = {};
+  List<Widget> _buildSocialLinks(String socialJson) {
     try {
-      socialLinks = jsonDecode(socialMediaJson) as Map<String, dynamic>;
-    } catch (e) {
-      print('Error decoding social_media: $e');
-    }
+      final Map<String, dynamic> socialLinks = jsonDecode(socialJson);
+      final entries = socialLinks.entries.toList();
 
-    return socialLinks.entries.map((entry) {
-      return Padding(
-        padding: const EdgeInsets.only(right: 10),
-        child: InkWell(
-          onTap: () => _launchURL(entry.value),
-          child: BarlowText(
-            text: entry.key,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF30578E),
+      return List<Widget>.generate(entries.length, (index) {
+        final entry = entries[index];
+        final isLast = index == entries.length - 1;
+
+        return Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: InkWell(
+            onTap: () => _launchURL(entry.value),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BarlowText(
+                  text: entry.key,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF30578E),
+                  enableUnderlineForActiveRoute: true,
+                  decorationColor: Color(0xFF30578E),
+                  hoverTextColor: const Color(0xFF2876E4),
+                ),
+                if (!isLast) ...[
+                  SizedBox(width: 14),
+                  BarlowText(
+                    text: '/',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF30578E),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-      );
-    }).toList();
+        );
+      });
+    } catch (e) {
+      debugPrint("Error parsing social links: $e");
+      return []; // Return empty list if parsing fails
+    }
   }
 
   Future<void> _launchURL(String url) async {
@@ -236,7 +282,13 @@ class AboutPageWeb extends StatelessWidget {
         !url.startsWith("https://") &&
         !url.startsWith("mailto:") &&
         !url.startsWith("tel:")) {
-      url = "https://$url";
+      if (RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(url)) {
+        url = "mailto:$url";
+      } else if (RegExp(r'^\+?\d{7,15}$').hasMatch(url)) {
+        url = "tel:$url";
+      } else {
+        url = "https://$url";
+      }
     }
 
     try {

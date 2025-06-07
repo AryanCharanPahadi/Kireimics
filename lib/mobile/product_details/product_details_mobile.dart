@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../component/api_helper/api_helper.dart';
+import '../../component/no_result_found/no_order_yet.dart';
 import '../../component/no_result_found/no_product_yet.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/product_details/product_details_modal.dart';
@@ -34,6 +35,8 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
   int _currentIndex = 0; // Tracks the starting index of displayed products
   String? _currentMainImage; // Track the currently displayed main image
   List<String> _otherImages = []; // Track all other images
+  bool _isOutOfStock = false; // Track stock status of the main product
+
   Future<bool> _isLoggedIn() async {
     String? userData = await SharedPreferencesHelper.getUserData();
     return userData != null && userData.isNotEmpty;
@@ -48,7 +51,6 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
   void _showPreviousProducts() {
     setState(() {
       print("Back button pressed");
-
       if (relatedProducts.isNotEmpty) {
         _currentIndex = (_currentIndex - 1) % relatedProducts.length;
         if (_currentIndex < 0) {
@@ -58,17 +60,16 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
     });
   }
 
-  // Add this to handle updates when productId changes
   @override
   void didUpdateWidget(ProductDetailsMobile oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.productId != widget.productId) {
-      // Reset state and fetch new product when productId changes
       setState(() {
         product = null;
         isLoading = true;
         errorMessage = "";
         relatedProducts = [];
+        _isOutOfStock = false; // Reset stock status
       });
       fetchProduct();
     }
@@ -80,10 +81,15 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
         widget.productId,
       );
       if (fetchedProduct != null) {
+        // Fetch stock quantity for the main product
+        final stockQuantity = await fetchStockQuantity(
+          widget.productId.toString(),
+        );
         setState(() {
           product = fetchedProduct;
           _currentMainImage = fetchedProduct.thumbnail;
           _otherImages = List.from(fetchedProduct.otherImages);
+          _isOutOfStock = stockQuantity == 0; // Set stock status
           isLoading = false;
         });
 
@@ -116,7 +122,6 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
 
   void _swapImageWithMain(int index) {
     setState(() {
-      // Swap the clicked image with the current main image
       final clickedImage = _otherImages[index];
       _otherImages[index] = _currentMainImage!;
       _currentMainImage = clickedImage;
@@ -154,6 +159,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
         ),
       );
     }
+
     List<Product> displayedProducts = [];
     if (relatedProducts.isNotEmpty) {
       for (int i = 0; i < 3; i++) {
@@ -161,6 +167,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
         displayedProducts.add(relatedProducts[index]);
       }
     }
+
     return Container(
       width: MediaQuery.of(context).size.width,
       child: Column(
@@ -178,7 +185,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
-                      letterSpacing: 1 * 0.04, // 4% of 32px
+                      letterSpacing: 1 * 0.04,
                       onTap: () {
                         context.go(AppRoutes.catalog);
                       },
@@ -191,7 +198,6 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       color: Color(0xFF30578E),
                     ),
                     SizedBox(width: 9.0),
-
                     BarlowText(
                       text: product!.catName,
                       color: Color(0xFF30578E),
@@ -199,17 +205,11 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
                       onTap: () {
-                        final controller = Get.put(
-                          CatalogPageController(),
-                        ); // Access the controller
-                        controller.selectedCategoryId.value =
-                            product!.catId; // Update selectedCategoryId
+                        final controller = Get.put(CatalogPageController());
+                        controller.selectedCategoryId.value = product!.catId;
                         context.go(
-                          AppRoutes
-                              .catalog, // Navigate to the CatalogPage route
-                          extra: {
-                            'categoryId': product!.catId,
-                          }, // Pass categoryId as extra data if needed
+                          AppRoutes.catalog,
+                          extra: {'categoryId': product!.catId},
                         );
                       },
                     ),
@@ -221,7 +221,6 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       color: Color(0xFF30578E),
                     ),
                     SizedBox(width: 9.0),
-
                     BarlowText(
                       text: "View Details",
                       color: Color(0xFF30578E),
@@ -229,133 +228,157 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
                       route: AppRoutes.productDetails(product!.id),
-                      enableUnderlineForActiveRoute:
-                          true, // Enable underline when active
-                      decorationColor: Color(
-                        0xFF30578E,
-                      ), // Color of the underline
+                      enableUnderlineForActiveRoute: true,
+                      decorationColor: Color(0xFF30578E),
                       onTap: () {},
                     ),
                   ],
                 ),
                 SizedBox(height: 20),
-                Image.network(
-                  _currentMainImage!, // Use the current main image
-                  // width: 346,
-                  // height: 444,
-                  fit: BoxFit.cover,
-                ),
-                SizedBox(height: 10),
+                Stack(
+                  children: [
+                    ColorFiltered(
+                      colorFilter: _isOutOfStock
+                          ? const ColorFilter.matrix(<double>[
+                        0.2126, 0.7152, 0.0722, 0, 0,
+                        0.2126, 0.7152, 0.0722, 0, 0,
+                        0.2126, 0.7152, 0.0722, 0, 0,
+                        0, 0, 0, 1, 0,
+                      ])
+                          : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+                      child: Image.network(
+                        _currentMainImage!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.broken_image),
+                        ),
+                      ),
+                    ),
 
+                  ],
+                ),
+
+                SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children:
-                      _otherImages.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final imageUrl = entry.value;
-                        return GestureDetector(
-                          onTap: () => _swapImageWithMain(index),
-                          child: Image.network(
-                            imageUrl,
-                            width:
-                                106, // Set a fixed width to control image size
-                            height: 122,
-                            fit: BoxFit.contain,
-                            errorBuilder:
-                                (context, error, stackTrace) => Container(
-                                  width: 106,
-                                  height: 122,
-                                  color: Colors.grey[300],
-                                  child: const Icon(Icons.broken_image),
-                                ),
+                  children: _otherImages.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final imageUrl = entry.value;
+
+                    return GestureDetector(
+                      onTap: () => _swapImageWithMain(index),
+                      child: Stack(
+                        children: [
+                          ColorFiltered(
+                            colorFilter: _isOutOfStock
+                                ? const ColorFilter.matrix(<double>[
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0, 0, 0, 1, 0,
+                            ])
+                                : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+                            child: Image.network(
+                              imageUrl,
+                              width: 106,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                width: 106,
+                                height: 122,
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.broken_image),
+                              ),
+                            ),
                           ),
-                        );
-                      }).toList(),
+
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
-                SizedBox(height: 24),
                 SizedBox(height: 24),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-
                   children: [
                     CralikaFont(
                       text: product!.name,
-
-                      fontWeight: FontWeight.w400, // 400 weight
-                      fontSize: 24.5, // 32px
-                      lineHeight:
-                          36 /
-                          32, // Line height (36px) divided by font size (32px)
-                      letterSpacing: 32 * 0.04, // 4% of 32px
+                      fontWeight: FontWeight.w400,
+                      fontSize: 24.5,
+                      lineHeight: 36 / 32,
+                      letterSpacing: 32 * 0.04,
                       color: Color(0xFF414141),
                     ),
-
-                    SizedBox(height: 09.0),
-
+                    SizedBox(height: 9.0),
                     BarlowText(
                       text: product!.catName,
-
-                      fontWeight: FontWeight.w600, // 400 weight
-                      fontSize: 16, // 32px
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
                       lineHeight: 1.0,
-                      letterSpacing: 1 * 0.04, // 4% of 32px
+                      letterSpacing: 1 * 0.04,
                       color: Color(0xFF30578E),
                     ),
-
                     SizedBox(height: 14),
-
                     BarlowText(
                       text: product!.price.toString(),
-
-                      fontWeight: FontWeight.w400, // 400 weight
-                      fontSize: 14, // 32px
+                      fontWeight: FontWeight.w400,
+                      fontSize: 14,
                       lineHeight: 1.0,
-                      letterSpacing: 1 * 0.04, // 4% of 32px
+                      letterSpacing: 1 * 0.04,
                       color: Color(0xFF414141),
                     ),
                     SizedBox(height: 14),
-
                     BarlowText(
                       text: product!.dimensions,
-
-                      fontWeight: FontWeight.w400, // 400 weight
-                      fontSize: 16, // 32px
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16,
                       lineHeight: 1.0,
-                      letterSpacing: 1 * 0.04, // 4% of 32px
+                      letterSpacing: 1 * 0.04,
                       color: Color(0xFF414141),
                     ),
-
                     SizedBox(height: 14),
-
                     SizedBox(
                       width: 508,
-
                       child: BarlowText(
                         text: product!.description,
-
-                        fontWeight: FontWeight.w400, // 400 weight
-                        fontSize: 14, // 32px
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
                         lineHeight: 1.0,
-                        letterSpacing: 1 * 0.04, // 4% of 32px
+                        letterSpacing: 1 * 0.04,
                         color: Color(0xFF414141),
                         softWrap: true,
                       ),
                     ),
-
-                    SizedBox(height: 44),
+                    if (_isOutOfStock) SizedBox(height: 44),
+                    if (_isOutOfStock)
+                      SvgPicture.asset(
+                        "assets/home_page/outofstock.svg",
+                        height: 32,
+                      ),
+                    SizedBox(height: 32),
                     GestureDetector(
-                      onTap: () {
-                        context.go(AppRoutes.cartDetails(product!.id));
-                      },
+                      onTap:
+                          _isOutOfStock
+                              ? () {
+                                widget.onWishlistChanged?.call(
+                                  "We'll notify you when this product is back in stock.",
+                                );
+                              }
+                              : () {
+                                context.go(AppRoutes.cartDetails(product!.id));
+                              },
                       child: BarlowText(
-                        text: "ADD TO CART",
+                        text: _isOutOfStock ? "NOTIFY ME" : "ADD TO CART",
                         color: Color(0xFF30578E),
-                        fontWeight: FontWeight.w600, // 400 weight
-                        fontSize: 14, // 32px
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
                         lineHeight: 1.0,
-                        letterSpacing: 1 * 0.04, // 4% of 32px
-                        backgroundColor: Color(0xFFb9d6ff),
+                        letterSpacing: 1 * 0.04,
+                        backgroundColor:
+                            _isOutOfStock
+                                ? Colors.grey[300]
+                                : Color(0xFFb9d6ff),
                       ),
                     ),
                     SizedBox(height: 24),
@@ -367,20 +390,16 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                         final isInWishlist = snapshot.data ?? false;
                         return GestureDetector(
                           onTap: () async {
-                            bool isLoggedIn =
-                                await _isLoggedIn(); // Await login status
+                            bool isLoggedIn = await _isLoggedIn();
                             if (!isLoggedIn) {
                               context.go(AppRoutes.logIn);
                               return;
                             }
-
                             if (isInWishlist) {
-                              // Product already in wishlist
                               widget.onWishlistChanged?.call(
                                 'Already in wishlist',
                               );
                             } else {
-                              // Add product to wishlist
                               await SharedPreferencesHelper.addToWishlist(
                                 product!.id.toString(),
                               );
@@ -393,10 +412,10 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                           child: BarlowText(
                             text: "WISHLIST",
                             color: Color(0xFF30578E),
-                            fontWeight: FontWeight.w600, // 400 weight
-                            fontSize: 14, // 32px
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
                             lineHeight: 1.0,
-                            letterSpacing: 1 * 0.04, // 4% of 32px
+                            letterSpacing: 1 * 0.04,
                           ),
                         );
                       },
@@ -409,7 +428,6 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
           SizedBox(height: 32),
           SizedBox(
             width: MediaQuery.of(context).size.width,
-
             child: Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
@@ -431,7 +449,6 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                 child: Column(
                   children:
                       product!.otherDetails.map((detail) {
-                        // You can optionally map specific titles to SVG icons
                         String iconPath;
                         switch (detail.title.toLowerCase()) {
                           case 'materials':
@@ -444,10 +461,8 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                             iconPath = 'assets/icons/shipping.svg';
                             break;
                           default:
-                            iconPath =
-                                'assets/icons/info.svg'; // default fallback icon
+                            iconPath = 'assets/icons/info.svg';
                         }
-
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16.0),
                           child: infoTile(
@@ -461,12 +476,12 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
               ),
             ),
           ),
-          SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (relatedProducts.isNotEmpty)
+          SizedBox(height: 24),
+          if (relatedProducts.isNotEmpty)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Column(
                   children: [
                     CralikaFont(
@@ -481,17 +496,11 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                     SizedBox(height: 27),
                     GestureDetector(
                       onTap: () {
-                        final controller = Get.put(
-                          CatalogPageController(),
-                        ); // Access the controller
-                        controller.selectedCategoryId.value =
-                            product!.catId; // Update selectedCategoryId
+                        final controller = Get.put(CatalogPageController());
+                        controller.selectedCategoryId.value = product!.catId;
                         context.go(
-                          AppRoutes
-                              .catalog, // Navigate to the CatalogPage route
-                          extra: {
-                            'categoryId': product!.catId,
-                          }, // Pass categoryId as extra data if needed
+                          AppRoutes.catalog,
+                          extra: {'categoryId': product!.catId},
                         );
                       },
                       child: BarlowText(
@@ -507,358 +516,135 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                     ),
                   ],
                 ),
-              SizedBox(width: 27),
-              relatedProducts.isEmpty
-                  ? NoProductYet()
-                  : SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: List.generate(1, (index) {
-                        final relatedProduct = displayedProducts[0];
-                        return FutureBuilder<int?>(
-                          future: fetchStockQuantity(
-                            relatedProduct.id.toString(),
-                          ),
-                          builder: (context, snapshot) {
-                            final quantity = snapshot.data;
-                            final isOutOfStock = quantity == 0;
-
-                            return Padding(
-                              padding: EdgeInsets.only(right: 14.0),
-                              child: SizedBox(
-                                height: 300,
-                                width: 170,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Stack(
-                                      children: [
-                                        ClipRect(
-                                          child: GestureDetector(
-                                            onTap:
-                                                isOutOfStock
-                                                    ? null
-                                                    : () {
-                                                      context.go(
-                                                        AppRoutes.productDetails(
-                                                          relatedProduct.id,
-                                                        ),
-                                                      );
-                                                    },
-                                            child: Image.network(
-                                              relatedProduct.thumbnail,
-                                              height: 196,
-                                              width: 170,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-
-                                        Positioned.fill(
-                                          child: GestureDetector(
-                                            onTap:
-                                                isOutOfStock
-                                                    ? null
-                                                    : () {
-                                                      context.go(
-                                                        AppRoutes.productDetails(
-                                                          relatedProduct.id,
-                                                        ),
-                                                      );
-                                                    },
-                                            child: Image.network(
-                                              relatedProduct.thumbnail,
-                                              height: 196,
-                                              width: 170,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-
-                                        if (isOutOfStock)
-                                          Positioned.fill(
-                                            child: Container(
-                                              color: Colors.black.withOpacity(
-                                                0.5,
-                                              ),
-                                            ),
-                                          ),
-                                        Positioned(
-                                          top: 10,
-                                          left: 10,
-                                          right: 10,
-                                          child: LayoutBuilder(
-                                            builder: (context, constraints) {
-                                              bool isMobile =
-                                                  constraints.maxWidth < 800;
-
-                                              if (isOutOfStock) {
-                                                return Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Align(
-                                                      alignment:
-                                                          Alignment.centerLeft,
-                                                      child: SvgPicture.asset(
-                                                        "assets/home_page/outofstock.svg",
-                                                        height: 24,
-                                                      ),
-                                                    ),
-                                                    Align(
-                                                      alignment:
-                                                          Alignment.centerRight,
-                                                      child: SvgPicture.asset(
-                                                        "assets/home_page/IconWishlistEmpty.svg",
-                                                        width: 23,
-                                                        height: 20,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                );
-                                              }
-
-                                              return Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Builder(
-                                                    builder: (context) {
-                                                      final List<Widget>
-                                                      badges = [];
-
-                                                      if (relatedProduct
-                                                              .isMakerChoice ==
-                                                          1) {
-                                                        badges.add(
-                                                          SvgPicture.asset(
-                                                            "assets/home_page/maker_choice.svg",
-                                                            height:
-                                                                isMobile
-                                                                    ? 40
-                                                                    : 32,
-                                                          ),
-                                                        );
-                                                      }
-
-                                                      if (quantity != null &&
-                                                          quantity < 2) {
-                                                        if (badges.isNotEmpty)
-                                                          badges.add(
-                                                            SizedBox(
-                                                              height: 10,
-                                                            ),
-                                                          );
-                                                        badges.add(
-                                                          SvgPicture.asset(
-                                                            "assets/home_page/fewPiecesMobile.svg",
-                                                            height:
-                                                                isMobile
-                                                                    ? 28
-                                                                    : 32,
-                                                          ),
-                                                        );
-                                                      }
-
-                                                      if (relatedProduct
-                                                              .discount !=
-                                                          0) {
-                                                        if (badges.isNotEmpty)
-                                                          badges.add(
-                                                            SizedBox(
-                                                              height: 10,
-                                                            ),
-                                                          );
-                                                        badges.add(
-                                                          ElevatedButton(
-                                                            onPressed: null,
-                                                            style: ElevatedButton.styleFrom(
-                                                              padding:
-                                                                  const EdgeInsets.symmetric(
-                                                                    horizontal:
-                                                                        30,
-                                                                    vertical:
-                                                                        0, // Reduced vertical padding
-                                                                  ),
-                                                              backgroundColor:
-                                                                  const Color(
-                                                                    0xFFF46856,
-                                                                  ),
-                                                              disabledBackgroundColor:
-                                                                  const Color(
-                                                                    0xFFF46856,
-                                                                  ),
-                                                              disabledForegroundColor:
-                                                                  Colors.white,
-                                                              elevation: 0,
-                                                              side:
-                                                                  BorderSide
-                                                                      .none,
-                                                              minimumSize:
-                                                                  const Size(
-                                                                    0,
-                                                                    33,
-                                                                  ), // Optional: Set a smaller minimum height
-                                                            ),
-                                                            child: Text(
-                                                              "${relatedProduct.discount}% OFF",
-                                                              style: TextStyle(
-                                                                fontFamily:
-                                                                    GoogleFonts.barlow()
-                                                                        .fontFamily,
-                                                                fontSize:
-                                                                    10, // Reduced font size
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                color:
-                                                                    Colors
-                                                                        .white,
-                                                                letterSpacing:
-                                                                    0.48,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        );
-                                                      }
-
-                                                      return Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: badges,
-                                                      );
-                                                    },
-                                                  ),
-                                                  Spacer(),
-                                                  FutureBuilder<bool>(
-                                                    future:
-                                                        SharedPreferencesHelper.isInWishlist(
-                                                          relatedProduct.id
-                                                              .toString(),
-                                                        ),
-                                                    builder: (
-                                                      context,
-                                                      snapshot,
-                                                    ) {
-                                                      final isInWishlist =
-                                                          snapshot.data ??
-                                                          false;
-                                                      return GestureDetector(
-                                                        onTap:
-                                                            isOutOfStock
-                                                                ? null
-                                                                : () async {
-                                                                  if (isInWishlist) {
-                                                                    await SharedPreferencesHelper.removeFromWishlist(
-                                                                      relatedProduct
-                                                                          .id
-                                                                          .toString(),
-                                                                    );
-                                                                    widget
-                                                                        .onWishlistChanged
-                                                                        ?.call(
-                                                                          'Product Removed From Wishlist',
-                                                                        );
-                                                                  } else {
-                                                                    await SharedPreferencesHelper.addToWishlist(
-                                                                      relatedProduct
-                                                                          .id
-                                                                          .toString(),
-                                                                    );
-                                                                    widget
-                                                                        .onWishlistChanged
-                                                                        ?.call(
-                                                                          'Product Added To Wishlist',
-                                                                        );
-                                                                  }
-                                                                  setState(
-                                                                    () {},
-                                                                  );
-                                                                },
-                                                        child: SvgPicture.asset(
-                                                          isInWishlist
-                                                              ? 'assets/home_page/IconWishlist.svg'
-                                                              : 'assets/home_page/IconWishlistEmpty.svg',
-                                                          width:
-                                                              isMobile
-                                                                  ? 20
-                                                                  : 24,
-                                                          height:
-                                                              isMobile
-                                                                  ? 18
-                                                                  : 20,
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 16),
-                                    CralikaFont(
-                                      text: relatedProduct.name,
-                                      maxLines: 1,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.barlow(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 14,
-                                        height: 1.2,
-                                        color: const Color(0xFF30578E),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    BarlowText(
-                                      text: "ADD TO CART",
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                      lineHeight: 1.2,
-                                      letterSpacing: 0.56,
-                                      color:
-                                          isOutOfStock
-                                              ? const Color(
-                                                0xFF30578E,
-                                              ).withOpacity(0.5)
-                                              : const Color(0xFF30578E),
-                                      onTap:
-                                          isOutOfStock
+                SizedBox(width: 27),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(1, (index) {
+                      final relatedProduct = displayedProducts[0];
+                      return FutureBuilder<int?>(
+                        future: fetchStockQuantity(
+                          relatedProduct.id.toString(),
+                        ),
+                        builder: (context, snapshot) {
+                          final quantity = snapshot.data;
+                          final isOutOfStock = quantity == 0;
+                          return Padding(
+                            padding: EdgeInsets.only(right: 14.0),
+                            child: SizedBox(
+                              height: 310,
+                              width: 170,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Stack(
+                                    children: [
+                                      ClipRect(
+                                        child: GestureDetector(
+                                          onTap: isOutOfStock
                                               ? null
                                               : () {
-                                                context.go(
-                                                  AppRoutes.cartDetails(
-                                                    relatedProduct.id,
-                                                  ),
-                                                );
-                                              },
+                                            context.go(
+                                              AppRoutes.productDetails(relatedProduct.id),
+                                            );
+                                          },
+                                          child: ColorFiltered(
+                                            colorFilter: isOutOfStock
+                                                ? const ColorFilter.matrix([
+                                              0.2126, 0.7152, 0.0722, 0, 0,
+                                              0.2126, 0.7152, 0.0722, 0, 0,
+                                              0.2126, 0.7152, 0.0722, 0, 0,
+                                              0, 0, 0, 1, 0,
+                                            ])
+                                                : const ColorFilter.mode(
+                                              Colors.transparent,
+                                              BlendMode.multiply,
+                                            ),
+                                            child: Image.network(
+                                              relatedProduct.thumbnail,
+                                              height: 196,
+                                              width: 170,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                    ],
+                                  ),
+                                  SizedBox(height: 10),
+                                  CralikaFont(
+                                    text: relatedProduct.name,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0XFF30578E),
+                                    maxLines: 2,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.barlow(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14,
+                                      height: 1.2,
+                                      color: const Color(0xFF30578E),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  isOutOfStock
+                                      ? BarlowText(
+                                        text: "NOTIFY ME",
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        lineHeight: 1.2,
+                                        letterSpacing: 0.56,
+                                        color: const Color(0xFF30578E),
+                                        onTap: () async {
+                                          bool isLoggedIn = await _isLoggedIn();
+                                          if (isLoggedIn) {
+                                            widget.onWishlistChanged?.call(
+                                              "We'll notify you when this product is back in stock.",
+                                            );
+                                          } else {
+                                            context.go(AppRoutes.logIn);
+                                          }
+                                        },
+                                      )
+                                      : BarlowText(
+                                        text: "ADD TO CART",
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        lineHeight: 1.2,
+                                        letterSpacing: 0.56,
+                                        color: const Color(0xFF30578E),
+                                        onTap: () {
+                                          context.go(
+                                            AppRoutes.cartDetails(
+                                              relatedProduct.id,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                ],
                               ),
-                            );
-                          },
-                        );
-                      }),
-                    ),
+                            ),
+                          );
+                        },
+                      );
+                    }),
                   ),
-            ],
-          ),
+                ),
+              ],
+            ),
         ],
       ),
     );
   }
 
   Widget infoTile({
-    required String svgAssetPath, // change from IconData to String
+    required String svgAssetPath,
     required String title,
     required String description,
   }) {
@@ -875,7 +661,6 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
             fit: BoxFit.contain,
           ),
         ),
-
         SizedBox(width: 12),
         Expanded(
           child: Column(

@@ -28,7 +28,6 @@ class _AddAddressUiState extends State<AddAddressUi> {
   @override
   void initState() {
     super.initState();
-    // Populate form fields if editing
     if (widget.isEditing && widget.address != null) {
       controller.populateFormForEdit(widget.address!);
     } else {
@@ -72,12 +71,15 @@ class _AddAddressUiState extends State<AddAddressUi> {
                               fontSize: 16.0,
                               lineHeight: 1.0,
                               letterSpacing: 0.64,
-                              enableHoverUnderline: true,
-                              decorationColor: const Color(0xFF30578E),
+                              hoverTextColor: const Color(0xFF2876E4),
                             ),
                           ),
                           if (showSuccessBanner || showErrorBanner)
                             NotificationBanner(
+                              iconPath:
+                                  showSuccessBanner
+                                      ? "assets/icons/success.svg"
+                                      : "assets/icons/error.svg",
                               message:
                                   showSuccessBanner
                                       ? (widget.isEditing
@@ -85,12 +87,15 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                           : "Added successfully!")
                                       : errorMessage,
                               bannerColor:
-                                  showSuccessBanner ? Colors.green : Colors.red,
-                              textColor: Colors.black,
+                                  showSuccessBanner
+                                      ? Color(0xFF268FA2)
+                                      : Color(0xFFF46856),
+                              textColor: Color(0xFF28292A),
                               onClose: () {
                                 setState(() {
                                   showSuccessBanner = false;
                                   showErrorBanner = false;
+                                  errorMessage = "";
                                 });
                               },
                             ),
@@ -114,7 +119,7 @@ class _AddAddressUiState extends State<AddAddressUi> {
                         child: Column(
                           children: [
                             customTextFormField(
-                              hintText: "FIRST NAME*",
+                              hintText: "FIRST NAME",
                               controller: controller.firstNameController,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -125,9 +130,11 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                 }
                                 return null;
                               },
+                              isRequired: true,
                             ),
+                            SizedBox(height: 32),
                             customTextFormField(
-                              hintText: "LAST NAME*",
+                              hintText: "LAST NAME",
                               controller: controller.lastNameController,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -138,9 +145,11 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                 }
                                 return null;
                               },
+                              isRequired: true,
                             ),
+                            SizedBox(height: 32),
                             customTextFormField(
-                              hintText: "EMAIL*",
+                              hintText: "EMAIL",
                               controller: controller.emailController,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -153,9 +162,11 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                 }
                                 return null;
                               },
+                              isRequired: true,
                             ),
+                            SizedBox(height: 32),
                             customTextFormField(
-                              hintText: "ADDRESS LINE 1*",
+                              hintText: "ADDRESS LINE 1",
                               controller: controller.addressLine1Controller,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -163,16 +174,19 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                 }
                                 return null;
                               },
+                              isRequired: true,
                             ),
+                            SizedBox(height: 32),
                             customTextFormField(
                               hintText: "ADDRESS LINE 2",
                               controller: controller.addressLine2Controller,
                             ),
+                            SizedBox(height: 32),
                             Row(
                               children: [
                                 Expanded(
                                   child: customTextFormField(
-                                    hintText: "ZIP*",
+                                    hintText: "ZIP",
                                     controller: controller.zipController,
                                     onChanged: (value) {
                                       if (value.length == 6) {
@@ -188,6 +202,7 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                       }
                                       return null;
                                     },
+                                    isRequired: true,
                                   ),
                                 ),
                                 SizedBox(width: 32),
@@ -197,7 +212,7 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                       hintText:
                                           controller.isPincodeLoading.value
                                               ? "Loading..."
-                                              : "STATE*",
+                                              : "STATE",
                                       controller: controller.stateController,
                                       enabled:
                                           !controller.isPincodeLoading.value,
@@ -207,11 +222,13 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                         }
                                         return null;
                                       },
+                                      isRequired: true,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
+                            SizedBox(height: 32),
                             Row(
                               children: [
                                 Expanded(
@@ -220,7 +237,7 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                       hintText:
                                           controller.isPincodeLoading.value
                                               ? "Loading..."
-                                              : "CITY*",
+                                              : "CITY",
                                       controller: controller.cityController,
                                       enabled:
                                           !controller.isPincodeLoading.value,
@@ -230,13 +247,14 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                         }
                                         return null;
                                       },
+                                      isRequired: true,
                                     ),
                                   ),
                                 ),
                                 SizedBox(width: 32),
                                 Expanded(
                                   child: customTextFormField(
-                                    hintText: "PHONE*",
+                                    hintText: "PHONE",
                                     controller: controller.phoneController,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
@@ -250,21 +268,30 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                       }
                                       return null;
                                     },
+                                    isRequired: true,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 32),
                             Row(
                               children: [
                                 Obx(
-                                  () => Checkbox(
-                                    value: controller.isChecked.value,
-                                    onChanged: controller.toggleCheckbox,
-                                    activeColor: Color(0xFF30578E),
+                                  () => GestureDetector(
+                                    onTap:
+                                        () => controller.toggleCheckbox(
+                                          !controller.isChecked.value,
+                                        ),
+                                    child: SvgPicture.asset(
+                                      controller.isChecked.value
+                                          ? "assets/icons/filledCheckbox.svg"
+                                          : "assets/icons/emptyCheckbox.svg",
+                                      height: 24,
+                                      width: 24,
+                                    ),
                                   ),
                                 ),
-                                SizedBox(width: 19),
+                                SizedBox(width: 10),
                                 Text(
                                   "Save as my default shipping address.",
                                   style: GoogleFonts.barlow(),
@@ -280,6 +307,105 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                   children: [
                                     GestureDetector(
                                       onTap: () async {
+                                        // Collect validation errors
+                                        List<String> errors = [];
+                                        if (controller
+                                            .firstNameController
+                                            .text
+                                            .isEmpty) {
+                                          errors.add(
+                                            'Please enter your first name',
+                                          );
+                                        } else if (controller
+                                                .firstNameController
+                                                .text
+                                                .length <
+                                            2) {
+                                          errors.add('First name too short');
+                                        }
+                                        if (controller
+                                            .lastNameController
+                                            .text
+                                            .isEmpty) {
+                                          errors.add(
+                                            'Please enter your last name',
+                                          );
+                                        } else if (controller
+                                                .lastNameController
+                                                .text
+                                                .length <
+                                            2) {
+                                          errors.add('Last name too short');
+                                        }
+                                        if (controller
+                                            .emailController
+                                            .text
+                                            .isEmpty) {
+                                          errors.add('Please enter your email');
+                                        } else if (!RegExp(
+                                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                        ).hasMatch(
+                                          controller.emailController.text,
+                                        )) {
+                                          errors.add(
+                                            'Please enter a valid email',
+                                          );
+                                        }
+                                        if (controller
+                                            .addressLine1Controller
+                                            .text
+                                            .isEmpty) {
+                                          errors.add(
+                                            'Please enter your ADDRESS LINE 1',
+                                          );
+                                        }
+                                        if (controller
+                                            .zipController
+                                            .text
+                                            .isEmpty) {
+                                          errors.add('Please enter your Zip');
+                                        }
+                                        if (controller
+                                            .stateController
+                                            .text
+                                            .isEmpty) {
+                                          errors.add('Please enter your state');
+                                        }
+                                        if (controller
+                                            .cityController
+                                            .text
+                                            .isEmpty) {
+                                          errors.add('Please enter your city');
+                                        }
+                                        if (controller
+                                            .phoneController
+                                            .text
+                                            .isEmpty) {
+                                          errors.add(
+                                            'Please enter your phone number',
+                                          );
+                                        } else if (!RegExp(
+                                          r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$',
+                                        ).hasMatch(
+                                          controller.phoneController.text,
+                                        )) {
+                                          errors.add(
+                                            'Please enter a valid phone number',
+                                          );
+                                        }
+
+                                        if (errors.isNotEmpty) {
+                                          // Set state to show the first error in the NotificationBanner
+                                          setState(() {
+                                            showErrorBanner = true;
+                                            showSuccessBanner = false;
+                                            errorMessage =
+                                                errors
+                                                    .first; // Display the first error
+                                          });
+                                          return; // Exit the callback to prevent further processing
+                                        }
+
                                         bool success = await controller
                                             .handleAddAddress(
                                               context,
@@ -295,6 +421,7 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                             if (success) {
                                               showSuccessBanner = true;
                                               showErrorBanner = false;
+                                              errorMessage = "";
                                             } else {
                                               showSuccessBanner = false;
                                               showErrorBanner = true;
@@ -342,18 +469,34 @@ class _AddAddressUiState extends State<AddAddressUi> {
     bool enabled = true,
     Function(String)? onChanged,
     String? Function(String?)? validator,
+    bool isRequired = false,
   }) {
     return Stack(
       children: [
         Positioned(
           left: 0,
           top: 13,
-          child: Text(
-            hintText,
-            style: GoogleFonts.barlow(
-              fontWeight: FontWeight.w400,
-              fontSize: 14,
-              color: Color(0xFF414141),
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: hintText,
+                  style: GoogleFonts.barlow(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 14,
+                    color: Color(0xFF414141),
+                  ),
+                ),
+                if (isRequired)
+                  TextSpan(
+                    text: ' *',
+                    style: GoogleFonts.barlow(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 14,
+                      color: Colors.red,
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -371,10 +514,16 @@ class _AddAddressUiState extends State<AddAddressUi> {
             enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Color(0xFF414141)),
             ),
-            errorStyle: TextStyle(color: Colors.red),
+            errorBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF414141)),
+            ),
+            focusedErrorBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF414141)),
+            ),
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Color(0xFF414141)),
             ),
+            errorStyle: TextStyle(height: 0, color: Colors.transparent),
             hintText: '',
             hintStyle: GoogleFonts.barlow(
               fontWeight: FontWeight.w400,
@@ -383,11 +532,27 @@ class _AddAddressUiState extends State<AddAddressUi> {
               letterSpacing: 0.0,
               color: Color(0xFF414141),
             ),
-            contentPadding: EdgeInsets.only(top: 16),
           ),
           style: TextStyle(color: Color(0xFF414141)),
         ),
       ],
+    );
+  }
+
+  // Placeholder for onWishlistError widget (to be defined based on your codebase)
+  Widget onWishlistError(BuildContext context, String errorMessage) {
+    // Example implementation, replace with actual onWishlistError widget
+    return NotificationBanner(
+      iconPath: "assets/icons/error.svg",
+      message: errorMessage,
+      bannerColor: Color(0xFFF46856),
+      textColor: Color(0xFF28292A),
+      onClose: () {
+        setState(() {
+          showErrorBanner = false;
+          errorMessage = "";
+        });
+      },
     );
   }
 }
