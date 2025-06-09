@@ -238,24 +238,44 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                 Stack(
                   children: [
                     ColorFiltered(
-                      colorFilter: _isOutOfStock
-                          ? const ColorFilter.matrix(<double>[
-                        0.2126, 0.7152, 0.0722, 0, 0,
-                        0.2126, 0.7152, 0.0722, 0, 0,
-                        0.2126, 0.7152, 0.0722, 0, 0,
-                        0, 0, 0, 1, 0,
-                      ])
-                          : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+                      colorFilter:
+                          _isOutOfStock
+                              ? const ColorFilter.matrix(<double>[
+                                0.2126,
+                                0.7152,
+                                0.0722,
+                                0,
+                                0,
+                                0.2126,
+                                0.7152,
+                                0.0722,
+                                0,
+                                0,
+                                0.2126,
+                                0.7152,
+                                0.0722,
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                                1,
+                                0,
+                              ])
+                              : const ColorFilter.mode(
+                                Colors.transparent,
+                                BlendMode.multiply,
+                              ),
                       child: Image.network(
                         _currentMainImage!,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.broken_image),
-                        ),
+                        errorBuilder:
+                            (context, error, stackTrace) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.broken_image),
+                            ),
                       ),
                     ),
-
                   ],
                 ),
 
@@ -263,40 +283,61 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _otherImages.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final imageUrl = entry.value;
+                  children:
+                      _otherImages.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final imageUrl = entry.value;
 
-                    return GestureDetector(
-                      onTap: () => _swapImageWithMain(index),
-                      child: Stack(
-                        children: [
-                          ColorFiltered(
-                            colorFilter: _isOutOfStock
-                                ? const ColorFilter.matrix(<double>[
-                              0.2126, 0.7152, 0.0722, 0, 0,
-                              0.2126, 0.7152, 0.0722, 0, 0,
-                              0.2126, 0.7152, 0.0722, 0, 0,
-                              0, 0, 0, 1, 0,
-                            ])
-                                : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
-                            child: Image.network(
-                              imageUrl,
-                              width: 106,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                width: 106,
-                                height: 122,
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.broken_image),
+                        return GestureDetector(
+                          onTap: () => _swapImageWithMain(index),
+                          child: Stack(
+                            children: [
+                              ColorFiltered(
+                                colorFilter:
+                                    _isOutOfStock
+                                        ? const ColorFilter.matrix(<double>[
+                                          0.2126,
+                                          0.7152,
+                                          0.0722,
+                                          0,
+                                          0,
+                                          0.2126,
+                                          0.7152,
+                                          0.0722,
+                                          0,
+                                          0,
+                                          0.2126,
+                                          0.7152,
+                                          0.0722,
+                                          0,
+                                          0,
+                                          0,
+                                          0,
+                                          0,
+                                          1,
+                                          0,
+                                        ])
+                                        : const ColorFilter.mode(
+                                          Colors.transparent,
+                                          BlendMode.multiply,
+                                        ),
+                                child: Image.network(
+                                  imageUrl,
+                                  width: 106,
+                                  fit: BoxFit.contain,
+                                  errorBuilder:
+                                      (context, error, stackTrace) => Container(
+                                        width: 106,
+                                        height: 122,
+                                        color: Colors.grey[300],
+                                        child: const Icon(Icons.broken_image),
+                                      ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                        );
+                      }).toList(),
                 ),
                 SizedBox(height: 24),
                 Column(
@@ -541,25 +582,45 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                                     children: [
                                       ClipRect(
                                         child: GestureDetector(
-                                          onTap: isOutOfStock
-                                              ? null
-                                              : () {
-                                            context.go(
-                                              AppRoutes.productDetails(relatedProduct.id),
-                                            );
-                                          },
+                                          onTap:
+                                              isOutOfStock
+                                                  ? null
+                                                  : () {
+                                                    context.go(
+                                                      AppRoutes.productDetails(
+                                                        relatedProduct.id,
+                                                      ),
+                                                    );
+                                                  },
                                           child: ColorFiltered(
-                                            colorFilter: isOutOfStock
-                                                ? const ColorFilter.matrix([
-                                              0.2126, 0.7152, 0.0722, 0, 0,
-                                              0.2126, 0.7152, 0.0722, 0, 0,
-                                              0.2126, 0.7152, 0.0722, 0, 0,
-                                              0, 0, 0, 1, 0,
-                                            ])
-                                                : const ColorFilter.mode(
-                                              Colors.transparent,
-                                              BlendMode.multiply,
-                                            ),
+                                            colorFilter:
+                                                isOutOfStock
+                                                    ? const ColorFilter.matrix([
+                                                      0.2126,
+                                                      0.7152,
+                                                      0.0722,
+                                                      0,
+                                                      0,
+                                                      0.2126,
+                                                      0.7152,
+                                                      0.0722,
+                                                      0,
+                                                      0,
+                                                      0.2126,
+                                                      0.7152,
+                                                      0.0722,
+                                                      0,
+                                                      0,
+                                                      0,
+                                                      0,
+                                                      0,
+                                                      1,
+                                                      0,
+                                                    ])
+                                                    : const ColorFilter.mode(
+                                                      Colors.transparent,
+                                                      BlendMode.multiply,
+                                                    ),
                                             child: Image.network(
                                               relatedProduct.thumbnail,
                                               height: 196,
@@ -569,14 +630,13 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                                           ),
                                         ),
                                       ),
-
                                     ],
                                   ),
                                   SizedBox(height: 10),
                                   CralikaFont(
                                     text: relatedProduct.name,
                                     fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w400,
                                     color: Color(0XFF30578E),
                                     maxLines: 2,
                                   ),

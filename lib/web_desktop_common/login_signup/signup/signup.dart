@@ -62,390 +62,367 @@ class _SignupState extends State<Signup> {
             width: MediaQuery.of(context).size.width > 1400 ? 550 : 504,
             child: Material(
               color: Colors.white,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(
-                        left: 32.0,
-                        top: 22,
-                        right: 44,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              GestureDetector(
-                                onTap: () => Navigator.of(context).pop(),
-                                child: BarlowText(
-                                  text: "Close",
-                                  color: Color(0xFF30578E),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16.0,
-                                  lineHeight: 1.0,
-                                  letterSpacing: 0.64,
-                                  enableUnderlineForActiveRoute: true,
-                                  decorationColor: Color(0xFF30578E),
-                                  hoverTextColor: const Color(0xFF2876E4),
-                                ),
-                              ),
-                              if (showSuccessBanner || showErrorBanner)
-                                if (showSuccessBanner || showErrorBanner)
-                                  NotificationBanner(
-                                    iconPath:
-                                        showSuccessBanner
-                                            ? "assets/icons/success.svg"
-                                            : "assets/icons/error.svg",
-
-                                    message:
-                                        showSuccessBanner
-                                            ? "Signed Up successfully!"
-                                            : errorMessage,
-                                    bannerColor:
-                                        showSuccessBanner
-                                            ? Color(0xFF268FA2)
-                                            : Color(0xFFF46856),
-                                    textColor: Color(0xFF28292A),
-                                    onClose: () {
-                                      setState(() {
-                                        showSuccessBanner = false;
-                                        showErrorBanner = false;
-                                      });
-                                    },
-                                  ),
-                            ],
-                          ),
-                          SizedBox(height: 33),
-                          CralikaFont(
-                            text: "Sign Up",
-                            color: Color(0xFF414141),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(left: 32.0, top: 22, right: 44),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: BarlowText(
+                            text: "Close",
+                            color: Color(0xFF30578E),
                             fontWeight: FontWeight.w600,
-                            fontSize: 32.0,
+                            fontSize: 16.0,
                             lineHeight: 1.0,
-                            letterSpacing: 0.128,
+                            letterSpacing: 0.64,
+                            enableUnderlineForActiveRoute: true,
+                            decorationColor: Color(0xFF30578E),
+                            hoverTextColor: const Color(0xFF2876E4),
                           ),
-                          SizedBox(height: 8),
-                          BarlowText(
-                            text:
-                                "Create a free Kireimics account for a quick checkout.",
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                            lineHeight: 1.0,
-                            letterSpacing: 0.0,
+                        ),
+                        if (showSuccessBanner || showErrorBanner)
+                          if (showSuccessBanner || showErrorBanner)
+                            NotificationBanner(
+                              iconPath:
+                                  showSuccessBanner
+                                      ? "assets/icons/success.svg"
+                                      : "assets/icons/error.svg",
+
+                              message:
+                                  showSuccessBanner
+                                      ? "Signed Up successfully!"
+                                      : errorMessage,
+                              bannerColor:
+                                  showSuccessBanner
+                                      ? Color(0xFF268FA2)
+                                      : Color(0xFFF46856),
+                              textColor: Color(0xFF28292A),
+                              onClose: () {
+                                setState(() {
+                                  showSuccessBanner = false;
+                                  showErrorBanner = false;
+                                });
+                              },
+                            ),
+                      ],
+                    ),
+                    SizedBox(height: 33),
+                    CralikaFont(
+                      text: "Sign Up",
+                      color: Color(0xFF414141),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 32.0,
+                      lineHeight: 1.0,
+                      letterSpacing: 0.128,
+                    ),
+                    SizedBox(height: 8),
+                    BarlowText(
+                      text:
+                          "Create a free Kireimics account for a quick checkout.",
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16,
+                      lineHeight: 1.0,
+                      letterSpacing: 0.0,
+                    ),
+                    SizedBox(height: 28),
+                    Form(
+                      key: signupController.formKey,
+                      child: Column(
+                        children: [
+                          customTextFormField(
+                            hintText: "FIRST NAME",
+                            controller: signupController.firstNameController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your first name';
+                              }
+                              if (value.length < 2) {
+                                return 'First name too short';
+                              }
+                              return null;
+                            },
                           ),
                           SizedBox(height: 28),
-                          Form(
-                            key: signupController.formKey,
-                            child: Column(
-                              children: [
-                                customTextFormField(
-                                  hintText: "FIRST NAME",
-                                  controller:
-                                      signupController.firstNameController,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter your first name';
-                                    }
-                                    if (value.length < 2) {
-                                      return 'First name too short';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                SizedBox(height: 28),
-                                customTextFormField(
-                                  hintText: "LAST NAME",
-                                  controller:
-                                      signupController.lastNameController,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter your last name';
-                                    }
-                                    if (value.length < 2) {
-                                      return 'Last name too short';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                SizedBox(height: 28),
-                                customTextFormField(
-                                  hintText: "EMAIL",
-                                  controller: signupController.emailController,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter your email';
-                                    }
-                                    if (!RegExp(
-                                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                    ).hasMatch(value)) {
-                                      return 'Please enter a valid email';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                SizedBox(height: 28),
-                                customTextFormField(
-                                  hintText: "PHONE",
-                                  controller: signupController.phoneController,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter your phone number';
-                                    }
-                                    if (!RegExp(
-                                      r'^[0-9]{10,15}$',
-                                    ).hasMatch(value)) {
-                                      return 'Please enter a valid phone number';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                SizedBox(height: 28),
-                                customTextFormField(
-                                  hintText: "CREATE PASSWORD",
-                                  controller:
-                                      signupController.passwordController,
-                                  isPassword: true,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter your password';
-                                    }
-                                    if (value.length < 8) {
-                                      return 'Password must be at least 8 characters';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                SizedBox(height: 28),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () async {
-                                            bool success =
-                                                await signupController
-                                                    .handleSignUp(context);
-                                            if (mounted) {
-                                              setState(() {
-                                                if (success) {
-                                                  showSuccessBanner = true;
-                                                  showErrorBanner = false;
-                                                } else {
+                          customTextFormField(
+                            hintText: "LAST NAME",
+                            controller: signupController.lastNameController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your last name';
+                              }
+                              if (value.length < 2) {
+                                return 'Last name too short';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 28),
+                          customTextFormField(
+                            hintText: "EMAIL",
+                            controller: signupController.emailController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your email';
+                              }
+                              if (!RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              ).hasMatch(value)) {
+                                return 'Please enter a valid email';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 28),
+                          customTextFormField(
+                            hintText: "PHONE",
+                            controller: signupController.phoneController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your phone number';
+                              }
+                              if (!RegExp(r'^[0-9]{10,15}$').hasMatch(value)) {
+                                return 'Please enter a valid phone number';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 28),
+                          customTextFormField(
+                            hintText: "CREATE PASSWORD",
+                            controller: signupController.passwordController,
+                            isPassword: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your password';
+                              }
+                              if (value.length < 8) {
+                                return 'Password must be at least 8 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 28),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Column(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () async {
+                                      bool success = await signupController
+                                          .handleSignUp(context);
+                                      if (mounted) {
+                                        setState(() {
+                                          if (success) {
+                                            showSuccessBanner = true;
+                                            showErrorBanner = false;
+                                          } else {
+                                            showSuccessBanner = false;
+                                            showErrorBanner = true;
+                                            errorMessage =
+                                                signupController.signupMessage;
+                                          }
+                                        });
+                                        if (success) {
+                                          Future.delayed(
+                                            const Duration(seconds: 1),
+                                            () {
+                                              if (mounted) {
+                                                setState(() {
                                                   showSuccessBanner = false;
-                                                  showErrorBanner = true;
-                                                  errorMessage =
-                                                      signupController
-                                                          .signupMessage;
-                                                }
-                                              });
-                                              if (success) {
-                                                Future.delayed(
-                                                  const Duration(seconds: 1),
-                                                  () {
-                                                    if (mounted) {
-                                                      setState(() {
-                                                        showSuccessBanner =
-                                                            false;
-                                                      });
-                                                      Navigator.of(
-                                                        context,
-                                                      ).pop();
-                                                    }
-                                                  },
-                                                );
+                                                });
+                                                Navigator.of(context).pop();
                                               }
-                                            }
-                                          },
-                                          child: BarlowText(
-                                            text: "SIGN UP",
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                            lineHeight: 1.0,
-                                            letterSpacing: 0.64,
-                                            color: Color(0xFF30578E),
-                                            backgroundColor: Color(0xFFb9d6ff),
-                                          ),
-                                        ),
-                                        SizedBox(height: 30),
-                                        Container(
-                                          width: 320,
-                                          child: Text.rich(
-                                            TextSpan(
-                                              text:
-                                                  'By signing up, you are agreeing to our ',
-                                              style: TextStyle(
-                                                fontFamily:
-                                                    GoogleFonts.barlow()
-                                                        .fontFamily,
-                                                fontWeight: FontWeight.w400,
-                                                fontSize: 14,
-                                                height: 1.0,
-                                                letterSpacing: 0.0,
-                                                color: Color(0xFF414141),
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text: 'Privacy Policy',
-                                                  style: TextStyle(
-                                                    color: Color(0xFF30578E),
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                  recognizer:
-                                                      TapGestureRecognizer()
-                                                        ..onTap = () {
-                                                          context.go(
-                                                            AppRoutes
-                                                                .privacyPolicy,
-                                                          );
-                                                        },
-                                                ),
-                                                TextSpan(
-                                                  text: ' & ',
-                                                  style: TextStyle(
-                                                    fontFamily:
-                                                        GoogleFonts.barlow()
-                                                            .fontFamily,
-                                                    fontWeight: FontWeight.w400,
-                                                    fontSize: 14,
-                                                    color: Color(0xFF414141),
-                                                  ),
-                                                ),
-                                                TextSpan(
-                                                  text: 'Shipping Policy',
-                                                  style: TextStyle(
-                                                    color: Color(0xFF30578E),
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                  recognizer:
-                                                      TapGestureRecognizer()
-                                                        ..onTap = () {
-                                                          context.go(
-                                                            AppRoutes
-                                                                .shippingPolicy,
-                                                          );
-                                                        },
-                                                ),
-                                                TextSpan(text: '.'),
-                                              ],
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                        SizedBox(height: 30),
-                                        BarlowText(
-                                          text: "Or",
+                                            },
+                                          );
+                                        }
+                                      }
+                                    },
+                                    child: BarlowText(
+                                      text: "SIGN UP",
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      lineHeight: 1.0,
+                                      letterSpacing: 0.64,
+                                      color: Color(0xFF30578E),
+                                      backgroundColor: Color(0xFFb9d6ff),
+                                    ),
+                                  ),
+                                  SizedBox(height: 30),
+                                  Container(
+                                    width: 320,
+                                    child: Text.rich(
+                                      TextSpan(
+                                        text:
+                                            'By signing up, you are agreeing to our ',
+                                        style: TextStyle(
+                                          fontFamily:
+                                              GoogleFonts.barlow().fontFamily,
                                           fontWeight: FontWeight.w400,
-                                          fontSize: 16,
-                                          lineHeight: 1.0,
+                                          fontSize: 14,
+                                          height: 1.0,
                                           letterSpacing: 0.0,
                                           color: Color(0xFF414141),
                                         ),
-                                        SizedBox(height: 16),
-                                        Row(
-                                          children: [
-                                            GoogleSignInButton(
-                                              functionName: 'signInWithGoogle',
+                                        children: [
+                                          TextSpan(
+                                            text: 'Privacy Policy',
+                                            style: TextStyle(
+                                              color: Color(0xFF30578E),
+                                              fontWeight: FontWeight.w600,
                                             ),
-                                          ],
-                                        ),
-                                      ],
+                                            recognizer:
+                                                TapGestureRecognizer()
+                                                  ..onTap = () {
+                                                    context.go(
+                                                      AppRoutes.privacyPolicy,
+                                                    );
+                                                  },
+                                          ),
+                                          TextSpan(
+                                            text: ' & ',
+                                            style: TextStyle(
+                                              fontFamily:
+                                                  GoogleFonts.barlow()
+                                                      .fontFamily,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 14,
+                                              color: Color(0xFF414141),
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: 'Shipping Policy',
+                                            style: TextStyle(
+                                              color: Color(0xFF30578E),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            recognizer:
+                                                TapGestureRecognizer()
+                                                  ..onTap = () {
+                                                    context.go(
+                                                      AppRoutes.shippingPolicy,
+                                                    );
+                                                  },
+                                          ),
+                                          TextSpan(text: '.'),
+                                        ],
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                  ),
+                                  SizedBox(height: 30),
+                                  BarlowText(
+                                    text: "Or",
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16,
+                                    lineHeight: 1.0,
+                                    letterSpacing: 0.0,
+                                    color: Color(0xFF414141),
+                                  ),
+                                  SizedBox(height: 16),
+                                  Row(
+                                    children: [
+                                      GoogleSignInButton(
+                                        functionName: 'signInWithGoogle',
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 30),
                         ],
                       ),
                     ),
-                  ),
-                  // Fixed login container at the bottom
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0xFFDDEAFF).withOpacity(0.6),
-                          offset: Offset(20, 20),
-                          blurRadius: 20,
-                        ),
-                      ],
-                      border: Border.all(color: Color(0xFFDDEAFF), width: 1),
-                    ),
-                    padding: const EdgeInsets.only(
-                      left: 16.0,
-                      top: 13,
-                      bottom: 13,
-                      right: 10,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: 56,
-                          width: 56,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFDDEAFF),
-                            borderRadius: BorderRadius.circular(8),
+                    SizedBox(height: 62),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xFFDDEAFF).withOpacity(0.6),
+                            offset: Offset(20, 20),
+                            blurRadius: 20,
                           ),
-                          child: Center(
-                            child: SvgPicture.asset(
-                              "assets/header/IconProfile.svg",
-                              height: 27,
-                              width: 25,
+                        ],
+                        border: Border.all(color: Color(0xFFDDEAFF), width: 1),
+                      ),
+                      padding: const EdgeInsets.only(
+                        left: 16.0,
+                        top: 13,
+                        bottom: 13,
+                        right: 10,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 56,
+                            width: 56,
+                            decoration: BoxDecoration(
+                              color: Color(0xFFDDEAFF),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ),
-                        ),
-                        SizedBox(width: 24),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            BarlowText(
-                              text: "Already have an account?",
-                              fontWeight: FontWeight.w400,
-                              fontSize: 20,
-                              lineHeight: 1.0,
-                              color: Color(0xFF000000),
-                            ),
-                            SizedBox(height: 10),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.pop(context);
-                                Future.delayed(Duration.zero, () {
-                                  showDialog(
-                                    context: context,
-                                    barrierColor: Colors.transparent,
-                                    builder: (BuildContext context) {
-                                      return LoginPage();
-                                    },
-                                  );
-                                });
-                              },
-                              child: BarlowText(
-                                text: "LOG IN NOW",
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                lineHeight: 1.5,
-                                color: Color(0xFF30578E),
-                                hoverBackgroundColor: Color(0xFFb9d6ff),
-                                enableHoverBackground: true,
-                                decorationColor: const Color(0xFF30578E),
-                                hoverTextColor: const Color(0xFF2876E4),
-                                hoverDecorationColor: Color(0xFF2876E4),
+                            child: Center(
+                              child: SvgPicture.asset(
+                                "assets/header/IconProfile.svg",
+                                height: 27,
+                                width: 25,
                               ),
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                          SizedBox(width: 24),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BarlowText(
+                                text: "Already have an account?",
+                                fontWeight: FontWeight.w400,
+                                fontSize: 20,
+                                lineHeight: 1.0,
+                                color: Color(0xFF000000),
+                              ),
+                              SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Future.delayed(Duration.zero, () {
+                                    showDialog(
+                                      context: context,
+                                      barrierColor: Colors.transparent,
+                                      builder: (BuildContext context) {
+                                        return LoginPage();
+                                      },
+                                    );
+                                  });
+                                },
+                                child: BarlowText(
+                                  text: "LOG IN NOW",
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  lineHeight: 1.5,
+                                  color: Color(0xFF30578E),
+                                  hoverBackgroundColor: Color(0xFFb9d6ff),
+                                  enableHoverBackground: true,
+                                  decorationColor: const Color(0xFF30578E),
+                                  hoverTextColor: const Color(0xFF2876E4),
+                                  hoverDecorationColor: Color(0xFF2876E4),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 22),
+                  ],
+                ),
               ),
             ),
           ),
@@ -506,10 +483,14 @@ class _SignupState extends State<Signup> {
                   letterSpacing: 0.0,
                   color: const Color(0xFF414141),
                 ),
-                contentPadding: const EdgeInsets.only(
-                  top: 16,
-                  right: 40, // Add padding for the eye icon
+                contentPadding: EdgeInsets.only(
+                  top: isPassword ? 16 : 10,
+                  right:
+                      isPassword
+                          ? 40
+                          : 0, // Conditionally add padding only if it's a password field
                 ),
+
                 suffixIcon:
                     isPassword
                         ? GestureDetector(

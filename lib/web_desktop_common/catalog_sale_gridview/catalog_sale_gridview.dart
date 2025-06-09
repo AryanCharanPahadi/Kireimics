@@ -134,7 +134,6 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<int?>(
@@ -192,7 +191,6 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                     //   Positioned.fill(
                     //     child: Container(color: Colors.black.withOpacity(0.3)), // slight dark overlay
                     //   ),
-
                     Positioned(
                       top: imageHeight * 0.04,
                       left: imageWidth * 0.05,
@@ -284,8 +282,6 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                     badges.add(
                                       SvgPicture.asset(
                                         "assets/home_page/fewPiecesLeft.svg",
-                                        height: 25,
-                                        width: 25,
                                       ),
                                     );
                                   }
@@ -299,7 +295,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                         style: ElevatedButton.styleFrom(
                                           padding: EdgeInsets.symmetric(
                                             vertical: paddingVertical,
-                                            horizontal: 27,
+                                            horizontal: 32,
                                           ),
                                           backgroundColor: const Color(
                                             0xFFF46856,
@@ -311,13 +307,12 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                           elevation: 0,
                                           side: BorderSide.none,
                                         ),
-                                        child: Text(
-                                          "${widget.product.discount}% OFF",
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
+                                        child: BarlowText(
+                                          text:
+                                              "${widget.product.discount}% OFF",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     );
@@ -504,23 +499,22 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                     SizedBox(width: imageWidth * 0.02),
                                     GestureDetector(
                                       onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          barrierColor: Colors.transparent,
-                                          builder: (BuildContext context) {
-                                            cartNotifier.refresh();
-                                            return widget.isLargeScreen
-                                                ? CartPanel(
-                                                  productId: widget.product.id,
-                                                )
-                                                : CartPanel(
-                                                  productId: widget.product.id,
-                                                );
-                                          },
-                                        );
-                                        widget.onWishlistChanged?.call(
-                                          'Product Added To Cart',
-                                        );
+                                        // Call the wishlist changed callback immediately
+                                        widget.onWishlistChanged?.call('Product Added To Cart');
+
+                                        // Delay the modal opening by 3 seconds
+                                        Future.delayed(Duration(seconds: 2), () {
+                                          showDialog(
+                                            context: context,
+                                            barrierColor: Colors.transparent,
+                                            builder: (BuildContext context) {
+                                              cartNotifier.refresh();
+                                              return CartPanel(
+                                                productId: widget.product.id,
+                                              );
+                                            },
+                                          );
+                                        });
                                       },
                                       child: BarlowText(
                                         text: "ADD TO CART",
@@ -533,6 +527,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                         hoverTextColor: Color(0xFF30578E),
                                       ),
                                     ),
+
                                   ],
                                 ),
                             ],

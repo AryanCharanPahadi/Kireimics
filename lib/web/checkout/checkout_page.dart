@@ -32,7 +32,6 @@ class CheckoutPageWeb extends StatefulWidget {
 }
 
 class _CheckoutPageWebState extends State<CheckoutPageWeb> {
-  bool hasAddress = false;
   bool showLoginBox = true;
   late double subtotal;
   final double deliveryCharge = 50.0;
@@ -53,9 +52,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
     subtotal = double.tryParse(uri.queryParameters['subtotal'] ?? '') ?? 0.0;
     total = subtotal + deliveryCharge;
 
-    // Extract and print product IDs
-    final productIds = uri.queryParameters['productIds']?.split(',') ?? [];
-    print('Product IDs: $productIds');
+    checkoutController.loadProductIds(context);
   }
 
   @override
@@ -106,7 +103,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                   BarlowText(
                     text: "View Details",
                     color: const Color(0xFF30578E),
-                    fontSize:16,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
                     route: AppRoutes.checkOut,
@@ -259,6 +256,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
             SizedBox(
               width: containerWidth,
               child: Form(
+                key: checkoutController.formKey,
                 child: Column(
                   children: [
                     customTextFormField(
@@ -267,29 +265,38 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                       controller: checkoutController.firstNameController,
                       isRequired: true,
                     ),
+                    SizedBox(height: 32),
                     customTextFormField(
                       hintText: "LAST NAME",
                       fontScale: fontScale,
                       controller: checkoutController.lastNameController,
                       isRequired: true,
                     ),
+                    SizedBox(height: 32),
+
                     customTextFormField(
                       hintText: "EMAIL",
                       fontScale: fontScale,
                       controller: checkoutController.emailController,
                       isRequired: true,
                     ),
+                    SizedBox(height: 32),
+
                     customTextFormField(
                       hintText: "ADDRESS LINE 1",
                       fontScale: fontScale,
                       controller: checkoutController.address1Controller,
                       isRequired: true,
                     ),
+                    SizedBox(height: 32),
+
                     customTextFormField(
                       hintText: "ADDRESS LINE 2",
                       fontScale: fontScale,
                       controller: checkoutController.address2Controller,
                     ),
+                    SizedBox(height: 32),
+
                     Row(
                       children: [
                         Expanded(
@@ -326,6 +333,8 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                         ),
                       ],
                     ),
+                    SizedBox(height: 32),
+
                     Row(
                       children: [
                         Expanded(
@@ -354,6 +363,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                         ),
                       ],
                     ),
+
                     SizedBox(height: 24),
                     if (!isLoggedIn) ...[
                       Row(
@@ -393,17 +403,15 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                                       text:
                                           "By selecting this checkbox, you are agreeing to our ",
                                       style: const TextStyle(
-                                          color: Color(0xFF414141),
-
+                                        color: Color(0xFF414141),
                                       ),
-
                                     ),
                                     TextSpan(
                                       text: "Privacy Policy",
                                       style: const TextStyle(
                                         color: Color(0xFF30578E),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                       recognizer:
                                           TapGestureRecognizer()
@@ -418,7 +426,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                                       style: const TextStyle(
                                         color: Color(0xFF30578E),
                                         fontSize: 14,
-                                        fontWeight: FontWeight.w600
+                                        fontWeight: FontWeight.w600,
                                       ),
                                       recognizer:
                                           TapGestureRecognizer()
@@ -441,7 +449,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                         children: [
                           BarlowText(
                             text:
-                                checkoutController.addressExists == true
+                                checkoutController.addressExists.value
                                     ? 'UPDATE ADDRESS'
                                     : 'ADD ADDRESS',
                             color: const Color(0xFF30578E),
@@ -455,7 +463,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                             hoverTextColor: const Color(0xFF2876E4),
                             hoverDecorationColor: Color(0xFF2876E4),
                             onTap: () {
-                              if (!hasAddress) {
+                              if (checkoutController.addressExists.value) {
                                 showDialog(
                                   context: context,
                                   barrierColor: Colors.transparent,
@@ -623,9 +631,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
               letterSpacing: 0.64 * fontScale,
               backgroundColor: Color(0xFFb9d6ff),
               hoverTextColor: Color(0xFF2876E4),
-              onTap: () {
-                // Check if user is not logged in and hasn't agreed to policies
-
+              onTap: () async {
                 // Sequential validation of required fields
                 if (checkoutController.firstNameController.text.isEmpty) {
                   widget.onErrorWishlistChanged?.call(
@@ -703,7 +709,24 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                   return;
                 }
 
-                // Proceed to payment if all validations pass
+                // Check if user is logged in
+                bool isLoggedIn = await isUserLoggedIn();
+                if (!isLoggedIn) {
+                  // Call handleSignUp for non-logged-in users
+                  bool signUpSuccess = await checkoutController.handleSignUp(
+                    context,
+                  );
+                  if (!signUpSuccess) {
+                    widget.onErrorWishlistChanged?.call(
+                      checkoutController.signupMessage.isNotEmpty
+                          ? checkoutController.signupMessage
+                          : 'Signup failed, please try again',
+                    );
+                    return;
+                  }
+                }
+
+                // Proceed to payment if all validations pass and signup is successful (or user is logged in)
                 final orderId =
                     'ORDER_${DateTime.now().millisecondsSinceEpoch}';
                 checkoutController.openRazorpayCheckout(

@@ -86,9 +86,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                           context.go(AppRoutes.catalog);
                         },
                         decorationColor: const Color(0xFF30578E),
-                        enableHoverUnderline: true,
                         hoverTextColor: const Color(0xFF2876E4),
-                        hoverDecorationColor: Color(0xFF2876E4),
                       ),
                       const SizedBox(width: 9),
                       SvgPicture.asset(
@@ -107,6 +105,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                         route: AppRoutes.checkOut,
                         enableUnderlineForActiveRoute: true,
                         decorationColor: const Color(0xFF30578E),
+                        hoverTextColor: const Color(0xFF2876E4),
                         onTap: () {},
                       ),
 
@@ -127,6 +126,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                         onTap: () {},
                         decoration: TextDecoration.underline,
                         decorationColor: const Color(0xFF30578E),
+                        hoverTextColor: const Color(0xFF2876E4),
                       ),
                     ],
                   ),

@@ -529,8 +529,7 @@ class _ProductDetailsState extends State<ProductDetails>
                                                         badges.add(
                                                           SvgPicture.asset(
                                                             "assets/home_page/fewPiecesLeft.svg",
-                                                            height: 25,
-                                                            width: 25,
+
                                                           ),
                                                         );
                                                       }
@@ -553,7 +552,7 @@ class _ProductDetailsState extends State<ProductDetails>
                                                                     vertical:
                                                                         paddingVertical,
                                                                     horizontal:
-                                                                        30,
+                                                                        32,
                                                                   ),
                                                               backgroundColor:
                                                                   const Color(
@@ -570,17 +569,15 @@ class _ProductDetailsState extends State<ProductDetails>
                                                                   BorderSide
                                                                       .none,
                                                             ),
-                                                            child: Text(
-                                                              "${relatedProduct.discount}% OFF",
-                                                              style: const TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                color:
-                                                                    Colors
-                                                                        .white,
-                                                              ),
+                                                            child: BarlowText(
+                                                            text:   "${relatedProduct.discount}% OFF",
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                              FontWeight
+                                                                  .w600,
+                                                              color:
+                                                              Colors
+                                                                  .white,
                                                             ),
                                                           ),
                                                         );

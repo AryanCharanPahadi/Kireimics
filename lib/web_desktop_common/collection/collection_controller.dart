@@ -65,9 +65,9 @@ class CollectionViewController extends GetxController {
     }
     final defaultCategory = categoriesController.categories.firstWhere(
       (cat) => cat['id'] == selectedCategoryId.value,
-      orElse: () => {'description': currentDescription.value},
+      orElse: () => {'catalog_description': currentDescription.value},
     );
-    currentDescription.value = defaultCategory['description'] as String;
+    currentDescription.value = defaultCategory['catalog_description'] as String;
   }
 
   void onCategorySelected(int id, String name, String desc, {int? productIds}) {
@@ -133,9 +133,9 @@ class CollectionViewController extends GetxController {
       collectionController.products.assignAll(productList);
       final selectedCategory = categoriesController.categories.firstWhere(
         (cat) => cat['id'] == selectedCategoryId.value,
-        orElse: () => {'description': currentDescription.value},
+        orElse: () => {'catalog_description': currentDescription.value},
       );
-      currentDescription.value = selectedCategory['description'] as String;
+      currentDescription.value = selectedCategory['catalog_description'] as String;
       currentFilter.value = 'All';
       initializeStates(productList.length);
       for (var product in productList) {
@@ -155,9 +155,9 @@ class CollectionViewController extends GetxController {
 
     final selectedCategory = categoriesController.categories.firstWhere(
       (cat) => cat['id'] == selectedCategoryId.value,
-      orElse: () => {'description': currentDescription.value},
+      orElse: () => {'catalog_description': currentDescription.value},
     );
-    currentDescription.value = selectedCategory['description'] as String;
+    currentDescription.value = selectedCategory['catalog_description'] as String;
     currentFilter.value = 'All';
     initializeStates(products.length);
   }

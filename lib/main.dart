@@ -87,13 +87,6 @@ class MyApp extends StatelessWidget {
                   const ResponsiveLayout(initialRoute: AppRoutes.about),
         ),
 
-        GoRoute(
-          path: AppRoutes.forgetPassword,
-          builder:
-              (context, state) => const ResponsiveLayout(
-                initialRoute: AppRoutes.forgetPassword,
-              ),
-        ),
 
         GoRoute(
           path: AppRoutes.searchQuery,
@@ -184,6 +177,26 @@ class MyApp extends StatelessWidget {
           builder:
               (context, state) =>
                   const ResponsiveLayout(initialRoute: AppRoutes.myOrder),
+        ),
+        GoRoute(
+          path: AppRoutes.deleteAddress,
+          builder:
+              (context, state) =>
+                  const ResponsiveLayout(initialRoute: AppRoutes.deleteAddress),
+        ),
+        GoRoute(
+          path: AppRoutes.forgotPasswordMain,
+          builder:
+              (context, state) => const ResponsiveLayout(
+                initialRoute: AppRoutes.forgotPasswordMain,
+              ),
+        ),
+        GoRoute(
+          path: AppRoutes.forgotPassword,
+          builder:
+              (context, state) => const ResponsiveLayout(
+                initialRoute: AppRoutes.forgotPassword,
+              ),
         ),
         GoRoute(
           path: AppRoutes.wishlist,

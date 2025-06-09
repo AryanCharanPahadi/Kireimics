@@ -186,7 +186,7 @@ class _LandingPageWebState extends State<LandingPageWeb>
       AppRoutes.searchQuery:
           (_) => SearchGridview(onWishlistChanged: _showNotification),
       AppRoutes.sale: (_) => Sale(onWishlistChanged: _showNotification),
-      AppRoutes.forgetPassword:
+      AppRoutes.forgotPasswordMain:
           (_) => ForgetPasswordPage(
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
@@ -430,7 +430,7 @@ class _LandingPageWebState extends State<LandingPageWeb>
 
   @override
   Widget build(BuildContext context) {
-    final isForgetPasswordRoute = _selectedPage == AppRoutes.forgetPassword;
+    final isForgetPasswordRoute = _selectedPage == AppRoutes.forgotPasswordMain;
 
     return PopScope(
       canPop: false,

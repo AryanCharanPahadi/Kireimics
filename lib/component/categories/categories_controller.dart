@@ -14,7 +14,7 @@ class CategoriesController extends GetxController {
   void loadCategories() async {
     isLoading.value = true;
 
-    final data = await ApiHelper.fetchCategoriesData();
+    final data = await ApiHelper.fetchCatalogCategoriesData();
     if (data != null) {
       categories.value = List<Map<String, dynamic>>.from(data);
     }

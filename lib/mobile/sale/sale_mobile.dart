@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/no_result_found/no_product_yet.dart';
 import 'package:kireimics/mobile/collection/collection.dart';
 import 'package:kireimics/web_desktop_common/sale/sale_controller.dart';
+import 'package:kireimics/web_desktop_common/sale/sale_navigation.dart';
 import '../../component/no_result_found/no_order_yet.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/app_routes/routes.dart';
@@ -86,7 +87,7 @@ class SaleMobile extends StatelessWidget {
                 const SizedBox(height: 15),
                 Padding(
                   padding: const EdgeInsets.only(left: 22),
-                  child: CatalogNavigation(
+                  child: SaleNavigation(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     selectedCategoryId: saleController.selectedCategoryId.value,

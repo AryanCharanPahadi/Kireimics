@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:kireimics/mobile/component/scrolling_header.dart';
@@ -10,6 +12,7 @@ import '../../component/google_sign_in/auth.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/utilities/url_launcher.dart';
+import '../../web/checkout/checkout_controller.dart';
 
 class DrawerMobile extends StatefulWidget {
   const DrawerMobile({super.key});
@@ -295,8 +298,16 @@ class _DrawerMobileState extends State<DrawerMobile>
                                   Navigator.pop(context); // Close drawer
                                   if (isLoggedIn) {
                                     // Perform logout operations
-                                    await signOutGoogle(); // Sign out from Google
-                                    await SharedPreferencesHelper.clearUserData(); // Clear user data
+                                    await signOutGoogle();
+
+                                    // Clear custom shared user data
+                                    await SharedPreferencesHelper.clearUserData();
+                                    await SharedPreferencesHelper.clearSelectedAddress();
+
+                                    // Refresh CheckoutController
+                                    final checkoutController =
+                                    Get.put(CheckoutController());
+                                    checkoutController.reset();
                                     context.go(
                                       AppRoutes.home,
                                     ); // Navigate to home

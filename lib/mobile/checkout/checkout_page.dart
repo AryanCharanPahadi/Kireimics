@@ -56,9 +56,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
     subtotal = double.tryParse(uri.queryParameters['subtotal'] ?? '') ?? 0.0;
     total = subtotal + deliveryCharge;
 
-    // Extract and print product IDs
-    final productIds = uri.queryParameters['productIds']?.split(',') ?? [];
-    print('Product IDs: $productIds');
+    checkoutController.loadProductIds(context);
   }
 
   @override
@@ -246,10 +244,8 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
 
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 22.0),
-                        child: Container(
-                          // width: 346,
-                          // color: Colo
-                          // rs.red,
+                        child: Form(
+                          key: checkoutController.formKey,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -459,8 +455,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                   children: [
                                     BarlowText(
                                       text:
-                                          checkoutController.addressExists ==
-                                                  true
+                                          checkoutController.addressExists.value
                                               ? 'UPDATE ADDRESS'
                                               : 'ADD ADDRESS',
                                       color: const Color(0xFF30578E),
@@ -471,7 +466,9 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                       backgroundColor: Color(0xFFB9D6FF),
 
                                       onTap: () {
-                                        if (!hasAddress) {
+                                        if (checkoutController
+                                            .addressExists
+                                            .value) {
                                           showDialog(
                                             context: context,
                                             barrierColor: Colors.transparent,

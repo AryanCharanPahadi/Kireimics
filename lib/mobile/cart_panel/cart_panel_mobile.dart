@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kireimics/component/no_result_found/no_order_yet.dart';
-
 import '../../component/api_helper/api_helper.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/product_details/product_details_modal.dart';
@@ -11,13 +10,16 @@ import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 
 class CartPanelMobile extends StatefulWidget {
-  final Function(String)? onWishlistChanged; // Updated callback
+  final Function(String)? onWishlistChanged;
   final int? productId;
+  final Function(double)?
+  onSubtotalChanged; // New callback for subtotal changes
 
   const CartPanelMobile({
     Key? key,
     required this.productId,
     this.onWishlistChanged,
+    this.onSubtotalChanged,
   }) : super(key: key);
 
   @override
@@ -27,9 +29,10 @@ class CartPanelMobile extends StatefulWidget {
 class _CartPanelMobileState extends State<CartPanelMobile> {
   List<Product> productList = [];
   List<ValueNotifier<int>> quantityList = [];
-  List<int?> stockQuantities = []; // New list to track stock quantities
+  List<int?> stockQuantities = [];
   bool isLoading = true;
   String errorMessage = "";
+  double _subtotal = 0.0; // Store subtotal locally
 
   double calculateTotal() {
     double total = 0.0;
@@ -39,6 +42,12 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
         final price = double.tryParse(priceString) ?? 0.0;
         total += price * quantityList[i].value;
       }
+    }
+    if (_subtotal != total) {
+      _subtotal = total;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onSubtotalChanged?.call(total); // Notify parent after build
+      });
     }
     return total;
   }
@@ -94,9 +103,14 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
             stockQuantities[index] != null && stockQuantities[index]! > 0
                 ? 1
                 : 0,
-          ),
+          )..addListener(() {
+            setState(() {
+              calculateTotal(); // Recalculate when quantity changes
+            });
+          }),
         );
         isLoading = false;
+        calculateTotal(); // Initial subtotal calculation
       });
     } catch (e) {
       setState(() {
@@ -289,6 +303,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                             productList.removeAt(index);
                                             quantityList.removeAt(index);
                                             stockQuantities.removeAt(index);
+                                            calculateTotal();
                                           });
                                         },
                                         child: BarlowText(
@@ -360,45 +375,6 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
               SizedBox(height: 27),
               Divider(color: Color(0xFFB9D6FF)),
               SizedBox(height: 22),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: BarlowText(
-                      text: "Rs ${calculateTotal().toStringAsFixed(2)}",
-                      color: Color(0xFF414141),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
-                      lineHeight: 1.0,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      height: 40,
-                      child: GestureDetector(
-                        onTap: () {
-                          final subtotal = calculateTotal();
-                          context.go(
-                            '${AppRoutes.checkOut}?subtotal=${subtotal.toStringAsFixed(2)}',
-                          );
-                        },
-                        child: BarlowText(
-                          text: "PROCEED TO CHECKOUT",
-                          color: Color(0xFF30578E),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          lineHeight: 1.0,
-                          letterSpacing: 1 * 0.04,
-                          backgroundColor: Color(0xFFb9d6ff),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ],
         ),

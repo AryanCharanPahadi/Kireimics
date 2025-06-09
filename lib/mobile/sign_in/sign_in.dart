@@ -290,77 +290,7 @@ class _SignInMobileState extends State<SignInMobile> {
                 ],
               ),
             ),
-            const SizedBox(height: 40),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFDDEAFF).withOpacity(0.6),
-                    offset: const Offset(20, 20),
-                    blurRadius: 20,
-                  ),
-                ],
-                border: Border.all(color: const Color(0xFFDDEAFF), width: 1),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 16.0,
-                  top: 13,
-                  bottom: 13,
-                  right: 10,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFDDEAFF),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          "assets/header/IconProfile.svg",
-                          height: 21,
-                          width: 20,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 24),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BarlowText(
-                          text: "Already have an account?",
-                          fontWeight: FontWeight.w400,
-                          fontSize: 14,
-                          lineHeight: 1.0,
-                          color: const Color(0xFF000000),
-                        ),
-                        const SizedBox(height: 6),
-                        GestureDetector(
-                          onTap: () {
-                            context.go(AppRoutes.logIn);
-                          },
-                          child: BarlowText(
-                            text: "LOG IN NOW",
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            lineHeight: 1.5,
-                            color: const Color(0xFF30578E),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 100),
           ],
         ),
       ),

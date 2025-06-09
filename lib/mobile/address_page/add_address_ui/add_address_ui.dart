@@ -58,35 +58,40 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: SvgPicture.asset(
-                    "assets/icons/closeIcon.svg",
-                    height: 18,
-                    width: 18,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: SvgPicture.asset(
+                        "assets/icons/closeIcon.svg",
+                        height: 18,
+                        width: 18,
+                      ),
+                    ),
+                    if (showSuccessBanner || showErrorBanner)
+                      NotificationBanner(
+                        message:
+                            showSuccessBanner
+                                ? (widget.isEditing
+                                    ? "Updated successfully!"
+                                    : "Added successfully!")
+                                : errorMessage,
+                        bannerColor:
+                            showSuccessBanner ? Colors.green : Colors.red,
+                        textColor: Colors.black,
+                        onClose: () {
+                          setState(() {
+                            showSuccessBanner = false;
+                            showErrorBanner = false;
+                          });
+                        },
+                      ),
+                  ],
                 ),
 
-                const SizedBox(height: 20),
-                if (showSuccessBanner || showErrorBanner)
-                  NotificationBanner(
-                    message:
-                        showSuccessBanner
-                            ? (widget.isEditing
-                                ? "Updated successfully!"
-                                : "Added successfully!")
-                            : errorMessage,
-                    bannerColor: showSuccessBanner ? Colors.green : Colors.red,
-                    textColor: Colors.black,
-                    onClose: () {
-                      setState(() {
-                        showSuccessBanner = false;
-                        showErrorBanner = false;
-                      });
-                    },
-                  ),
                 const SizedBox(height: 20),
                 CralikaFont(
                   text: widget.isEditing ? "Update Address" : "Add New Address",
@@ -117,6 +122,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                           return null;
                         },
                       ),
+                      SizedBox(height: 32),
                       customTextFormField(
                         hintText: "LAST NAME*",
                         controller: controller.lastNameController,
@@ -130,6 +136,8 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                           return null;
                         },
                       ),
+                      SizedBox(height: 32),
+
                       customTextFormField(
                         hintText: "EMAIL*",
                         controller: controller.emailController,
@@ -145,6 +153,8 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                           return null;
                         },
                       ),
+                      SizedBox(height: 32),
+
                       customTextFormField(
                         hintText: "ADDRESS LINE 1*",
                         controller: controller.addressLine1Controller,
@@ -156,10 +166,14 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                           return null;
                         },
                       ),
+                      SizedBox(height: 32),
+
                       customTextFormField(
                         hintText: "ADDRESS LINE 2",
                         controller: controller.addressLine2Controller,
                       ),
+                      SizedBox(height: 32),
+
                       Row(
                         children: [
                           Expanded(
@@ -204,6 +218,8 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                           ),
                         ],
                       ),
+                      SizedBox(height: 32),
+
                       customTextFormField(
                         hintText:
                             controller.isPincodeLoading.value
@@ -238,16 +254,22 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 24),
                       Row(
                         children: [
                           Obx(
-                            () => Checkbox(
-                              value: controller.isChecked.value,
-                              onChanged: controller.toggleCheckbox,
-                              activeColor: Color(0xFF30578E),
+                            () => GestureDetector(
+                              onTap: () => controller.toggleCheckbox(),
+                              child: SvgPicture.asset(
+                                controller.isChecked.value
+                                    ? 'assets/icons/filledCheckbox.svg'
+                                    : 'assets/icons/emptyCheckbox.svg',
+                                width: 24,
+                                height: 24,
+                              ),
                             ),
                           ),
+
                           SizedBox(width: 11),
                           BarlowText(
                             text: "Save as my default shipping address.",

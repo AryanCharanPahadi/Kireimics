@@ -4,6 +4,9 @@ class AppRoutes {
   static const String about = '/about';
   static const String drawer = '/drawer';
   static const String shippingPolicy = '/shipping-policy';
+  static const String deleteAddress = '/delete-address';
+  static const String forgotPassword = '/forgot-password';
+  static const String forgotPasswordMain = '/forgot-password-reset';
   static const String privacyPolicy = '/privacy-policy';
   static const String contactUs = '/contact-us';
   static const String catalog = '/catalog';
@@ -18,7 +21,6 @@ class AppRoutes {
   static const String logIn = '/log-in';
   static const String signIn = '/sign-in';
   static const String addAddress = '/add-address';
-  static const String forgetPassword = '/forget-password';
   static const String paymentResult = '/payment-result'; // New route
   static const String addToCart = '/cart/:id';
   static String cartDetails(int id) => '/cart/$id'; // for navigation

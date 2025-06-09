@@ -1,14 +1,14 @@
 import 'package:get/get.dart';
 import 'package:kireimics/component/api_helper/api_helper.dart';
-import 'package:kireimics/component/categories/categories_controller.dart';
 import 'package:kireimics/component/product_details/product_details_modal.dart';
+import 'package:kireimics/web_desktop_common/sale/sale_categories_controller.dart';
 
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../collection/collection_modal.dart';
 
 class SaleController extends GetxController {
-  final CategoriesController categoriesController = Get.put(
-    CategoriesController(),
+  final SaleCategoriesController saleCategoriesController = Get.put(
+    SaleCategoriesController(),
   );
 
   // Reactive variables
@@ -51,16 +51,16 @@ class SaleController extends GetxController {
   }
 
   Future<void> initializeDescription() async {
-    while (categoriesController.isLoading.value) {
+    while (saleCategoriesController.isLoading.value) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
-    final defaultCategory = categoriesController.categories.firstWhere(
+    final defaultCategory = saleCategoriesController.categories.firstWhere(
       (cat) => cat['id'] == selectedCategoryId.value,
-      orElse: () => {'description': currentDescription.value},
+      orElse: () => {'sale_description': currentDescription.value},
     );
 
-    currentDescription.value = defaultCategory['description'] as String;
+    currentDescription.value = defaultCategory['sale_description'] as String;
   }
 
   Future<void> fetchAllProducts() async {
@@ -83,16 +83,16 @@ class SaleController extends GetxController {
     isCollectionView.value = false;
 
     final products = await ApiHelper.fetchProductByCatId(catId);
-    final selectedCategory = categoriesController.categories.firstWhere(
+    final selectedCategory = saleCategoriesController.categories.firstWhere(
       (cat) => cat['id'] == catId,
-      orElse: () => {'description': currentDescription.value},
+      orElse: () => {'sale_description': currentDescription.value},
     );
 
     productList.assignAll(products);
     filteredProductList.assignAll(
       products.where((product) => product.isSale == 1).toList(),
     );
-    currentDescription.value = selectedCategory['description'] as String;
+    currentDescription.value = selectedCategory['sale_description'] as String;
     currentFilter.value = 'All';
     initializeStates(filteredProductList.length);
     isLoading.value = false;
@@ -107,7 +107,6 @@ class SaleController extends GetxController {
     initializeStates(collections?.length ?? 0);
     isLoading.value = false;
   }
-
 
   Future<void> fetchCollectionList(int catId) async {
     isLoading.value = true;

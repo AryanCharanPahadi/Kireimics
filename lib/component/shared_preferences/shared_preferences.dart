@@ -128,5 +128,4 @@ class SharedPreferencesHelper {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_selectedAddressKey);
   }
-
 }

@@ -125,8 +125,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
             fontWeight: FontWeight.w600,
             fontSize: 16,
             color: Color(0xFF30578E),
-            hoverBackgroundColor: Color(0xFFb9d6ff),
-            enableHoverBackground: true,
+            hoverTextColor: Color(0xFF2876E4),
           ),
         ),
       ),
@@ -144,8 +143,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
             fontWeight: FontWeight.w600,
             fontSize: 16,
             color: Color(0xFF30578E),
-            hoverBackgroundColor: Color(0xFFb9d6ff),
-            enableHoverBackground: true,
+            hoverTextColor: Color(0xFF2876E4),
           ),
         ),
       ),
@@ -163,8 +161,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
             fontWeight: FontWeight.w600,
             fontSize: 16,
             color: Color(0xFF30578E),
-            hoverBackgroundColor: Color(0xFFb9d6ff),
-            enableHoverBackground: true,
+            hoverTextColor: Color(0xFF2876E4),
           ),
         ),
       ),
@@ -182,8 +179,13 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
 
           // Clear custom shared user data
           await SharedPreferencesHelper.clearUserData();
+          await SharedPreferencesHelper.clearSelectedAddress();
+
           // Refresh CheckoutController
-          final checkoutController = Get.find<CheckoutController>();
+          final CheckoutController checkoutController = Get.put(
+            CheckoutController(),
+          );
+          ;
           checkoutController.reset();
 
           // Navigate to home
@@ -191,13 +193,17 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: const Text(
-            'LOGOUT',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: Color(0xFFAEAEAE),
-            ),
+          child: const BarlowText(
+            text: 'LOGOUT',
+
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            color: Color(0xFFAEAEAE),
+            hoverBackgroundColor: Color(0xFFb9d6ff),
+            enableHoverBackground: true,
+            decorationColor: const Color(0xFF30578E),
+            hoverTextColor: const Color(0xFF2876E4),
+            hoverDecorationColor: Color(0xFF2876E4),
           ),
         ),
       ),
@@ -209,76 +215,80 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
     return [
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    widget.onClose();
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  widget.onClose();
 
-                    showDialog(
-                      context: context,
-                      barrierColor: Colors.transparent,
-                      builder: (BuildContext context) {
-                        return LoginPage();
-                      },
-                    );
-                  },
-                  child: const Text(
-                    'LOG IN',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Color(0xFF30578E),
-                    ),
-                  ),
+                  showDialog(
+                    context: context,
+                    barrierColor: Colors.transparent,
+                    builder: (BuildContext context) {
+                      return LoginPage();
+                    },
+                  );
+                },
+                child: const BarlowText(
+                  text: 'LOG IN',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Color(0xFF30578E),
+                  hoverBackgroundColor: Color(0xFFb9d6ff),
+                  enableHoverBackground: true,
+                  decorationColor: const Color(0xFF30578E),
+                  hoverTextColor: const Color(0xFF2876E4),
+                  hoverDecorationColor: Color(0xFF2876E4),
                 ),
-                const SizedBox(width: 8), // spacing between Log In and Sign Up
-                Text(
-                  '/',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                    color: Color(0xFF30578E),
-                  ),
+              ),
+              const SizedBox(width: 8), // spacing between Log In and Sign Up
+              Text(
+                '/',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Color(0xFF30578E),
                 ),
-                const SizedBox(width: 8), // spacing between Log In and Sign Up
+              ),
+              const SizedBox(width: 8), // spacing between Log In and Sign Up
 
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    widget.onClose();
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  widget.onClose();
 
-                    showDialog(
-                      context: context,
-                      barrierColor: Colors.transparent,
-                      builder: (BuildContext context) {
-                        return Signup();
-                      },
-                    );
-                  },
-                  child: const Text(
-                    'SIGN UP',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Color(0xFF30578E),
-                    ),
-                  ),
+                  showDialog(
+                    context: context,
+                    barrierColor: Colors.transparent,
+                    builder: (BuildContext context) {
+                      return Signup();
+                    },
+                  );
+                },
+                child: BarlowText(
+                  text: 'SIGN UP',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Color(0xFF30578E),
+                  hoverBackgroundColor: Color(0xFFb9d6ff),
+                  enableHoverBackground: true,
+                  decorationColor: const Color(0xFF30578E),
+                  hoverTextColor: const Color(0xFF2876E4),
+                  hoverDecorationColor: Color(0xFF2876E4),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Divider(color: Color(0xFF30578E)),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
@@ -300,15 +310,13 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: Color(0xFF30578E),
-                hoverBackgroundColor: Color(0xFFb9d6ff),
-
-                enableHoverBackground: true,
+                hoverTextColor: Color(0xFF2876E4),
               ),
             ),
           ),
 
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
@@ -330,15 +338,13 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: Color(0xFF30578E),
-                hoverBackgroundColor: Color(0xFFb9d6ff),
-
-                enableHoverBackground: true,
+                hoverTextColor: Color(0xFF2876E4),
               ),
             ),
           ),
 
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
@@ -360,9 +366,7 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: Color(0xFF30578E),
-                hoverBackgroundColor: Color(0xFFb9d6ff),
-
-                enableHoverBackground: true,
+                hoverTextColor: Color(0xFF2876E4),
               ),
             ),
           ),

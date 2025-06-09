@@ -550,34 +550,21 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                                                               0xFF30578E,
                                                             ),
                                                           ),
-                                                          GestureDetector(
-                                                            onTapDown: (
-                                                              TapDownDetails
-                                                              details,
-                                                            ) {
-                                                              // Capture the global tap position
-                                                              final tapPosition =
-                                                                  details
-                                                                      .globalPosition;
-                                                              _showDeleteConfirmationBanner(
-                                                                address["id"]
-                                                                    .toString(),
-                                                                tapPosition,
+                                                          BarlowText(
+                                                            text: "DELETE",
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 14,
+                                                            lineHeight: 1.5,
+                                                            letterSpacing: 0.0,
+                                                            color: Color(
+                                                              0xFF30578E,
+                                                            ),
+                                                            onTap: () {
+                                                              context.go(
+                                                                '${AppRoutes.deleteAddress}?addressId=${address['id'].toString()}',
                                                               );
                                                             },
-                                                            child: BarlowText(
-                                                              text: "DELETE",
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              fontSize: 14,
-                                                              lineHeight: 1.5,
-                                                              letterSpacing:
-                                                                  0.0,
-                                                              color: Color(
-                                                                0xFF30578E,
-                                                              ),
-                                                            ),
                                                           ),
                                                         ],
                                                       ),

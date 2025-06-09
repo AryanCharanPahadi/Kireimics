@@ -116,8 +116,22 @@ class ApiHelper {
     }
   }
 
-  static Future<List<dynamic>?> fetchCategoriesData() async {
+  static Future<List<dynamic>?> fetchCatalogCategoriesData() async {
     final response = await http.get(Uri.parse("$baseUrlC/categories.php"));
+
+    if (response.statusCode == 200) {
+      print(response.body);
+      return jsonDecode(response.body);
+    } else {
+      print("Error: ${response.statusCode}");
+      return null;
+    }
+  }
+
+  static Future<List<dynamic>?> fetchSaleCategoriesData() async {
+    final response = await http.get(
+      Uri.parse("$baseUrlC/categories_data/sale_categories.php"),
+    );
 
     if (response.statusCode == 200) {
       print(response.body);
@@ -356,21 +370,26 @@ class ApiHelper {
     required String lastName,
     required String email,
     required String phone,
-    required String password,
+    String? password, // Made optional
     required String createdAt,
   }) async {
     try {
+      final Map<String, String> body = {
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'phone': phone,
+        'createdAt': createdAt,
+      };
+
+      if (password != null) {
+        body['password'] = password;
+      }
+
       final response = await http.post(
         Uri.parse('${baseUrlF}login_signup/signup.php'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: {
-          'first_name': firstName,
-          'last_name': lastName,
-          'email': email,
-          'phone': phone,
-          'password': password,
-          'createdAt': createdAt,
-        },
+        body: body,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -549,6 +568,33 @@ class ApiHelper {
   static Future<Map<String, dynamic>> getUserAddress(String userId) async {
     final url = Uri.parse(
       '$baseUrlF/user_address/get_user_address.php?created_by=$userId',
+    );
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      final jsonData = json.decode(response.body);
+
+      if (response.statusCode == 200 && jsonData['error'] == false) {
+        return {'error': false, 'data': jsonData['data']};
+      } else {
+        return {
+          'error': true,
+          'message':
+              jsonData['message'] ?? jsonData['data'] ?? 'Something went wrong',
+        };
+      }
+    } catch (e) {
+      return {'error': true, 'message': 'Error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> getUserAddressById(String userId) async {
+    final url = Uri.parse(
+      '$baseUrlF/user_address/get_address_by_id.php?id=$userId',
     );
 
     try {

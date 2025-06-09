@@ -100,7 +100,6 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
     AppRoutes.about: (_) => const AboutPageWeb(),
     AppRoutes.shippingPolicy: (_) => const ShippingPolicy(),
     AppRoutes.privacyPolicy: (_) => const PrivacyPolicy(),
-    AppRoutes.forgetPassword: (_) => const ForgetPasswordPage(),
     // AppRoutes.collection: (_) => const Collection(),
     AppRoutes.sale: (_) => const Sale(),
     AppRoutes.myOrder: (_) => const MyOrderUiDesktop(),
@@ -116,6 +115,12 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
           ),
+      AppRoutes.forgotPasswordMain:
+          (_) => ForgetPasswordPage(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
+
       AppRoutes.searchQuery:
           (_) => SearchGridview(onWishlistChanged: _showNotification),
       AppRoutes.wishlist:
@@ -429,7 +434,7 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
 
   @override
   Widget build(BuildContext context) {
-    final isForgetPasswordRoute = _selectedPage == AppRoutes.forgetPassword;
+    final isForgetPasswordRoute = _selectedPage == AppRoutes.forgotPasswordMain;
 
     return PopScope(
       canPop: false,

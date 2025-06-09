@@ -117,9 +117,9 @@ class CatalogPageController extends GetxController {
     }
     final selectedCategory = categoriesController.categories.firstWhere(
       (cat) => cat['id'] == catId,
-      orElse: () => {'description': currentDescription.value},
+      orElse: () => {'catalog_description': currentDescription.value},
     );
-    currentDescription.value = selectedCategory['description'] as String;
+    currentDescription.value = selectedCategory['catalog_description'] as String;
     currentFilter.value = 'All';
     initializeStates(productList.length);
     isLoading.value = false;
@@ -151,9 +151,9 @@ class CatalogPageController extends GetxController {
     }
     final defaultCategory = categoriesController.categories.firstWhere(
       (cat) => cat['id'] == selectedCategoryId.value,
-      orElse: () => {'description': currentDescription.value},
+      orElse: () => {'catalog_description': currentDescription.value},
     );
-    currentDescription.value = defaultCategory['description'] as String;
+    currentDescription.value = defaultCategory['catalog_description'] as String;
   }
 
   void onCategorySelected(int id, String name, String desc) {

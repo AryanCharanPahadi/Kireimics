@@ -5,7 +5,8 @@ import '../../component/categories/categories_controller.dart';
 
 class CollectionNavigation extends StatelessWidget {
   final int selectedCategoryId;
-  final Function(int, String, String, {int? productIds}) onCategorySelected; // Updated signature
+  final Function(int, String, String, {int? productIds})
+  onCategorySelected; // Updated signature
   final Function()? fetchAllProducts;
   final BuildContext context;
   final double fontSize;
@@ -25,7 +26,8 @@ class CollectionNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CategoriesController categoriesController = Get.find<CategoriesController>();
+    final CategoriesController categoriesController =
+    Get.put(CategoriesController());;
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 800;
 
@@ -34,51 +36,60 @@ class CollectionNavigation extends StatelessWidget {
         return const CircularProgressIndicator();
       }
 
-      final children = categoriesController.categories
-          .where((category) => (category['name'] as String).toLowerCase() != 'collections')
-          .map((category) {
-        final name = category['name'] as String;
-        final desc = category['description'] as String;
-        final id = category['id'] as int;
+      final children =
+          categoriesController.categories
+              .where(
+                (category) =>
+                    (category['name'] as String).toLowerCase() != 'collections',
+              )
+              .map((category) {
+                final name = category['name'] as String;
+                final desc = category['catalog_description'] as String;
+                final id = category['id'] as int;
 
-        return GestureDetector(
-          onTap: () {
-            onCategorySelected(id, name, desc, productIds: productIds); // Pass productIds
-          },
-          child: BarlowText(
-            text: name,
-            color: const Color(0xFF30578E),
-            fontWeight: fontWeight,
-            fontSize: fontSize,
-            lineHeight: 1.0,
-            letterSpacing: 0.04 * fontSize,
-            decoration: selectedCategoryId == id
-                ? TextDecoration.underline
-                : TextDecoration.none,
-            decorationThickness: 2.0,
-            decorationColor: const Color(0xFF30578E),
-            enableHoverUnderline: true,
-            hoverTextColor: const Color(0xFF2876E4),
-            hoverDecorationColor: Color(0xFF2876E4),
-          ),
-        );
-      }).toList();
+                return GestureDetector(
+                  onTap: () {
+                    onCategorySelected(
+                      id,
+                      name,
+                      desc,
+                      productIds: productIds,
+                    ); // Pass productIds
+                  },
+                  child: BarlowText(
+                    text: name,
+                    color: const Color(0xFF30578E),
+                    fontWeight: fontWeight,
+                    fontSize: fontSize,
+                    lineHeight: 1.0,
+                    letterSpacing: 0.04 * fontSize,
+                    decoration:
+                    selectedCategoryId == id
+                        ? TextDecoration.underline
+                        : TextDecoration.none,
+                    decorationThickness: 2.0,
+                    enableUnderlineForActiveRoute: true,
+                    decorationColor: const Color(0xFF30578E),
+                    hoverTextColor: const Color(0xFF2876E4),
+                  ),
+                );
+              })
+              .toList();
 
       return isSmallScreen
-          ? Wrap(
-        spacing: 16,
-        runSpacing: 18,
-        children: children,
-      )
+          ? Wrap(spacing: 16, runSpacing: 18, children: children)
           : Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: children
-            .map((child) => Padding(
-          padding: const EdgeInsets.only(right: 32),
-          child: child,
-        ))
-            .toList(),
-      );
+            mainAxisAlignment: MainAxisAlignment.start,
+            children:
+                children
+                    .map(
+                      (child) => Padding(
+                        padding: const EdgeInsets.only(right: 32),
+                        child: child,
+                      ),
+                    )
+                    .toList(),
+          );
     });
   }
 }

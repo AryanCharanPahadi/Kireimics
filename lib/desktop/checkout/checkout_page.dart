@@ -33,13 +33,10 @@ class CheckoutPageDesktop extends StatefulWidget {
 }
 
 class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
-  bool hasAddress = false;
   bool showLoginBox = true;
-  bool isChecked = false;
   late double subtotal;
   final double deliveryCharge = 50.0;
   late double total;
-
   Future<bool> isUserLoggedIn() async {
     String? userData = await SharedPreferencesHelper.getUserData();
     return userData != null && userData.isNotEmpty;
@@ -56,9 +53,8 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
     subtotal = double.tryParse(uri.queryParameters['subtotal'] ?? '') ?? 0.0;
     total = subtotal + deliveryCharge;
 
-    // Extract and print product IDs
-    final productIds = uri.queryParameters['productIds']?.split(',') ?? [];
-    print('Product IDs: $productIds');
+    checkoutController.loadProductIds(context);
+
   }
 
   @override
@@ -258,6 +254,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
             SizedBox(
               width: containerWidth,
               child: Form(
+                key: checkoutController.formKey,
                 child: Column(
                   children: [
                     customTextFormField(
@@ -266,29 +263,39 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                       controller: checkoutController.firstNameController,
                       isRequired: true,
                     ),
+                    SizedBox(height: 32),
+
                     customTextFormField(
                       hintText: "LAST NAME",
                       fontScale: fontScale,
                       controller: checkoutController.lastNameController,
                       isRequired: true,
                     ),
+                    SizedBox(height: 32),
+
                     customTextFormField(
                       hintText: "EMAIL",
                       fontScale: fontScale,
                       controller: checkoutController.emailController,
                       isRequired: true,
                     ),
+                    SizedBox(height: 32),
+
                     customTextFormField(
                       hintText: "ADDRESS LINE 1",
                       fontScale: fontScale,
                       controller: checkoutController.address1Controller,
                       isRequired: true,
                     ),
+                    SizedBox(height: 32),
+
                     customTextFormField(
                       hintText: "ADDRESS LINE 2",
                       fontScale: fontScale,
                       controller: checkoutController.address2Controller,
                     ),
+                    SizedBox(height: 32),
+
                     Row(
                       children: [
                         Expanded(
@@ -325,6 +332,8 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                         ),
                       ],
                     ),
+                    SizedBox(height: 32),
+
                     Row(
                       children: [
                         Expanded(
@@ -361,11 +370,12 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                           GestureDetector(
                             onTap: () {
                               setState(() {
-                                isChecked = !isChecked;
+                                checkoutController.isChecked =
+                                    !checkoutController.isChecked;
                               });
                             },
                             child: SvgPicture.asset(
-                              isChecked
+                              checkoutController.isChecked
                                   ? "assets/icons/filledCheckbox.svg"
                                   : "assets/icons/emptyCheckbox.svg",
                               height: 24,
@@ -430,7 +440,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                         children: [
                           BarlowText(
                             text:
-                                checkoutController.addressExists == true
+                                checkoutController.addressExists.value
                                     ? 'UPDATE ADDRESS'
                                     : 'ADD ADDRESS',
                             color: const Color(0xFF30578E),
@@ -444,7 +454,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                             hoverTextColor: const Color(0xFF2876E4),
                             hoverDecorationColor: Color(0xFF2876E4),
                             onTap: () {
-                              if (!hasAddress) {
+                              if (checkoutController.addressExists.value) {
                                 showDialog(
                                   context: context,
                                   barrierColor: Colors.transparent,
@@ -615,11 +625,8 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
               lineHeight: 1.0,
               letterSpacing: 0.64 * fontScale,
               backgroundColor: Color(0xFFb9d6ff),
-              hoverTextColor: Color(0xFF2876E4), // Changes to blue on hover
-
-              onTap: () {
-                // Check if user is not logged in and hasn't agreed to policies
-
+              hoverTextColor: Color(0xFF2876E4),
+              onTap: () async {
                 // Sequential validation of required fields
                 if (checkoutController.firstNameController.text.isEmpty) {
                   widget.onErrorWishlistChanged?.call(
@@ -689,14 +696,32 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                   );
                   return;
                 }
-                if (!isChecked && !checkoutController.addressExists.value) {
+                if (!checkoutController.isChecked &&
+                    !checkoutController.addressExists.value) {
                   widget.onErrorWishlistChanged?.call(
                     'Please agree to the Privacy and Shipping Policy',
                   );
                   return;
                 }
 
-                // Proceed to payment if all validations pass
+                // Check if user is logged in
+                bool isLoggedIn = await isUserLoggedIn();
+                if (!isLoggedIn) {
+                  // Call handleSignUp for non-logged-in users
+                  bool signUpSuccess = await checkoutController.handleSignUp(
+                    context,
+                  );
+                  if (!signUpSuccess) {
+                    widget.onErrorWishlistChanged?.call(
+                      checkoutController.signupMessage.isNotEmpty
+                          ? checkoutController.signupMessage
+                          : 'Signup failed, please try again',
+                    );
+                    return;
+                  }
+                }
+
+                // Proceed to payment if all validations pass and signup is successful (or user is logged in)
                 final orderId =
                     'ORDER_${DateTime.now().millisecondsSinceEpoch}';
                 checkoutController.openRazorpayCheckout(

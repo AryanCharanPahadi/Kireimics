@@ -480,8 +480,7 @@ class _SearchGridviewState extends State<SearchGridview>
                                                               badges.add(
                                                                 SvgPicture.asset(
                                                                   "assets/home_page/fewPiecesLeft.svg",
-                                                                  height: 25,
-                                                                  width: 25,
+
                                                                 ),
                                                               );
                                                             }
@@ -505,7 +504,7 @@ class _SearchGridviewState extends State<SearchGridview>
                                                                       vertical:
                                                                           paddingVertical,
                                                                       horizontal:
-                                                                          30,
+                                                                          32,
                                                                     ),
                                                                     backgroundColor:
                                                                         const Color(
@@ -528,7 +527,7 @@ class _SearchGridviewState extends State<SearchGridview>
                                                                     "${product.discount}% OFF",
                                                                     style: const TextStyle(
                                                                       fontSize:
-                                                                          16,
+                                                                          14,
                                                                       fontWeight:
                                                                           FontWeight
                                                                               .w600,
@@ -775,29 +774,22 @@ class _SearchGridviewState extends State<SearchGridview>
                                                               ),
                                                               GestureDetector(
                                                                 onTap: () {
-                                                                  showDialog(
-                                                                    context:
-                                                                        context,
-                                                                    barrierColor:
-                                                                        Colors
-                                                                            .transparent,
-                                                                    builder: (
-                                                                      BuildContext
-                                                                      context,
-                                                                    ) {
-                                                                      cartNotifier
-                                                                          .refresh();
-                                                                      return CartPanel(
-                                                                        productId:
-                                                                            product.id,
-                                                                      );
-                                                                    },
-                                                                  );
-                                                                  widget
-                                                                      .onWishlistChanged
-                                                                      ?.call(
-                                                                        'Product Added To Cart',
-                                                                      );
+                                                                  // Call the wishlist changed callback immediately
+                                                                  widget.onWishlistChanged?.call('Product Added To Cart');
+
+                                                                  // Delay the modal opening by 3 seconds
+                                                                  Future.delayed(Duration(seconds: 3), () {
+                                                                    showDialog(
+                                                                      context: context,
+                                                                      barrierColor: Colors.transparent,
+                                                                      builder: (BuildContext context) {
+                                                                        cartNotifier.refresh();
+                                                                        return CartPanel(
+                                                                          productId: product.id,
+                                                                        );
+                                                                      },
+                                                                    );
+                                                                  });
                                                                 },
                                                                 child: BarlowText(
                                                                   text:

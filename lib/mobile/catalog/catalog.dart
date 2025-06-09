@@ -276,9 +276,7 @@ class _CatalogMobileComponentState extends State<CatalogMobileComponent> {
                                             Positioned.fill(
                                               child: GestureDetector(
                                                 onTap:
-                                                    isOutOfStock
-                                                        ? null
-                                                        : () {
+                                                     () {
                                                           context.go(
                                                             AppRoutes.productDetails(
                                                               product.id,

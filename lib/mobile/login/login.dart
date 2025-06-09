@@ -36,282 +36,205 @@ class _LoginMobileState extends State<LoginMobile> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SingleChildScrollView(
-          child: Container(
-            height: MediaQuery.of(context).size.height,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 70.0, left: 22, right: 22),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          context.go(AppRoutes.home);
-                        },
-                        child: SvgPicture.asset(
-                          "assets/icons/closeIcon.svg",
-                          height: 18,
-                          width: 18,
-                        ),
-                      ),
-                    ],
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 70.0, left: 22, right: 22),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    context.go(AppRoutes.home);
+                  },
+                  child: SvgPicture.asset(
+                    "assets/icons/closeIcon.svg",
+                    height: 18,
+                    width: 18,
                   ),
-                  const SizedBox(height: 20),
-                  CralikaFont(
-                    text: "Log In",
-                    color: const Color(0xFF414141),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 24.0,
-                    lineHeight: 1.0,
-                    letterSpacing: 0.128,
-                  ),
-                  const SizedBox(height: 12),
-                  BarlowText(
-                    text:
-                        "Log in to your Kireimics account for a quick checkout.",
-                    fontWeight: FontWeight.w400,
-                    fontSize: 14,
-                    lineHeight: 1.0,
-                    letterSpacing: 0.0,
-                  ),
-                  const SizedBox(height: 44),
-                  Form(
-                    key: loginController.formKey,
-                    child: Column(
-                      children: [
-                        customTextFormField(
-                          hintText: "EMAIL",
-                          controller: loginController.emailController,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            if (!RegExp(
-                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                            ).hasMatch(value)) {
-                              return 'Please enter a valid email';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 32),
-                        customTextFormField(
-                          hintText: "PASSWORD",
-                          controller: loginController.passwordController,
-                          isPassword: true, // Add isPassword flag
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            if (value.length < 8) {
-                              return 'Password must be at least 8 characters';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          isChecked = !isChecked;
-                                        });
-                                      },
-                                      child: SvgPicture.asset(
-                                        isChecked
-                                            ? "assets/icons/filledCheckbox.svg"
-                                            : "assets/icons/emptyCheckbox.svg",
-                                        height: 24,
-                                        width: 24,
-                                      ),
-                                    ),
-                                    SizedBox(width: 12),
-                                    BarlowText(
-                                      text: "Remember Me",
-                                      color: Color(0xFF414141),
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 14,
-                                      lineHeight: 1.0,
-                                      letterSpacing: 0.0,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                BarlowText(
-                                  text: "Forgot Password?",
-                                  color: Color(0xFF30578E),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  lineHeight: 1.0,
-                                  letterSpacing: 0.64,
-                                  hoverBackgroundColor: Color(0xFFb9d6ff),
-                                  enableHoverBackground: true,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 30),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Column(
-                              children: [
-                                GestureDetector(
-                                  onTap: () async {
-                                    bool success = await loginController
-                                        .handleLogin(context);
-                                    if (mounted) {
-                                      setState(() {
-                                        if (success) {
-                                          showSuccessBanner = true;
-                                          showErrorBanner = false;
-                                          widget.onWishlistChanged?.call(
-                                            "Login successful!",
-                                          );
-                                        } else {
-                                          showSuccessBanner = false;
-                                          showErrorBanner = true;
-                                          errorMessage =
-                                              loginController.loginMessage;
-                                          widget.onWishlistChanged?.call(
-                                            errorMessage,
-                                          );
-                                        }
-                                      });
-                                    }
-                                  },
-                                  child: BarlowText(
-                                    text: "LOG IN",
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    lineHeight: 1.0,
-                                    letterSpacing: 0.64,
-                                    color: Color(0xFF30578E),
-                                    backgroundColor: Color(0xFFb9d6ff),
-                                  ),
-                                ),
-                                SizedBox(height: 30),
-                                BarlowText(
-                                  text: "Or",
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16,
-                                  lineHeight: 1.0,
-                                  letterSpacing: 0.0,
-                                  color: Color(0xFF414141),
-                                ),
-                                SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    GoogleSignInButton(
-                                      functionName: 'signInWithGoogle',
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFDDEAFF).withOpacity(0.6),
-                  offset: const Offset(20, 20),
-                  blurRadius: 20,
                 ),
               ],
-              border: Border.all(color: const Color(0xFFDDEAFF), width: 1),
             ),
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: 16.0,
-                top: 13,
-                bottom: 13,
-                right: 10,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
+            const SizedBox(height: 20),
+            CralikaFont(
+              text: "Log In",
+              color: const Color(0xFF414141),
+              fontWeight: FontWeight.w600,
+              fontSize: 24.0,
+              lineHeight: 1.0,
+              letterSpacing: 0.128,
+            ),
+            const SizedBox(height: 12),
+            BarlowText(
+              text: "Log in to your Kireimics account for a quick checkout.",
+              fontWeight: FontWeight.w400,
+              fontSize: 14,
+              lineHeight: 1.0,
+              letterSpacing: 0.0,
+            ),
+            const SizedBox(height: 44),
+            Form(
+              key: loginController.formKey,
+              child: Column(
                 children: [
-                  Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFDDEAFF),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: SvgPicture.asset(
-                        "assets/header/IconProfile.svg",
-                        height: 21,
-                        width: 20,
-                      ),
-                    ),
+                  customTextFormField(
+                    hintText: "EMAIL",
+                    controller: loginController.emailController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      if (!RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    },
                   ),
-                  const SizedBox(width: 24),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  SizedBox(height: 32),
+                  customTextFormField(
+                    hintText: "PASSWORD",
+                    controller: loginController.passwordController,
+                    isPassword: true, // Add isPassword flag
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      if (value.length < 8) {
+                        return 'Password must be at least 8 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      BarlowText(
-                        text: "Don't have an account?",
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                        lineHeight: 1.0,
-                        color: const Color(0xFF000000),
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    isChecked = !isChecked;
+                                  });
+                                },
+                                child: SvgPicture.asset(
+                                  isChecked
+                                      ? "assets/icons/filledCheckbox.svg"
+                                      : "assets/icons/emptyCheckbox.svg",
+                                  height: 24,
+                                  width: 24,
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              BarlowText(
+                                text: "Remember Me",
+                                color: Color(0xFF414141),
+                                fontWeight: FontWeight.w400,
+                                fontSize: 14,
+                                lineHeight: 1.0,
+                                letterSpacing: 0.0,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 6),
-                      GestureDetector(
-                        onTap: () {
-                          context.go(AppRoutes.signIn);
-                        },
-                        child: BarlowText(
-                          text: "SIGN UP NOW",
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          lineHeight: 1.5,
-                          color: const Color(0xFF30578E),
-                        ),
+                      Column(
+                        children: [
+                          BarlowText(
+                            text: "Forgot Password?",
+                            color: Color(0xFF30578E),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            lineHeight: 1.0,
+                            letterSpacing: 0.64,
+                            hoverBackgroundColor: Color(0xFFb9d6ff),
+                            enableHoverBackground: true,
+                            onTap: () {
+                              context.go(AppRoutes.forgotPassword);
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              bool success = await loginController.handleLogin(
+                                context,
+                              );
+                              if (mounted) {
+                                setState(() {
+                                  if (success) {
+                                    showSuccessBanner = true;
+                                    showErrorBanner = false;
+                                    widget.onWishlistChanged?.call(
+                                      "Login successful!",
+                                    );
+                                  } else {
+                                    showSuccessBanner = false;
+                                    showErrorBanner = true;
+                                    errorMessage = loginController.loginMessage;
+                                    widget.onWishlistChanged?.call(
+                                      errorMessage,
+                                    );
+                                  }
+
+                                });
+                              }
+                            },
+                            child: BarlowText(
+                              text: "LOG IN",
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              lineHeight: 1.0,
+                              letterSpacing: 0.64,
+                              color: Color(0xFF30578E),
+                              backgroundColor: Color(0xFFb9d6ff),
+                            ),
+                          ),
+                          SizedBox(height: 30),
+                          BarlowText(
+                            text: "Or",
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                            lineHeight: 1.0,
+                            letterSpacing: 0.0,
+                            color: Color(0xFF414141),
+                          ),
+                          SizedBox(height: 16),
+                          Row(
+                            children: [
+                              GoogleSignInButton(
+                                functionName: 'signInWithGoogle',
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-          ),
+            const SizedBox(height: 100),
+          ],
         ),
-      ],
+      ),
     );
   }
 

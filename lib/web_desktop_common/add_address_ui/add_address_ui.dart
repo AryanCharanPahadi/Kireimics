@@ -278,10 +278,7 @@ class _AddAddressUiState extends State<AddAddressUi> {
                               children: [
                                 Obx(
                                   () => GestureDetector(
-                                    onTap:
-                                        () => controller.toggleCheckbox(
-                                          !controller.isChecked.value,
-                                        ),
+                                    onTap: controller.toggleCheckbox,
                                     child: SvgPicture.asset(
                                       controller.isChecked.value
                                           ? "assets/icons/filledCheckbox.svg"
@@ -291,6 +288,7 @@ class _AddAddressUiState extends State<AddAddressUi> {
                                     ),
                                   ),
                                 ),
+
                                 SizedBox(width: 10),
                                 Text(
                                   "Save as my default shipping address.",

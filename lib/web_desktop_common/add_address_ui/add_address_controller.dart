@@ -107,8 +107,8 @@ class AddAddressController extends GetxController {
   }
 
   // Toggle checkbox state
-  void toggleCheckbox(bool? value) {
-    isChecked.value = value ?? false;
+  void toggleCheckbox() {
+    isChecked.value = !isChecked.value;
   }
 
   String addressMessage = "";

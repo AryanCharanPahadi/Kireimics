@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:kireimics/component/text_fonts/custom_text.dart';
 import 'package:kireimics/web_desktop_common/sale/sale_gridview_compoennt.dart';
 import 'package:kireimics/component/no_result_found/no_product_yet.dart';
+import 'package:kireimics/web_desktop_common/sale/sale_navigation.dart';
 import '../../component/no_result_found/no_order_yet.dart';
 import '../catalog_sale_gridview/catalog_sale_navigation.dart';
 import '../collection/collection.dart';
@@ -101,7 +102,7 @@ class Sale extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        CatalogNavigation(
+                        SaleNavigation(
                           selectedCategoryId:
                               saleController.selectedCategoryId.value,
                           onCategorySelected: saleController.updateCategory,
@@ -183,6 +184,8 @@ class Sale extends StatelessWidget {
                         top: 80,
                       ),
                       child: CartEmpty(
+                        hideBrowseButton: true,
+
                         cralikaText: "No products here yet!",
                         barlowText:
                             "Try another category, hopefully you'll find something you like there!",
@@ -196,6 +199,8 @@ class Sale extends StatelessWidget {
                         top: 80,
                       ),
                       child: CartEmpty(
+                        hideBrowseButton: true,
+
                         cralikaText: "No products here yet!",
                         barlowText:
                             "Try another category, hopefully you'll find something you like there!",

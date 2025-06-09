@@ -43,37 +43,37 @@ class _SelectAddressState extends State<SelectAddress> {
       // Ensure the address has an ID
       if (address['id'] == null) {
         print('Error: Address ID is missing');
+        // CustomToast.showToast('Error: Address ID is missing');
         return;
       }
 
-      // Print the selected address ID
-      print('Selected Address ID: ${address['id']}');
+      // Print the selected address ID for debugging
+      print('Saving Selected Address ID: ${address['id']}');
 
-      // Save only the address ID to SharedPreferences
+      // Save the address ID to SharedPreferences
       await SharedPreferencesHelper.saveSelectedAddress(
         address['id'].toString(),
       );
 
-      // Update CheckoutController with address details (still needed for UI)
-      checkoutController.address1Controller.text =
-          address['address']?.toString() ?? '';
-      checkoutController.address2Controller.text =
-          address['address2']?.toString() ?? '';
-      checkoutController.zipController.text =
-          address['postalCode']?.toString() ?? '';
-      checkoutController.stateController.text =
-          address['state']?.toString() ?? '';
-      checkoutController.cityController.text =
-          address['city']?.toString() ?? '';
-      checkoutController.addressExists(true);
+      // Verify the saved address ID
+      String? savedAddressId =
+          await SharedPreferencesHelper.getSelectedAddress();
+      print('Verified Saved Address ID: $savedAddressId');
 
-      // Show success toast (uncomment if needed)
-      // CustomToast.showSuccess(context, 'Address selected successfully');
+      // Update CheckoutController with the selected address
+      // checkoutController.updateSelectedAddress(address);
+
+      // Show success toast
+      // CustomToast.showToast('Address selected successfully');
 
       // Close the dialog
       Navigator.of(context).pop();
+
+      // Trigger reload of address data to ensure UI reflects the selected address
+      await checkoutController.loadAddressData();
     } catch (e) {
       print('Error saving selected address: $e');
+      // CustomToast.showToast('Error saving address: $e');
     }
   }
 
@@ -114,7 +114,6 @@ class _SelectAddressState extends State<SelectAddress> {
                               lineHeight: 1.0,
                               letterSpacing: 0.64,
                               hoverTextColor: const Color(0xFF2876E4),
-
                             ),
                           ),
                         ],
@@ -177,9 +176,7 @@ class _SelectAddressState extends State<SelectAddress> {
                                   children:
                                       controller.addressList.map((address) {
                                         print('=== Address in List ===');
-                                        print(
-                                          'Address Item: $address',
-                                        ); // Debug print for each address
+                                        print('Address Item: $address');
                                         return Padding(
                                           padding: const EdgeInsets.only(
                                             bottom: 16.0,
@@ -327,7 +324,6 @@ class _SelectAddressState extends State<SelectAddress> {
                                                                 Navigator.of(
                                                                   context,
                                                                 ).pop();
-
                                                                 showDialog(
                                                                   context:
                                                                       context,

@@ -27,6 +27,10 @@ class CollectionViewMobile extends StatefulWidget {
 
 class _CollectionViewMobileState extends State<CollectionViewMobile> {
   late String collectionName = '';
+  Future<bool> _isLoggedIn() async {
+    String? userData = await SharedPreferencesHelper.getUserData();
+    return userData != null && userData.isNotEmpty;
+  }
 
   @override
   void initState() {
@@ -316,16 +320,13 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                           children: [
                                             Positioned.fill(
                                               child: GestureDetector(
-                                                onTap:
-                                                    isOutOfStock
-                                                        ? null
-                                                        : () {
-                                                          context.go(
-                                                            AppRoutes.productDetails(
-                                                              product.id,
-                                                            ),
-                                                          );
-                                                        },
+                                                onTap: () {
+                                                  context.go(
+                                                    AppRoutes.productDetails(
+                                                      product.id,
+                                                    ),
+                                                  );
+                                                },
                                                 child: ColorFiltered(
                                                   colorFilter:
                                                       isOutOfStock
@@ -381,6 +382,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                       800;
 
                                                   if (isOutOfStock) {
+                                                    // Only show out-of-stock image and wishlist icon
                                                     return Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -399,10 +401,65 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                           alignment:
                                                               Alignment
                                                                   .centerRight,
-                                                          child: SvgPicture.asset(
-                                                            "assets/home_page/IconWishlistEmpty.svg",
-                                                            width: 23,
-                                                            height: 20,
+                                                          child: FutureBuilder<
+                                                            bool
+                                                          >(
+                                                            future:
+                                                                SharedPreferencesHelper.isInWishlist(
+                                                                  product.id
+                                                                      .toString(),
+                                                                ),
+                                                            builder: (
+                                                              context,
+                                                              snapshot,
+                                                            ) {
+                                                              final isInWishlist =
+                                                                  snapshot
+                                                                      .data ??
+                                                                  false;
+
+                                                              return GestureDetector(
+                                                                onTap: () async {
+                                                                  if (isInWishlist) {
+                                                                    await SharedPreferencesHelper.removeFromWishlist(
+                                                                      product.id
+                                                                          .toString(),
+                                                                    );
+                                                                    widget
+                                                                        .onWishlistChanged
+                                                                        ?.call(
+                                                                          'Product Removed From Wishlist',
+                                                                        );
+                                                                  } else {
+                                                                    await SharedPreferencesHelper.addToWishlist(
+                                                                      product.id
+                                                                          .toString(),
+                                                                    );
+                                                                    widget
+                                                                        .onWishlistChanged
+                                                                        ?.call(
+                                                                          'Product Added To Wishlist',
+                                                                        );
+                                                                  }
+                                                                  setState(
+                                                                    () {},
+                                                                  );
+                                                                },
+                                                                child: SvgPicture.asset(
+                                                                  isInWishlist
+                                                                      ? 'assets/home_page/IconWishlist.svg'
+                                                                      : 'assets/home_page/IconWishlistEmpty.svg',
+                                                                  width:
+                                                                      isMobile
+                                                                          ? 20
+                                                                          : 24,
+                                                                  height:
+                                                                      isMobile
+                                                                          ? 18
+                                                                          : 20,
+                                                                ),
+                                                              );
+                                                            },
                                                           ),
                                                         ),
                                                       ],
@@ -632,7 +689,22 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                               GestureDetector(
                                                 onTap:
                                                     isOutOfStock
-                                                        ? null
+                                                        ? () async {
+                                                          bool isLoggedIn =
+                                                              await _isLoggedIn();
+
+                                                          if (isLoggedIn) {
+                                                            widget
+                                                                .onWishlistChanged
+                                                                ?.call(
+                                                                  "We'll notify you when this product is back in stock.",
+                                                                );
+                                                          } else {
+                                                            context.go(
+                                                              AppRoutes.logIn,
+                                                            );
+                                                          }
+                                                        }
                                                         : () {
                                                           context.go(
                                                             AppRoutes.cartDetails(
@@ -641,20 +713,17 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                           );
                                                         },
                                                 child: Text(
-                                                  "ADD TO CART",
+                                                  isOutOfStock
+                                                      ? "NOTIFY ME"
+                                                      : "ADD TO CART",
                                                   style: GoogleFonts.barlow(
                                                     fontWeight: FontWeight.w600,
                                                     fontSize: 14,
                                                     height: 1.2,
                                                     letterSpacing: 0.56,
-                                                    color:
-                                                        isOutOfStock
-                                                            ? const Color(
-                                                              0xFF30578E,
-                                                            ).withOpacity(0.5)
-                                                            : const Color(
-                                                              0xFF30578E,
-                                                            ),
+                                                    color: const Color(
+                                                      0xFF30578E,
+                                                    ),
                                                   ),
                                                 ),
                                               ),

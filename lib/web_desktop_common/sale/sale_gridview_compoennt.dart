@@ -254,13 +254,11 @@ class _SaleProductGridItemState extends State<SaleProductGridItem>
                                           elevation: 0,
                                           side: BorderSide.none,
                                         ),
-                                        child: Text(
-                                          "${widget.product.discount}% OFF",
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
+                                        child: BarlowText(
+                                       text:    "${widget.product.discount}% OFF",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     );
@@ -395,33 +393,24 @@ class _SaleProductGridItemState extends State<SaleProductGridItem>
                                   ),
                                   SizedBox(width: imageWidth * 0.02),
                                   GestureDetector(
-                                    onTap:
-                                        isOutOfStock
-                                            ? null
-                                            : () {
-                                              showDialog(
-                                                context: context,
-                                                barrierColor:
-                                                    Colors.transparent,
-                                                builder: (
-                                                  BuildContext context,
-                                                ) {
-                                                  cartNotifier.refresh();
-                                                  return widget.isLargeScreen
-                                                      ? CartPanel(
-                                                        productId:
-                                                            widget.product.id,
-                                                      )
-                                                      : CartPanel(
-                                                        productId:
-                                                            widget.product.id,
-                                                      );
-                                                },
-                                              );
-                                              widget.onWishlistChanged?.call(
-                                                'Product Added To Cart',
-                                              );
-                                            },
+                                    onTap: () {
+                                      // Call the wishlist changed callback immediately
+                                      widget.onWishlistChanged?.call('Product Added To Cart');
+
+                                      // Delay the modal opening by 3 seconds
+                                      Future.delayed(Duration(seconds: 2), () {
+                                        showDialog(
+                                          context: context,
+                                          barrierColor: Colors.transparent,
+                                          builder: (BuildContext context) {
+                                            cartNotifier.refresh();
+                                            return CartPanel(
+                                              productId: widget.product.id,
+                                            );
+                                          },
+                                        );
+                                      });
+                                    },
                                     child: BarlowText(
                                       text: "ADD TO CART",
                                       color: Colors.white,

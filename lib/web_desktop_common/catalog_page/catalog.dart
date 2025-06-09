@@ -185,7 +185,9 @@ class CatalogPage extends StatelessWidget {
                         top: 80,
                       ),
                       child: CartEmpty(
+                        hideBrowseButton:true,
                         cralikaText: "No products here yet!",
+
                         barlowText:
                             "Try another category, hopefully you'll find something you like there!",
                       ),
@@ -201,6 +203,8 @@ class CatalogPage extends StatelessWidget {
                       child: SizedBox(
                         width: 344,
                         child: CartEmpty(
+                          hideBrowseButton:true,
+
                           cralikaText: "No products here yet!",
                           barlowText:
                               "Try another category, hopefully you'll find something you like there!",

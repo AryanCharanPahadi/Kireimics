@@ -1,12 +1,12 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:kireimics/mobile/address_page/add_address_ui/add_address_ui.dart';
+import 'package:kireimics/mobile/address_page/add_address_ui/delete_address.dart';
 import 'package:kireimics/mobile/checkout/checkout_page.dart';
 import 'package:kireimics/mobile/contact_us/contact_us_component.dart';
 import 'package:kireimics/mobile/home_page/home_page_mobile.dart';
@@ -24,18 +24,20 @@ import 'package:kireimics/mobile/view_details/view_details_ui.dart';
 import 'package:kireimics/component/above_footer/above_footer.dart';
 import 'package:kireimics/component/app_routes/routes.dart';
 import '../component/notification_toast/custom_toast.dart';
+import '../component/shared_preferences/shared_preferences.dart';
 import '../component/text_fonts/custom_text.dart';
 import '../web/checkout/checkout_controller.dart';
 import 'about_page/about_page.dart';
 import 'cart_panel/cart_panel_mobile.dart';
+import 'cart_panel/proceed_to_checkout.dart';
 import 'catalog/catalog.dart';
-import 'collection/collection.dart';
 import 'collection/collection_view_mobile.dart';
 import 'component/custom_header_mobile.dart';
 import 'component/footer/footer.dart';
 import 'component/scrolling_header.dart';
+import 'login/forgot_password/forget_password_page.dart';
+import 'login/forgot_password/forgot_password_ui.dart';
 import 'my_account_route/wishlist_ui/wishlist.dart';
-import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
 import 'dart:js' as js;
 
 class LandingPageMobile extends StatefulWidget {
@@ -51,6 +53,9 @@ class _LandingPageMobileState extends State<LandingPageMobile>
     with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   final CheckoutController checkoutController = Get.put(CheckoutController());
+  final ValueNotifier<double> _cartSubtotal = ValueNotifier<double>(
+    0.0,
+  ); // New notifier for cart subtotal
 
   double _lastScrollOffset = 0.0;
   bool _isScrollingUp = false;
@@ -62,16 +67,18 @@ class _LandingPageMobileState extends State<LandingPageMobile>
   late Animation<double> _fadeAnimation;
   bool _isClosing = false;
   double _subtotal = 0.0;
-  final double _deliveryCharge = 50.0; // Static delivery charge
+  final double _deliveryCharge = 50.0;
   late double _total;
-
+  Future<bool> isUserLoggedIn() async {
+    String? userData = await SharedPreferencesHelper.getUserData();
+    return userData != null && userData.isNotEmpty;
+  }
   @override
   void initState() {
     super.initState();
     _selectedPage = _getPageFromRoute(widget.initialRoute ?? AppRoutes.home);
     _scrollController.addListener(_scrollListener);
 
-    // Initialize subtotal and total
     _updateSubtotalAndTotal();
 
     _animationController = AnimationController(
@@ -102,7 +109,9 @@ class _LandingPageMobileState extends State<LandingPageMobile>
   void _updateSubtotalAndTotal() {
     final route = GoRouter.of(context).routerDelegate.currentConfiguration;
     final uri = Uri.parse(route.uri.toString());
-    _subtotal = double.tryParse(uri.queryParameters['subtotal'] ?? '') ?? 0.0;
+    _subtotal =
+        double.tryParse(uri.queryParameters['subtotal'] ?? '') ??
+        _cartSubtotal.value;
     _total = _subtotal + _deliveryCharge;
   }
 
@@ -111,6 +120,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
     AppRoutes.shippingPolicy: (_) => const ShippingPolicyMobile(),
     AppRoutes.privacyPolicy: (_) => const PrivacyPolicyMobile(),
     AppRoutes.viewDetails: (_) => const ViewDetailsUiMobile(),
+    AppRoutes.forgotPassword: (_) => const ForgotPasswordUiMobile(),
     AppRoutes.myOrder: (_) => const MyOrderUiMobile(),
   };
 
@@ -122,10 +132,18 @@ class _LandingPageMobileState extends State<LandingPageMobile>
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
           ),
+      AppRoutes.forgotPasswordMain:
+          (_) => ForgotPasswordMainMobile(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
+
       AppRoutes.catalog:
           (_) => CatalogMobileComponent(onWishlistChanged: _showNotification),
       AppRoutes.sale: (_) => SaleMobile(onWishlistChanged: _showNotification),
       AppRoutes.logIn: (_) => LoginMobile(onWishlistChanged: _showNotification),
+      AppRoutes.deleteAddress:
+          (_) => DeleteAddressMobile(onWishlistChanged: _showNotification),
       AppRoutes.signIn:
           (_) => SignInMobile(
             onWishlistChanged: _showNotification,
@@ -141,7 +159,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
           ),
-
       AppRoutes.wishlist:
           (_) => WishlistUiMobile(onWishlistChanged: _showNotification),
       AppRoutes.searchQuery:
@@ -150,11 +167,17 @@ class _LandingPageMobileState extends State<LandingPageMobile>
           (_) => AddAddressUiMobile(onWishlistChanged: _showNotification),
       AppRoutes.myAccount:
           (_) => MyAccountUiMobile(onWishlistChanged: _showNotification),
-
       '/cart':
           (id) => CartPanelMobile(
             productId: int.tryParse(id ?? '0') ?? 0,
             onWishlistChanged: _showNotification,
+            onSubtotalChanged: (subtotal) {
+              _cartSubtotal.value =
+                  subtotal; // Update notifier when subtotal changes
+              setState(() {
+                _updateSubtotalAndTotal(); // Update _subtotal and _total
+              });
+            },
           ),
       '/product':
           (id) => ProductDetailsMobile(
@@ -166,7 +189,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
             catId: int.tryParse(id ?? '0') ?? 0,
             onWishlistChanged: _showNotification,
           ),
-
       '/collection':
           (id) => CollectionViewMobile(
             productIds: int.tryParse(id ?? '0') ?? 0,
@@ -198,7 +220,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
     if (route.startsWith('/cart/')) return '/cart';
     if (route.startsWith('/category/')) return '/category';
     if (route.startsWith('/collection/')) return '/collection';
-
     return _pageMap.containsKey(route) ? route : AppRoutes.home;
   }
 
@@ -209,6 +230,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
   void dispose() {
     _animationController.dispose();
     _scrollController.dispose();
+    _cartSubtotal.dispose(); // Dispose of the notifier
     super.dispose();
   }
 
@@ -220,7 +242,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
         _selectedPage = _getPageFromRoute(
           widget.initialRoute ?? AppRoutes.home,
         );
-        _updateSubtotalAndTotal(); // Update subtotal and total when route changes
+        _updateSubtotalAndTotal();
       });
       _animationController.reset();
       _animationController.duration = const Duration(milliseconds: 1000);
@@ -280,7 +302,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
           setState(() {
             _selectedPage = route;
             _isClosing = false;
-            _updateSubtotalAndTotal(); // Update subtotal and total on navigation
+            _updateSubtotalAndTotal();
           });
           _animationController.reset();
           _animationController.duration = const Duration(milliseconds: 1000);
@@ -306,14 +328,19 @@ class _LandingPageMobileState extends State<LandingPageMobile>
     final isAddAddressRoute = _selectedPage == AppRoutes.addAddress;
     final isViewDetailsRoute = _selectedPage == AppRoutes.viewDetails;
     final isCheckoutRoute = _selectedPage == AppRoutes.checkOut;
+    final isDeleteAddressRoute = _selectedPage == AppRoutes.deleteAddress;
+    final isForgotPasswordRoute = _selectedPage == AppRoutes.forgotPassword;
+    final isForgotPasswordResetRoute =
+        _selectedPage == AppRoutes.forgotPasswordMain;
+    final isCartRoute = _selectedPage == '/cart';
+
     void openRazorpayCheckout() async {
-      print('openRazorpayCheckout called'); // Debug print
+      print('openRazorpayCheckout called');
       if (!kIsWeb) {
-        print('Not running on web platform'); // Debug print
+        print('Not running on web platform');
         return;
       }
 
-      // Check if openRazorpay is available
       if (!js.context.hasProperty('openRazorpay')) {
         print('Error: openRazorpay function not found in JavaScript context');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -324,7 +351,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
         return;
       }
 
-      // Generate a mock order ID for testing
       final orderId = 'ORDER_${DateTime.now().millisecondsSinceEpoch}';
 
       final options = {
@@ -336,19 +362,15 @@ class _LandingPageMobileState extends State<LandingPageMobile>
         'prefill': {'name': '', 'email': '', 'contact': ''},
         'notes': {'address': 'Customer address'},
         'handler': js.allowInterop((response) async {
-          // Convert the JavaScript response object to a JSON string
           final responseJson = js.context['JSON'].callMethod('stringify', [
             response,
           ]);
-
-          // Extract payment details from response
           final paymentId = response['razorpay_payment_id'] ?? 'N/A';
           final orderIdResponse = response['razorpay_order_id'] ?? orderId;
           final signature = response['razorpay_signature'] ?? 'N/A';
-          final amount = _total; // From the outer scope
-          final status = 'success'; // Since handler is called on success
+          final amount = _total;
+          final status = 'success';
 
-          // Print client-side response
           print('=== Payment Successful ===');
           print('Payment ID: $paymentId');
           print('Order ID: $orderIdResponse');
@@ -357,7 +379,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
           print('Status: $status');
           print('Raw Client-Side Response: $responseJson');
 
-          // Fetch full payment details from PHP server
           try {
             final serverResponse = await http.get(
               Uri.parse(
@@ -386,14 +407,13 @@ class _LandingPageMobileState extends State<LandingPageMobile>
             print('Error fetching payment details: $e');
           }
 
-          // Navigate to payment result route
           context.go(
             '${AppRoutes.paymentResult}?success=true&orderId=$orderId&amount=$_total',
           );
         }),
         'modal': {
           'ondismiss': js.allowInterop(() {
-            print('Payment modal dismissed'); // Debug print
+            print('Payment modal dismissed');
             context.go(
               '${AppRoutes.paymentResult}?success=false&orderId=$orderId&amount=$_total',
             );
@@ -401,16 +421,13 @@ class _LandingPageMobileState extends State<LandingPageMobile>
         },
       };
 
-      print('Razorpay options: $options'); // Debug print
+      print('Razorpay options: $options');
 
       try {
-        print('Calling js.context.callMethod for openRazorpay'); // Debug print
+        print('Calling js.context.callMethod for openRazorpay');
         js.context.callMethod('openRazorpay', [js.JsObject.jsify(options)]);
       } catch (e) {
-        print('Error initiating payment: $e'); // Debug print
-        // context.go(
-        //   '${AppRoutes.paymentResult}?success=false&orderId=$orderId&amount=$total',
-        // );
+        print('Error initiating payment: $e');
       }
     }
 
@@ -452,12 +469,14 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                           if (!isLoginRoute &&
                               !isSignInRoute &&
                               !isAddAddressRoute &&
+                              !isDeleteAddressRoute &&
+                              !isForgotPasswordRoute &&
+                              !isForgotPasswordResetRoute &&
                               !isViewDetailsRoute) ...[
                             ScrollingHeaderMobile(),
                             const CustomHeaderMobile(),
                             Column1(onNavItemSelected: _onNavItemSelected),
                           ],
-
                           _selectedPage == '/product' ||
                                   _selectedPage == '/category' ||
                                   _selectedPage == '/collection'
@@ -469,10 +488,12 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                 widget.initialRoute?.split('/').last,
                               )
                               : _pageMap[_selectedPage]!(null),
-
                           if (!isLoginRoute &&
                               !isSignInRoute &&
                               !isAddAddressRoute &&
+                              !isForgotPasswordRoute &&
+                              !isForgotPasswordResetRoute &&
+                              !isDeleteAddressRoute &&
                               !isViewDetailsRoute &&
                               _selectedPage != AppRoutes.catalog &&
                               _selectedPage != AppRoutes.sale &&
@@ -489,10 +510,12 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                             const SizedBox(height: 40),
                             const AboveFooter(fontSize: 24),
                           ],
-
                           if (!isLoginRoute &&
                               !isSignInRoute &&
+                              !isDeleteAddressRoute &&
+                              !isForgotPasswordRoute &&
                               !isAddAddressRoute &&
+                              !isForgotPasswordResetRoute &&
                               !isViewDetailsRoute) ...[
                             const SizedBox(height: 27),
                             const Footer(),
@@ -501,8 +524,169 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                       ),
                     ),
 
+                    if (isLoginRoute)
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFDDEAFF).withOpacity(0.6),
+                                offset: const Offset(20, 20),
+                                blurRadius: 20,
+                              ),
+                            ],
+                            border: Border.all(
+                              color: const Color(0xFFDDEAFF),
+                              width: 1,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: 16.0,
+                              top: 13,
+                              bottom: 13,
+                              right: 10,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDDEAFF),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Center(
+                                    child: SvgPicture.asset(
+                                      "assets/header/IconProfile.svg",
+                                      height: 21,
+                                      width: 20,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 24),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    BarlowText(
+                                      text: "Don't have an account?",
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14,
+                                      lineHeight: 1.0,
+                                      color: const Color(0xFF000000),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    GestureDetector(
+                                      onTap: () {
+                                        context.go(AppRoutes.signIn);
+                                      },
+                                      child: BarlowText(
+                                        text: "SIGN UP NOW",
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        lineHeight: 1.5,
+                                        color: const Color(0xFF30578E),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    if (isSignInRoute)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFDDEAFF).withOpacity(0.6),
+                                offset: const Offset(20, 20),
+                                blurRadius: 20,
+                              ),
+                            ],
+                            border: Border.all(
+                              color: const Color(0xFFDDEAFF),
+                              width: 1,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: 16.0,
+                              top: 13,
+                              bottom: 13,
+                              right: 10,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDDEAFF),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Center(
+                                    child: SvgPicture.asset(
+                                      "assets/header/IconProfile.svg",
+                                      height: 21,
+                                      width: 20,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 24),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    BarlowText(
+                                      text: "Already have an account?",
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14,
+                                      lineHeight: 1.0,
+                                      color: const Color(0xFF000000),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    GestureDetector(
+                                      onTap: () {
+                                        context.go(AppRoutes.logIn);
+                                      },
+                                      child: BarlowText(
+                                        text: "LOG IN NOW",
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        lineHeight: 1.5,
+                                        color: const Color(0xFF30578E),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
                     if (!isLoginRoute &&
                         !isSignInRoute &&
+                        !isForgotPasswordRoute &&
+                        !isDeleteAddressRoute &&
+                        !isForgotPasswordResetRoute &&
                         !isAddAddressRoute &&
                         !isViewDetailsRoute &&
                         (_showStickyHeader || _showStickyColumn1))
@@ -524,37 +708,22 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                           ),
                         ),
                       ),
-
                     if (!isLoginRoute &&
                         !isSignInRoute &&
+                        !isForgotPasswordRoute &&
+                        !isDeleteAddressRoute &&
+                        !isForgotPasswordResetRoute &&
                         !isAddAddressRoute &&
                         !isViewDetailsRoute)
-                      // Positioned(
-                      //   left: 300,
-                      //   bottom: 60,
-                      //   right: 10,
-                      //   child: Stack(
-                      //     alignment: Alignment.center,
-                      //     children: [
-                      //       SvgPicture.asset(
-                      //         "assets/chat_bot/chat.svg",
-                      //         width: 36,
-                      //         height: 36,
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
-                      // Make Payment Container for Checkout Route
                       if (isCheckoutRoute)
                         Positioned(
-                          bottom: 0, // Position at the bottom
+                          bottom: 0,
                           left: 0,
                           right: 0,
                           child: Container(
                             width: MediaQuery.of(context).size.width,
                             height: 100,
                             color: Colors.white.withOpacity(0.8),
-
                             child: Padding(
                               padding: const EdgeInsets.only(
                                 left: 22.0,
@@ -571,7 +740,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                     fontSize: 20,
                                     fontWeight: FontWeight.w400,
                                     lineHeight: 1.0,
-                                    letterSpacing: 1 * 0.04, // 4% of 32px
+                                    letterSpacing: 1 * 0.04,
                                   ),
                                   SizedBox(height: 8),
                                   BarlowText(
@@ -581,11 +750,8 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                     fontWeight: FontWeight.w600,
                                     backgroundColor: Color(0xFFB9D6FF),
                                     lineHeight: 1.0,
-                                    letterSpacing: 1 * 0.04, // 4% of 32px
-                                    onTap: () {
-                                      // Check if user is not logged in and hasn't agreed to policies
-
-                                      // Sequential validation of required fields
+                                    letterSpacing: 1 * 0.04,
+                                    onTap: () async {
                                       if (checkoutController
                                           .firstNameController
                                           .text
@@ -724,7 +890,23 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                         return;
                                       }
 
-                                      // Proceed to payment if all validations pass
+                                      bool isLoggedIn = await isUserLoggedIn();
+                                      if (!isLoggedIn) {
+                                        // Call handleSignUp for non-logged-in users
+                                        bool signUpSuccess = await checkoutController.handleSignUp(
+                                          context,
+                                        );
+                                        if (!signUpSuccess) {
+                                          checkoutController
+                                              .onErrorWishlistChanged?.call(
+                                            checkoutController.signupMessage.isNotEmpty
+                                                ? checkoutController.signupMessage
+                                                : 'Signup failed, please try again',
+                                          );
+                                          return;
+                                        }
+                                      }
+
                                       final orderId =
                                           'ORDER_${DateTime.now().millisecondsSinceEpoch}';
                                       checkoutController.openRazorpayCheckout(
@@ -739,7 +921,29 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                             ),
                           ),
                         ),
-
+                    if (!isLoginRoute &&
+                        !isSignInRoute &&
+                        !isForgotPasswordRoute &&
+                        !isDeleteAddressRoute &&
+                        !isAddAddressRoute &&
+                        !isForgotPasswordResetRoute &&
+                        !isViewDetailsRoute &&
+                        isCartRoute)
+                      ValueListenableBuilder<double>(
+                        valueListenable: _cartSubtotal,
+                        builder: (context, subtotal, _) {
+                          return subtotal > 0.00
+                              ? Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: ProceedToCheckoutButton(
+                                  subtotal: subtotal,
+                                ),
+                              )
+                              : const SizedBox.shrink();
+                        },
+                      ),
                     ValueListenableBuilder<String?>(
                       valueListenable: _notificationMessage,
                       builder: (context, message, _) {
@@ -753,15 +957,13 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                 iconPath: "assets/icons/success.svg",
                                 bannerColor: const Color(0xFF268FA2),
                                 onClose: () {
-                                  _notificationMessage.value =
-                                      null; // This will close the banner
+                                  _notificationMessage.value = null;
                                 },
                               ),
                             )
                             : const SizedBox.shrink();
                       },
                     ),
-
                     ValueListenableBuilder<String?>(
                       valueListenable: _notificationErrorMessage,
                       builder: (context, message, _) {
@@ -775,8 +977,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                 iconPath: "assets/icons/error.svg",
                                 bannerColor: const Color(0xFFF46856),
                                 onClose: () {
-                                  _notificationErrorMessage.value =
-                                      null; // This will close the banner
+                                  _notificationErrorMessage.value = null;
                                 },
                               ),
                             )
