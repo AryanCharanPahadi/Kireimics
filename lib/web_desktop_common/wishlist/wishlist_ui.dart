@@ -609,19 +609,57 @@ class _WishlistUiState extends State<WishlistUi> {
                                                         height:
                                                             imageHeight * 0.01,
                                                       ),
-                                                      BarlowText(
-                                                        text:
-                                                            "Rs. ${product.price.toStringAsFixed(2)}",
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        fontSize: 14,
-                                                        lineHeight: 1.0,
-                                                      ),
-                                                      SizedBox(
-                                                        height:
-                                                            imageHeight * 0.04,
-                                                      ),
+                                                      if (!isOutOfStock) ...[
+                                                        Row(
+                                                          children: [
+                                                            // Original price with strikethrough
+                                                            if (product.discount != 0)
+                                                              Text(
+                                                                "Rs. ${product.price.toStringAsFixed(2)}",
+                                                                style: TextStyle(
+                                                                  color: Colors.white.withOpacity(0.7),
+                                                                  fontWeight: FontWeight.w400,
+                                                                  fontSize: 14,
+                                                                  height: 1.2,
+                                                                  decoration: TextDecoration.lineThrough,
+                                                                  decorationColor: Colors.white
+                                                                      .withOpacity(
+                                                                    0.7,
+                                                                  ), // Match strikethrough color
+                                                                  fontFamily:
+                                                                  GoogleFonts.barlow()
+                                                                      .fontFamily, // Match Barlow font
+                                                                ),
+                                                              ),
+                                                            if (product.discount != 0)
+                                                              SizedBox(width: 8),
+                                                            // Discounted price
+                                                            BarlowText(
+                                                              text:
+                                                              product.discount != 0
+                                                                  ? "Rs. ${(product.price * (1 - product.discount / 100)).toStringAsFixed(2)}"
+                                                                  : "Rs. ${product.price.toStringAsFixed(2)}",
+                                                              color: Colors.white,
+                                                              fontWeight: FontWeight.w600,
+                                                              fontSize: 14,
+                                                              lineHeight: 1.2,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+
+                                                      if(isOutOfStock)...[
+                                                        BarlowText(
+                                                          text:
+                                                          "Rs. ${product.price.toStringAsFixed(2)}",
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.w600,
+                                                          fontSize: 14,
+                                                          lineHeight: 1.2,
+                                                        ),
+                                                      ],
+
+                                                      SizedBox(height: imageHeight * 0.04),
                                                       if (isOutOfStock)
                                                         Row(
                                                           children: [
@@ -770,7 +808,7 @@ class _WishlistUiState extends State<WishlistUi> {
                                                                 widget.onWishlistChanged?.call('Product Added To Cart');
 
                                                                 // Delay the modal opening by 3 seconds
-                                                                Future.delayed(Duration(seconds: 3), () {
+                                                                Future.delayed(Duration(seconds: 2), () {
                                                                   showDialog(
                                                                     context: context,
                                                                     barrierColor: Colors.transparent,

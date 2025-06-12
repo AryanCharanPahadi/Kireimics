@@ -61,7 +61,7 @@ class _ShippingPolicyMobileState extends State<ShippingPolicyMobile> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
-                        CralikaFont(text: "Shipping Policy"),
+                        CralikaFont(text: "Shipping Policy",fontSize: 24,fontWeight: FontWeight.w400,),
 
                         SizedBox(height: 10),
                       ],
@@ -74,17 +74,17 @@ class _ShippingPolicyMobileState extends State<ShippingPolicyMobile> {
                     children: [
                       CralikaFont(
                         text: section.title,
-                        fontSize: 21,
+                        fontSize: 22,
                         fontWeight: FontWeight.w400,
-                        letterSpacing: 0.8, // 4% of 20px = 0.8
-                        lineHeight: 27 / 20, // Line height calculation
+                        letterSpacing: 0.88, // 4% of 22
+                        lineHeight: 27 / 22, // 1.227
                       ),
                       const SizedBox(height: 16),
                       ...List.generate(
                         section.content.length,
                         (i) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: BarlowText(text: section.content[i]),
+                          child: BarlowText(text: section.content[i],fontWeight: FontWeight.w400,fontSize: 14,),
                         ),
                       ),
                       const SizedBox(height: 24),

@@ -78,8 +78,9 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
         children: [
           SvgPicture.asset(
             'assets/home_page/PanelTitle.svg',
-            height: 85,
-            fit: BoxFit.cover,
+            height: 64,
+            width: 76,
+            fit: BoxFit.contain,
           ),
           Expanded(
             child: Column(
@@ -89,18 +90,15 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                   bannerImg.isNotEmpty
                       ? bannerImg
                       : 'https://via.placeholder.com/150', // Fallback image
-                  // width: double.infinity,
-                  // fit: BoxFit.cover,
+                  height: 180, // Set desired height
+                  width: double.infinity, // Set width to match parent or a specific value like 300
+                  fit: BoxFit.cover, // Adjust how the image fits (optional)
+
                   errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      // width: 285,
-                      // height:180, // Adjust height as needed
-                      color: Colors.grey[300],
-                      child: Center(
-                        child: Text(
-                          'Failed to load image',
-                          style: TextStyle(color: Colors.red),
-                        ),
+                    return Center(
+                      child: Text(
+                        'Failed to load image',
+                        style: TextStyle(color: Colors.red),
                       ),
                     );
                   },
@@ -142,8 +140,8 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                       children: [
                         BarlowText(
                           text: "VIEW",
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
                           lineHeight: 1.0,
                           letterSpacing: 0.0,
                           color: Color(0xFF30578E),

@@ -223,9 +223,8 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                                 decorationColor: const Color(0xFF30578E),
-                                enableHoverUnderline: true,
+
                                 hoverTextColor: const Color(0xFF2876E4),
-                                hoverDecorationColor: Color(0xFF2876E4),
                               ),
                             ),
                             SizedBox(width: 24),
@@ -241,10 +240,8 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                                 color: const Color(0xFF30578E),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
-                                decorationColor: const Color(0xFF30578E),
-                                enableHoverUnderline: true,
+
                                 hoverTextColor: const Color(0xFF2876E4),
-                                hoverDecorationColor: Color(0xFF2876E4),
                               ),
                             ),
                           ],
@@ -303,11 +300,27 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                   controller.showSortMenu.value
                       ? Positioned(
                         right: isLargeScreen ? 300 : 120,
-                        top: 295,
+                        top: 230,
                         child: Container(
                           width: 180,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          color: Colors.white,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Color(0xFFE7E7E7), // #E7E7E7
+                              width: 1.0,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(
+                                  0x0F000000,
+                                ), // #0000000F (6% opacity black)
+                                blurRadius: 20,
+                                spreadRadius: 0,
+                                offset: Offset(20, 20),
+                              ),
+                            ],
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: _buildSortOptions(controller),
@@ -321,12 +334,28 @@ class _CollectionProductPageState extends State<CollectionProductPage>
               () =>
                   controller.showFilterMenu.value
                       ? Positioned(
-                        right: isLargeScreen ? 300 : 90,
-                        top: 295,
+                        right: isLargeScreen ? 250 : 80,
+                        top: 230,
                         child: Container(
                           width: 180,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          color: Colors.white,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Color(0xFFE7E7E7), // #E7E7E7
+                              width: 1.0,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(
+                                  0x0F000000,
+                                ), // #0000000F (6% opacity black)
+                                blurRadius: 20,
+                                spreadRadius: 0,
+                                offset: Offset(20, 20),
+                              ),
+                            ],
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: _buildFilterOptions(controller),
@@ -354,7 +383,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
   List<Widget> _buildSortOptions(CollectionViewController controller) {
     final options = [
       {
-        'label': 'Price: Low to High',
+        'label': 'Price Low - High',
         'onTap': () {
           controller.showSortMenu.value = false;
           controller.productList.sort((a, b) => a.price.compareTo(b.price));
@@ -364,7 +393,17 @@ class _CollectionProductPageState extends State<CollectionProductPage>
         },
       },
       {
-        'label': 'Price: High to Low',
+        'label': 'Price High - Low',
+        'onTap': () {
+          controller.showSortMenu.value = false;
+          controller.productList.sort((a, b) => b.price.compareTo(a.price));
+          controller.collectionController.products.assignAll(
+            controller.productList,
+          );
+        },
+      },
+      {
+        'label': 'New',
         'onTap': () {
           controller.showSortMenu.value = false;
           controller.productList.sort((a, b) => b.price.compareTo(a.price));
@@ -390,8 +429,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: const Color(0xFF30578E),
-                hoverBackgroundColor: const Color(0xFFb9d6ff),
-                enableHoverBackground: true,
+                hoverTextColor: const Color(0xFF2876E4),
               ),
             ),
           ),
@@ -448,8 +486,7 @@ class _CollectionProductPageState extends State<CollectionProductPage>
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: const Color(0xFF30578E),
-                hoverBackgroundColor: const Color(0xFFb9d6ff),
-                enableHoverBackground: true,
+                hoverTextColor: const Color(0xFF2876E4),
               ),
             ),
           ),

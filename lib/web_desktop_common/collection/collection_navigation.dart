@@ -68,9 +68,10 @@ class CollectionNavigation extends StatelessWidget {
                         ? TextDecoration.underline
                         : TextDecoration.none,
                     decorationThickness: 2.0,
-                    enableUnderlineForActiveRoute: true,
+                    // enableUnderlineForActiveRoute: true,
                     decorationColor: const Color(0xFF30578E),
                     hoverTextColor: const Color(0xFF2876E4),
+
                   ),
                 );
               })

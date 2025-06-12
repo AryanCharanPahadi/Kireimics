@@ -46,15 +46,38 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
   @override
   void initState() {
     super.initState();
+    // Initial load of user and address data
     checkoutController.loadUserData();
     checkoutController.loadAddressData();
+    // Load initial subtotal and product IDs
+    updateFromRoute();
+    // Listen to route changes to update state
+    GoRouter.of(context).routeInformationProvider.addListener(updateFromRoute);
+  }
+
+  @override
+  void dispose() {
+    // Remove the route listener to prevent memory leaks
+    GoRouter.of(
+      context,
+    ).routeInformationProvider.removeListener(updateFromRoute);
+    super.dispose();
+  }
+
+  void updateFromRoute() {
+    // Extract parameters from the current route
     final route = GoRouter.of(context).routerDelegate.currentConfiguration;
     final uri = Uri.parse(route.uri.toString());
-    subtotal = double.tryParse(uri.queryParameters['subtotal'] ?? '') ?? 0.0;
-    total = subtotal + deliveryCharge;
-
+    setState(() {
+      subtotal =
+          double.tryParse(uri.queryParameters['subtotal'] ?? '0.0') ?? 0.0;
+      // Set totalDeliveryCharge to 0 if subtotal is above 2000
+      checkoutController.totalDeliveryCharge.value =
+          subtotal > 2000 ? 0.0 : checkoutController.totalDeliveryCharge.value;
+      total = subtotal + checkoutController.totalDeliveryCharge.value;
+    });
+    // Update product IDs and other data in the controller
     checkoutController.loadProductIds(context);
-
   }
 
   @override
@@ -550,7 +573,8 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                       letterSpacing: 0.64 * fontScale,
                     ),
                     BarlowText(
-                      text: "Rs. ${deliveryCharge.toStringAsFixed(2)}",
+                      text:
+                          "Rs. ${checkoutController.totalDeliveryCharge.toStringAsFixed(2)}",
                       color: const Color(0xFFFFFFFF),
                       fontWeight: FontWeight.w400,
                       fontSize: 16,
@@ -619,13 +643,28 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
             SizedBox(height: 24 * fontScale),
             BarlowText(
               text: "MAKE PAYMENT",
-              color: const Color(0xFF30578E),
               fontWeight: FontWeight.w600,
               fontSize: 16,
               lineHeight: 1.0,
               letterSpacing: 0.64 * fontScale,
-              backgroundColor: Color(0xFFb9d6ff),
-              hoverTextColor: Color(0xFF2876E4),
+              color:
+                  isAnyRequiredFieldEmpty()
+                      ? const Color(0xFF30578E).withOpacity(
+                        0.5,
+                      ) // ⬅️ faded text
+                      : const Color(0xFF30578E),
+              backgroundColor:
+                  isAnyRequiredFieldEmpty()
+                      ? const Color(0xFFb9d6ff).withOpacity(
+                        0.5,
+                      ) // ⬅️ faded background
+                      : const Color(0xFFb9d6ff),
+              hoverTextColor:
+                  isAnyRequiredFieldEmpty()
+                      ? const Color(0xFF2876E4).withOpacity(
+                        0.5,
+                      ) // ⬅️ faded text
+                      : const Color(0xFF2876E4),
               onTap: () async {
                 // Sequential validation of required fields
                 if (checkoutController.firstNameController.text.isEmpty) {
@@ -696,18 +735,20 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                   );
                   return;
                 }
-                if (!checkoutController.isChecked &&
-                    !checkoutController.addressExists.value) {
+
+                // Check Privacy and Shipping Policy only for non-logged-in users without an existing address
+                bool isLoggedIn = await isUserLoggedIn();
+                if (!isLoggedIn &&
+                    !checkoutController.addressExists.value &&
+                    !checkoutController.isChecked) {
                   widget.onErrorWishlistChanged?.call(
                     'Please agree to the Privacy and Shipping Policy',
                   );
                   return;
                 }
 
-                // Check if user is logged in
-                bool isLoggedIn = await isUserLoggedIn();
+                // Proceed with signup for non-logged-in users
                 if (!isLoggedIn) {
-                  // Call handleSignUp for non-logged-in users
                   bool signUpSuccess = await checkoutController.handleSignUp(
                     context,
                   );
@@ -719,9 +760,23 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                     );
                     return;
                   }
+                } else {
+                  // For logged-in users, call handleAddAddress if no address exists
+                  if (!checkoutController.addressExists.value) {
+                    bool addressSuccess = await checkoutController
+                        .handleAddAddress(context);
+                    if (!addressSuccess) {
+                      widget.onErrorWishlistChanged?.call(
+                        checkoutController.signupMessage.isNotEmpty
+                            ? checkoutController.signupMessage
+                            : 'Failed to add address, please try again',
+                      );
+                      return;
+                    }
+                  }
                 }
 
-                // Proceed to payment if all validations pass and signup is successful (or user is logged in)
+                // Proceed to payment if all validations pass
                 final orderId =
                     'ORDER_${DateTime.now().millisecondsSinceEpoch}';
                 checkoutController.openRazorpayCheckout(
@@ -735,6 +790,17 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
         ),
       ],
     );
+  }
+
+  bool isAnyRequiredFieldEmpty() {
+    return checkoutController.firstNameController.text.isEmpty ||
+        checkoutController.lastNameController.text.isEmpty ||
+        checkoutController.emailController.text.isEmpty ||
+        checkoutController.address1Controller.text.isEmpty ||
+        checkoutController.zipController.text.isEmpty ||
+        checkoutController.stateController.text.isEmpty ||
+        checkoutController.cityController.text.isEmpty ||
+        checkoutController.mobileController.text.isEmpty;
   }
 
   Widget customTextFormField({

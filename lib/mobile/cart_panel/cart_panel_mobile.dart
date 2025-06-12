@@ -12,10 +12,16 @@ import '../../component/shared_preferences/shared_preferences.dart';
 class CartPanelMobile extends StatefulWidget {
   final Function(String)? onWishlistChanged;
   final int? productId;
-  final Function(double)?
-  onSubtotalChanged; // New callback for subtotal changes
-
-  const CartPanelMobile({
+  final Function(
+      double, // subtotal
+      Map<int, int>, // productQuantities
+      Map<int, double>, // productPrices
+      Map<int, double?>, // productHeights
+      Map<int, double?>, // productWidths
+      Map<int, double?>, // productLengths
+      Map<int, double?>, // productWeights
+      )? onSubtotalChanged; // Updated callback
+   const CartPanelMobile({
     Key? key,
     required this.productId,
     this.onWishlistChanged,
@@ -32,27 +38,57 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
   List<int?> stockQuantities = [];
   bool isLoading = true;
   String errorMessage = "";
-  double _subtotal = 0.0; // Store subtotal locally
+  double _subtotal = 0.0;
 
   double calculateTotal() {
     double total = 0.0;
+    Map<int, int> productQuantities = {};
+    Map<int, double> productPrices = {};
+    Map<int, double?> productHeights = {}; // New map
+    Map<int, double?> productWidths = {};  // New map
+    Map<int, double?> productLengths = {}; // New map
+    Map<int, double?> productWeights = {}; // New map
+
     for (int i = 0; i < productList.length; i++) {
       if (stockQuantities[i] != null && stockQuantities[i]! > 0) {
         final priceString = productList[i].price.toString().replaceAll(',', '');
         final price = double.tryParse(priceString) ?? 0.0;
-        total += price * quantityList[i].value;
+        final discount = productList[i].discount ?? 0.0;
+        final finalPrice = discount > 0 ? price * (1 - discount / 100) : price;
+        total += finalPrice * quantityList[i].value;
+        productQuantities[productList[i].id] = quantityList[i].value;
+        productPrices[productList[i].id] = finalPrice;
+        // Parse String to double? for height, width, length, and weight
+        productHeights[productList[i].id] = productList[i].height != null
+            ? double.tryParse(productList[i].height.toString().replaceAll(',', ''))
+            : null;
+        productWidths[productList[i].id] = productList[i].breadth != null
+            ? double.tryParse(productList[i].breadth.toString().replaceAll(',', ''))
+            : null;
+        productLengths[productList[i].id] = productList[i].length != null
+            ? double.tryParse(productList[i].length.toString().replaceAll(',', ''))
+            : null;
+        productWeights[productList[i].id] = productList[i].weight != null
+            ? double.tryParse(productList[i].weight.toString().replaceAll(',', ''))
+            : null;
       }
     }
     if (_subtotal != total) {
       _subtotal = total;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.onSubtotalChanged?.call(total); // Notify parent after build
+        widget.onSubtotalChanged?.call(
+          total,
+          productQuantities,
+          productPrices,
+          productHeights,
+          productWidths,
+          productLengths,
+          productWeights,
+        );
       });
     }
     return total;
-  }
-
-  Future<int?> fetchStockQuantity(String productId) async {
+  }  Future<int?> fetchStockQuantity(String productId) async {
     try {
       var result = await ApiHelper.getStockDetail(productId);
       if (result['error'] == false && result['data'] != null) {
@@ -218,6 +254,8 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                         text:
                                             isOutOfStock
                                                 ? "Out of Stock"
+                                                : product.discount > 0
+                                                ? "Rs ${(product.price * (1 - product.discount / 100)).toStringAsFixed(2)}"
                                                 : "Rs ${product.price.toStringAsFixed(2)}",
                                         fontWeight: FontWeight.w400,
                                         fontSize: 16,

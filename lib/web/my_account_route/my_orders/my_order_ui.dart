@@ -1,10 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:kireimics/component/api_helper/api_helper.dart';
 import 'package:kireimics/component/app_routes/routes.dart';
-
+import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../web_desktop_common/view_details_cart/view_detail/view_details_cart.dart';
 
@@ -16,129 +18,113 @@ class MyOrderUiWeb extends StatefulWidget {
 }
 
 class _MyOrderUiWebState extends State<MyOrderUiWeb> {
-  // Sample data for the orders
-  final List<Map<String, dynamic>> orders = [
-    {
-      "orderNumber": "382083",
-      "placedDate": "Sun, 16 Mar 2025",
-      "deliveredDate": "Sun, 16 Mar 2025",
-      "status": "Delivered",
-    },
-    {
-      "orderNumber": "382084",
-      "placedDate": "Mon, 17 Mar 2025",
-      "deliveredDate": "Tue, 18 Mar 2025",
-      "status": "Delivered",
-    },
-  ];
+  List<Map<String, dynamic>> orders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getOrderData();
+  }
+
+  Future<void> getOrderData() async {
+    String? userId = await SharedPreferencesHelper.getUserId();
+
+    var response = await ApiHelper.getOrderDetails(userId.toString());
+
+    if (response != null &&
+        response['error'] == false &&
+        response['data'] != null) {
+      List<Map<String, dynamic>> fetchedOrders = [];
+
+      for (var order in response['data']) {
+        String createdAt = order['created_at'] ?? '';
+        String formattedDate = _formatDate(createdAt);
+
+        fetchedOrders.add({
+          'orderNumber': order['order_id'] ?? 'Unknown',
+          'placedDate': formattedDate,
+          'deliveredDate': formattedDate, // Assuming delivery same as placed
+          'status': 'Delivered',
+        });
+      }
+
+      setState(() {
+        orders = fetchedOrders;
+      });
+    }
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      final dateTime = DateTime.parse(dateString);
+      return DateFormat('E, dd MMM yyyy').format(dateTime);
+    } catch (e) {
+      return dateString;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-              left: 292,
-              top: 24,
-              right: MediaQuery.of(context).size.width * 0.07,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 292,
+          top: 24,
+          right: MediaQuery.of(context).size.width * 0.07,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CralikaFont(
+              text: "My Orders",
+              fontWeight: FontWeight.w400,
+              fontSize: 32,
+              lineHeight: 36 / 32,
+              letterSpacing: 1.28,
+              color: const Color(0xFF414141),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 13),
+            Row(
               children: [
-                CralikaFont(
-                  text: "My Orders",
-                  fontWeight: FontWeight.w400,
-                  fontSize: 32,
-                  lineHeight: 36 / 32,
-                  letterSpacing: 1.28,
-                  color: const Color(0xFF414141),
-                ),
-                const SizedBox(height: 13),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    BarlowText(
-                      text: "My Account",
-                      color: const Color(0xFF30578E),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      lineHeight: 1.0,
-                      letterSpacing: 1 * 0.04,
-                      route: AppRoutes.myAccount,
-                      enableUnderlineForActiveRoute: true,
-                      decorationColor: const Color(0xFF30578E),
-                      onTap: () {
-                        context.go(AppRoutes.myAccount);
-                      },
-                      hoverTextColor: const Color(0xFF2876E4),
-                    ),
-                    const SizedBox(width: 32),
-
-                    BarlowText(
-                      text: "My Orders",
-                      color: const Color(0xFF30578E),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      lineHeight: 1.0,
-                      route: AppRoutes.myOrder,
-                      enableUnderlineForActiveRoute: true,
-                      decorationColor: const Color(0xFF30578E),
-                      onTap: () {
-                        context.go(AppRoutes.myOrder);
-                      },
-                      hoverTextColor: const Color(0xFF2876E4),
-                    ),
-                    const SizedBox(width: 32),
-
-                    BarlowText(
-                      text: "Wishlist",
-                      color: const Color(0xFF30578E),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      lineHeight: 1.0,
-                      onTap: () {
-                        context.go(AppRoutes.wishlist);
-                      },
-                      hoverTextColor: const Color(0xFF2876E4),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CralikaFont(
-                      text: "${orders.length} Orders",
-                      fontWeight: FontWeight.w400,
-                      fontSize: 20,
-                      lineHeight: 36 / 32,
-                      letterSpacing: 1.28,
-                      color: const Color(0xFF414141),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Orders list
-                    Column(
-                      children:
-                          orders
-                              .map((order) => _buildOrderItem(order))
-                              .toList(),
-                    ),
-                  ],
-                ),
+                _navItem("My Account", AppRoutes.myAccount),
+                const SizedBox(width: 32),
+                _navItem("My Orders", AppRoutes.myOrder),
+                const SizedBox(width: 32),
+                _navItem("Wishlist", AppRoutes.wishlist),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 32),
+            CralikaFont(
+              text: "${orders.length} Orders",
+              fontWeight: FontWeight.w400,
+              fontSize: 20,
+              lineHeight: 36 / 32,
+              letterSpacing: 1.28,
+              color: const Color(0xFF414141),
+            ),
+            const SizedBox(height: 24),
+            ...orders.map((order) => _buildOrderItem(order)).toList(),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _navItem(String title, String route) {
+    return BarlowText(
+      text: title,
+      color: const Color(0xFF30578E),
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      lineHeight: 1.0,
+      route: route,
+      enableUnderlineForActiveRoute: true,
+      decorationColor: const Color(0xFF30578E),
+      onTap: () {
+        context.go(route);
+      },
+      hoverTextColor: const Color(0xFF2876E4),
     );
   }
 
@@ -209,11 +195,10 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                   ),
                   const SizedBox(width: 24),
                   Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       BarlowText(
-                        text: "Order# ${order['orderNumber']}",
+                        text: "${order['orderNumber']}",
                         fontWeight: FontWeight.w400,
                         fontSize: 20,
                         lineHeight: 1.0,
@@ -223,7 +208,6 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                       const SizedBox(height: 10),
                       GestureDetector(
                         onTap: () {
-                          print("Cart icon tapped");
                           showDialog(
                             context: context,
                             barrierColor: Colors.transparent,
@@ -239,8 +223,8 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                           lineHeight: 1.0,
                           letterSpacing: 0,
                           color: const Color(0xFF30578E),
-                          backgroundColor: Color(0xFFb9d6ff),
-                          hoverTextColor: Color(0xFF2876E4),
+                          backgroundColor: const Color(0xFFb9d6ff),
+                          hoverTextColor: const Color(0xFF2876E4),
                         ),
                       ),
                     ],
@@ -251,54 +235,6 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget customTextFormField({
-    required String hintText,
-    TextEditingController? controller,
-  }) {
-    return Stack(
-      children: [
-        Positioned(
-          left: 0,
-          top: 16,
-          child: Text(
-            hintText,
-            style: GoogleFonts.barlow(
-              fontWeight: FontWeight.w400,
-              fontSize: 14,
-              color: const Color(0xFF414141),
-            ),
-          ),
-        ),
-        TextFormField(
-          controller: controller,
-          textAlign: TextAlign.right,
-          cursorColor: const Color(0xFF414141),
-          decoration: InputDecoration(
-            border: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF414141)),
-            ),
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF414141)),
-            ),
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF414141)),
-            ),
-            hintText: '',
-            hintStyle: GoogleFonts.barlow(
-              fontWeight: FontWeight.w400,
-              fontSize: 14,
-              height: 1.0,
-              letterSpacing: 0.0,
-              color: const Color(0xFF414141),
-            ),
-            contentPadding: const EdgeInsets.only(top: 16),
-          ),
-          style: const TextStyle(color: Color(0xFF414141)),
-        ),
-      ],
     );
   }
 }

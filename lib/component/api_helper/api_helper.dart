@@ -449,6 +449,50 @@ class ApiHelper {
     }
   }
 
+  static Future<Map<String, dynamic>> updateStock({
+    required String productId,
+    required String quantity,
+
+    required String updatedAt,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse(
+          'https://vedvika.com/v1/apis/backend/stock/delete_stock_by_quantity.php',
+        ),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'product_id': productId,
+          'quantity': quantity,
+
+          'updated_at': updatedAt,
+        },
+      );
+
+      print("HTTP Status Code: ${response.statusCode}");
+      print("Raw API Response: ${response.body}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        try {
+          return json.decode(response.body);
+        } catch (e) {
+          return {
+            'error': true,
+            'message': 'Invalid JSON response: ${response.body}',
+          };
+        }
+      } else {
+        return {
+          'error': true,
+          'message': 'Server error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      print("API call error: $e");
+      return {'error': true, 'message': 'Network error: $e'};
+    }
+  }
+
   static Future<Map<String, dynamic>> getDefaultAddress(int userId) async {
     final url =
         'https://vedvika.com/v1/apis/frontend/user_address/get_default_address.php?created_by=$userId';
@@ -710,4 +754,117 @@ class ApiHelper {
       return {'error': true, 'message': 'Error: $e'};
     }
   }
+
+  static Future<Map<String, dynamic>> orderPurchaseDetails({
+    required String userId,
+    required String productDetails,
+    required String orderId,
+    required String isSuccess,
+    required String paymentMode,
+    required String paymentId,
+    required String amount,
+    required String razorpayAmount,
+    required String addressId,
+    required String createdAt,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse(
+          'https://vedvika.com/v1/apis/backend/order_payments_details/insert_order_payment.php',
+        ),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'user_id': userId,
+          'product_details': productDetails,
+          'order_id': orderId,
+          'is_success': isSuccess,
+          'payment_mode': paymentMode,
+          'payment_id': paymentId,
+          'amount': amount,
+          'razorpay_amount': razorpayAmount,
+          'address_id': addressId,
+          'created_at': createdAt,
+        },
+      );
+
+      print("HTTP Status Code: ${response.statusCode}");
+      print("Raw API Response: ${response.body}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        try {
+          return json.decode(response.body);
+        } catch (e) {
+          return {
+            'error': true,
+            'message': 'Invalid JSON response: ${response.body}',
+          };
+        }
+      } else {
+        return {
+          'error': true,
+          'message': 'Server error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      print("API call error: $e");
+      return {'error': true, 'message': 'Network error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> getOrderDetails(String userId) async {
+    final url = Uri.parse(
+      '$baseUrlC/order_details/get_order_details.php?user_id=$userId',
+    );
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      final jsonData = json.decode(response.body);
+
+      if (response.statusCode == 200 && jsonData['error'] == false) {
+        print(jsonData);
+        return {'error': false, 'data': jsonData['data']};
+      } else {
+        return {
+          'error': true,
+          'message':
+              jsonData['message'] ?? jsonData['data'] ?? 'Something went wrong',
+        };
+      }
+    } catch (e) {
+      return {'error': true, 'message': 'Error: $e'};
+    }
+  }
+
+// Inside ApiHelper class
+  static Future<Map<String, dynamic>> getShippingTax(Map<String, String> params) async {
+    final url = Uri.parse('https://vedvika.com/v1/apis/frontend/order_created/shipping_taxes.php')
+        .replace(queryParameters: params);
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      final jsonData = json.decode(response.body);
+
+      if (response.statusCode == 200 && jsonData['error'] == false) {
+        return {'error': false, 'data': jsonData['data']};
+      } else {
+        return {
+          'error': true,
+          'message': jsonData['message'] ?? jsonData['data'] ?? 'Something went wrong',
+        };
+      }
+    } catch (e) {
+      return {'error': true, 'message': 'Error: $e'};
+    }
+  }
+
+
+
 }

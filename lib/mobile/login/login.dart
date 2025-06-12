@@ -15,7 +15,12 @@ import '../../web_desktop_common/login_signup/login/login_controller.dart';
 
 class LoginMobile extends StatefulWidget {
   final Function(String)? onWishlistChanged; // Callback to notify parent
-  const LoginMobile({super.key, this.onWishlistChanged});
+  final Function(String)? onErrorWishlistChanged; // Callback to notify parent
+  const LoginMobile({
+    super.key,
+    this.onWishlistChanged,
+    this.onErrorWishlistChanged,
+  });
   @override
   State<LoginMobile> createState() => _LoginMobileState();
 }
@@ -83,32 +88,12 @@ class _LoginMobileState extends State<LoginMobile> {
                   customTextFormField(
                     hintText: "EMAIL",
                     controller: loginController.emailController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      if (!RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      ).hasMatch(value)) {
-                        return 'Please enter a valid email';
-                      }
-                      return null;
-                    },
                   ),
                   SizedBox(height: 32),
                   customTextFormField(
                     hintText: "PASSWORD",
                     controller: loginController.passwordController,
                     isPassword: true, // Add isPassword flag
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      if (value.length < 8) {
-                        return 'Password must be at least 8 characters';
-                      }
-                      return null;
-                    },
                   ),
                   SizedBox(height: 15),
                   Row(
@@ -174,6 +159,69 @@ class _LoginMobileState extends State<LoginMobile> {
                         children: [
                           GestureDetector(
                             onTap: () async {
+                              final email =
+                                  loginController.emailController.text.trim();
+                              final password =
+                                  loginController.passwordController.text
+                                      .trim();
+
+                              // Email empty check
+                              if (email.isEmpty) {
+                                setState(() {
+                                  showSuccessBanner = false;
+                                  showErrorBanner = true;
+                                  errorMessage = "Please enter email";
+                                  widget.onErrorWishlistChanged?.call(
+                                    errorMessage,
+                                  );
+                                });
+                                return;
+                              }
+
+                              // Email format check using RegExp
+                              final emailRegex = RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              );
+                              if (!emailRegex.hasMatch(email)) {
+                                setState(() {
+                                  showSuccessBanner = false;
+                                  showErrorBanner = true;
+                                  errorMessage = "Please enter a valid email";
+                                  widget.onErrorWishlistChanged?.call(
+                                    errorMessage,
+                                  );
+                                });
+                                return;
+                              }
+
+                              // Password empty check
+                              if (password.isEmpty) {
+                                setState(() {
+                                  showSuccessBanner = false;
+                                  showErrorBanner = true;
+                                  errorMessage = "Please enter password";
+                                  widget.onErrorWishlistChanged?.call(
+                                    errorMessage,
+                                  );
+                                });
+                                return;
+                              }
+
+                              // Password length check
+                              if (password.length < 9) {
+                                setState(() {
+                                  showSuccessBanner = false;
+                                  showErrorBanner = true;
+                                  errorMessage =
+                                      "Password must be at least 9 characters";
+                                  widget.onErrorWishlistChanged?.call(
+                                    errorMessage,
+                                  );
+                                });
+                                return;
+                              }
+
+                              // Proceed to login only if all validations pass
                               bool success = await loginController.handleLogin(
                                 context,
                               );
@@ -189,11 +237,10 @@ class _LoginMobileState extends State<LoginMobile> {
                                     showSuccessBanner = false;
                                     showErrorBanner = true;
                                     errorMessage = loginController.loginMessage;
-                                    widget.onWishlistChanged?.call(
+                                    widget.onErrorWishlistChanged?.call(
                                       errorMessage,
                                     );
                                   }
-
                                 });
                               }
                             },
@@ -241,7 +288,6 @@ class _LoginMobileState extends State<LoginMobile> {
   Widget customTextFormField({
     required String hintText,
     TextEditingController? controller,
-    String? Function(String?)? validator,
     bool isPassword = false, // Add isPassword parameter
   }) {
     bool obscureText =
@@ -263,7 +309,6 @@ class _LoginMobileState extends State<LoginMobile> {
               ),
             ),
             TextFormField(
-              validator: validator,
               controller: controller,
               textAlign: TextAlign.right,
               cursorColor: const Color(0xFF414141),

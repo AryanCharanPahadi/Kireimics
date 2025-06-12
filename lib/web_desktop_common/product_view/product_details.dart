@@ -257,11 +257,15 @@ class _ProductDetailsState extends State<ProductDetails>
                 child: Container(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
                     children: [
                       if (relatedProducts.isNotEmpty)
                         Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(height: 19),
+                            // SizedBox(height: 19),
                             CralikaFont(
                               text: "Other Products\nyou may like",
                               textAlign: TextAlign.right,
@@ -271,7 +275,6 @@ class _ProductDetailsState extends State<ProductDetails>
                               letterSpacing: 0.96,
                               color: Color(0xFF414141),
                             ),
-                            SizedBox(height: 19),
                             SizedBox(height: 19),
                             GestureDetector(
                               onTap: () {
@@ -435,7 +438,8 @@ class _ProductDetailsState extends State<ProductDetails>
                                                           Alignment.centerLeft,
                                                       child: SvgPicture.asset(
                                                         "assets/home_page/outofstock.svg",
-                                                        height: 32,
+                                                        height: 25,
+                                                        width: 25,
                                                       ),
                                                     ),
                                                     Align(
@@ -529,7 +533,6 @@ class _ProductDetailsState extends State<ProductDetails>
                                                         badges.add(
                                                           SvgPicture.asset(
                                                             "assets/home_page/fewPiecesLeft.svg",
-
                                                           ),
                                                         );
                                                       }
@@ -570,14 +573,14 @@ class _ProductDetailsState extends State<ProductDetails>
                                                                       .none,
                                                             ),
                                                             child: BarlowText(
-                                                            text:   "${relatedProduct.discount}% OFF",
+                                                              text:
+                                                                  "${relatedProduct.discount}% OFF",
                                                               fontSize: 14,
                                                               fontWeight:
-                                                              FontWeight
-                                                                  .w600,
+                                                                  FontWeight
+                                                                      .w600,
                                                               color:
-                                                              Colors
-                                                                  .white,
+                                                                  Colors.white,
                                                             ),
                                                           ),
                                                         );
@@ -686,14 +689,72 @@ class _ProductDetailsState extends State<ProductDetails>
                                                     letterSpacing: 0.80,
                                                   ),
                                                   SizedBox(height: 5),
-                                                  BarlowText(
-                                                    text:
-                                                        "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w400,
-                                                    fontSize: 14,
-                                                    lineHeight: 1.0,
-                                                  ),
+                                                  if (!isOutOfStock) ...[
+                                                    Row(
+                                                      children: [
+                                                        // Original price with strikethrough
+                                                        if (relatedProduct
+                                                                .discount !=
+                                                            0)
+                                                          Text(
+                                                            "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
+                                                            style: TextStyle(
+                                                              color: Colors
+                                                                  .white
+                                                                  .withOpacity(
+                                                                    0.7,
+                                                                  ),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400,
+                                                              fontSize: 14,
+                                                              height: 1.2,
+                                                              decoration:
+                                                                  TextDecoration
+                                                                      .lineThrough,
+                                                              decorationColor: Colors
+                                                                  .white
+                                                                  .withOpacity(
+                                                                    0.7,
+                                                                  ), // Match strikethrough color
+                                                              fontFamily:
+                                                                  GoogleFonts.barlow()
+                                                                      .fontFamily, // Match Barlow font
+                                                            ),
+                                                          ),
+                                                        if (relatedProduct
+                                                                .discount !=
+                                                            0)
+                                                          SizedBox(width: 8),
+                                                        // Discounted price
+                                                        BarlowText(
+                                                          text:
+                                                              relatedProduct
+                                                                          .discount !=
+                                                                      0
+                                                                  ? "Rs. ${(relatedProduct.price * (1 - relatedProduct.discount / 100)).toStringAsFixed(2)}"
+                                                                  : "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 14,
+                                                          lineHeight: 1.2,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+
+                                                  if (isOutOfStock) ...[
+                                                    BarlowText(
+                                                      text:
+                                                          "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 14,
+                                                      lineHeight: 1.2,
+                                                    ),
+                                                  ],
                                                   SizedBox(height: 14),
                                                   if (isOutOfStock)
                                                     Row(

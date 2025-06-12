@@ -237,45 +237,74 @@ class CatalogPage extends StatelessWidget {
                                 ),
                       ),
                     ),
-                SizedBox(height: 40),
+                // SizedBox(height: 40),
               ],
             ),
             Obx(
-              () =>
-                  controller.showSortMenu.value
-                      ? Positioned(
-                        right: isLargeScreen ? 300 : 120,
-                        top: 230,
-                        child: Container(
-                          width: 180,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          color: Colors.white,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: _buildSortOptions(controller),
-                          ),
-                        ),
-                      )
-                      : SizedBox.shrink(),
-            ),
+                  () => controller.showSortMenu.value
+                  ? Positioned(
+                right: isLargeScreen ? 300 : 120,
+                top: 230,
+                child: Container(
+                  width: 180,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: Color(0xFFE7E7E7), // #E7E7E7
+                      width: 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x0F000000), // #0000000F (6% opacity black)
+                        blurRadius: 20,
+                        spreadRadius: 0,
+                        offset: Offset(20, 20),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _buildSortOptions(controller),
+                  ),
+                ),
+              )
+                  : SizedBox.shrink(),
+            )
+            ,
+
             Obx(
-              () =>
-                  controller.showFilterMenu.value
-                      ? Positioned(
-                        right: isLargeScreen ? 250 : 80,
-                        top: 230,
-                        child: Container(
-                          width: 180,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          color: Colors.white,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: _buildFilterOptions(controller),
-                          ),
-                        ),
-                      )
-                      : SizedBox.shrink(),
-            ),
+                  () => controller.showFilterMenu.value
+                  ? Positioned(
+                right: isLargeScreen ? 250 : 80,
+                top: 230,
+                child: Container(
+                  width: 180,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: Color(0xFFE7E7E7), // #E7E7E7
+                      width: 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x0F000000), // #0000000F (6% opacity black)
+                        blurRadius: 20,
+                        spreadRadius: 0,
+                        offset: Offset(20, 20),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _buildFilterOptions(controller),
+                  ),
+                ),
+              )
+                  : SizedBox.shrink(),
+            )
+
           ],
         ),
       );
@@ -312,7 +341,7 @@ class CatalogPage extends StatelessWidget {
             : [
               // Existing product sort options
               {
-                'label': 'Price: Low to High',
+                'label': 'Price Low - High',
                 'onTap': () {
                   controller.showSortMenu.value = false;
                   controller.productList.sort(
@@ -324,7 +353,18 @@ class CatalogPage extends StatelessWidget {
                 },
               },
               {
-                'label': 'Price: High to Low',
+                'label': 'Price High - Low',
+                'onTap': () {
+                  controller.showSortMenu.value = false;
+                  controller.productList.sort(
+                    (a, b) => b.price.compareTo(a.price),
+                  );
+                  controller.catalogController.products.assignAll(
+                    controller.productList,
+                  );
+                },
+              },   {
+                'label': 'New',
                 'onTap': () {
                   controller.showSortMenu.value = false;
                   controller.productList.sort(
@@ -339,7 +379,7 @@ class CatalogPage extends StatelessWidget {
 
     return options.map((option) {
       return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
@@ -352,8 +392,8 @@ class CatalogPage extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: const Color(0xFF30578E),
-                hoverBackgroundColor: const Color(0xFFb9d6ff),
-                enableHoverBackground: true,
+                hoverTextColor: const Color(0xFF2876E4),
+
               ),
             ),
           ),
@@ -406,7 +446,7 @@ class CatalogPage extends StatelessWidget {
 
     return options.map((option) {
       return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
@@ -419,8 +459,8 @@ class CatalogPage extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: const Color(0xFF30578E),
-                hoverBackgroundColor: const Color(0xFFb9d6ff),
-                enableHoverBackground: true,
+                hoverTextColor: const Color(0xFF2876E4),
+
               ),
             ),
           ),

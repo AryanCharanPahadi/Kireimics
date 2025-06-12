@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -53,9 +51,14 @@ class _LandingPageMobileState extends State<LandingPageMobile>
     with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   final CheckoutController checkoutController = Get.put(CheckoutController());
-  final ValueNotifier<double> _cartSubtotal = ValueNotifier<double>(
-    0.0,
-  ); // New notifier for cart subtotal
+  final ValueNotifier<double> _cartSubtotal = ValueNotifier<double>(0.0);
+  final ValueNotifier<Map<int, int>> _productQuantities =
+      ValueNotifier<Map<int, int>>({});
+  final ValueNotifier<Map<int, double>> _productPrices = ValueNotifier<Map<int, double>>({});
+  final ValueNotifier<Map<int, double?>> _productHeights = ValueNotifier<Map<int, double?>>({});
+  final ValueNotifier<Map<int, double?>> _productWidths = ValueNotifier<Map<int, double?>>({});
+  final ValueNotifier<Map<int, double?>> _productLengths = ValueNotifier<Map<int, double?>>({});
+  final ValueNotifier<Map<int, double?>> _productWeights = ValueNotifier<Map<int, double?>>({});
 
   double _lastScrollOffset = 0.0;
   bool _isScrollingUp = false;
@@ -69,10 +72,23 @@ class _LandingPageMobileState extends State<LandingPageMobile>
   double _subtotal = 0.0;
   final double _deliveryCharge = 50.0;
   late double _total;
+
   Future<bool> isUserLoggedIn() async {
     String? userData = await SharedPreferencesHelper.getUserData();
     return userData != null && userData.isNotEmpty;
   }
+
+  bool isAnyRequiredFieldEmpty() {
+    return checkoutController.firstNameController.text.isEmpty ||
+        checkoutController.lastNameController.text.isEmpty ||
+        checkoutController.emailController.text.isEmpty ||
+        checkoutController.address1Controller.text.isEmpty ||
+        checkoutController.zipController.text.isEmpty ||
+        checkoutController.stateController.text.isEmpty ||
+        checkoutController.cityController.text.isEmpty ||
+        checkoutController.mobileController.text.isEmpty;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -137,13 +153,19 @@ class _LandingPageMobileState extends State<LandingPageMobile>
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
           ),
-
       AppRoutes.catalog:
           (_) => CatalogMobileComponent(onWishlistChanged: _showNotification),
       AppRoutes.sale: (_) => SaleMobile(onWishlistChanged: _showNotification),
-      AppRoutes.logIn: (_) => LoginMobile(onWishlistChanged: _showNotification),
+      AppRoutes.logIn:
+          (_) => LoginMobile(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
       AppRoutes.deleteAddress:
-          (_) => DeleteAddressMobile(onWishlistChanged: _showNotification),
+          (_) => DeleteAddressMobile(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
       AppRoutes.signIn:
           (_) => SignInMobile(
             onWishlistChanged: _showNotification,
@@ -169,16 +191,42 @@ class _LandingPageMobileState extends State<LandingPageMobile>
           (_) => MyAccountUiMobile(onWishlistChanged: _showNotification),
       '/cart':
           (id) => CartPanelMobile(
-            productId: int.tryParse(id ?? '0') ?? 0,
-            onWishlistChanged: _showNotification,
-            onSubtotalChanged: (subtotal) {
-              _cartSubtotal.value =
-                  subtotal; // Update notifier when subtotal changes
-              setState(() {
-                _updateSubtotalAndTotal(); // Update _subtotal and _total
-              });
-            },
-          ),
+        productId: int.tryParse(id ?? '0') ?? 0,
+        onWishlistChanged: _showNotification,
+        onSubtotalChanged: (
+            subtotal,
+            productQuantities,
+            productPrices,
+            productHeights,
+            productWidths,
+            productLengths,
+            productWeights,
+            ) {
+          _cartSubtotal.value = subtotal;
+          _productQuantities.value = productQuantities;
+          _productPrices.value = productPrices;
+          _productHeights.value = productHeights;   // Store heights
+          _productWidths.value = productWidths;     // Store widths
+          _productLengths.value = productLengths;   // Store lengths
+          _productWeights.value = productWeights;   // Store weights
+          setState(() {
+            _updateSubtotalAndTotal();
+          });
+          // Print product details
+          print('Product Details:');
+          productQuantities.forEach((productId, quantity) {
+            final price = productPrices[productId] ?? 0.0;
+            final height = productHeights[productId] ?? 'N/A';
+            final width = productWidths[productId] ?? 'N/A';
+            final length = productLengths[productId] ?? 'N/A';
+            final weight = productWeights[productId] ?? 'N/A';
+            print(
+              'Product ID: $productId, Quantity: $quantity, Price: $price, '
+                  'Height: $height, Width: $width, Length: $length, Weight: $weight',
+            );
+          });
+        },
+      ),
       '/product':
           (id) => ProductDetailsMobile(
             productId: int.tryParse(id ?? '0') ?? 0,
@@ -230,7 +278,12 @@ class _LandingPageMobileState extends State<LandingPageMobile>
   void dispose() {
     _animationController.dispose();
     _scrollController.dispose();
-    _cartSubtotal.dispose(); // Dispose of the notifier
+    _cartSubtotal.dispose();
+    _productQuantities.dispose(); // Dispose of the new notifier
+    _productHeights.dispose();
+    _productWidths.dispose();
+    _productLengths.dispose();
+    _productWeights.dispose();
     super.dispose();
   }
 
@@ -334,103 +387,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
         _selectedPage == AppRoutes.forgotPasswordMain;
     final isCartRoute = _selectedPage == '/cart';
 
-    void openRazorpayCheckout() async {
-      print('openRazorpayCheckout called');
-      if (!kIsWeb) {
-        print('Not running on web platform');
-        return;
-      }
-
-      if (!js.context.hasProperty('openRazorpay')) {
-        print('Error: openRazorpay function not found in JavaScript context');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error: Payment system not initialized'),
-          ),
-        );
-        return;
-      }
-
-      final orderId = 'ORDER_${DateTime.now().millisecondsSinceEpoch}';
-
-      final options = {
-        'key': 'rzp_test_PKUyVj9nF0FvA7',
-        'amount': (_total * 100).toInt(),
-        'currency': 'INR',
-        'name': 'Kireimics',
-        'description': 'Payment for order',
-        'prefill': {'name': '', 'email': '', 'contact': ''},
-        'notes': {'address': 'Customer address'},
-        'handler': js.allowInterop((response) async {
-          final responseJson = js.context['JSON'].callMethod('stringify', [
-            response,
-          ]);
-          final paymentId = response['razorpay_payment_id'] ?? 'N/A';
-          final orderIdResponse = response['razorpay_order_id'] ?? orderId;
-          final signature = response['razorpay_signature'] ?? 'N/A';
-          final amount = _total;
-          final status = 'success';
-
-          print('=== Payment Successful ===');
-          print('Payment ID: $paymentId');
-          print('Order ID: $orderIdResponse');
-          print('Signature: $signature');
-          print('Amount: $amount INR');
-          print('Status: $status');
-          print('Raw Client-Side Response: $responseJson');
-
-          try {
-            final serverResponse = await http.get(
-              Uri.parse(
-                'http://localhost/17000ft/payment_details.php?payment_id=$paymentId',
-              ),
-            );
-
-            if (serverResponse.statusCode == 200) {
-              final paymentDetails = jsonDecode(serverResponse.body);
-              print('=== Full Payment Details ===');
-              print('Full Raw Response: ${jsonEncode(paymentDetails)}');
-              print('Mode of Payment: ${paymentDetails['method'] ?? 'N/A'}');
-              print('Payment ID: ${paymentDetails['id'] ?? 'N/A'}');
-              print('Order ID: ${paymentDetails['order_id'] ?? 'N/A'}');
-              print(
-                'Amount: ${(paymentDetails['amount'] / 100).toStringAsFixed(2)} ${paymentDetails['currency'] ?? 'N/A'}',
-              );
-              print('Status: ${paymentDetails['status'] ?? 'N/A'}');
-              print(
-                'Created At: ${DateTime.fromMillisecondsSinceEpoch((paymentDetails['created_at'] * 1000) ?? 0)}',
-              );
-            } else {
-              print('Failed to fetch payment details: ${serverResponse.body}');
-            }
-          } catch (e) {
-            print('Error fetching payment details: $e');
-          }
-
-          context.go(
-            '${AppRoutes.paymentResult}?success=true&orderId=$orderId&amount=$_total',
-          );
-        }),
-        'modal': {
-          'ondismiss': js.allowInterop(() {
-            print('Payment modal dismissed');
-            context.go(
-              '${AppRoutes.paymentResult}?success=false&orderId=$orderId&amount=$_total',
-            );
-          }),
-        },
-      };
-
-      print('Razorpay options: $options');
-
-      try {
-        print('Calling js.context.callMethod for openRazorpay');
-        js.context.callMethod('openRazorpay', [js.JsObject.jsify(options)]);
-      } catch (e) {
-        print('Error initiating payment: $e');
-      }
-    }
-
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -524,7 +480,8 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                       ),
                     ),
 
-                    if (isLoginRoute)
+                    if (isLoginRoute &&
+                        MediaQuery.of(context).viewInsets.bottom == 0)
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -603,7 +560,8 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                         ),
                       ),
 
-                    if (isSignInRoute)
+                    if (isSignInRoute &&
+                        MediaQuery.of(context).viewInsets.bottom == 0)
                       Positioned(
                         left: 0,
                         right: 0,
@@ -712,8 +670,8 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                         !isSignInRoute &&
                         !isForgotPasswordRoute &&
                         !isDeleteAddressRoute &&
-                        !isForgotPasswordResetRoute &&
                         !isAddAddressRoute &&
+                        !isForgotPasswordResetRoute &&
                         !isViewDetailsRoute)
                       if (isCheckoutRoute)
                         Positioned(
@@ -745,10 +703,26 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                   SizedBox(height: 8),
                                   BarlowText(
                                     text: "MAKE PAYMENT",
-                                    color: Color(0xFF30578E),
+                                    color:
+                                        isAnyRequiredFieldEmpty()
+                                            ? const Color(
+                                              0xFF30578E,
+                                            ).withOpacity(0.5)
+                                            : const Color(0xFF30578E),
+                                    backgroundColor:
+                                        isAnyRequiredFieldEmpty()
+                                            ? const Color(
+                                              0xFFb9d6ff,
+                                            ).withOpacity(0.5)
+                                            : const Color(0xFFb9d6ff),
+                                    hoverTextColor:
+                                        isAnyRequiredFieldEmpty()
+                                            ? const Color(
+                                              0xFF2876E4,
+                                            ).withOpacity(0.5)
+                                            : const Color(0xFF2876E4),
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
-                                    backgroundColor: Color(0xFFB9D6FF),
                                     lineHeight: 1.0,
                                     letterSpacing: 1 * 0.04,
                                     onTap: () async {
@@ -878,10 +852,13 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                             );
                                         return;
                                       }
-                                      if (!checkoutController.isChecked &&
+
+                                      bool isLoggedIn = await isUserLoggedIn();
+                                      if (!isLoggedIn &&
                                           !checkoutController
                                               .addressExists
-                                              .value) {
+                                              .value &&
+                                          !checkoutController.isChecked) {
                                         checkoutController
                                             .onErrorWishlistChanged
                                             ?.call(
@@ -890,20 +867,44 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                         return;
                                       }
 
-                                      bool isLoggedIn = await isUserLoggedIn();
                                       if (!isLoggedIn) {
-                                        // Call handleSignUp for non-logged-in users
-                                        bool signUpSuccess = await checkoutController.handleSignUp(
-                                          context,
-                                        );
+                                        bool signUpSuccess =
+                                            await checkoutController
+                                                .handleSignUp(context);
                                         if (!signUpSuccess) {
                                           checkoutController
-                                              .onErrorWishlistChanged?.call(
-                                            checkoutController.signupMessage.isNotEmpty
-                                                ? checkoutController.signupMessage
-                                                : 'Signup failed, please try again',
-                                          );
+                                              .onErrorWishlistChanged
+                                              ?.call(
+                                                checkoutController
+                                                        .signupMessage
+                                                        .isNotEmpty
+                                                    ? checkoutController
+                                                        .signupMessage
+                                                    : 'Signup failed, please try again',
+                                              );
                                           return;
+                                        }
+                                      } else {
+                                        // For logged-in users, call handleAddAddress if no address exists
+                                        if (!checkoutController
+                                            .addressExists
+                                            .value) {
+                                          bool addressSuccess =
+                                              await checkoutController
+                                                  .handleAddAddress(context);
+                                          if (!addressSuccess) {
+                                            checkoutController
+                                                .onErrorWishlistChanged
+                                                ?.call(
+                                                  checkoutController
+                                                          .signupMessage
+                                                          .isNotEmpty
+                                                      ? checkoutController
+                                                          .signupMessage
+                                                      : 'Failed to add address, please try again',
+                                                );
+                                            return;
+                                          }
                                         }
                                       }
 
@@ -921,6 +922,10 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                             ),
                           ),
                         ),
+
+
+
+
                     if (!isLoginRoute &&
                         !isSignInRoute &&
                         !isForgotPasswordRoute &&
@@ -932,18 +937,55 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                       ValueListenableBuilder<double>(
                         valueListenable: _cartSubtotal,
                         builder: (context, subtotal, _) {
-                          return subtotal > 0.00
-                              ? Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                child: ProceedToCheckoutButton(
-                                  subtotal: subtotal,
-                                ),
-                              )
-                              : const SizedBox.shrink();
+                          return ValueListenableBuilder<Map<int, int>>(
+                            valueListenable: _productQuantities,
+                            builder: (context, productQuantities, _) {
+                              return ValueListenableBuilder<Map<int, double>>(
+                                valueListenable: _productPrices,
+                                builder: (context, productPrices, _) {
+                                  return ValueListenableBuilder<Map<int, double?>>(
+                                    valueListenable: _productHeights,
+                                    builder: (context, productHeights, _) {
+                                      return ValueListenableBuilder<Map<int, double?>>(
+                                        valueListenable: _productWidths,
+                                        builder: (context, productWidths, _) {
+                                          return ValueListenableBuilder<Map<int, double?>>(
+                                            valueListenable: _productLengths,
+                                            builder: (context, productLengths, _) {
+                                              return ValueListenableBuilder<Map<int, double?>>(
+                                                valueListenable: _productWeights,
+                                                builder: (context, productWeights, _) {
+                                                  return subtotal > 0.00
+                                                      ? Positioned(
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    child: ProceedToCheckoutButton(
+                                                      subtotal: subtotal,
+                                                      productQuantities: productQuantities,
+                                                      productPrices: productPrices,
+                                                      productHeights: productHeights,
+                                                      productWidths: productWidths,
+                                                      productLengths: productLengths,
+                                                      productWeights: productWeights,
+                                                    ),
+                                                  )
+                                                      : const SizedBox.shrink();
+                                                },
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                            },
+                          );
                         },
                       ),
+
                     ValueListenableBuilder<String?>(
                       valueListenable: _notificationMessage,
                       builder: (context, message, _) {

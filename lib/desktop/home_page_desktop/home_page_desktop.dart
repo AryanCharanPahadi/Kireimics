@@ -264,13 +264,13 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                         isMessageField: true,
                                         focusNode: _messageFocusNode,
                                         nextFocusNode: _anotherMessageFocusNode,
+                                        nextController: _anotherMessageController, // REQUIRED
                                       ),
                                     ),
                                     const SizedBox(height: 10),
                                     SizedBox(
-                                      child: CustomTextFormField(
-                                        hintText:
-                                            "", // Empty hint text for continuation
+                                      child:CustomTextFormField(
+                                        hintText: "",
                                         controller: _anotherMessageController,
                                         focusNode: _anotherMessageFocusNode,
                                         maxLength: 100,

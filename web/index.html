@@ -11,46 +11,78 @@
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Kireimics">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="logo.png"/>
 
+  <!-- Safari/iOS and modern browser address bar color -->
+  <meta name="theme-color" content="#30578E">
+  <meta name="apple-mobile-web-app-status-bar-style" content="#30578E">
+
   <title>Kireimics</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <script src="razorpay.js"></script>
-  <script src =  "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js"></script>
-<script src =  "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js"></script>
-  <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
 
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
-      apiKey: "AIzaSyC48_4nuTzlxahYvhWpt85A72YXXsOi6ps",
-      authDomain: "kireimics-35393.firebaseapp.com",
-      projectId: "kireimics-35393",
-      storageBucket: "kireimics-35393.firebasestorage.app",
-      messagingSenderId: "542570800162",
-      appId: "1:542570800162:web:53a56183806aca5ca7167b",
-      measurementId: "G-EHK73FFE7T"
+<!-- Flutter Web -->
+<script src="flutter_bootstrap.js" async></script>
+
+<!-- Razorpay -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="razorpay.js"></script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC48_4nuTzlxahYvhWpt85A72YXXsOi6ps",
+    authDomain: "kireimics-35393.firebaseapp.com",
+    projectId: "kireimics-35393",
+    storageBucket: "kireimics-35393.firebasestorage.app",
+    messagingSenderId: "542570800162",
+    appId: "1:542570800162:web:53a56183806aca5ca7167b",
+    measurementId: "G-EHK73FFE7T"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
+<!-- Ensure theme-color is updated on Flutter navigation -->
+<script>
+  function setThemeColor(color) {
+    let themeMeta = document.querySelector("meta[name='theme-color']");
+    if (themeMeta) {
+      themeMeta.setAttribute("content", color);
+    }
+  }
+
+  // Set on load
+  setThemeColor("#30578E");
+
+  window.addEventListener('flutter-first-frame', function () {
+    setThemeColor("#30578E");
+
+    // Patch pushState to detect in-app navigation
+    const originalPushState = history.pushState;
+    history.pushState = function () {
+      originalPushState.apply(this, arguments);
+      setThemeColor("#30578E");
     };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-  </script>
-
+    // Handle back/forward navigation
+    window.addEventListener('popstate', () => {
+      setThemeColor("#30578E");
+    });
+  });
+</script>
 
 </body>
 </html>

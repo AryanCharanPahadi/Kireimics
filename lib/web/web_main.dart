@@ -455,8 +455,10 @@ class _LandingPageWebState extends State<LandingPageWeb>
         }
       },
       child: ColoredBox(
-        color: Colors.white, // Persistent background to prevent flicker
+        color: Colors.white,
         child: Scaffold(
+          backgroundColor: Colors.white,
+
           body: FadeTransition(
             opacity: _fadeAnimation,
             child: SlideTransition(
@@ -489,7 +491,9 @@ class _LandingPageWebState extends State<LandingPageWeb>
                           ),
                           const SizedBox(height: 5),
                           if (!isForgetPasswordRoute)
-                            Footer(onItemSelected: _onFooterItemSelected),
+                            Container(
+                                color:Colors.white,
+                child: Footer(onItemSelected: _onFooterItemSelected)),
                         ],
                       ),
                     ),

@@ -454,10 +454,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     BarlowText(
-                                      text:
-                                          checkoutController.addressExists.value
-                                              ? 'UPDATE ADDRESS'
-                                              : 'ADD ADDRESS',
+                                      text: 'UPDATE ADDRESS',
                                       color: const Color(0xFF30578E),
                                       fontWeight: FontWeight.w600,
                                       fontSize: 16,
@@ -466,25 +463,13 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                       backgroundColor: Color(0xFFB9D6FF),
 
                                       onTap: () {
-                                        if (checkoutController
-                                            .addressExists
-                                            .value) {
-                                          showDialog(
-                                            context: context,
-                                            barrierColor: Colors.transparent,
-                                            builder: (BuildContext context) {
-                                              return SelectAddressMobile();
-                                            },
-                                          );
-                                        } else {
-                                          showDialog(
-                                            context: context,
-                                            barrierColor: Colors.transparent,
-                                            builder: (BuildContext context) {
-                                              return AddAddressUiMobile();
-                                            },
-                                          );
-                                        }
+                                        showDialog(
+                                          context: context,
+                                          barrierColor: Colors.transparent,
+                                          builder: (BuildContext context) {
+                                            return SelectAddressMobile();
+                                          },
+                                        );
                                       },
                                     ),
                                   ],

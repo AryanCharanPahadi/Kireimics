@@ -461,6 +461,8 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
       child: ColoredBox(
         color: Colors.white, // Persistent background to prevent flicker
         child: Scaffold(
+          backgroundColor: Colors.white,
+
           body: FadeTransition(
             opacity: _fadeAnimation,
             child: SlideTransition(
@@ -493,8 +495,10 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
                           ),
                           const SizedBox(height: 5),
                           if (!isForgetPasswordRoute)
-                            Footer(onItemSelected: _onFooterItemSelected),
-                        ],
+                            Container(
+                              color: Colors.white,
+                              child: Footer(onItemSelected: _onFooterItemSelected),
+                            ),                        ],
                       ),
                     ),
                     if (!isForgetPasswordRoute)

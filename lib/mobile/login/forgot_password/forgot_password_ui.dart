@@ -103,7 +103,7 @@ class _ForgotPasswordUiMobileState extends State<ForgotPasswordUiMobile> {
                             child: BarlowText(
                               text: "SEND RESET LINK",
                               fontWeight: FontWeight.w600,
-                              fontSize: 16,
+                              fontSize: 14,
                               lineHeight: 1.0,
                               letterSpacing: 0.64,
                               color: Color(0xFF30578E),

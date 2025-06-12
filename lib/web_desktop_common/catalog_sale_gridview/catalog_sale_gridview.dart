@@ -187,10 +187,6 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                       ),
                     ),
 
-                    // if (isOutOfStock)
-                    //   Positioned.fill(
-                    //     child: Container(color: Colors.black.withOpacity(0.3)), // slight dark overlay
-                    //   ),
                     Positioned(
                       top: imageHeight * 0.04,
                       left: imageWidth * 0.05,
@@ -309,7 +305,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                         ),
                                         child: BarlowText(
                                           text:
-                                              "${widget.product.discount}% OFF",
+                                          "${widget.product.discount}% OFF",
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.white,
@@ -320,7 +316,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
 
                                   return Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                     children: badges,
                                   );
                                 },
@@ -397,17 +393,57 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                 maxLines: 2,
                               ),
                               SizedBox(height: imageHeight * 0.01),
-                              Text(
-                                "Rs. ${widget.product.price.toStringAsFixed(2)}",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: GoogleFonts.barlow().fontFamily,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14,
-                                  height: 1.2,
+                              if (!isOutOfStock) ...[
+                                Row(
+                                  children: [
+                                    // Original price with strikethrough
+                                    if (widget.product.discount != 0)
+                                      Text(
+                                        "Rs. ${widget.product.price.toStringAsFixed(2)}",
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7),
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 14,
+                                          height: 1.2,
+                                          decoration: TextDecoration.lineThrough,
+                                          decorationColor: Colors.white
+                                              .withOpacity(
+                                            0.7,
+                                          ), // Match strikethrough color
+                                          fontFamily:
+                                          GoogleFonts.barlow()
+                                              .fontFamily, // Match Barlow font
+                                        ),
+                                      ),
+                                    if (widget.product.discount != 0)
+                                      SizedBox(width: 8),
+                                    // Discounted price
+                                    BarlowText(
+                                      text:
+                                      widget.product.discount != 0
+                                          ? "Rs. ${(widget.product.price * (1 - widget.product.discount / 100)).toStringAsFixed(2)}"
+                                          : "Rs. ${widget.product.price.toStringAsFixed(2)}",
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                      lineHeight: 1.2,
+                                    ),
+                                  ],
                                 ),
-                              ),
+                              ],
+
+                              if(isOutOfStock)...[
+                                BarlowText(
+                                  text:
+                                  "Rs. ${widget.product.price.toStringAsFixed(2)}",
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  lineHeight: 1.2,
+                                ),
+                              ],
                               SizedBox(height: imageHeight * 0.04),
+
                               if (isOutOfStock)
                                 Row(
                                   children: [
@@ -436,7 +472,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontFamily:
-                                            GoogleFonts.barlow().fontFamily,
+                                        GoogleFonts.barlow().fontFamily,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15,
                                         height: 1.0,
@@ -490,7 +526,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontFamily:
-                                            GoogleFonts.barlow().fontFamily,
+                                        GoogleFonts.barlow().fontFamily,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15,
                                         height: 1.0,
@@ -500,21 +536,26 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                     GestureDetector(
                                       onTap: () {
                                         // Call the wishlist changed callback immediately
-                                        widget.onWishlistChanged?.call('Product Added To Cart');
+                                        widget.onWishlistChanged?.call(
+                                          'Product Added To Cart',
+                                        );
 
                                         // Delay the modal opening by 3 seconds
-                                        Future.delayed(Duration(seconds: 2), () {
-                                          showDialog(
-                                            context: context,
-                                            barrierColor: Colors.transparent,
-                                            builder: (BuildContext context) {
-                                              cartNotifier.refresh();
-                                              return CartPanel(
-                                                productId: widget.product.id,
-                                              );
-                                            },
-                                          );
-                                        });
+                                        Future.delayed(
+                                          Duration(seconds: 2),
+                                              () {
+                                            showDialog(
+                                              context: context,
+                                              barrierColor: Colors.transparent,
+                                              builder: (BuildContext context) {
+                                                cartNotifier.refresh();
+                                                return CartPanel(
+                                                  productId: widget.product.id,
+                                                );
+                                              },
+                                            );
+                                          },
+                                        );
                                       },
                                       child: BarlowText(
                                         text: "ADD TO CART",
@@ -527,7 +568,6 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                         hoverTextColor: Color(0xFF30578E),
                                       ),
                                     ),
-
                                   ],
                                 ),
                             ],

@@ -236,41 +236,70 @@ class Sale extends StatelessWidget {
               ],
             ),
             Obx(
-              () =>
-                  saleController.showSortMenu.value
-                      ? Positioned(
-                        right: isLargeScreen ? 300 : 120,
-                        top: 230,
-                        child: Container(
-                          width: 180,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          color: Colors.white,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: _buildSortOptions(saleController),
-                          ),
-                        ),
-                      )
-                      : const SizedBox.shrink(),
-            ),
+                  () => saleController.showSortMenu.value
+                  ? Positioned(
+                right: isLargeScreen ? 300 : 120,
+                top: 230,
+                child: Container(
+                  width: 180,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: Color(0xFFE7E7E7), // #E7E7E7
+                      width: 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x0F000000), // #0000000F (6% opacity black)
+                        blurRadius: 20,
+                        spreadRadius: 0,
+                        offset: Offset(20, 20),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _buildSortOptions(saleController),
+                  ),
+                ),
+              )
+                  : SizedBox.shrink(),
+            )
+            ,
+
             Obx(
-              () =>
-                  saleController.showFilterMenu.value
-                      ? Positioned(
-                        right: isLargeScreen ? 250 : 80,
-                        top: 230,
-                        child: Container(
-                          width: 180,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          color: Colors.white,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: _buildFilterOptions(saleController),
-                          ),
-                        ),
-                      )
-                      : const SizedBox.shrink(),
-            ),
+                  () => saleController.showFilterMenu.value
+                  ? Positioned(
+                right: isLargeScreen ? 250 : 80,
+                top: 230,
+                child: Container(
+                  width: 180,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: Color(0xFFE7E7E7), // #E7E7E7
+                      width: 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x0F000000), // #0000000F (6% opacity black)
+                        blurRadius: 20,
+                        spreadRadius: 0,
+                        offset: Offset(20, 20),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _buildFilterOptions(saleController),
+                  ),
+                ),
+              )
+                  : SizedBox.shrink(),
+            )
+
           ],
         ),
       );
@@ -305,14 +334,20 @@ class Sale extends StatelessWidget {
             ]
             : [
               {
-                'label': 'Price: Low to High',
+                'label': 'Price Low - High',
                 'onTap': () {
                   controller.showSortMenu.value = false;
                   controller.sortProductsLowToHigh();
                 },
               },
               {
-                'label': 'Price: High to Low',
+                'label': 'Price High - Low',
+                'onTap': () {
+                  controller.showSortMenu.value = false;
+                  controller.sortProductsHighToLow();
+                },
+              },  {
+                'label': 'New',
                 'onTap': () {
                   controller.showSortMenu.value = false;
                   controller.sortProductsHighToLow();
@@ -335,8 +370,8 @@ class Sale extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: const Color(0xFF30578E),
-                hoverBackgroundColor: const Color(0xFFb9d6ff),
-                enableHoverBackground: true,
+                hoverTextColor: const Color(0xFF2876E4),
+
               ),
             ),
           ),
@@ -389,8 +424,8 @@ class Sale extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: const Color(0xFF30578E),
-                hoverBackgroundColor: const Color(0xFFb9d6ff),
-                enableHoverBackground: true,
+                hoverTextColor: const Color(0xFF2876E4),
+
               ),
             ),
           ),

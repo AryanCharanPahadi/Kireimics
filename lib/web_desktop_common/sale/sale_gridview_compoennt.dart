@@ -255,7 +255,8 @@ class _SaleProductGridItemState extends State<SaleProductGridItem>
                                           side: BorderSide.none,
                                         ),
                                         child: BarlowText(
-                                       text:    "${widget.product.discount}% OFF",
+                                          text:
+                                              "${widget.product.discount}% OFF",
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.white,
@@ -344,16 +345,47 @@ class _SaleProductGridItemState extends State<SaleProductGridItem>
                                 maxLines: 2,
                               ),
                               SizedBox(height: imageHeight * 0.01),
-                              Text(
-                                "Rs. ${widget.product.price.toStringAsFixed(2)}",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: GoogleFonts.barlow().fontFamily,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14,
-                                  height: 1.2,
+                              if (!isOutOfStock) ...[
+                                Row(
+                                  children: [
+                                    // Original price with strikethrough
+                                    if (widget.product.discount != 0)
+                                      Text(
+                                        "Rs. ${widget.product.price.toStringAsFixed(2)}",
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7),
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 14,
+                                          height: 1.2,
+                                          decoration: TextDecoration.lineThrough,
+                                          decorationColor: Colors.white
+                                              .withOpacity(
+                                            0.7,
+                                          ), // Match strikethrough color
+                                          fontFamily:
+                                          GoogleFonts.barlow()
+                                              .fontFamily, // Match Barlow font
+                                        ),
+                                      ),
+                                    if (widget.product.discount != 0)
+                                      SizedBox(width: 8),
+                                    // Discounted price
+                                    BarlowText(
+                                      text:
+                                      widget.product.discount != 0
+                                          ? "Rs. ${(widget.product.price * (1 - widget.product.discount / 100)).toStringAsFixed(2)}"
+                                          : "Rs. ${widget.product.price.toStringAsFixed(2)}",
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                      lineHeight: 1.2,
+                                    ),
+                                  ],
                                 ),
-                              ),
+                              ],
+
+
+
                               SizedBox(height: imageHeight * 0.04),
                               Row(
                                 children: [
@@ -395,7 +427,9 @@ class _SaleProductGridItemState extends State<SaleProductGridItem>
                                   GestureDetector(
                                     onTap: () {
                                       // Call the wishlist changed callback immediately
-                                      widget.onWishlistChanged?.call('Product Added To Cart');
+                                      widget.onWishlistChanged?.call(
+                                        'Product Added To Cart',
+                                      );
 
                                       // Delay the modal opening by 3 seconds
                                       Future.delayed(Duration(seconds: 2), () {

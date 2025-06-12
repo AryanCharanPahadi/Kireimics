@@ -149,26 +149,26 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                           hintText: "YOUR NAME",
                           controller: _nameController,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 24),
                         customTextFormField(
                           hintText: "YOUR EMAIL",
                           controller: _emailController,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 24),
                         customTextFormField(
                           hintText: "MESSAGE",
+                          controller: _messageController,
                           isMessageField: true,
                           focusNode: _messageFocusNode,
                           nextFocusNode: _anotherMessageFocusNode,
-                          controller: _messageController,
+                          nextController: _anotherMessageController,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 24),
                         customTextFormField(
                           hintText: "",
-                          isMessageField: true,
                           controller: _anotherMessageController,
                           focusNode: _anotherMessageFocusNode,
-                          maxLength: 40,
+                          maxLength: 100,
                         ),
                         const SizedBox(height: 24),
                         GestureDetector(
@@ -177,7 +177,7 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                           child: Align(
                             alignment: Alignment.bottomRight,
                             child: SvgPicture.asset(
-                              "assets/home_page/submit.svg",
+                              "assets/icons/submit_new2.svg",
                               height: 19,
                               width: 58,
                             ),
@@ -249,7 +249,7 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                               text:
                                   contactController.contactData!['phone']
                                       .toString(),
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF30578E),
                               decorationColor: const Color(0xFF30578E),
@@ -269,7 +269,7 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                               text:
                                   contactController.contactData!['email']
                                       .toString(),
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF30578E),
                               decorationColor: const Color(0xFF30578E),
@@ -398,60 +398,103 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
   Widget customTextFormField({
     required String hintText,
     TextEditingController? controller,
+    TextEditingController? nextController,
     bool isMessageField = false,
     int? maxLength,
     FocusNode? focusNode,
     FocusNode? nextFocusNode,
   }) {
     final int? effectiveMaxLength = isMessageField ? 25 : maxLength;
+    String? trailingWord;
 
-    return Stack(
-      children: [
-        // Hint text positioned on the left
-        Positioned(
-          left: 0,
-          top: 16,
-          child: Text(
-            hintText,
-            style: GoogleFonts.barlow(
-              fontSize: 14,
-              color: const Color(0xFF414141),
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Stack(
+          children: [
+            Positioned(
+              left: 0,
+              top: 16,
+              child: Text(
+                hintText,
+                style: GoogleFonts.barlow(
+                  fontSize: 14,
+                  color: const Color(0xFF414141),
+                ),
+              ),
             ),
-          ),
-        ),
-        TextFormField(
-          controller: controller,
-          focusNode: focusNode,
-          cursorColor: Colors.black,
-          textAlign: TextAlign.right,
-          maxLength: effectiveMaxLength,
-          onChanged: (value) {
-            if (isMessageField && value.length == 25 && nextFocusNode != null) {
-              nextFocusNode!.requestFocus();
-            }
-          },
-          decoration: InputDecoration(
-            counterText: '', // hides the maxLength counter
-            hintStyle: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              fontFamily: GoogleFonts.barlow().fontFamily,
+            TextFormField(
+              controller: controller,
+              focusNode: focusNode,
+              cursorColor: Colors.black,
+              textAlign: TextAlign.right,
+              maxLength: effectiveMaxLength,
+              onChanged: (value) {
+                if (isMessageField && value.length == 25) {
+                  final lastSpaceIndex = value.lastIndexOf(' ');
+
+                  if (lastSpaceIndex != -1 &&
+                      lastSpaceIndex < value.length - 1) {
+                    final wordToMove = value.substring(lastSpaceIndex + 1);
+                    final newText = value.substring(0, lastSpaceIndex);
+
+                    controller?.text = newText;
+                    controller?.selection = TextSelection.fromPosition(
+                      TextPosition(offset: newText.length),
+                    );
+
+                    if (nextController != null) {
+                      final nextText = nextController.text;
+                      final updatedNextText =
+                          nextText.isEmpty
+                              ? wordToMove
+                              : '$nextText $wordToMove';
+                      nextController.text = updatedNextText;
+                      nextController.selection = TextSelection.fromPosition(
+                        TextPosition(offset: updatedNextText.length),
+                      );
+                    }
+
+                    if (nextFocusNode != null) {
+                      nextFocusNode.requestFocus();
+                    }
+
+                    trailingWord = wordToMove;
+                  } else {
+                    // No space found
+                    nextFocusNode?.requestFocus();
+                    trailingWord = null;
+                  }
+                  setState(() {});
+                } else if (isMessageField) {
+                  final parts = value.split(' ');
+                  trailingWord = value.endsWith(' ') ? '' : parts.last;
+                  setState(() {});
+                }
+              },
+              decoration: InputDecoration(
+                counterText: '',
+                hintStyle: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: GoogleFonts.barlow().fontFamily,
+                ),
+                enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF414141)),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF414141)),
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.only(bottom: 5),
+              ),
+              style: TextStyle(
+                color: const Color(0xFF414141),
+                fontFamily: GoogleFonts.barlow().fontFamily,
+              ),
             ),
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF414141)),
-            ),
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF414141)),
-            ),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.only(bottom: 5),
-          ),
-          style: TextStyle(
-            color: const Color(0xFF414141),
-            fontFamily: GoogleFonts.barlow().fontFamily,
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
@@ -485,7 +528,7 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
               children: [
                 BarlowText(
                   text: entry.key,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF30578E),
                   enableUnderlineForActiveRoute: true,

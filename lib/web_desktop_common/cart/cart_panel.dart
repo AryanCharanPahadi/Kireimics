@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/get_instance.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kireimics/component/no_result_found/no_order_yet.dart';
 
@@ -11,6 +13,7 @@ import '../../component/product_details/product_details_modal.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/utilities/utility.dart';
+import '../../web/checkout/checkout_controller.dart';
 
 class CartPanel extends StatefulWidget {
   final int? productId;
@@ -34,7 +37,10 @@ class _CartPanelState extends State<CartPanel> {
       if (stockQuantities[i] != null && stockQuantities[i]! > 0) {
         final priceString = productList[i].price.toString().replaceAll(',', '');
         final price = double.tryParse(priceString) ?? 0.0;
-        total += price * quantityList[i].value;
+        final discount =
+            productList[i].discount ?? 0.0; // Ensure discount is not null
+        final discountedPrice = price * (1 - discount / 100);
+        total += discountedPrice * quantityList[i].value;
       }
     }
     return total;
@@ -45,6 +51,8 @@ class _CartPanelState extends State<CartPanel> {
     super.initState();
     initCart();
   }
+
+  final CheckoutController checkoutController = Get.put(CheckoutController());
 
   Future<int?> fetchStockQuantity(String productId) async {
     try {
@@ -151,7 +159,6 @@ class _CartPanelState extends State<CartPanel> {
                         lineHeight: 1.0,
                         letterSpacing: 0.64,
                         hoverTextColor: const Color(0xFF2876E4),
-
                       ),
                     ),
                     SizedBox(height: 33),
@@ -228,6 +235,8 @@ class _CartPanelState extends State<CartPanel> {
                                                   text:
                                                       isOutOfStock
                                                           ? "Out of Stock"
+                                                          : product.discount > 0
+                                                          ? "Rs ${(product.price * (1 - product.discount / 100)).toStringAsFixed(2)}"
                                                           : "Rs ${product.price.toStringAsFixed(2)}",
                                                   fontWeight: FontWeight.w400,
                                                   fontSize: 18,
@@ -331,9 +340,12 @@ class _CartPanelState extends State<CartPanel> {
                                                 color: Color(0xFF30578E),
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 16,
-                                                decorationColor: const Color(0xFF30578E),
-                                                hoverTextColor: const Color(0xFF2876E4),
-
+                                                decorationColor: const Color(
+                                                  0xFF30578E,
+                                                ),
+                                                hoverTextColor: const Color(
+                                                  0xFF2876E4,
+                                                ),
                                               ),
                                             ),
                                           ],
@@ -387,41 +399,127 @@ class _CartPanelState extends State<CartPanel> {
                             Align(
                               alignment: Alignment.centerRight,
                               child: GestureDetector(
-                                onTap: () {
+                                onTap: () async {
                                   final router = GoRouter.of(context);
                                   final currentRoute =
                                       router.routeInformationProvider.value.uri
                                           .toString();
 
+                                  // Calculate subtotal and prepare data for URL
+                                  final subtotal = calculateTotal();
+                                  final productIds = productList
+                                      .map((product) => product.id.toString())
+                                      .join(',');
+                                  final productNames = productList
+                                      .map(
+                                        (product) =>
+                                            Uri.encodeComponent(product.name),
+                                      )
+                                      .join(',');
+                                  final productPrices = productList
+                                      .asMap()
+                                      .map((index, product) {
+                                        final priceString = product.price
+                                            .toString()
+                                            .replaceAll(',', '');
+                                        final price =
+                                            double.tryParse(priceString) ?? 0.0;
+                                        final discount =
+                                            product.discount ?? 0.0;
+                                        final effectivePrice =
+                                            discount > 0
+                                                ? price * (1 - discount / 100)
+                                                : price;
+                                        return MapEntry(
+                                          index,
+                                          effectivePrice.toStringAsFixed(2),
+                                        );
+                                      })
+                                      .values
+                                      .join(',');
+                                  final quantities = quantityList
+                                      .map(
+                                        (quantity) => quantity.value.toString(),
+                                      )
+                                      .join(',');
+                                  final lengths = productList
+                                      .map(
+                                        (product) => product.length.toString(),
+                                      )
+                                      .join(',');
+                                  final heights = productList
+                                      .map(
+                                        (product) => product.length.toString(),
+                                      )
+                                      .join(',');
+                                  final breadths = productList
+                                      .map(
+                                        (product) => product.breadth.toString(),
+                                      )
+                                      .join(',');
+                                  final weights = productList
+                                      .map(
+                                        (product) => product.weight.toString(),
+                                      )
+                                      .join(',');
+
+                                  // Update checkout controller with product details
+                                  checkoutController
+                                      .productIds
+                                      .value = productIds.split(',');
+                                  checkoutController
+                                      .quantities
+                                      .value = quantities.split(',');
+                                  checkoutController.heights.value = heights
+                                      .split(',');
+                                  checkoutController.weights.value = weights
+                                      .split(',');
+                                  checkoutController.breadths.value = breadths
+                                      .split(',');
+                                  checkoutController.lengths.value = lengths
+                                      .split(',');
+
+                                  // Try to get the user's saved pincode if available
+                                  String? savedPincode;
+                                  try {
+                                    await checkoutController.loadAddressData();
+                                    savedPincode =
+                                        checkoutController.zipController.text
+                                            .trim();
+                                  } catch (e) {
+                                    print('Error loading address data: $e');
+                                  }
+
+                                  // If we have a saved pincode, fetch shipping data
+                                  if (savedPincode != null &&
+                                      savedPincode.isNotEmpty) {
+                                    await checkoutController.fetchPincodeData(
+                                      savedPincode,
+                                    );
+                                  }
+
+                                  // Construct the new checkout route with updated parameters
+                                  final newCheckoutRoute =
+                                      '${AppRoutes.checkOut}?subtotal=${subtotal.toStringAsFixed(2)}'
+                                      '&productIds=$productIds'
+                                      '&productNames=$productNames'
+                                      '&productPrices=$productPrices'
+                                      '&quantities=$quantities'
+                                      '&lengths=$lengths'
+                                      '&height=$heights'
+                                      '&breadths=$breadths'
+                                      '&weights=$weights';
+
                                   if (currentRoute.contains(
                                     AppRoutes.checkOut,
                                   )) {
-                                    // If already on the checkout page, just pop
-                                    context.pop();
+                                    // If already on checkout route, replace the current route with updated parameters
+                                    router.replace(newCheckoutRoute);
+                                    // Close the cart modal
+                                    Navigator.of(context).pop();
                                   } else {
-                                    final subtotal = calculateTotal();
-
-                                    final productIds = productList
-                                        .map((product) => product.id.toString())
-                                        .join(',');
-                                    final productNames = productList
-                                        .map(
-                                          (product) =>
-                                              Uri.encodeComponent(product.name),
-                                        )
-                                        .join(',');
-                                    final productPrices = productList
-                                        .map(
-                                          (product) => product.price
-                                              .toString()
-                                              .replaceAll(',', ''),
-                                        )
-                                        .join(',');
-
-                                    context.go(
-                                      '${AppRoutes.checkOut}?subtotal=${subtotal.toStringAsFixed(2)}'
-                                      '&productIds=$productIds&productNames=$productNames&productPrices=$productPrices',
-                                    );
+                                    // Navigate to checkout route if not already there
+                                    context.go(newCheckoutRoute);
                                   }
                                 },
                                 child: BarlowText(
@@ -432,9 +530,7 @@ class _CartPanelState extends State<CartPanel> {
                                   lineHeight: 1.0,
                                   letterSpacing: 1 * 0.04,
                                   backgroundColor: Color(0xFFb9d6ff),
-                                  hoverTextColor: Color(
-                                    0xFF2876E4,
-                                  ), // Changes to blue on hover
+                                  hoverTextColor: Color(0xFF2876E4),
                                   decorationColor: const Color(0xFF30578E),
                                   hoverDecorationColor: Color(0xFF2876E4),
                                 ),

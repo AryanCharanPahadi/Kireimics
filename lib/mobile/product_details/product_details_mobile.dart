@@ -48,18 +48,6 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
     fetchProduct();
   }
 
-  void _showPreviousProducts() {
-    setState(() {
-      print("Back button pressed");
-      if (relatedProducts.isNotEmpty) {
-        _currentIndex = (_currentIndex - 1) % relatedProducts.length;
-        if (_currentIndex < 0) {
-          _currentIndex = relatedProducts.length - 1;
-        }
-      }
-    });
-  }
-
   @override
   void didUpdateWidget(ProductDetailsMobile oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -407,7 +395,14 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                                 );
                               }
                               : () {
-                                context.go(AppRoutes.cartDetails(product!.id));
+                                widget.onWishlistChanged?.call(
+                                  'Product Added To Cart',
+                                );
+                                Future.delayed(Duration(seconds: 2), () {
+                                  context.go(
+                                    AppRoutes.cartDetails(product!.id),
+                                  );
+                                });
                               },
                       child: BarlowText(
                         text: _isOutOfStock ? "NOTIFY ME" : "ADD TO CART",
@@ -561,7 +556,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: List.generate(1, (index) {
+                    children: List.generate(relatedProducts.length, (index) {
                       final relatedProduct = displayedProducts[0];
                       return FutureBuilder<int?>(
                         future: fetchStockQuantity(
@@ -570,10 +565,11 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                         builder: (context, snapshot) {
                           final quantity = snapshot.data;
                           final isOutOfStock = quantity == 0;
+
                           return Padding(
                             padding: EdgeInsets.only(right: 14.0),
                             child: SizedBox(
-                              height: 310,
+                              height: 330,
                               width: 170,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -582,16 +578,13 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                                     children: [
                                       ClipRect(
                                         child: GestureDetector(
-                                          onTap:
-                                              isOutOfStock
-                                                  ? null
-                                                  : () {
-                                                    context.go(
-                                                      AppRoutes.productDetails(
-                                                        relatedProduct.id,
-                                                      ),
-                                                    );
-                                                  },
+                                          onTap: () {
+                                            context.go(
+                                              AppRoutes.productDetails(
+                                                relatedProduct.id,
+                                              ),
+                                            );
+                                          },
                                           child: ColorFiltered(
                                             colorFilter:
                                                 isOutOfStock
@@ -630,6 +623,329 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                                           ),
                                         ),
                                       ),
+                                      Positioned(
+                                        top: 10,
+                                        left: 10,
+                                        right: 10,
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            bool isMobile =
+                                                constraints.maxWidth < 800;
+                                            List<Widget> badges = [];
+
+                                            if (isOutOfStock) {
+                                              // Only show out-of-stock image and wishlist icon
+                                              return Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.centerLeft,
+                                                    child: SvgPicture.asset(
+                                                      "assets/home_page/outofstock.svg",
+                                                      height: 24,
+                                                    ),
+                                                  ),
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.centerRight,
+                                                    child: FutureBuilder<bool>(
+                                                      future:
+                                                          SharedPreferencesHelper.isInWishlist(
+                                                            relatedProduct.id
+                                                                .toString(),
+                                                          ),
+                                                      builder: (
+                                                        context,
+                                                        snapshot,
+                                                      ) {
+                                                        final isInWishlist =
+                                                            snapshot.data ??
+                                                            false;
+
+                                                        return GestureDetector(
+                                                          onTap: () async {
+                                                            if (isInWishlist) {
+                                                              await SharedPreferencesHelper.removeFromWishlist(
+                                                                relatedProduct
+                                                                    .id
+                                                                    .toString(),
+                                                              );
+                                                              widget
+                                                                  .onWishlistChanged
+                                                                  ?.call(
+                                                                    'Product Removed From Wishlist',
+                                                                  );
+                                                            } else {
+                                                              await SharedPreferencesHelper.addToWishlist(
+                                                                relatedProduct
+                                                                    .id
+                                                                    .toString(),
+                                                              );
+                                                              widget
+                                                                  .onWishlistChanged
+                                                                  ?.call(
+                                                                    'Product Added To Wishlist',
+                                                                  );
+                                                            }
+                                                            setState(() {});
+                                                          },
+                                                          child: SvgPicture.asset(
+                                                            isInWishlist
+                                                                ? 'assets/home_page/IconWishlist.svg'
+                                                                : 'assets/home_page/IconWishlistEmpty.svg',
+                                                            width:
+                                                                isMobile
+                                                                    ? 20
+                                                                    : 24,
+                                                            height:
+                                                                isMobile
+                                                                    ? 18
+                                                                    : 20,
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            }
+
+                                            return Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Builder(
+                                                  builder: (context) {
+                                                    final List<Widget> badges =
+                                                        [];
+
+                                                    if (relatedProduct
+                                                            .isMakerChoice ==
+                                                        1) {
+                                                      badges.add(
+                                                        SvgPicture.asset(
+                                                          "assets/home_page/maker_choice.svg",
+                                                          height:
+                                                              isMobile
+                                                                  ? 40
+                                                                  : 32,
+                                                        ),
+                                                      );
+                                                    }
+
+                                                    if (quantity != null &&
+                                                        quantity < 2) {
+                                                      if (badges.isNotEmpty)
+                                                        badges.add(
+                                                          SizedBox(height: 10),
+                                                        );
+                                                      badges.add(
+                                                        ElevatedButton(
+                                                          onPressed:
+                                                              () {}, // Replace with your logic
+                                                          style: ElevatedButton.styleFrom(
+                                                            backgroundColor:
+                                                            Colors
+                                                                .white,
+                                                            foregroundColor:
+                                                            const Color(
+                                                              0xFFF46856,
+                                                            ),
+                                                            minimumSize:
+                                                            const Size(
+                                                              110,
+                                                              32,
+                                                            ),
+                                                            maximumSize:
+                                                            const Size(
+                                                              110,
+                                                              32,
+                                                            ),
+                                                            padding:
+                                                            const EdgeInsets.fromLTRB(
+                                                              14,
+                                                              7,
+                                                              14,
+                                                              7,
+                                                            ),
+                                                            elevation: 0,
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                              BorderRadius.circular(
+                                                                79,
+                                                              ),
+                                                              side: const BorderSide(
+                                                                color: Color(
+                                                                  0xFFF46856,
+                                                                ),
+                                                                width: 1,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          child: Text(
+                                                            "Few Pieces Left",
+                                                            style: TextStyle(
+                                                              fontFamily:
+                                                              GoogleFonts.barlow()
+                                                                  .fontFamily,
+                                                              fontSize:
+                                                              10,
+                                                              fontWeight:
+                                                              FontWeight
+                                                                  .w600,
+                                                              color: const Color(
+                                                                0xFFF46856,
+                                                              ),
+                                                              letterSpacing:
+                                                              0.48,
+                                                            ),
+                                                            textAlign:
+                                                            TextAlign
+                                                                .center,
+                                                          ),
+                                                        ),
+
+                                                      );
+                                                    }
+
+                                                    if (relatedProduct
+                                                            .discount !=
+                                                        0) {
+                                                      if (badges.isNotEmpty)
+                                                        badges.add(
+                                                          SizedBox(height: 10),
+                                                        );
+                                                      badges.add(
+                                                        ElevatedButton(
+                                                          onPressed:
+                                                              () {}, // Replace with your logic
+                                                          style: ElevatedButton.styleFrom(
+                                                            backgroundColor:
+                                                            Color(
+                                                              0xFFF46856,
+                                                            ),
+                                                            foregroundColor:
+                                                            const Color(
+                                                              0xFFF46856,
+                                                            ),
+                                                            minimumSize:
+                                                            const Size(
+                                                              110,
+                                                              32,
+                                                            ),
+                                                            maximumSize:
+                                                            const Size(
+                                                              110,
+                                                              32,
+                                                            ),
+                                                            padding:
+                                                            const EdgeInsets.fromLTRB(
+                                                              14,
+                                                              7,
+                                                              14,
+                                                              7,
+                                                            ),
+                                                            elevation: 0,
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                              BorderRadius.circular(
+                                                                79,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          child: Text(
+                                                            "${relatedProduct.discount}% OFF",
+                                                            style: TextStyle(
+                                                              fontFamily:
+                                                              GoogleFonts.barlow()
+                                                                  .fontFamily,
+                                                              fontSize:
+                                                              10,
+                                                              fontWeight:
+                                                              FontWeight
+                                                                  .w600,
+                                                              color:
+                                                              Colors
+                                                                  .white,
+                                                              letterSpacing:
+                                                              0.48,
+                                                            ),
+                                                            textAlign:
+                                                            TextAlign
+                                                                .center,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+
+                                                    return Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: badges,
+                                                    );
+                                                  },
+                                                ),
+                                                Spacer(),
+                                                FutureBuilder<bool>(
+                                                  future:
+                                                      SharedPreferencesHelper.isInWishlist(
+                                                        relatedProduct.id
+                                                            .toString(),
+                                                      ),
+                                                  builder: (context, snapshot) {
+                                                    final isInWishlist =
+                                                        snapshot.data ?? false;
+                                                    return GestureDetector(
+                                                      onTap:
+                                                          isOutOfStock
+                                                              ? null
+                                                              : () async {
+                                                                if (isInWishlist) {
+                                                                  await SharedPreferencesHelper.removeFromWishlist(
+                                                                    relatedProduct
+                                                                        .id
+                                                                        .toString(),
+                                                                  );
+                                                                  widget
+                                                                      .onWishlistChanged
+                                                                      ?.call(
+                                                                        'Product Removed From Wishlist',
+                                                                      );
+                                                                } else {
+                                                                  await SharedPreferencesHelper.addToWishlist(
+                                                                    relatedProduct
+                                                                        .id
+                                                                        .toString(),
+                                                                  );
+                                                                  widget
+                                                                      .onWishlistChanged
+                                                                      ?.call(
+                                                                        'Product Added To Wishlist',
+                                                                      );
+                                                                }
+                                                                setState(() {});
+                                                              },
+                                                      child: SvgPicture.asset(
+                                                        isInWishlist
+                                                            ? 'assets/home_page/IconWishlist.svg'
+                                                            : 'assets/home_page/IconWishlistEmpty.svg',
+                                                        width:
+                                                            isMobile ? 20 : 24,
+                                                        height:
+                                                            isMobile ? 18 : 20,
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   SizedBox(height: 10),
@@ -637,21 +953,65 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                                     text: relatedProduct.name,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w400,
-                                    color: Color(0XFF30578E),
+                                    color: Color(0xFF30578E),
                                     maxLines: 2,
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(
-                                    "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.barlow(
+                                  if (!isOutOfStock) ...[
+                                    Row(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+
+                                      children: [
+                                        // Original price with strikethrough
+                                        if (relatedProduct.discount != 0)
+                                          Text(
+                                            "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
+                                            style: TextStyle(
+                                              color: Color(
+                                                0xFF30578E,
+                                              ).withOpacity(0.7),
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 14,
+                                              height: 1.2,
+                                              decoration:
+                                              TextDecoration.lineThrough,
+                                              decorationColor: Color(
+                                                0xFF30578E,
+                                              ).withOpacity(0.7),
+                                              fontFamily:
+                                              GoogleFonts.barlow()
+                                                  .fontFamily,
+                                            ),
+                                          ),
+
+                                        // Vertical divider
+                                        SizedBox(width: 6),
+                                        // Discounted price
+                                        BarlowText(
+                                          text:
+                                          relatedProduct.discount != 0
+                                              ? "Rs. ${(relatedProduct.price * (1 - relatedProduct.discount / 100)).toStringAsFixed(2)}"
+                                              : "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 14,
+                                          lineHeight: 1.2,
+                                          color: const Color(0xFF30578E),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+
+                                  if (isOutOfStock) ...[
+                                    BarlowText(
+                                      text:
+                                          "Rs. ${relatedProduct.price.toStringAsFixed(2)}",
                                       fontWeight: FontWeight.w400,
                                       fontSize: 14,
-                                      height: 1.2,
+                                      lineHeight: 1.2,
                                       color: const Color(0xFF30578E),
                                     ),
-                                  ),
+                                  ],
                                   const SizedBox(height: 8),
                                   isOutOfStock
                                       ? BarlowText(
@@ -680,10 +1040,18 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                                         letterSpacing: 0.56,
                                         color: const Color(0xFF30578E),
                                         onTap: () {
-                                          context.go(
-                                            AppRoutes.cartDetails(
-                                              relatedProduct.id,
-                                            ),
+                                          widget.onWishlistChanged?.call(
+                                            'Product Added To Cart',
+                                          );
+                                          Future.delayed(
+                                            Duration(seconds: 2),
+                                            () {
+                                              context.go(
+                                                AppRoutes.cartDetails(
+                                                  relatedProduct.id,
+                                                ),
+                                              );
+                                            },
                                           );
                                         },
                                       ),

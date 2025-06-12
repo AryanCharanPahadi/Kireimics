@@ -285,7 +285,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                             fontSize: 14,
                             lineHeight: 1.0,
                             letterSpacing: 0.04 * 16,
-                            color: Color(0xFF414141),
+                            color: Color(0xFF3E5B84),
                             backgroundColor: Color(0xFFb9d6ff),
                           ),
                         ),
@@ -301,16 +301,22 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                             controller: firstNameController,
                             readOnly: !isEditing,
                           ),
+                          SizedBox(height: 24),
+
                           customTextFormField(
                             hintText: "LAST NAME",
                             controller: lastNameController,
                             readOnly: !isEditing,
                           ),
+                          SizedBox(height: 24),
+
                           customTextFormField(
                             hintText: "EMAIL",
                             controller: emailController,
                             readOnly: !isEditing || isEditing,
                           ),
+                          SizedBox(height: 24),
+
                           customTextFormField(
                             hintText: "MOBILE",
                             controller: mobileController,
@@ -356,7 +362,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                             fontSize: 14,
                             lineHeight: 1.0,
                             letterSpacing: 0.04 * 16,
-                            color: Color(0xFF414141),
+                            color: Color(0xFF3E5B84),
                             backgroundColor: Color(0xFFb9d6ff),
                           ),
                         ),

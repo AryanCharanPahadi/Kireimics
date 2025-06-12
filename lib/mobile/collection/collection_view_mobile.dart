@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/no_result_found/no_product_yet.dart';
 import '../../component/app_routes/routes.dart';
+import '../../component/no_result_found/no_order_yet.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 
@@ -237,7 +238,14 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                         top: 20,
                         right: 22,
                       ),
-                      child: NoProductYet(),
+                      child: Center(
+                        child: CartEmpty(
+                          cralikaText: "No Collections here yet!",
+                          // hideBrowseButton: true,
+                          barlowText:
+                              "Try another category, hopefully you'll\nfind something you like there!",
+                        ),
+                      ),
                     )
                     : controller.productList.isEmpty
                     ? Padding(
@@ -262,20 +270,21 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
                                   crossAxisSpacing: 24,
-                                  mainAxisSpacing: 5,
+                                  mainAxisSpacing:
+                                      24, // Increased vertical spacing
                                   childAspectRatio: () {
                                     double width =
                                         MediaQuery.of(context).size.width;
                                     if (width > 320 && width <= 410) {
-                                      return 0.53;
+                                      return 0.48;
                                     } else if (width > 410 && width <= 500) {
-                                      return 0.59;
+                                      return 0.53;
                                     } else if (width > 500 && width <= 600) {
-                                      return 0.62;
+                                      return 0.56;
                                     } else if (width > 600 && width <= 700) {
-                                      return 0.65;
+                                      return 0.62;
                                     } else if (width > 700 && width <= 800) {
-                                      return 0.67;
+                                      return 0.65;
                                     } else {
                                       return 0.50;
                                     }
@@ -501,13 +510,71 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                                 ),
                                                               );
                                                             badges.add(
-                                                              SvgPicture.asset(
-                                                                "assets/home_page/fewPiecesMobile.svg",
-                                                                height:
-                                                                    isMobile
-                                                                        ? 28
-                                                                        : 32,
+                                                              ElevatedButton(
+                                                                onPressed:
+                                                                    () {}, // Replace with your logic
+                                                                style: ElevatedButton.styleFrom(
+                                                                  backgroundColor:
+                                                                  Colors
+                                                                      .white,
+                                                                  foregroundColor:
+                                                                  const Color(
+                                                                    0xFFF46856,
+                                                                  ),
+                                                                  minimumSize:
+                                                                  const Size(
+                                                                    110,
+                                                                    32,
+                                                                  ),
+                                                                  maximumSize:
+                                                                  const Size(
+                                                                    110,
+                                                                    32,
+                                                                  ),
+                                                                  padding:
+                                                                  const EdgeInsets.fromLTRB(
+                                                                    14,
+                                                                    7,
+                                                                    14,
+                                                                    7,
+                                                                  ),
+                                                                  elevation: 0,
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      79,
+                                                                    ),
+                                                                    side: const BorderSide(
+                                                                      color: Color(
+                                                                        0xFFF46856,
+                                                                      ),
+                                                                      width: 1,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                child: Text(
+                                                                  "Few Pieces Left",
+                                                                  style: TextStyle(
+                                                                    fontFamily:
+                                                                    GoogleFonts.barlow()
+                                                                        .fontFamily,
+                                                                    fontSize:
+                                                                    10,
+                                                                    fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                    color: const Color(
+                                                                      0xFFF46856,
+                                                                    ),
+                                                                    letterSpacing:
+                                                                    0.48,
+                                                                  ),
+                                                                  textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                                ),
                                                               ),
+
                                                             );
                                                           }
 
@@ -523,52 +590,62 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                               );
                                                             badges.add(
                                                               ElevatedButton(
-                                                                onPressed: null,
+                                                                onPressed:
+                                                                    () {}, // Replace with your logic
                                                                 style: ElevatedButton.styleFrom(
-                                                                  padding: const EdgeInsets.symmetric(
-                                                                    horizontal:
-                                                                        30,
-                                                                    vertical:
-                                                                        0, // Reduced vertical padding
-                                                                  ),
                                                                   backgroundColor:
-                                                                      const Color(
-                                                                        0xFFF46856,
-                                                                      ),
-                                                                  disabledBackgroundColor:
-                                                                      const Color(
-                                                                        0xFFF46856,
-                                                                      ),
-                                                                  disabledForegroundColor:
-                                                                      Colors
-                                                                          .white,
-                                                                  elevation: 0,
-                                                                  side:
-                                                                      BorderSide
-                                                                          .none,
+                                                                  Color(
+                                                                    0xFFF46856,
+                                                                  ),
+                                                                  foregroundColor:
+                                                                  const Color(
+                                                                    0xFFF46856,
+                                                                  ),
                                                                   minimumSize:
-                                                                      const Size(
-                                                                        0,
-                                                                        33,
-                                                                      ), // Optional: Set a smaller minimum height
+                                                                  const Size(
+                                                                    110,
+                                                                    32,
+                                                                  ),
+                                                                  maximumSize:
+                                                                  const Size(
+                                                                    110,
+                                                                    32,
+                                                                  ),
+                                                                  padding:
+                                                                  const EdgeInsets.fromLTRB(
+                                                                    14,
+                                                                    7,
+                                                                    14,
+                                                                    7,
+                                                                  ),
+                                                                  elevation: 0,
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      79,
+                                                                    ),
+                                                                  ),
                                                                 ),
                                                                 child: Text(
                                                                   "${product.discount}% OFF",
                                                                   style: TextStyle(
                                                                     fontFamily:
-                                                                        GoogleFonts.barlow()
-                                                                            .fontFamily,
+                                                                    GoogleFonts.barlow()
+                                                                        .fontFamily,
                                                                     fontSize:
-                                                                        10, // Reduced font size
+                                                                    10,
                                                                     fontWeight:
-                                                                        FontWeight
-                                                                            .w600,
+                                                                    FontWeight
+                                                                        .w600,
                                                                     color:
-                                                                        Colors
-                                                                            .white,
+                                                                    Colors
+                                                                        .white,
                                                                     letterSpacing:
-                                                                        0.48,
+                                                                    0.48,
                                                                   ),
+                                                                  textAlign:
+                                                                  TextAlign
+                                                                      .center,
                                                                 ),
                                                               ),
                                                             );
@@ -672,19 +749,63 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                 maxLines: 1,
                                               ),
                                               const SizedBox(height: 8),
-                                              Text(
-                                                "Rs. ${product.price.toStringAsFixed(2)}",
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: GoogleFonts.barlow(
+                                              if (!isOutOfStock) ...[
+                                                Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+
+                                                  children: [
+                                                    // Original price with strikethrough
+                                                    if (product.discount != 0)
+                                                      Text(
+                                                        "Rs. ${product.price.toStringAsFixed(2)}",
+                                                        style: TextStyle(
+                                                          color: Color(
+                                                            0xFF30578E,
+                                                          ).withOpacity(0.7),
+                                                          fontWeight: FontWeight.w400,
+                                                          fontSize: 14,
+                                                          height: 1.2,
+                                                          decoration:
+                                                          TextDecoration.lineThrough,
+                                                          decorationColor: Color(
+                                                            0xFF30578E,
+                                                          ).withOpacity(0.7),
+                                                          fontFamily:
+                                                          GoogleFonts.barlow()
+                                                              .fontFamily,
+                                                        ),
+                                                      ),
+
+                                                    // Vertical divider
+                                                    SizedBox(width: 6),
+                                                    // Discounted price
+                                                    BarlowText(
+                                                      text:
+                                                      product.discount != 0
+                                                          ? "Rs. ${(product.price * (1 - product.discount / 100)).toStringAsFixed(2)}"
+                                                          : "Rs. ${product.price.toStringAsFixed(2)}",
+                                                      fontWeight: FontWeight.w400,
+                                                      fontSize: 14,
+                                                      lineHeight: 1.2,
+                                                      color: const Color(0xFF30578E),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+
+                                              if (isOutOfStock) ...[
+                                                BarlowText(
+                                                  text:
+                                                      "Rs. ${product.price.toStringAsFixed(2)}",
                                                   fontWeight: FontWeight.w400,
                                                   fontSize: 14,
-                                                  height: 1.2,
+                                                  lineHeight: 1.2,
                                                   color: const Color(
                                                     0xFF30578E,
                                                   ),
                                                 ),
-                                              ),
+                                              ],
                                               const SizedBox(height: 8),
                                               GestureDetector(
                                                 onTap:
@@ -706,10 +827,22 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                           }
                                                         }
                                                         : () {
-                                                          context.go(
-                                                            AppRoutes.cartDetails(
-                                                              product.id,
+                                                          widget
+                                                              .onWishlistChanged
+                                                              ?.call(
+                                                                'Product Added To Cart',
+                                                              );
+                                                          Future.delayed(
+                                                            Duration(
+                                                              seconds: 2,
                                                             ),
+                                                            () {
+                                                              context.go(
+                                                                AppRoutes.cartDetails(
+                                                                  product.id,
+                                                                ),
+                                                              );
+                                                            },
                                                           );
                                                         },
                                                 child: Text(
@@ -753,7 +886,23 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                       child: Container(
                         width: 180,
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Color(0xFFE7E7E7), // #E7E7E7
+                            width: 1.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(
+                                0x0F000000,
+                              ), // #0000000F (6% opacity black)
+                              blurRadius: 20,
+                              spreadRadius: 0,
+                              offset: Offset(20, 20),
+                            ),
+                          ],
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: _buildSortOptions(controller),
@@ -771,7 +920,24 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                       child: Container(
                         width: 180,
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Color(0xFFE7E7E7), // #E7E7E7
+                            width: 1.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(
+                                0x0F000000,
+                              ), // #0000000F (6% opacity black)
+                              blurRadius: 20,
+                              spreadRadius: 0,
+                              offset: Offset(20, 20),
+                            ),
+                          ],
+                        ),
+
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: _buildFilterOptions(controller),
@@ -788,7 +954,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
   List<Widget> _buildSortOptions(CollectionViewController controller) {
     final options = [
       {
-        'label': 'Price: Low to High',
+        'label': 'Price Low - High',
         'onTap': () {
           controller.showSortMenu.value = false;
           controller.productList.sort((a, b) => a.price.compareTo(b.price));
@@ -798,7 +964,17 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
         },
       },
       {
-        'label': 'Price: High to Low',
+        'label': 'Price High - Low',
+        'onTap': () {
+          controller.showSortMenu.value = false;
+          controller.productList.sort((a, b) => b.price.compareTo(a.price));
+          controller.collectionController.products.assignAll(
+            controller.productList,
+          );
+        },
+      },
+      {
+        'label': 'New',
         'onTap': () {
           controller.showSortMenu.value = false;
           controller.productList.sort((a, b) => b.price.compareTo(a.price));

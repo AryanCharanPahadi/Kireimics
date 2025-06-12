@@ -234,6 +234,7 @@ class _HomePageWebState extends State<HomePageWeb>
                                         isMessageField: true,
                                         focusNode: _messageFocusNode,
                                         nextFocusNode: _anotherMessageFocusNode,
+                                        nextController: _anotherMessageController, // REQUIRED
                                       ),
                                     ),
                                     const SizedBox(height: 10),

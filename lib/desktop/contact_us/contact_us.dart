@@ -232,14 +232,15 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                               focusNode: _messageFocusNode,
                               nextFocusNode: _anotherMessageFocusNode,
                               controller: _messageController,
+                              nextController:
+                                  _anotherMessageController, // REQUIRED
                             ),
                             const SizedBox(height: 10),
                             customTextFormField(
                               hintText: "",
-                              isMessageField: true,
                               controller: _anotherMessageController,
                               focusNode: _anotherMessageFocusNode,
-                              maxLength: 40,
+                              maxLength: 50,
                             ),
                             const SizedBox(height: 24),
                             GestureDetector(
@@ -249,8 +250,8 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                                 alignment: Alignment.bottomRight,
                                 child: SvgPicture.asset(
                                   "assets/home_page/submit.svg",
-                                  height: 25,
-                                  width: 70,
+                                  height: 19,
+                                  width: 58,
                                 ),
                               ),
                             ),
@@ -422,6 +423,7 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
   Widget customTextFormField({
     required String hintText,
     TextEditingController? controller,
+    TextEditingController? nextController,
     bool isMessageField = false,
     int? maxLength,
     FocusNode? focusNode,
@@ -450,8 +452,37 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
           textAlign: TextAlign.right,
           maxLength: effectiveMaxLength,
           onChanged: (value) {
-            if (isMessageField && value.length == 25 && nextFocusNode != null) {
-              nextFocusNode!.requestFocus();
+            if (isMessageField && value.length == 25) {
+              final lastSpaceIndex = value.lastIndexOf(' ');
+
+              if (lastSpaceIndex != -1 && lastSpaceIndex < value.length - 1) {
+                final wordToMove = value.substring(lastSpaceIndex + 1);
+                final newText = value.substring(0, lastSpaceIndex);
+
+                // Update current controller
+                controller?.text = newText;
+                controller?.selection = TextSelection.fromPosition(
+                  TextPosition(offset: newText.length),
+                );
+
+                // Move word to next controller
+                if (nextController != null) {
+                  final nextText = nextController.text;
+                  final updatedNextText =
+                      nextText.isEmpty ? wordToMove : '$nextText $wordToMove';
+
+                  nextController.text = updatedNextText;
+                  nextController.selection = TextSelection.fromPosition(
+                    TextPosition(offset: updatedNextText.length),
+                  );
+                }
+
+                // Shift focus
+                nextFocusNode?.requestFocus();
+              } else {
+                // No space found, just shift focus
+                nextFocusNode?.requestFocus();
+              }
             }
           },
           decoration: InputDecoration(

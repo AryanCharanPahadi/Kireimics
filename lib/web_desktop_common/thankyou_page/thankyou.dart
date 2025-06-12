@@ -37,60 +37,68 @@ class PaymentResultPage extends StatelessWidget {
         children: [
           // Background Image
           Positioned(
-            left: MediaQuery.of(context).size.width > 1400 ? 700 : 405,
-            // bottom: 273,
-            top: MediaQuery.of(context).size.width > 1400 ? 250 : 160,
-
+            left:
+                screenWidth < 800
+                    ? 33
+                    : screenWidth > 1400
+                    ? 700
+                    : 405,
+            top: screenWidth > 1400 ? 250 : 160,
             child: SvgPicture.asset(
               'assets/footer/footerbg.svg',
-              height: 290,
-              width: 254,
-
+              height: screenWidth < 800 ? 157 : 290,
+              width: screenWidth < 800 ? 154 : 254,
               fit: BoxFit.contain,
               colorFilter: ColorFilter.mode(Color(0xFF3094a7), BlendMode.srcIn),
             ),
           ),
 
           Positioned(
-            left: MediaQuery.of(context).size.width > 1400 ? 1200 : 850,
-            // bottom: 273,
-            top: MediaQuery.of(context).size.width > 1400 ? 250 : 260,
-
+            left:
+                screenWidth < 800
+                    ? 284
+                    : screenWidth > 1400
+                    ? 1200
+                    : 850,
+            top: screenWidth > 1400 ? 250 : 260,
             child: SvgPicture.asset(
               'assets/footer/diamond.svg',
-              height: 60,
-              width: 60,
-
+              height: screenWidth < 800 ? 28 : 60,
+              width: screenWidth < 800 ? 28 : 60,
               fit: BoxFit.contain,
               colorFilter: ColorFilter.mode(Color(0xFF3094a7), BlendMode.srcIn),
             ),
           ),
 
           Positioned(
-            left: MediaQuery.of(context).size.width > 1400 ? 1200 : 750,
-            // bottom: 273,
-            top: MediaQuery.of(context).size.width > 1400 ? 400 : 400,
-
+            left:
+                screenWidth < 800
+                    ? 252
+                    : screenWidth > 1400
+                    ? 1200
+                    : 750,
+            top: 400, // since both conditions use 400
             child: SvgPicture.asset(
               'assets/footer/footerbg.svg',
-              height: 150,
-              width: 150,
-
+              height: screenWidth < 800 ? 107 : 150,
+              width: screenWidth < 800 ? 105 : 150,
               fit: BoxFit.contain,
               colorFilter: ColorFilter.mode(Color(0xFF3094a7), BlendMode.srcIn),
             ),
           ),
 
           Positioned(
-            left: MediaQuery.of(context).size.width > 1400 ? 850 : 505,
-            // bottom: 273,
+            left:
+                screenWidth < 800
+                    ? 98
+                    : screenWidth > 1400
+                    ? 850
+                    : 505,
             top: MediaQuery.of(context).size.width > 1400 ? 600 : 498,
-
             child: SvgPicture.asset(
               'assets/footer/diamond.svg',
-              height: 30,
-              width: 30,
-
+              height: screenWidth < 800 ? 16 : 30,
+              width: screenWidth < 800 ? 16 : 30,
               fit: BoxFit.contain,
               colorFilter: ColorFilter.mode(Color(0xFF3094a7), BlendMode.srcIn),
             ),

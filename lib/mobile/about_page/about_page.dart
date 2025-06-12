@@ -64,20 +64,18 @@ class _AboutPageState extends State<AboutPage> {
                               child: Container(
                                 height: 120,
                                 width: 342,
-                                child: Text(
-                                  aboutUsController
+                                child: BarlowText(
+                                  text:
+                                      aboutUsController
                                           .profileData
                                           .value!['banner_text']
                                           ?.toString() ??
                                       'N/A',
-                                  style: TextStyle(
-                                    fontFamily: GoogleFonts.barlow().fontFamily,
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 14,
-                                    height: 30 / 14,
-                                    letterSpacing: 0.56,
-                                    color: Colors.white,
-                                  ),
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14,
+                                  lineHeight: 30 / 14,
+                                  letterSpacing: 0.56,
+                                  color: Colors.white,
                                   textAlign: TextAlign.left,
                                 ),
                               ),
@@ -120,36 +118,33 @@ class _AboutPageState extends State<AboutPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         SizedBox(height: 24),
-                        Text(
-                          aboutUsController.profileData.value!['heading_1']
+                        CralikaFont(
+                          text:
+                              aboutUsController.profileData.value!['heading_1']
                                   ?.toString() ??
                               'N/A',
-                          style: TextStyle(
-                            fontFamily: "Cralika",
-                            fontWeight: FontWeight.w400,
-                            fontSize: 24,
-                            height: 36 / 24, // Equivalent to line-height: 36px
-                            letterSpacing: 4, // Use a valid unit (e.g., pixels)
-                            color: Color(0xFF414141),
-                          ),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 24,
+                          lineHeight:
+                              36 / 24, // Equivalent to line-height: 36px
+                          letterSpacing: 4, // Use a valid unit (e.g., pixels)
+                          color: Color(0xFF414141),
                         ),
                         SizedBox(height: 15),
 
                         Container(
-                          child: Text(
-                            aboutUsController
+                          child: BarlowText(
+                            text:
+                                aboutUsController
                                     .profileData
                                     .value!['heading_1_content']
                                     ?.toString() ??
                                 'N/A',
-                            style: TextStyle(
-                              fontFamily: GoogleFonts.barlow().fontFamily,
-                              fontWeight: FontWeight.w400,
-                              fontSize: 14,
-                              height: 1.2, // Equivalent to 100% line-height
-                              letterSpacing: 0.0, // No extra spacing
-                              color: Color(0xFF414141),
-                            ),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14,
+                            lineHeight: 1.2, // Equivalent to 100% line-height
+                            letterSpacing: 0.0, // No extra spacing
+                            color: Color(0xFF414141),
                           ),
                         ),
                         SizedBox(height: 44),
@@ -164,37 +159,36 @@ class _AboutPageState extends State<AboutPage> {
                         SizedBox(height: 44),
 
                         Container(
-                          child: Text(
-                            aboutUsController.profileData.value!['heading_2']
+                          child: CralikaFont(
+                            text:
+                                aboutUsController
+                                    .profileData
+                                    .value!['heading_2']
                                     ?.toString() ??
                                 'N/A',
-                            style: TextStyle(
-                              fontFamily: "Cralika",
-                              fontWeight: FontWeight.w400,
-                              fontSize: 24,
-                              height: 1.7, // 36px / 24px
-                              letterSpacing: 0.96, // 4% of 24px
-                              color: Color(0xFF414141),
-                            ),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 24,
+                            lineHeight:
+                                36 / 24, // Equivalent to line-height: 36px
+                            letterSpacing: 4, // Use a valid unit (e.g., pixels)
+                            color: Color(0xFF414141),
                           ),
                         ),
                         SizedBox(height: 14),
 
                         Container(
-                          child: Text(
-                            aboutUsController
+                          child: BarlowText(
+                            text:
+                                aboutUsController
                                     .profileData
                                     .value!['heading_2_content']
                                     ?.toString() ??
                                 'N/A',
-                            style: TextStyle(
-                              fontFamily: GoogleFonts.barlow().fontFamily,
-                              fontWeight: FontWeight.w400,
-                              fontSize: 14,
-                              height: 1.0, // 100% line-height
-                              letterSpacing: 0.0, // 0% letter-spacing
-                              color: Color(0xFF414141),
-                            ),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14,
+                            lineHeight: 1.2, // Equivalent to 100% line-height
+                            letterSpacing: 0.0, // No extra spacing
+                            color: Color(0xFF414141),
                           ),
                         ),
                         SizedBox(height: 24),
@@ -268,7 +262,7 @@ class _AboutPageState extends State<AboutPage> {
               children: [
                 BarlowText(
                   text: entry.key,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF30578E),
                   enableUnderlineForActiveRoute: true,

@@ -6,9 +6,14 @@ class Product {
   final String name;
   final String tag;
   final double price;
+  final double? discountPrice;
   final String thumbnail;
   final List<String> otherImages;
   final String dimensions;
+  final String length;
+  final String breadth;
+  final String height;
+  final String weight;
   final String description;
   final String catName;
   final String catDesc;
@@ -24,12 +29,17 @@ class Product {
     required this.name,
     required this.tag,
     required this.price,
+    this.discountPrice,
     required this.thumbnail,
     required this.otherImages,
     required this.dimensions,
+    required this.length,
+    required this.breadth,
+    required this.height,
+    required this.weight,
     required this.description,
     required this.catName,
-     this.collectionName,
+    this.collectionName,
     required this.otherDetails,
     required this.discount,
     required this.catDesc,
@@ -44,10 +54,15 @@ class Product {
       name: json['name'],
       tag: json['tag'],
       price: json['price'],
+      discountPrice: json['discount_price'],
       thumbnail: json['thumnail'],
       collectionName: json['collection_name'],
       otherImages: (json['other_images'] as String).split(','),
       dimensions: json['dimensions'],
+      length: json['length'],
+      breadth: json['breadth'],
+      height: json['height'],
+      weight: json['weight'],
       description: json['description'],
       catName: json['category_name'],
       catDesc: json['description'],
