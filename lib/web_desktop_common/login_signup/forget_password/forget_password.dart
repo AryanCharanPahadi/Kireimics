@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/app_routes/routes.dart';
+import '../../../component/api_helper/api_helper.dart';
+import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../component/utilities/utility.dart';
+import '../../component/rotating_svg_loader.dart';
 
 class ForgetPassword extends StatefulWidget {
   const ForgetPassword({super.key});
@@ -17,6 +20,7 @@ class ForgetPassword extends StatefulWidget {
 class _ForgetPasswordState extends State<ForgetPassword> {
   final TextEditingController emailController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  bool isSendingMail = false;
 
   bool showSuccessBanner = false;
   bool showErrorBanner = false;
@@ -58,12 +62,34 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                               fontSize: 16.0,
                               lineHeight: 1.0,
                               letterSpacing: 0.64,
-                              enableHoverUnderline: true,
-                              decorationColor: const Color(0xFF30578E),
                               hoverTextColor: const Color(0xFF2876E4),
-                              hoverDecorationColor: Color(0xFF2876E4),
                             ),
                           ),
+
+                          if (showSuccessBanner || showErrorBanner)
+                            if (showSuccessBanner || showErrorBanner)
+                              NotificationBanner(
+                                iconPath:
+                                    showSuccessBanner
+                                        ? "assets/icons/success.svg"
+                                        : "assets/icons/error.svg",
+
+                                message:
+                                    showSuccessBanner
+                                        ? "Password Reset Mail Sent Successfully"
+                                        : errorMessage,
+                                bannerColor:
+                                    showSuccessBanner
+                                        ? Color(0xFF268FA2)
+                                        : Color(0xFFF46856),
+                                textColor: Color(0xFF28292A),
+                                onClose: () {
+                                  setState(() {
+                                    showSuccessBanner = false;
+                                    showErrorBanner = false;
+                                  });
+                                },
+                              ),
                         ],
                       ),
                       SizedBox(height: 33),
@@ -114,21 +140,78 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                 Column(
                                   children: [
                                     GestureDetector(
-                                      onTap: () {
-                                        context.go(
-                                          AppRoutes.forgotPasswordMain,
-                                        );
+                                      onTap: () async {
+                                        if (formKey.currentState!.validate()) {
+                                          setState(() {
+                                            isSendingMail = true;
+                                            showSuccessBanner = false;
+                                            showErrorBanner = false;
+                                          });
+
+                                          final mailResponse =
+                                              await ApiHelper.resetPasswordMail(
+                                                email: emailController.text,
+                                              );
+
+                                          print(
+                                            "Password Reset Mail Response: $mailResponse",
+                                          );
+
+                                          if (mailResponse is Map &&
+                                              mailResponse['error'] == false) {
+                                            setState(() {
+                                              showSuccessBanner = true;
+                                              showErrorBanner = false;
+                                              errorMessage = '';
+                                              isSendingMail = false;
+                                            });
+
+                                            Future.delayed(
+                                              Duration(seconds: 3),
+                                              () {
+                                                if (mounted) context.pop();
+                                              },
+                                            );
+                                          } else {
+                                            setState(() {
+                                              showErrorBanner = true;
+                                              showSuccessBanner = false;
+                                              errorMessage =
+                                                  mailResponse is Map &&
+                                                          mailResponse['message'] !=
+                                                              null
+                                                      ? mailResponse['message']
+                                                      : 'Something went wrong. Please try again.';
+                                              isSendingMail = false;
+                                            });
+                                          }
+                                        }
                                       },
-                                      child: BarlowText(
-                                        text: "SEND RESET LINK",
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        lineHeight: 1.0,
-                                        letterSpacing: 0.64,
-                                        color: Color(0xFF30578E),
-                                        backgroundColor: Color(0xFFb9d6ff),
-                                        hoverTextColor: Color(0xFF2876E4),
-                                      ),
+
+                                      child:
+                                          isSendingMail
+                                              ? SizedBox(
+                                                height: 24,
+                                                width: 24,
+                                                child:
+                                                RotatingSvgLoader(
+                                                  assetPath: 'assets/footer/footerbg.svg',
+                                                ),
+                                              )
+                                              : BarlowText(
+                                                text: "SEND RESET LINK",
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                                lineHeight: 1.0,
+                                                letterSpacing: 0.64,
+                                                color: Color(0xFF30578E),
+                                                backgroundColor: Color(
+                                                  0xFFb9d6ff,
+                                                ),
+                                                hoverTextColor: Color(
+                                                  0xFF2876E4,
+                                                ),
+                                              ),
                                     ),
                                   ],
                                 ),

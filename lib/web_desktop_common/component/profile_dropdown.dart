@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kireimics/component/cart_length/cart_loader.dart';
 import '../../component/google_sign_in/auth.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/app_routes/routes.dart' show AppRoutes;
@@ -180,6 +181,8 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
           // Clear custom shared user data
           await SharedPreferencesHelper.clearUserData();
           await SharedPreferencesHelper.clearSelectedAddress();
+          await SharedPreferencesHelper.clearAllProductIds();
+          await cartNotifier;
 
           // Refresh CheckoutController
           final CheckoutController checkoutController = Get.put(

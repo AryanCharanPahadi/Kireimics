@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:kireimics/component/text_fonts/custom_text.dart';
 import '../../component/app_routes/routes.dart';
+import '../../web_desktop_common/component/rotating_svg_loader.dart';
 
 class AquaCollectionCard extends StatefulWidget {
   const AquaCollectionCard({super.key});
@@ -91,7 +92,9 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                       ? bannerImg
                       : 'https://via.placeholder.com/150', // Fallback image
                   height: 180, // Set desired height
-                  width: double.infinity, // Set width to match parent or a specific value like 300
+                  width:
+                      double
+                          .infinity, // Set width to match parent or a specific value like 300
                   fit: BoxFit.cover, // Adjust how the image fits (optional)
 
                   errorBuilder: (context, error, stackTrace) {
@@ -104,7 +107,9 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                   },
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
-                    return Center(child: CircularProgressIndicator());
+                    return Center(child:  RotatingSvgLoader(
+                      assetPath: 'assets/footer/footerbg.svg',
+                    ),);
                   },
                 ),
                 SizedBox(height: 14),
@@ -147,7 +152,9 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
                           color: Color(0xFF30578E),
                           onTap: () async {
                             if (bannerId != null) {
-                              context.go(AppRoutes.idCollectionView(bannerId!));
+                              context.go(
+                                "${AppRoutes.idCollectionView(bannerId!)}?collection_name=${bannerText}",
+                              );
                             }
                           },
                         ),

@@ -6,6 +6,8 @@ import 'package:kireimics/component/above_footer/above_footer.dart';
 import 'package:kireimics/web/about_us/about_us_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../web_desktop_common/component/rotating_svg_loader.dart';
+
 class AboutPageWeb extends StatelessWidget {
   const AboutPageWeb({super.key});
 
@@ -17,7 +19,11 @@ class AboutPageWeb extends StatelessWidget {
     return Obx(
       () =>
           aboutUsController.isLoading.value
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(
+                child: RotatingSvgLoader(
+                  assetPath: 'assets/footer/footerbg.svg',
+                ),
+              )
               : aboutUsController.errorMessage.value.isNotEmpty
               ? Center(child: Text(aboutUsController.errorMessage.value))
               : aboutUsController.profileData.value == null
@@ -32,20 +38,25 @@ class AboutPageWeb extends StatelessWidget {
                           Padding(
                             padding: EdgeInsets.only(
                               left:
-                                  MediaQuery.of(context).size.width > 1400
+                                  MediaQuery.of(context).size.width > 1700
+                                      ? 395
+                                      : MediaQuery.of(context).size.width > 1400
                                       ? 395
                                       : 292,
                               top: 35,
                               right:
-                                  MediaQuery.of(context).size.width > 1400
+                                  MediaQuery.of(context).size.width > 1700
                                       ? 266
                                       : 0,
                             ),
                             child: Container(
                               width:
-                                  MediaQuery.of(context).size.width > 1400
+                                  MediaQuery.of(context).size.width > 1700
                                       ? MediaQuery.of(context).size.width -
                                           (395 + 266)
+                                      : MediaQuery.of(context).size.width > 1400
+                                      ? MediaQuery.of(context).size.width -
+                                          (395 + 0)
                                       : MediaQuery.of(context).size.width - 292,
                               decoration: BoxDecoration(
                                 image: DecorationImage(
@@ -63,7 +74,7 @@ class AboutPageWeb extends StatelessWidget {
                                 padding: EdgeInsets.only(
                                   top: 40,
                                   right:
-                                      MediaQuery.of(context).size.width > 1400
+                                      MediaQuery.of(context).size.width > 1700
                                           ? 540
                                           : 445,
                                   left: 47,
@@ -79,8 +90,7 @@ class AboutPageWeb extends StatelessWidget {
                                   textAlign: TextAlign.left,
                                   fontWeight: FontWeight.w400,
                                   fontSize: 20,
-                                  lineHeight: 1.5,
-                                  letterSpacing: 0.04 * 20,
+
                                   color: Colors.white,
                                 ),
                               ),
@@ -92,7 +102,7 @@ class AboutPageWeb extends StatelessWidget {
                       Positioned(
                         top: 100,
                         right:
-                            MediaQuery.of(context).size.width > 1400
+                            MediaQuery.of(context).size.width > 1700
                                 ? 364
                                 : 112,
                         child: Container(
@@ -108,12 +118,17 @@ class AboutPageWeb extends StatelessWidget {
                       Positioned(
                         top: 250,
                         left:
-                            MediaQuery.of(context).size.width > 1400
+                            MediaQuery.of(context).size.width > 1700
+                                ? 395
+                                : MediaQuery.of(context).size.width > 1400
                                 ? 395
                                 : 292,
                         right:
-                            MediaQuery.of(context).size.width > 1400
+                            MediaQuery.of(context).size.width > 1700
                                 ? 774
+                                : MediaQuery.of(context).size.width > 1400
+                                ? MediaQuery.of(context).size.width -
+                                    (395 + 574)
                                 : 466,
                         child: SizedBox(
                           width: 574,

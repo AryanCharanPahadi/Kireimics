@@ -4,24 +4,28 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kireimics/component/no_result_found/no_order_yet.dart';
 import '../../component/api_helper/api_helper.dart';
+import '../../component/cart_length/cart_loader.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
+import '../../web_desktop_common/component/rotating_svg_loader.dart';
 
 class CartPanelMobile extends StatefulWidget {
   final Function(String)? onWishlistChanged;
   final int? productId;
   final Function(
-      double, // subtotal
-      Map<int, int>, // productQuantities
-      Map<int, double>, // productPrices
-      Map<int, double?>, // productHeights
-      Map<int, double?>, // productWidths
-      Map<int, double?>, // productLengths
-      Map<int, double?>, // productWeights
-      )? onSubtotalChanged; // Updated callback
-   const CartPanelMobile({
+    double, // subtotal
+    Map<int, int>, // productQuantities
+    Map<int, double>, // productPrices
+    Map<int, String>, // productPrices
+    Map<int, double?>, // productHeights
+    Map<int, double?>, // productWidths
+    Map<int, double?>, // productLengths
+    Map<int, double?>, // productWeights
+  )?
+  onSubtotalChanged; // Updated callback
+  const CartPanelMobile({
     Key? key,
     required this.productId,
     this.onWishlistChanged,
@@ -44,10 +48,11 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
     double total = 0.0;
     Map<int, int> productQuantities = {};
     Map<int, double> productPrices = {};
-    Map<int, double?> productHeights = {}; // New map
-    Map<int, double?> productWidths = {};  // New map
-    Map<int, double?> productLengths = {}; // New map
-    Map<int, double?> productWeights = {}; // New map
+    Map<int, String> productNames = {};
+    Map<int, double?> productHeights = {};
+    Map<int, double?> productWidths = {};
+    Map<int, double?> productLengths = {};
+    Map<int, double?> productWeights = {};
 
     for (int i = 0; i < productList.length; i++) {
       if (stockQuantities[i] != null && stockQuantities[i]! > 0) {
@@ -58,19 +63,32 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
         total += finalPrice * quantityList[i].value;
         productQuantities[productList[i].id] = quantityList[i].value;
         productPrices[productList[i].id] = finalPrice;
-        // Parse String to double? for height, width, length, and weight
-        productHeights[productList[i].id] = productList[i].height != null
-            ? double.tryParse(productList[i].height.toString().replaceAll(',', ''))
-            : null;
-        productWidths[productList[i].id] = productList[i].breadth != null
-            ? double.tryParse(productList[i].breadth.toString().replaceAll(',', ''))
-            : null;
-        productLengths[productList[i].id] = productList[i].length != null
-            ? double.tryParse(productList[i].length.toString().replaceAll(',', ''))
-            : null;
-        productWeights[productList[i].id] = productList[i].weight != null
-            ? double.tryParse(productList[i].weight.toString().replaceAll(',', ''))
-            : null;
+        productNames[productList[i].id] =
+            productList[i].name; // Add product name
+        productHeights[productList[i].id] =
+            productList[i].height != null
+                ? double.tryParse(
+                  productList[i].height.toString().replaceAll(',', ''),
+                )
+                : null;
+        productWidths[productList[i].id] =
+            productList[i].breadth != null
+                ? double.tryParse(
+                  productList[i].breadth.toString().replaceAll(',', ''),
+                )
+                : null;
+        productLengths[productList[i].id] =
+            productList[i].length != null
+                ? double.tryParse(
+                  productList[i].length.toString().replaceAll(',', ''),
+                )
+                : null;
+        productWeights[productList[i].id] =
+            productList[i].weight != null
+                ? double.tryParse(
+                  productList[i].weight.toString().replaceAll(',', ''),
+                )
+                : null;
       }
     }
     if (_subtotal != total) {
@@ -80,6 +98,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
           total,
           productQuantities,
           productPrices,
+          productNames, // Pass product names
           productHeights,
           productWidths,
           productLengths,
@@ -88,7 +107,9 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
       });
     }
     return total;
-  }  Future<int?> fetchStockQuantity(String productId) async {
+  }
+
+  Future<int?> fetchStockQuantity(String productId) async {
     try {
       var result = await ApiHelper.getStockDetail(productId);
       if (result['error'] == false && result['data'] != null) {
@@ -159,7 +180,9 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF30578E)));
+      return Center(
+        child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+      );
     }
 
     if (errorMessage.isNotEmpty) {
@@ -247,6 +270,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                                   ? Colors.grey
                                                   : Color(0xFF414141),
                                           softWrap: true,
+                                          maxLines: 2,
                                         ),
                                       ),
                                       SizedBox(width: 8),
@@ -343,6 +367,7 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                             stockQuantities.removeAt(index);
                                             calculateTotal();
                                           });
+                                          await cartNotifier.refresh();
                                         },
                                         child: BarlowText(
                                           text: "REMOVE",
@@ -410,8 +435,6 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                   ),
                 ],
               ),
-              SizedBox(height: 27),
-              Divider(color: Color(0xFFB9D6FF)),
               SizedBox(height: 22),
             ],
           ],

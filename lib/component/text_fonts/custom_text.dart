@@ -116,9 +116,13 @@ class BarlowText extends StatefulWidget {
   // Route-based styling properties
   final String? route;
   final bool enableUnderlineForActiveRoute;
+  final bool enableUnderlineForCurrentFilter;
   final bool enableBackgroundForActiveRoute;
   final Color? activeBackgroundColor;
   final TextDecoration? activeUnderlineDecoration;
+
+  // Filter properties
+  final String? currentFilterValue; // New property for filter comparison
 
   // Hover properties
   final Color? hoverBackgroundColor;
@@ -126,7 +130,7 @@ class BarlowText extends StatefulWidget {
   final Color? hoverTextColor;
   final bool enableHoverUnderline;
   final TextDecoration? hoverDecoration;
-  final Color? hoverDecorationColor; // ✅ New hover underline color
+  final Color? hoverDecorationColor;
 
   static final String fontFamily = GoogleFonts.barlow().fontFamily ?? 'Barlow';
 
@@ -149,15 +153,17 @@ class BarlowText extends StatefulWidget {
     this.decorationColor,
     this.route,
     this.enableUnderlineForActiveRoute = false,
+    this.enableUnderlineForCurrentFilter = false,
     this.enableBackgroundForActiveRoute = false,
     this.activeBackgroundColor,
     this.activeUnderlineDecoration,
+    this.currentFilterValue, // Added to constructor
     this.hoverBackgroundColor,
     this.enableHoverBackground = false,
     this.hoverTextColor,
     this.enableHoverUnderline = false,
     this.hoverDecoration,
-    this.hoverDecorationColor, // ✅
+    this.hoverDecorationColor,
   });
 
   @override
@@ -173,20 +179,31 @@ class _BarlowTextState extends State<BarlowText> {
     return currentLocation == widget.route;
   }
 
+  bool _isCurrentFilter() {
+    // Compare the widget's text with the current filter value
+    if (widget.currentFilterValue == null) return false;
+    return widget.text == widget.currentFilterValue;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isActive = _isCurrentRoute(context);
+    final isCurrentFilter =
+        widget.enableUnderlineForCurrentFilter ? _isCurrentFilter() : false;
 
     TextDecoration? decoration;
     Color? decorationColor;
 
+    // Priority order: Active Route > Current Filter > Hover > Default
     if (isActive && widget.enableUnderlineForActiveRoute) {
+      decoration = widget.activeUnderlineDecoration ?? TextDecoration.underline;
+      decorationColor = widget.decorationColor;
+    } else if (isCurrentFilter) {
       decoration = widget.activeUnderlineDecoration ?? TextDecoration.underline;
       decorationColor = widget.decorationColor;
     } else if (_isHovering && widget.enableHoverUnderline) {
       decoration = widget.hoverDecoration ?? TextDecoration.underline;
-      decorationColor =
-          widget.hoverDecorationColor; // ✅ Apply hover underline color
+      decorationColor = widget.hoverDecorationColor;
     } else {
       decoration = widget.decoration;
       decorationColor = widget.decorationColor;
@@ -197,16 +214,8 @@ class _BarlowTextState extends State<BarlowText> {
           widget.onTap ??
           (widget.route != null ? () => context.go(widget.route!) : null),
       child: MouseRegion(
-        onEnter: (_) {
-          setState(() {
-            _isHovering = true;
-          });
-        },
-        onExit: (_) {
-          setState(() {
-            _isHovering = false;
-          });
-        },
+        onEnter: (_) => setState(() => _isHovering = true),
+        onExit: (_) => setState(() => _isHovering = false),
         child: Text(
           widget.text,
           textAlign: widget.textAlign,
@@ -223,13 +232,7 @@ class _BarlowTextState extends State<BarlowText> {
                 _isHovering && widget.hoverTextColor != null
                     ? widget.hoverTextColor
                     : widget.color,
-            backgroundColor:
-                _isHovering && widget.enableHoverBackground
-                    ? widget.hoverBackgroundColor
-                    : (isActive && widget.enableBackgroundForActiveRoute
-                        ? (widget.activeBackgroundColor ??
-                            widget.backgroundColor)
-                        : widget.backgroundColor),
+            backgroundColor: _getBackgroundColor(isActive),
             decoration: decoration,
             decorationStyle: widget.decorationStyle,
             decorationThickness: widget.decorationThickness,
@@ -238,5 +241,15 @@ class _BarlowTextState extends State<BarlowText> {
         ),
       ),
     );
+  }
+
+  Color? _getBackgroundColor(bool isActive) {
+    if (_isHovering && widget.enableHoverBackground) {
+      return widget.hoverBackgroundColor;
+    }
+    if (isActive && widget.enableBackgroundForActiveRoute) {
+      return widget.activeBackgroundColor ?? widget.backgroundColor;
+    }
+    return widget.backgroundColor;
   }
 }

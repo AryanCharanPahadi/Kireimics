@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kireimics/component/text_fonts/custom_text.dart';
 import '../../component/categories/categories_controller.dart';
+import '../component/rotating_svg_loader.dart';
 
 class CollectionNavigation extends StatelessWidget {
   final int selectedCategoryId;
@@ -33,7 +34,9 @@ class CollectionNavigation extends StatelessWidget {
 
     return Obx(() {
       if (categoriesController.isLoading.value) {
-        return const CircularProgressIndicator();
+        return const  RotatingSvgLoader(
+          assetPath: 'assets/footer/footerbg.svg',
+        );
       }
 
       final children =

@@ -1,8 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../component/api_helper/api_helper.dart' show ApiHelper;
 import '../../component/text_fonts/custom_text.dart';
+import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../web_desktop_common/shipping_policy/ShippingPolicyModal.dart';
 
 class ShippingPolicyMobile extends StatefulWidget {
@@ -33,7 +36,9 @@ class _ShippingPolicyMobileState extends State<ShippingPolicyMobile> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+      );
     }
 
     if (_policyModel == null) {
@@ -61,7 +66,11 @@ class _ShippingPolicyMobileState extends State<ShippingPolicyMobile> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
-                        CralikaFont(text: "Shipping Policy",fontSize: 24,fontWeight: FontWeight.w400,),
+                        CralikaFont(
+                          text: "Shipping Policy",
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                        ),
 
                         SizedBox(height: 10),
                       ],
@@ -75,7 +84,7 @@ class _ShippingPolicyMobileState extends State<ShippingPolicyMobile> {
                       CralikaFont(
                         text: section.title,
                         fontSize: 22,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w600,
                         letterSpacing: 0.88, // 4% of 22
                         lineHeight: 27 / 22, // 1.227
                       ),
@@ -84,7 +93,7 @@ class _ShippingPolicyMobileState extends State<ShippingPolicyMobile> {
                         section.content.length,
                         (i) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: BarlowText(text: section.content[i],fontWeight: FontWeight.w400,fontSize: 14,),
+                          child: buildContentWithLinks(section.content[i]),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -95,6 +104,85 @@ class _ShippingPolicyMobileState extends State<ShippingPolicyMobile> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget buildContentWithLinks(String text) {
+    final RegExp linkRegex = RegExp(
+      r'<a\s*(.*?)<\/a>',
+    ); // Matches <a something</a>
+    final matches = linkRegex.allMatches(text);
+
+    if (matches.isEmpty) {
+      return BarlowText(text: text, fontWeight: FontWeight.w400, fontSize: 14);
+    }
+
+    final spans = <TextSpan>[];
+    int lastMatchEnd = 0;
+
+    for (final match in matches) {
+      final fullMatch = match.group(0)!;
+      final linkText = match.group(1)!.trim();
+
+      // Add plain text before the link
+      if (match.start > lastMatchEnd) {
+        spans.add(
+          TextSpan(
+            text: text.substring(lastMatchEnd, match.start),
+            style: const TextStyle(color: Colors.black),
+          ),
+        );
+      }
+
+      // Add the link
+      spans.add(
+        TextSpan(
+          text: linkText,
+          style: const TextStyle(color: Color(0xFF30578E)),
+          recognizer:
+              TapGestureRecognizer()
+                ..onTap = () async {
+                  if (linkText.contains('@')) {
+                    final uri = Uri.parse('mailto:$linkText');
+                    if (await canLaunchUrl(uri)) {
+                      launchUrl(uri);
+                    }
+                  } else {
+                    final uri = Uri.parse(
+                      linkText.startsWith('http')
+                          ? linkText
+                          : 'https://$linkText',
+                    );
+                    if (await canLaunchUrl(uri)) {
+                      launchUrl(uri);
+                    }
+                  }
+                },
+        ),
+      );
+
+      lastMatchEnd = match.end;
+    }
+
+    // Add any remaining text after the last match
+    if (lastMatchEnd < text.length) {
+      spans.add(
+        TextSpan(
+          text: text.substring(lastMatchEnd),
+          style: const TextStyle(color: Colors.black),
+        ),
+      );
+    }
+
+    return SelectableText.rich(
+      TextSpan(
+        children: spans,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          height: 1.4,
+        ),
       ),
     );
   }

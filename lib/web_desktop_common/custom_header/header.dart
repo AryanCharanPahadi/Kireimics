@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../component/cart_length/cart_loader.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
@@ -18,7 +19,6 @@ class Header extends StatefulWidget {
 }
 
 class _HeaderState extends State<Header> {
-  int? _cartProductId;
   int _cartItemCount = 0;
 
   final Map<String, bool> _isHovered = {};
@@ -195,8 +195,7 @@ class _HeaderState extends State<Header> {
                       const SizedBox(width: 32),
                       GestureDetector(
                         onTap: () async {
-                          bool isLoggedIn =
-                              await _isLoggedIn();
+                          bool isLoggedIn = await _isLoggedIn();
 
                           if (isLoggedIn) {
                             context.go(AppRoutes.wishlist);
@@ -256,28 +255,36 @@ class _HeaderState extends State<Header> {
             ),
           ),
         ),
-        if (_cartItemCount > 0)
-          Positioned(
-            top: 30,
-            right: isLargeScreen ? 160 : 63,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Colors.redAccent,
-                shape: BoxShape.circle,
-              ),
-              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-              child: Text(
-                '$_cartItemCount',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+        ValueListenableBuilder<int>(
+          valueListenable: cartNotifier,
+          builder: (context, count, _) {
+            return count > 0
+                ? Positioned(
+              top: 30,
+              right: isLargeScreen ? 160 : 63,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.redAccent,
+                  shape: BoxShape.circle,
                 ),
-                textAlign: TextAlign.center,
+                constraints:
+                const BoxConstraints(minWidth: 18, minHeight: 18),
+                child: Text(
+                  '$count',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
-          ),
+            )
+                : const SizedBox.shrink();
+          },
+        ),
+
       ],
     );
   }

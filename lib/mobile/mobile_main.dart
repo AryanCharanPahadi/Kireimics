@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 import 'package:kireimics/mobile/address_page/add_address_ui/add_address_ui.dart';
 import 'package:kireimics/mobile/address_page/add_address_ui/delete_address.dart';
 import 'package:kireimics/mobile/checkout/checkout_page.dart';
@@ -24,7 +23,9 @@ import 'package:kireimics/component/app_routes/routes.dart';
 import '../component/notification_toast/custom_toast.dart';
 import '../component/shared_preferences/shared_preferences.dart';
 import '../component/text_fonts/custom_text.dart';
+import '../component/utilities/utility.dart';
 import '../web/checkout/checkout_controller.dart';
+import '../web_desktop_common/component/rotating_svg_loader.dart';
 import 'about_page/about_page.dart';
 import 'cart_panel/cart_panel_mobile.dart';
 import 'cart_panel/proceed_to_checkout.dart';
@@ -54,12 +55,20 @@ class _LandingPageMobileState extends State<LandingPageMobile>
   final ValueNotifier<double> _cartSubtotal = ValueNotifier<double>(0.0);
   final ValueNotifier<Map<int, int>> _productQuantities =
       ValueNotifier<Map<int, int>>({});
-  final ValueNotifier<Map<int, double>> _productPrices = ValueNotifier<Map<int, double>>({});
-  final ValueNotifier<Map<int, double?>> _productHeights = ValueNotifier<Map<int, double?>>({});
-  final ValueNotifier<Map<int, double?>> _productWidths = ValueNotifier<Map<int, double?>>({});
-  final ValueNotifier<Map<int, double?>> _productLengths = ValueNotifier<Map<int, double?>>({});
-  final ValueNotifier<Map<int, double?>> _productWeights = ValueNotifier<Map<int, double?>>({});
-
+  final ValueNotifier<Map<int, double>> _productPrices =
+      ValueNotifier<Map<int, double>>({});
+  final ValueNotifier<Map<int, double?>> _productHeights =
+      ValueNotifier<Map<int, double?>>({});
+  final ValueNotifier<Map<int, double?>> _productWidths =
+      ValueNotifier<Map<int, double?>>({});
+  final ValueNotifier<Map<int, double?>> _productLengths =
+      ValueNotifier<Map<int, double?>>({});
+  final ValueNotifier<Map<int, double?>> _productWeights =
+      ValueNotifier<Map<int, double?>>({});
+  final _productNames = ValueNotifier<Map<int, String>>({});
+  final ValueNotifier<bool> _isPaymentProcessing = ValueNotifier(
+    false,
+  ); // New notifier for payment processing
   double _lastScrollOffset = 0.0;
   bool _isScrollingUp = false;
   bool _showStickyColumn1 = false;
@@ -70,8 +79,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
   late Animation<double> _fadeAnimation;
   bool _isClosing = false;
   double _subtotal = 0.0;
-  final double _deliveryCharge = 50.0;
-  late double _total;
 
   Future<bool> isUserLoggedIn() async {
     String? userData = await SharedPreferencesHelper.getUserData();
@@ -86,7 +93,11 @@ class _LandingPageMobileState extends State<LandingPageMobile>
         checkoutController.zipController.text.isEmpty ||
         checkoutController.stateController.text.isEmpty ||
         checkoutController.cityController.text.isEmpty ||
-        checkoutController.mobileController.text.isEmpty;
+        checkoutController.mobileController.text.isEmpty ||
+        ((!checkoutController.isLoggedIn.value ||
+                (checkoutController.isLoggedIn.value &&
+                    !checkoutController.addressExists.value)) &&
+            !checkoutController.isPrivacyPolicyChecked);
   }
 
   @override
@@ -128,7 +139,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
     _subtotal =
         double.tryParse(uri.queryParameters['subtotal'] ?? '') ??
         _cartSubtotal.value;
-    _total = _subtotal + _deliveryCharge;
   }
 
   final Map<String, Widget Function(String?)> _basePageMap = {
@@ -136,7 +146,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
     AppRoutes.shippingPolicy: (_) => const ShippingPolicyMobile(),
     AppRoutes.privacyPolicy: (_) => const PrivacyPolicyMobile(),
     AppRoutes.viewDetails: (_) => const ViewDetailsUiMobile(),
-    AppRoutes.forgotPassword: (_) => const ForgotPasswordUiMobile(),
     AppRoutes.myOrder: (_) => const MyOrderUiMobile(),
   };
 
@@ -153,6 +162,12 @@ class _LandingPageMobileState extends State<LandingPageMobile>
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
           ),
+      AppRoutes.forgotPassword:
+          (_) => ForgotPasswordUiMobile(
+            onWishlistChanged: _showNotification,
+            onErrorWishlistChanged: _showErrorNotification,
+          ),
+
       AppRoutes.catalog:
           (_) => CatalogMobileComponent(onWishlistChanged: _showNotification),
       AppRoutes.sale: (_) => SaleMobile(onWishlistChanged: _showNotification),
@@ -180,6 +195,9 @@ class _LandingPageMobileState extends State<LandingPageMobile>
           (_) => CheckoutPageMobile(
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
+            onPaymentProcessing: (isProcessing) {
+              _isPaymentProcessing.value = isProcessing; // Update loading state
+            },
           ),
       AppRoutes.wishlist:
           (_) => WishlistUiMobile(onWishlistChanged: _showNotification),
@@ -191,42 +209,46 @@ class _LandingPageMobileState extends State<LandingPageMobile>
           (_) => MyAccountUiMobile(onWishlistChanged: _showNotification),
       '/cart':
           (id) => CartPanelMobile(
-        productId: int.tryParse(id ?? '0') ?? 0,
-        onWishlistChanged: _showNotification,
-        onSubtotalChanged: (
-            subtotal,
-            productQuantities,
-            productPrices,
-            productHeights,
-            productWidths,
-            productLengths,
-            productWeights,
+            productId: int.tryParse(id ?? '0') ?? 0,
+            onWishlistChanged: _showNotification,
+            onSubtotalChanged: (
+              double subtotal,
+              Map<int, int> productQuantities,
+              Map<int, double> productPrices,
+              Map<int, String> productNames, // Added productNames
+              Map<int, double?> productHeights,
+              Map<int, double?> productWidths,
+              Map<int, double?> productLengths,
+              Map<int, double?> productWeights,
             ) {
-          _cartSubtotal.value = subtotal;
-          _productQuantities.value = productQuantities;
-          _productPrices.value = productPrices;
-          _productHeights.value = productHeights;   // Store heights
-          _productWidths.value = productWidths;     // Store widths
-          _productLengths.value = productLengths;   // Store lengths
-          _productWeights.value = productWeights;   // Store weights
-          setState(() {
-            _updateSubtotalAndTotal();
-          });
-          // Print product details
-          print('Product Details:');
-          productQuantities.forEach((productId, quantity) {
-            final price = productPrices[productId] ?? 0.0;
-            final height = productHeights[productId] ?? 'N/A';
-            final width = productWidths[productId] ?? 'N/A';
-            final length = productLengths[productId] ?? 'N/A';
-            final weight = productWeights[productId] ?? 'N/A';
-            print(
-              'Product ID: $productId, Quantity: $quantity, Price: $price, '
+              _cartSubtotal.value = subtotal;
+              _productQuantities.value = productQuantities;
+              _productPrices.value = productPrices;
+              _productNames.value = productNames; // Store product names
+              _productHeights.value = productHeights;
+              _productWidths.value = productWidths;
+              _productLengths.value = productLengths;
+              _productWeights.value = productWeights;
+              setState(() {
+                _updateSubtotalAndTotal();
+              });
+              // Print product details
+              print('Product Details:');
+              productQuantities.forEach((productId, quantity) {
+                final price = productPrices[productId] ?? 0.0;
+                final name =
+                    productNames[productId] ?? 'Unknown'; // Access product name
+                final height = productHeights[productId] ?? 'N/A';
+                final width = productWidths[productId] ?? 'N/A';
+                final length = productLengths[productId] ?? 'N/A';
+                final weight = productWeights[productId] ?? 'N/A';
+                print(
+                  'Product ID: $productId, Name: $name, Quantity: $quantity, Price: $price, '
                   'Height: $height, Width: $width, Length: $length, Weight: $weight',
-            );
-          });
-        },
-      ),
+                );
+              });
+            },
+          ),
       '/product':
           (id) => ProductDetailsMobile(
             productId: int.tryParse(id ?? '0') ?? 0,
@@ -276,6 +298,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
 
   @override
   void dispose() {
+    _isPaymentProcessing.dispose(); // Dispose the new notifier
     _animationController.dispose();
     _scrollController.dispose();
     _cartSubtotal.dispose();
@@ -376,6 +399,10 @@ class _LandingPageMobileState extends State<LandingPageMobile>
 
   @override
   Widget build(BuildContext context) {
+    final double finalDeliveryCharge =
+        _subtotal > 2500 ? 0.0 : checkoutController.totalDeliveryCharge.value;
+    final double total = _subtotal + finalDeliveryCharge;
+
     final isLoginRoute = _selectedPage == AppRoutes.logIn;
     final isSignInRoute = _selectedPage == AppRoutes.signIn;
     final isAddAddressRoute = _selectedPage == AppRoutes.addAddress;
@@ -410,6 +437,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
       child: ColoredBox(
         color: Colors.white,
         child: Scaffold(
+          backgroundColor: Colors.white,
           body: FadeTransition(
             opacity: _fadeAnimation,
             child: SlideTransition(
@@ -666,265 +694,351 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                           ),
                         ),
                       ),
+
                     if (!isLoginRoute &&
                         !isSignInRoute &&
                         !isForgotPasswordRoute &&
                         !isDeleteAddressRoute &&
                         !isAddAddressRoute &&
                         !isForgotPasswordResetRoute &&
-                        !isViewDetailsRoute)
-                      if (isCheckoutRoute)
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
+                        !isViewDetailsRoute &&
+                        isCheckoutRoute)
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Obx(() {
+                          final double finalDeliveryCharge =
+                              _subtotal > 2500
+                                  ? 0.0
+                                  : checkoutController
+                                      .totalDeliveryCharge
+                                      .value;
+                          final double total = _subtotal + finalDeliveryCharge;
+
+                          final isLoading =
+                              !checkoutController.isShippingTaxLoaded.value;
+
+                          return Container(
                             width: MediaQuery.of(context).size.width,
-                            height: 100,
+                            height: 125,
                             color: Colors.white.withOpacity(0.8),
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                left: 22.0,
-                                top: 21,
-                                bottom: 28,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  BarlowText(
-                                    text: "Rs. ${_total.toStringAsFixed(2)}",
-                                    color: Color(0xFF30578E),
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w400,
-                                    lineHeight: 1.0,
-                                    letterSpacing: 1 * 0.04,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(height: 1, color: Color(0xFFB9D6FF)),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 22.0,
+                                    top: 21,
+                                    bottom: 28,
                                   ),
-                                  SizedBox(height: 8),
-                                  BarlowText(
-                                    text: "MAKE PAYMENT",
-                                    color:
-                                        isAnyRequiredFieldEmpty()
-                                            ? const Color(
-                                              0xFF30578E,
-                                            ).withOpacity(0.5)
-                                            : const Color(0xFF30578E),
-                                    backgroundColor:
-                                        isAnyRequiredFieldEmpty()
-                                            ? const Color(
-                                              0xFFb9d6ff,
-                                            ).withOpacity(0.5)
-                                            : const Color(0xFFb9d6ff),
-                                    hoverTextColor:
-                                        isAnyRequiredFieldEmpty()
-                                            ? const Color(
-                                              0xFF2876E4,
-                                            ).withOpacity(0.5)
-                                            : const Color(0xFF2876E4),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    lineHeight: 1.0,
-                                    letterSpacing: 1 * 0.04,
-                                    onTap: () async {
-                                      if (checkoutController
-                                          .firstNameController
-                                          .text
-                                          .isEmpty) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call(
-                                              'Please enter your first name',
-                                            );
-                                        return;
-                                      }
-                                      if (checkoutController
-                                              .firstNameController
-                                              .text
-                                              .length <
-                                          2) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call('First name too short');
-                                        return;
-                                      }
-                                      if (checkoutController
-                                          .lastNameController
-                                          .text
-                                          .isEmpty) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call(
-                                              'Please enter your last name',
-                                            );
-                                        return;
-                                      }
-                                      if (checkoutController
-                                              .lastNameController
-                                              .text
-                                              .length <
-                                          2) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call('Last name too short');
-                                        return;
-                                      }
-                                      if (checkoutController
-                                          .emailController
-                                          .text
-                                          .isEmpty) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call('Please enter your email');
-                                        return;
-                                      }
-                                      if (!RegExp(
-                                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                      ).hasMatch(
-                                        checkoutController.emailController.text,
-                                      )) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call(
-                                              'Please enter a valid email',
-                                            );
-                                        return;
-                                      }
-                                      if (checkoutController
-                                          .address1Controller
-                                          .text
-                                          .isEmpty) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call(
-                                              'Please enter your ADDRESS LINE 1',
-                                            );
-                                        return;
-                                      }
-                                      if (checkoutController
-                                          .zipController
-                                          .text
-                                          .isEmpty) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call('Please enter your Zip');
-                                        return;
-                                      }
-                                      if (checkoutController
-                                          .stateController
-                                          .text
-                                          .isEmpty) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call('Please enter your state');
-                                        return;
-                                      }
-                                      if (checkoutController
-                                          .cityController
-                                          .text
-                                          .isEmpty) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call('Please enter your city');
-                                        return;
-                                      }
-                                      if (checkoutController
-                                          .mobileController
-                                          .text
-                                          .isEmpty) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call(
-                                              'Please enter your phone number',
-                                            );
-                                        return;
-                                      }
-                                      if (!RegExp(
-                                        r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$',
-                                      ).hasMatch(
-                                        checkoutController
-                                            .mobileController
-                                            .text,
-                                      )) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call(
-                                              'Please enter a valid phone number',
-                                            );
-                                        return;
-                                      }
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      isLoading
+                                          ? SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: RotatingSvgLoader(
+                                              assetPath:
+                                                  'assets/footer/footerbg.svg',
+                                            ),
+                                          )
+                                          : BarlowText(
+                                            text:
+                                                "Rs. ${total.toStringAsFixed(2)}",
+                                            color: Color(0xFF30578E),
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w400,
+                                            lineHeight: 1.0,
+                                            letterSpacing: 0.04,
+                                          ),
+                                      SizedBox(height: 8),
 
-                                      bool isLoggedIn = await isUserLoggedIn();
-                                      if (!isLoggedIn &&
-                                          !checkoutController
-                                              .addressExists
-                                              .value &&
-                                          !checkoutController.isChecked) {
-                                        checkoutController
-                                            .onErrorWishlistChanged
-                                            ?.call(
-                                              'Please agree to the Privacy and Shipping Policy',
-                                            );
-                                        return;
-                                      }
+                                      /// Main Button
+                                      checkoutController
+                                              .isSignupProcessing
+                                              .value
+                                          ? SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: RotatingSvgLoader(
+                                              assetPath:
+                                                  'assets/footer/footerbg.svg',
+                                            ),
+                                          )
+                                          : BarlowText(
+                                            text: "MAKE PAYMENT",
+                                            color:
+                                                isAnyRequiredFieldEmpty()
+                                                    ? const Color(
+                                                      0xFF30578E,
+                                                    ).withOpacity(0.5)
+                                                    : const Color(0xFF30578E),
+                                            backgroundColor:
+                                                isAnyRequiredFieldEmpty()
+                                                    ? const Color(
+                                                      0xFFb9d6ff,
+                                                    ).withOpacity(0.5)
+                                                    : const Color(0xFFb9d6ff),
+                                            hoverTextColor:
+                                                isAnyRequiredFieldEmpty()
+                                                    ? const Color(
+                                                      0xFF2876E4,
+                                                    ).withOpacity(0.5)
+                                                    : const Color(0xFF2876E4),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            lineHeight: 1.0,
+                                            letterSpacing: 0.04,
+                                            onTap: () async {
+                                              if (checkoutController
+                                                  .isSignupProcessing
+                                                  .value)
+                                                return;
 
-                                      if (!isLoggedIn) {
-                                        bool signUpSuccess =
-                                            await checkoutController
-                                                .handleSignUp(context);
-                                        if (!signUpSuccess) {
-                                          checkoutController
-                                              .onErrorWishlistChanged
-                                              ?.call(
+                                              bool isLoggedIn =
+                                                  await isUserLoggedIn();
+
+                                              // Validation checks
+                                              if (checkoutController
+                                                  .firstNameController
+                                                  .text
+                                                  .isEmpty) {
                                                 checkoutController
-                                                        .signupMessage
-                                                        .isNotEmpty
-                                                    ? checkoutController
-                                                        .signupMessage
-                                                    : 'Signup failed, please try again',
-                                              );
-                                          return;
-                                        }
-                                      } else {
-                                        // For logged-in users, call handleAddAddress if no address exists
-                                        if (!checkoutController
-                                            .addressExists
-                                            .value) {
-                                          bool addressSuccess =
-                                              await checkoutController
-                                                  .handleAddAddress(context);
-                                          if (!addressSuccess) {
-                                            checkoutController
-                                                .onErrorWishlistChanged
-                                                ?.call(
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please enter your first name',
+                                                    );
+                                                return;
+                                              }
+                                              if (checkoutController
+                                                      .firstNameController
+                                                      .text
+                                                      .length <
+                                                  2) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'First name too short',
+                                                    );
+                                                return;
+                                              }
+                                              if (checkoutController
+                                                  .lastNameController
+                                                  .text
+                                                  .isEmpty) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please enter your last name',
+                                                    );
+                                                return;
+                                              }
+                                              if (checkoutController
+                                                      .lastNameController
+                                                      .text
+                                                      .length <
+                                                  2) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Last name too short',
+                                                    );
+                                                return;
+                                              }
+                                              if (checkoutController
+                                                  .emailController
+                                                  .text
+                                                  .isEmpty) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please enter your email',
+                                                    );
+                                                return;
+                                              }
+                                              if (!RegExp(
+                                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                              ).hasMatch(
+                                                checkoutController
+                                                    .emailController
+                                                    .text,
+                                              )) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please enter a valid email',
+                                                    );
+                                                return;
+                                              }
+                                              if (checkoutController
+                                                  .address1Controller
+                                                  .text
+                                                  .isEmpty) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please enter your ADDRESS LINE 1',
+                                                    );
+                                                return;
+                                              }
+                                              if (checkoutController
+                                                  .zipController
+                                                  .text
+                                                  .isEmpty) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please enter your Zip',
+                                                    );
+                                                return;
+                                              }
+                                              if (checkoutController
+                                                  .stateController
+                                                  .text
+                                                  .isEmpty) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please enter your state',
+                                                    );
+                                                return;
+                                              }
+                                              if (checkoutController
+                                                  .cityController
+                                                  .text
+                                                  .isEmpty) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please enter your city',
+                                                    );
+                                                return;
+                                              }
+                                              if (checkoutController
+                                                  .mobileController
+                                                  .text
+                                                  .isEmpty) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please enter your phone number',
+                                                    );
+                                                return;
+                                              }
+                                              if (!RegExp(
+                                                r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$',
+                                              ).hasMatch(
+                                                checkoutController
+                                                    .mobileController
+                                                    .text,
+                                              )) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please enter a valid phone number',
+                                                    );
+                                                return;
+                                              }
+
+                                              if ((!isLoggedIn ||
+                                                      (isLoggedIn &&
+                                                          !checkoutController
+                                                              .addressExists
+                                                              .value)) &&
+                                                  !checkoutController
+                                                      .isPrivacyPolicyChecked) {
+                                                checkoutController
+                                                    .onErrorWishlistChanged
+                                                    ?.call(
+                                                      'Please accept the Privacy Policy',
+                                                    );
+                                                return;
+                                              }
+
+                                              // Signup or address
+                                              if (!isLoggedIn) {
+                                                bool signUpSuccess =
+                                                    await checkoutController
+                                                        .handleSignUp(context);
+                                                if (!signUpSuccess) {
                                                   checkoutController
-                                                          .signupMessage
-                                                          .isNotEmpty
-                                                      ? checkoutController
-                                                          .signupMessage
-                                                      : 'Failed to add address, please try again',
-                                                );
-                                            return;
-                                          }
-                                        }
-                                      }
+                                                      .onErrorWishlistChanged
+                                                      ?.call(
+                                                        checkoutController
+                                                                .signupMessage
+                                                                .isNotEmpty
+                                                            ? checkoutController
+                                                                .signupMessage
+                                                            : 'Signup failed, please try again',
+                                                      );
+                                                  return;
+                                                }
+                                              } else if (!checkoutController
+                                                  .addressExists
+                                                  .value) {
+                                                bool addressSuccess =
+                                                    await checkoutController
+                                                        .handleAddAddress(
+                                                          context,
+                                                        );
+                                                if (!addressSuccess) {
+                                                  checkoutController
+                                                      .onErrorWishlistChanged
+                                                      ?.call(
+                                                        checkoutController
+                                                                .signupMessage
+                                                                .isNotEmpty
+                                                            ? checkoutController
+                                                                .signupMessage
+                                                            : 'Failed to add address, please try again',
+                                                      );
+                                                  return;
+                                                }
+                                              }
 
-                                      final orderId =
-                                          'ORDER_${DateTime.now().millisecondsSinceEpoch}';
-                                      checkoutController.openRazorpayCheckout(
-                                        context,
-                                        _total,
-                                        orderId,
-                                      );
-                                    },
+                                              // Final payment
+                                              final orderId =
+                                                  'ORDER_${DateTime.now().millisecondsSinceEpoch}';
+                                              checkoutController
+                                                  .openRazorpayCheckout(
+                                                    context,
+                                                    total,
+                                                    orderId,
+                                                  );
+                                            },
+                                          ),
+                                      SizedBox(height: 8),
+
+                                      /// Razorpay info
+                                      Row(
+                                        children: [
+                                          Image.asset(
+                                            'assets/icons/razorpay1.png',
+                                            width: 76,
+                                            height: 16,
+                                            color: const Color(0xFF30578E),
+                                          ),
+                                          SizedBox(width: 4),
+                                          BarlowText(
+                                            text:
+                                                "Secure (UPI, Cards, Wallets, NetBanking)",
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ),
-
-
-
+                          );
+                        }),
+                      ),
 
                     if (!isLoginRoute &&
                         !isSignInRoute &&
@@ -943,34 +1057,72 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                               return ValueListenableBuilder<Map<int, double>>(
                                 valueListenable: _productPrices,
                                 builder: (context, productPrices, _) {
-                                  return ValueListenableBuilder<Map<int, double?>>(
-                                    valueListenable: _productHeights,
-                                    builder: (context, productHeights, _) {
-                                      return ValueListenableBuilder<Map<int, double?>>(
-                                        valueListenable: _productWidths,
-                                        builder: (context, productWidths, _) {
-                                          return ValueListenableBuilder<Map<int, double?>>(
-                                            valueListenable: _productLengths,
-                                            builder: (context, productLengths, _) {
-                                              return ValueListenableBuilder<Map<int, double?>>(
-                                                valueListenable: _productWeights,
-                                                builder: (context, productWeights, _) {
-                                                  return subtotal > 0.00
-                                                      ? Positioned(
-                                                    bottom: 0,
-                                                    left: 0,
-                                                    right: 0,
-                                                    child: ProceedToCheckoutButton(
-                                                      subtotal: subtotal,
-                                                      productQuantities: productQuantities,
-                                                      productPrices: productPrices,
-                                                      productHeights: productHeights,
-                                                      productWidths: productWidths,
-                                                      productLengths: productLengths,
-                                                      productWeights: productWeights,
-                                                    ),
-                                                  )
-                                                      : const SizedBox.shrink();
+                                  return ValueListenableBuilder<
+                                    Map<int, String>
+                                  >(
+                                    valueListenable: _productNames,
+                                    builder: (context, productNames, _) {
+                                      return ValueListenableBuilder<
+                                        Map<int, double?>
+                                      >(
+                                        valueListenable: _productHeights,
+                                        builder: (context, productHeights, _) {
+                                          return ValueListenableBuilder<
+                                            Map<int, double?>
+                                          >(
+                                            valueListenable: _productWidths,
+                                            builder: (
+                                              context,
+                                              productWidths,
+                                              _,
+                                            ) {
+                                              return ValueListenableBuilder<
+                                                Map<int, double?>
+                                              >(
+                                                valueListenable:
+                                                    _productLengths,
+                                                builder: (
+                                                  context,
+                                                  productLengths,
+                                                  _,
+                                                ) {
+                                                  return ValueListenableBuilder<
+                                                    Map<int, double?>
+                                                  >(
+                                                    valueListenable:
+                                                        _productWeights,
+                                                    builder: (
+                                                      context,
+                                                      productWeights,
+                                                      _,
+                                                    ) {
+                                                      return subtotal > 0.00
+                                                          ? Positioned(
+                                                            bottom: 0,
+                                                            left: 0,
+                                                            right: 0,
+                                                            child: ProceedToCheckoutButton(
+                                                              subtotal:
+                                                                  subtotal,
+                                                              productQuantities:
+                                                                  productQuantities,
+                                                              productPrices:
+                                                                  productPrices,
+                                                              productNames:
+                                                                  productNames, // Added productNames
+                                                              productHeights:
+                                                                  productHeights,
+                                                              productBreadths:
+                                                                  productWidths,
+                                                              productLengths:
+                                                                  productLengths,
+                                                              productWeights:
+                                                                  productWeights,
+                                                            ),
+                                                          )
+                                                          : const SizedBox.shrink();
+                                                    },
+                                                  );
                                                 },
                                               );
                                             },
@@ -989,6 +1141,19 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                     ValueListenableBuilder<String?>(
                       valueListenable: _notificationMessage,
                       builder: (context, message, _) {
+                        // Determine the icon path based on the route
+                        final iconPath =
+                            (_selectedPage == AppRoutes.signIn ||
+                                    _selectedPage ==
+                                        AppRoutes.forgotPasswordMain)
+                                ? "assets/icons/success.svg"
+                                : "assets/icons/success1.svg";
+                        final bannerColor =
+                            (_selectedPage == AppRoutes.signIn ||
+                                    _selectedPage ==
+                                        AppRoutes.forgotPasswordMain)
+                                ? Color(0xFF268FA2)
+                                : Color(0xFF2876E4);
                         return message != null
                             ? Positioned(
                               top: 30,
@@ -996,14 +1161,35 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                               child: NotificationBanner(
                                 textColor: Color(0xFF28292A),
                                 message: message,
-                                iconPath: "assets/icons/success.svg",
-                                bannerColor: const Color(0xFF268FA2),
+                                iconPath:
+                                    iconPath, // Use the conditionally determined icon path
+                                bannerColor: bannerColor,
                                 onClose: () {
                                   _notificationMessage.value = null;
                                 },
                               ),
                             )
                             : const SizedBox.shrink();
+                      },
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _isPaymentProcessing,
+                      builder: (context, isProcessing, _) {
+                        if (!isProcessing) return const SizedBox.shrink();
+
+                        return Stack(
+                          children: const [
+                            // Blurred background
+                            BlurredBackdrop(),
+                            // Center loader
+                            Center(
+                              child: RotatingSvgLoader(
+                                assetPath: 'assets/footer/footerbg.svg',
+                                color: Color(0xFFC0D4F0),
+                              ),
+                            ),
+                          ],
+                        );
                       },
                     ),
                     ValueListenableBuilder<String?>(

@@ -81,7 +81,7 @@ class _CollectionGridState extends State<CollectionGrid> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CralikaFont(
-                        text:   collection.name ?? 'Unnamed Collection',
+                          text: collection.name ?? 'Unnamed Collection',
                           fontWeight: FontWeight.w400,
                           fontSize: 20,
                           lineHeight: 36 / 20,

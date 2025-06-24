@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart'; // Add GetX for state management
 import '../../../component/api_helper/api_helper.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/utilities/utility.dart';
 
-class SignupController {
+class SignupController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   final firstNameController = TextEditingController();
@@ -13,7 +16,18 @@ class SignupController {
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void dispose() {
+  // Add loading state
+  var isLoading = false.obs; // Observable boolean for loading state
+
+  String signupMessage = '';
+
+  @override
+  void onClose() {
+    disposeControllers();
+    super.onClose();
+  }
+
+  void disposeControllers() {
     firstNameController.dispose();
     lastNameController.dispose();
     emailController.dispose();
@@ -21,51 +35,86 @@ class SignupController {
     passwordController.dispose();
   }
 
-  String signupMessage = ""; // Add this
-
   Future<bool> handleSignUp(BuildContext context) async {
-    if (formKey.currentState!.validate()) {
-      String formattedDate = getFormattedDate();
+    if (!formKey.currentState!.validate()) {
+      signupMessage = 'Please fill all fields correctly';
+      return false;
+    }
 
-      try {
-        final response = await ApiHelper.registerUser(
-          firstName: firstNameController.text.trim(),
-          lastName: lastNameController.text.trim(),
-          email: emailController.text.trim(),
-          phone: phoneController.text.trim(),
-          password: passwordController.text.trim(),
-          createdAt: formattedDate,
-        );
+    isLoading.value = true; // Start loading
+    update(); // Notify UI of state change
 
-        // Print the full API response
-        print("Signup Response: $response");
+    final String email = emailController.text.trim();
+    final String formattedDate = getFormattedDate();
 
-        if (response['error'] == true) {
-          // Optionally print error message
-          signupMessage =
-              response['message'] ?? "Signup failed"; // Store the message
-          return false;
-        } else {
-          // Clear controllers after successful sign up
-          firstNameController.clear();
-          lastNameController.clear();
-          emailController.clear();
-          phoneController.clear();
-          passwordController.clear();
+    try {
+      final response = await ApiHelper.registerUser(
+        firstName: firstNameController.text.trim(),
+        lastName: lastNameController.text.trim(),
+        email: email,
+        phone: phoneController.text.trim(),
+        createdAt: formattedDate,
+      );
 
-       return true;
-        }
-      } catch (e) {
-        print("Signup exception: $e");
-        signupMessage =
-            "An error occurred during signup"; // Store generic error
-
+      if (response['error'] == true) {
+        signupMessage = response['message'] ?? 'Signup failed';
+        isLoading.value = false; // Stop loading
+        update();
         return false;
       }
-    }
-    signupMessage =
-        "Please fill all fields correctly"; // Validation failed message
 
-    return false;
+      final mailResponse = await ApiHelper.registerMail(email: email);
+      print('Register Mail Response: $mailResponse');
+
+      final String apiUrl =
+          'https://vedvika.com/v1/apis/common/user_data/get_user_data.php?email=$email';
+      final http.Response apiResponse = await http.get(Uri.parse(apiUrl));
+
+      if (apiResponse.statusCode != 200) {
+        signupMessage = 'Failed to fetch user data';
+        isLoading.value = false; // Stop loading
+        update();
+        return false;
+      }
+
+      final Map<String, dynamic> responseData = json.decode(apiResponse.body);
+
+      if (responseData['error'] == true || responseData['data'].isEmpty) {
+        signupMessage = 'Failed to fetch user data';
+        isLoading.value = false; // Stop loading
+        update();
+        return false;
+      }
+
+      final userData = responseData['data'][0];
+      int userId = userData['id'] ?? -1;
+      String firstName = userData['first_name'] ?? 'Unknown';
+      String lastName = userData['last_name'] ?? 'Unknown';
+      String phone = userData['phone'] ?? 'Unknown';
+      String createdAt = userData['createdAt'] ?? formattedDate;
+
+      String userDetails =
+          '$userId, $firstName $lastName, $phone, $email, $createdAt';
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('auth', true);
+      await SharedPreferencesHelper.saveUserData(userDetails);
+
+      firstNameController.clear();
+      lastNameController.clear();
+      emailController.clear();
+      phoneController.clear();
+      passwordController.clear();
+      signupMessage = 'Signup successfully';
+
+      isLoading.value = false; // Stop loading
+      update();
+      return true;
+    } catch (e) {
+      signupMessage = 'An error occurred during signup';
+      isLoading.value = false; // Stop loading
+      update();
+      return false;
+    }
   }
 }

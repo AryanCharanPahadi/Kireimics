@@ -5,9 +5,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../component/api_helper/api_helper.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/utilities/url_launcher.dart';
+import '../../component/utilities/utility.dart';
 import '../../web/contact_us/contact_us_controller.dart';
+import '../../web_desktop_common/component/rotating_svg_loader.dart';
 
 class ContactUsComponent extends StatefulWidget {
   final Function(String)? onWishlistChanged; // Callback to notify parent
@@ -44,8 +47,10 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
     super.dispose();
   }
 
-  void _submitForm() {
-    // Check validation in order of priority
+  Future<void> _submitForm() async {
+    final String formattedDate = getFormattedDate();
+
+    // Validation checks
     if (_nameController.text.isEmpty) {
       widget.onErrorWishlistChanged?.call('Please enter your name');
       return;
@@ -68,14 +73,32 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
       return;
     }
 
-    // If all validations pass
-    widget.onWishlistChanged?.call('Form submitted successfully!');
+    try {
+      final response = await ApiHelper.contactQuery(
+        name: _nameController.text,
+        email: _emailController.text,
+        message: "${_messageController.text} ${_anotherMessageController.text}",
+        createdAt: formattedDate,
+      );
 
-    // Clear the fields
-    _nameController.clear();
-    _emailController.clear();
-    _messageController.clear();
-    _anotherMessageController.clear();
+      if (response['error'] == true) {
+        widget.onErrorWishlistChanged?.call(
+          response['message'] ?? 'Submission failed',
+        );
+      } else {
+        widget.onWishlistChanged?.call('Form submitted successfully!');
+
+        // Clear fields
+        _nameController.clear();
+        _emailController.clear();
+        _messageController.clear();
+        _anotherMessageController.clear();
+      }
+    } catch (e) {
+      widget.onErrorWishlistChanged?.call(
+        'An unexpected error occurred: ${e.toString()}',
+      );
+    }
   }
 
   @override
@@ -92,7 +115,9 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
   @override
   Widget build(BuildContext context) {
     return contactController.isLoading
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(
+          child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+        )
         : contactController.contactData == null
         ? const Center(child: Text("Failed to load contact details."))
         : SizedBox(
@@ -125,7 +150,7 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                       style: TextStyle(
                         fontFamily: GoogleFonts.barlow().fontFamily,
                         fontWeight: FontWeight.w400,
-                        fontSize: 16,
+                        fontSize: 14,
                         height: 30 / 14,
                         letterSpacing: 0.56,
                         color: Colors.white,
@@ -243,12 +268,12 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                             onTap:
                                 () => UrlLauncherHelper.launchURL(
                                   context,
-                                  "tel:${contactController.contactData!['phone'].toString()}",
+                                  "tel:+91${contactController.contactData!['phone'].toString()}",
                                 ),
                             child: BarlowText(
                               text:
-                                  contactController.contactData!['phone']
-                                      .toString(),
+                                  "+91 ${contactController.contactData!['phone'].toString()}",
+
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF30578E),

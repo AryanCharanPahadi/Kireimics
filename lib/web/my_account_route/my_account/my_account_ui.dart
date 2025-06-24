@@ -241,7 +241,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                             children: [
                               CralikaFont(
                                 text: "My Details",
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w600,
                                 fontSize: 20,
                                 lineHeight: 27 / 20,
                                 letterSpacing: 0.04 * 20,
@@ -336,7 +336,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                           children: [
                             CralikaFont(
                               text: "My Addresses",
-                              fontWeight: FontWeight.w400,
+                              fontWeight: FontWeight.w600,
                               fontSize: 20,
                               lineHeight: 27 / 20,
                               letterSpacing: 0.04 * 20,

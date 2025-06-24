@@ -296,13 +296,15 @@ class _SignInMobileState extends State<SignInMobile> {
       ),
     );
   }
+
   Widget customTextFormField({
     required String hintText,
     TextEditingController? controller,
     String? Function(String?)? validator,
     bool isPassword = false, // Add isPassword parameter
   }) {
-    bool obscureText = isPassword; // Initially hide password if isPassword is true
+    bool obscureText =
+        isPassword; // Initially hide password if isPassword is true
     return StatefulBuilder(
       builder: (context, setState) {
         return Stack(
@@ -323,7 +325,10 @@ class _SignInMobileState extends State<SignInMobile> {
               controller: controller,
               textAlign: TextAlign.right,
               cursorColor: const Color(0xFF414141),
-              obscureText: isPassword ? obscureText : false, // Apply obscureText for password
+              obscureText:
+                  isPassword
+                      ? obscureText
+                      : false, // Apply obscureText for password
               validator: validator,
               decoration: InputDecoration(
                 border: UnderlineInputBorder(
@@ -336,10 +341,14 @@ class _SignInMobileState extends State<SignInMobile> {
                   borderSide: BorderSide(color: const Color(0xFF414141)),
                 ),
                 errorBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: const Color(0xFF414141)), // Match normal border
+                  borderSide: BorderSide(
+                    color: const Color(0xFF414141),
+                  ), // Match normal border
                 ),
                 focusedErrorBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: const Color(0xFF414141)), // Match normal border
+                  borderSide: BorderSide(
+                    color: const Color(0xFF414141),
+                  ), // Match normal border
                 ),
                 errorStyle: TextStyle(
                   height: 0, // Hide error message
@@ -357,19 +366,22 @@ class _SignInMobileState extends State<SignInMobile> {
                   top: isPassword ? 16 : 12,
                   right: isPassword ? 40 : 0, // Add padding for the eye icon
                 ),
-                suffixIcon: isPassword
-                    ? IconButton(
-                  icon: Icon(
-                    obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: const Color(0xFF30578E),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      obscureText = !obscureText; // Toggle visibility
-                    });
-                  },
-                )
-                    : null,
+                suffixIcon:
+                    isPassword
+                        ? IconButton(
+                          icon: Icon(
+                            obscureText
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: const Color(0xFF30578E),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              obscureText = !obscureText; // Toggle visibility
+                            });
+                          },
+                        )
+                        : null,
               ),
               style: const TextStyle(color: Color(0xFF414141)),
             ),

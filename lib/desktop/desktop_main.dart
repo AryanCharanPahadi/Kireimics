@@ -5,10 +5,13 @@ import 'package:kireimics/desktop/contact_us/contact_us.dart';
 import 'package:kireimics/web_desktop_common/collection/collection_view.dart';
 import '../component/notification_toast/custom_toast.dart';
 import '../component/app_routes/routes.dart';
+import '../component/utilities/utility.dart';
 import '../web/about_us/about_page.dart';
+import '../web/my_account_route/my_orders/my_order_ui.dart';
 import '../web_desktop_common/add_address_ui/add_address_ui.dart';
 import '../web_desktop_common/cart/cart_panel.dart';
 import '../web_desktop_common/component/profile_dropdown.dart';
+import '../web_desktop_common/component/rotating_svg_loader.dart';
 import '../web_desktop_common/component/scrollable_header.dart';
 import '../web_desktop_common/login_signup/forget_password/forget_password_page.dart';
 import '../web_desktop_common/product_view/product_details.dart';
@@ -55,6 +58,9 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
   final ValueNotifier<bool> _showSideCartDetails = ValueNotifier(false);
   final ValueNotifier<String?> _notificationMessage = ValueNotifier(null);
   final ValueNotifier<String?> _notificationErrorMessage = ValueNotifier(null);
+  final ValueNotifier<bool> _isPaymentProcessing = ValueNotifier(
+    false,
+  );
   // Animation controller and animations
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
@@ -102,7 +108,7 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
     AppRoutes.privacyPolicy: (_) => const PrivacyPolicy(),
     // AppRoutes.collection: (_) => const Collection(),
     AppRoutes.sale: (_) => const Sale(),
-    AppRoutes.myOrder: (_) => const MyOrderUiDesktop(),
+    AppRoutes.myOrder: (_) => const MyOrderUiWeb(),
 
     '/cart': (id) => CartPanel(productId: int.tryParse(id ?? '0') ?? 0),
   };
@@ -136,6 +142,9 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
           (_) => CheckoutPageDesktop(
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
+            onPaymentProcessing: (isProcessing) {
+              _isPaymentProcessing.value = isProcessing; // Update loading state
+            },
           ),
       AppRoutes.contactUs:
           (_) => ContactUsDesktop(
@@ -235,6 +244,8 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
   @override
   void dispose() {
     // Always call super.dispose() first to ensure proper cleanup
+    _isPaymentProcessing.dispose(); // Dispose the new notifier
+
     _animationController.dispose();
     _scrollController.dispose();
     _showSideContainer.dispose();
@@ -497,8 +508,11 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
                           if (!isForgetPasswordRoute)
                             Container(
                               color: Colors.white,
-                              child: Footer(onItemSelected: _onFooterItemSelected),
-                            ),                        ],
+                              child: Footer(
+                                onItemSelected: _onFooterItemSelected,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     if (!isForgetPasswordRoute)
@@ -579,8 +593,8 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
                               child: NotificationBanner(
                                 textColor: Color(0xFF28292A),
                                 message: message,
-                                iconPath: "assets/icons/success.svg",
-                                bannerColor: const Color(0xFF268FA2),
+                                iconPath: "assets/icons/success1.svg",
+                                bannerColor: const Color(0xFF2876E4),
                                 onClose: () {
                                   _notificationMessage.value =
                                       null; // This will close the banner
@@ -609,6 +623,26 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
                               ),
                             )
                             : const SizedBox.shrink();
+                      },
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _isPaymentProcessing,
+                      builder: (context, isProcessing, _) {
+                        if (!isProcessing) return const SizedBox.shrink();
+
+                        return Stack(
+                          children: [
+                            // Blurred background
+                            const BlurredBackdrop(),
+                            // Center loader
+                            Center(
+                              child: RotatingSvgLoader(
+                                assetPath: 'assets/footer/footerbg.svg',
+                                color: Color(0xFFC0D4F0),
+                              ),
+                            ),
+                          ],
+                        );
                       },
                     ),
                     ProfileDropdown(

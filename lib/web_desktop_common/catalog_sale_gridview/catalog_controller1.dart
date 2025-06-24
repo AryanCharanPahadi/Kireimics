@@ -119,7 +119,8 @@ class CatalogPageController extends GetxController {
       (cat) => cat['id'] == catId,
       orElse: () => {'catalog_description': currentDescription.value},
     );
-    currentDescription.value = selectedCategory['catalog_description'] as String;
+    currentDescription.value =
+        selectedCategory['catalog_description'] as String;
     currentFilter.value = 'All';
     initializeStates(productList.length);
     isLoading.value = false;

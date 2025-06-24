@@ -6,8 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:kireimics/component/api_helper/api_helper.dart';
 import 'package:kireimics/component/app_routes/routes.dart';
+import '../../../component/no_result_found/no_order_yet.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
+import '../../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../../web_desktop_common/view_details_cart/view_detail/view_details_cart.dart';
 
 class MyOrderUiWeb extends StatefulWidget {
@@ -19,6 +21,7 @@ class MyOrderUiWeb extends StatefulWidget {
 
 class _MyOrderUiWebState extends State<MyOrderUiWeb> {
   List<Map<String, dynamic>> orders = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -27,6 +30,10 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
   }
 
   Future<void> getOrderData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     String? userId = await SharedPreferencesHelper.getUserId();
 
     var response = await ApiHelper.getOrderDetails(userId.toString());
@@ -38,19 +45,64 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
 
       for (var order in response['data']) {
         String createdAt = order['created_at'] ?? '';
-        String formattedDate = _formatDate(createdAt);
+        String formattedPlacedDate = _formatDate(createdAt);
+
+        String status = 'Unknown';
+        String? deliveredDateFormatted;
+
+        try {
+          var awbResponse = await ApiHelper.awbCodeDetails(
+            awbCode: order['awb_code'],
+          );
+
+          if (awbResponse != null &&
+              awbResponse['error'] == false &&
+              awbResponse['tracking_data'] != null &&
+              awbResponse['tracking_data']['tracking_data'] != null &&
+              awbResponse['tracking_data']['tracking_data']['shipment_track'] !=
+                  null &&
+              awbResponse['tracking_data']['tracking_data']['shipment_track']
+                  .isNotEmpty) {
+            final trackingInfo =
+                awbResponse['tracking_data']['tracking_data']['shipment_track'][0];
+            status = trackingInfo['current_status'] ?? 'Unknown';
+
+            if (trackingInfo['delivered_date'] != null &&
+                trackingInfo['delivered_date'].toString().isNotEmpty) {
+              deliveredDateFormatted = _formatDate(
+                trackingInfo['delivered_date'].toString(),
+              );
+            }
+          }
+        } catch (_) {}
 
         fetchedOrders.add({
           'orderNumber': order['order_id'] ?? 'Unknown',
-          'placedDate': formattedDate,
-          'deliveredDate': formattedDate, // Assuming delivery same as placed
-          'status': 'Delivered',
+          'awb_code': order['awb_code'] ?? 'Unknown',
+          'placedDate': formattedPlacedDate,
+          'deliveredDate': deliveredDateFormatted,
+          'status': status,
         });
       }
 
       setState(() {
         orders = fetchedOrders;
+        _isLoading = false;
       });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Color getStatusColor(String status) {
+    if (status.toLowerCase() == 'delivered') {
+      return Color(0xFF268FA2);
+    } else if (status.toLowerCase() == 'canceled') {
+      return Colors.red;
+    } else {
+      return const Color(0xFF414141);
     }
   }
 
@@ -69,9 +121,12 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
       width: MediaQuery.of(context).size.width,
       child: Padding(
         padding: EdgeInsets.only(
-          left: 292,
+          left: MediaQuery.of(context).size.width > 1400 ? 389 : 292,
           top: 24,
-          right: MediaQuery.of(context).size.width * 0.07,
+          right:
+              MediaQuery.of(context).size.width > 1400
+                  ? MediaQuery.of(context).size.width * 0.15
+                  : MediaQuery.of(context).size.width * 0.07,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,14 +152,34 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
             const SizedBox(height: 32),
             CralikaFont(
               text: "${orders.length} Orders",
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w600,
               fontSize: 20,
               lineHeight: 36 / 32,
               letterSpacing: 1.28,
               color: const Color(0xFF414141),
             ),
             const SizedBox(height: 24),
-            ...orders.map((order) => _buildOrderItem(order)).toList(),
+            _isLoading
+                ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(40.0),
+                    child: RotatingSvgLoader(
+                      assetPath: 'assets/footer/footerbg.svg',
+                    ),
+                  ),
+                )
+                : orders.isEmpty
+                ? Center(
+                  child: CartEmpty(
+                    cralikaText: "No Orders Yet!",
+                    barlowText:
+                        "Browse our catalog and complete your purchase. All your orders will appear here.",
+                  ),
+                )
+                : Column(
+                  children:
+                      orders.map((order) => _buildOrderItem(order)).toList(),
+                ),
           ],
         ),
       ),
@@ -157,20 +232,24 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                 children: [
                   BarlowText(
                     text:
-                        "Placed On: ${order['placedDate']} / Delivered On: ${order['deliveredDate']}",
+                        "Placed On: ${order['placedDate']}" +
+                        (order['deliveredDate'] != null
+                            ? " / Delivered On: ${order['deliveredDate']}"
+                            : ""),
                     fontWeight: FontWeight.w400,
                     fontSize: 14,
                     lineHeight: 1.4,
                     letterSpacing: 0,
                     color: const Color(0xFF636363),
                   ),
+
                   BarlowText(
                     text: order['status'],
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                     lineHeight: 1.4,
                     letterSpacing: 0,
-                    color: const Color(0xFF268FA2),
+                    color: getStatusColor(order['status']),
                   ),
                 ],
               ),
@@ -212,7 +291,12 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
                             context: context,
                             barrierColor: Colors.transparent,
                             builder: (BuildContext context) {
-                              return ViewDetailsCart();
+                              return ViewDetailsCart(
+                                orderId:
+                                    order['orderNumber']
+                                        .toString(), // passing the order ID
+                              );
+                              ;
                             },
                           );
                         },

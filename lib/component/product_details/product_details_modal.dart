@@ -10,17 +10,19 @@ class Product {
   final String thumbnail;
   final List<String> otherImages;
   final String dimensions;
-  final String length;
-  final String breadth;
-  final String height;
-  final String weight;
+  final double length;
+  final double breadth;
+  final double height;
   final String description;
+  final int? quantity;
+  final double weight;
   final String catName;
   final String catDesc;
   final String? collectionName;
   final List<OtherDetail> otherDetails;
   final int discount;
   final int isSale;
+  final int? isCollection;
   final int isMakerChoice;
 
   Product({
@@ -38,12 +40,14 @@ class Product {
     required this.height,
     required this.weight,
     required this.description,
+     this.quantity,
     required this.catName,
     this.collectionName,
     required this.otherDetails,
     required this.discount,
     required this.catDesc,
     required this.isSale,
+     this.isCollection,
     required this.isMakerChoice,
   });
 
@@ -64,10 +68,12 @@ class Product {
       height: json['height'],
       weight: json['weight'],
       description: json['description'],
+      quantity: json['quantity'],
       catName: json['category_name'],
       catDesc: json['description'],
       discount: json['discount'],
       isSale: json['is_sale'],
+      isCollection: json['is_collection'],
       isMakerChoice: json['is_make_choice'],
       otherDetails:
           (json['other_details'] != null)

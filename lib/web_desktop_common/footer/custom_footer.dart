@@ -7,6 +7,7 @@ import 'package:kireimics/mobile/component/footer/footer_controller.dart';
 
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/app_routes/routes.dart';
+import '../component/rotating_svg_loader.dart';
 
 class Footer extends StatelessWidget {
   final Function(String) onItemSelected;
@@ -121,7 +122,9 @@ class Footer extends StatelessWidget {
                         () =>
                             footerController.isLoading.value
                                 ? const Center(
-                                  child: CircularProgressIndicator(),
+                                  child:  RotatingSvgLoader(
+                                    assetPath: 'assets/footer/footerbg.svg',
+                                  )
                                 )
                                 : footerController.errorMessage.value.isNotEmpty
                                 ? Center(

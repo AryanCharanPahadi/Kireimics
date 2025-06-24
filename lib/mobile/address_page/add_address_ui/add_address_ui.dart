@@ -110,7 +110,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       customTextFormField(
-                        hintText: "FIRST NAME*",
+                        hintText: "FIRST NAME",
                         controller: controller.firstNameController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -121,10 +121,11 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                           }
                           return null;
                         },
+                        isRequired: true,
                       ),
                       SizedBox(height: 32),
                       customTextFormField(
-                        hintText: "LAST NAME*",
+                        hintText: "LAST NAME",
                         controller: controller.lastNameController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -135,11 +136,12 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                           }
                           return null;
                         },
+                        isRequired: true,
                       ),
                       SizedBox(height: 32),
 
                       customTextFormField(
-                        hintText: "EMAIL*",
+                        hintText: "EMAIL",
                         controller: controller.emailController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -152,11 +154,12 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                           }
                           return null;
                         },
+                        isRequired: true,
                       ),
                       SizedBox(height: 32),
 
                       customTextFormField(
-                        hintText: "ADDRESS LINE 1*",
+                        hintText: "ADDRESS LINE 1",
                         controller: controller.addressLine1Controller,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -165,6 +168,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
 
                           return null;
                         },
+                        isRequired: true,
                       ),
                       SizedBox(height: 32),
 
@@ -178,7 +182,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                         children: [
                           Expanded(
                             child: customTextFormField(
-                              hintText: "ZIP*",
+                              hintText: "ZIP",
                               controller: controller.zipController,
                               onChanged: (value) {
                                 if (value.length == 6) {
@@ -195,6 +199,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
 
                                 return null;
                               },
+                              isRequired: true,
                             ),
                           ),
                           SizedBox(width: 32), // spacing between fields
@@ -204,7 +209,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                                 hintText:
                                     controller.isPincodeLoading.value
                                         ? "Loading..."
-                                        : "STATE*",
+                                        : "STATE",
                                 controller: controller.stateController,
                                 enabled: !controller.isPincodeLoading.value,
                                 validator: (value) {
@@ -213,6 +218,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                                   }
                                   return null;
                                 },
+                                isRequired: true,
                               ),
                             ),
                           ),
@@ -224,7 +230,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                         hintText:
                             controller.isPincodeLoading.value
                                 ? "Loading..."
-                                : "CITY*",
+                                : "CITY",
                         controller: controller.cityController,
                         enabled: !controller.isPincodeLoading.value,
                         validator: (value) {
@@ -233,10 +239,11 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                           }
                           return null;
                         },
+                        isRequired: true,
                       ),
-                      SizedBox(width: 32), // spacing between fields
+                      SizedBox(height: 32), // spacing between fields
                       customTextFormField(
-                        hintText: "PHONE*",
+                        hintText: "PHONE",
                         controller: controller.phoneController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -253,6 +260,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
 
                           return null;
                         },
+                        isRequired: true,
                       ),
                       SizedBox(height: 24),
                       Row(
@@ -355,6 +363,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
 
     Function(String)? onChanged,
     String? Function(String?)? validator, // Add validator parameter
+    bool isRequired = false,
   }) {
     return Stack(
       children: [
@@ -362,12 +371,27 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
         Positioned(
           left: 0,
           top: 16, // Adjust this value to align vertically
-          child: Text(
-            hintText,
-            style: GoogleFonts.barlow(
-              fontWeight: FontWeight.w400,
-              fontSize: 14,
-              color: const Color(0xFF414141),
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: hintText,
+                  style: GoogleFonts.barlow(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 14,
+                    color: Color(0xFF414141),
+                  ),
+                ),
+                if (isRequired)
+                  TextSpan(
+                    text: ' *',
+                    style: GoogleFonts.barlow(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 14,
+                      color: Colors.red,
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

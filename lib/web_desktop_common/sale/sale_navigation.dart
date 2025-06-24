@@ -5,43 +5,45 @@ import 'package:kireimics/component/text_fonts/custom_text.dart';
 import 'package:kireimics/web_desktop_common/sale/sale_categories_controller.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/categories/categories_controller.dart';
+import '../component/rotating_svg_loader.dart';
 
 class SaleNavigation extends StatelessWidget {
-  final int selectedCategoryId;
-  final Function(int, String, String) onCategorySelected;
-  final Function() fetchAllProducts;
-  final BuildContext context;
+  final int? selectedCategoryId;
+  final Function(int, String, String)? onCategorySelected;
+  final Function()? fetchAllProducts;
+  final BuildContext? context;
   final double fontSize; // Font size parameter
   final FontWeight fontWeight; // Font weight parameter
 
   const SaleNavigation({
     super.key,
-    required this.selectedCategoryId,
-    required this.onCategorySelected,
-    required this.fetchAllProducts,
-    required this.context,
-    this.fontSize = 16, // Default font size if not provided
-    this.fontWeight = FontWeight.w600, // Default font weight if not provided
+    this.selectedCategoryId,
+    this.onCategorySelected,
+    this.fetchAllProducts,
+    this.context,
+    this.fontSize = 16,
+    this.fontWeight = FontWeight.w600,
   });
 
   @override
   Widget build(BuildContext context) {
-    final SaleCategoriesController saleCategoriesController = Get.put(
+    // Use the provided context or fall back to the build context
+    final effectiveContext = this.context ?? context;
+    final SaleCategoriesController categoriesController = Get.put(
       SaleCategoriesController(),
     );
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(effectiveContext).size.width;
     final isSmallScreen = screenWidth < 800;
 
     return Obx(() {
-      if (saleCategoriesController.isLoading.value) {
-        return const CircularProgressIndicator();
+      if (categoriesController.isLoading.value) {
+        return const RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg');
       }
 
-      // Check if the current route is the checkout route
       final currentRoute =
           GoRouter.of(context).routeInformationProvider.value.uri.toString();
       final children =
-          saleCategoriesController.categories
+          categoriesController.categories
               .where((category) {
                 if (currentRoute.contains(AppRoutes.sale) &&
                     (category['name']?.toString().toLowerCase() ==
@@ -57,7 +59,7 @@ class SaleNavigation extends StatelessWidget {
 
                 return GestureDetector(
                   onTap: () {
-                    onCategorySelected(id, name, desc);
+                    onCategorySelected!(id, name, desc);
                   },
                   child: BarlowText(
                     text: name,

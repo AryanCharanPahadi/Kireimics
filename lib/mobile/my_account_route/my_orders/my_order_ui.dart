@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
+import 'package:intl/intl.dart';
 import 'package:kireimics/component/app_routes/routes.dart';
 import 'package:kireimics/mobile/view_details/view_details_ui.dart';
+import '../../../component/api_helper/api_helper.dart';
+import '../../../component/no_result_found/no_order_yet.dart';
+import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
+import '../../../web_desktop_common/component/rotating_svg_loader.dart';
 
 class MyOrderUiMobile extends StatefulWidget {
   const MyOrderUiMobile({super.key});
@@ -15,21 +20,98 @@ class MyOrderUiMobile extends StatefulWidget {
 }
 
 class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
-  // Sample JSON data for addresses
-  final List<Map<String, dynamic>> orders = [
-    {
-      "orderNumber": "382083",
-      "placedDate": "Sun, 16 Mar 2025",
-      "deliveredDate": "Sun, 16 Mar 2025",
-      "status": "Delivered",
-    },
-    {
-      "orderNumber": "382084",
-      "placedDate": "Mon, 17 Mar 2025",
-      "deliveredDate": "Tue, 18 Mar 2025",
-      "status": "Delivered",
-    },
-  ];
+  List<Map<String, dynamic>> orders = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    getOrderData();
+  }
+
+  Future<void> getOrderData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    String? userId = await SharedPreferencesHelper.getUserId();
+
+    var response = await ApiHelper.getOrderDetails(userId.toString());
+
+    if (response != null &&
+        response['error'] == false &&
+        response['data'] != null) {
+      List<Map<String, dynamic>> fetchedOrders = [];
+
+      for (var order in response['data']) {
+        String createdAt = order['created_at'] ?? '';
+        String formattedPlacedDate = _formatDate(createdAt);
+
+        String status = 'Unknown';
+        String? deliveredDateFormatted;
+
+        try {
+          var awbResponse = await ApiHelper.awbCodeDetails(
+            awbCode: order['awb_code'],
+          );
+
+          if (awbResponse != null &&
+              awbResponse['error'] == false &&
+              awbResponse['tracking_data'] != null &&
+              awbResponse['tracking_data']['tracking_data'] != null &&
+              awbResponse['tracking_data']['tracking_data']['shipment_track'] !=
+                  null &&
+              awbResponse['tracking_data']['tracking_data']['shipment_track']
+                  .isNotEmpty) {
+            final trackingInfo =
+            awbResponse['tracking_data']['tracking_data']['shipment_track'][0];
+            status = trackingInfo['current_status'] ?? 'Unknown';
+
+            if (trackingInfo['delivered_date'] != null &&
+                trackingInfo['delivered_date'].toString().isNotEmpty) {
+              deliveredDateFormatted = _formatDate(
+                trackingInfo['delivered_date'].toString(),
+              );
+            }
+          }
+        } catch (_) {}
+
+        fetchedOrders.add({
+          'orderNumber': order['order_id'] ?? 'Unknown',
+          'awb_code': order['awb_code'] ?? 'Unknown',
+          'placedDate': formattedPlacedDate,
+          'deliveredDate': deliveredDateFormatted,
+          'status': status,
+        });
+      }
+
+      setState(() {
+        orders = fetchedOrders;
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+  Color getStatusColor(String status) {
+    if (status.toLowerCase() == 'delivered') {
+      return Colors.green;
+    } else if (status.toLowerCase() == 'canceled') {
+      return Colors.red;
+    } else {
+      return const Color(0xFF414141);
+    }
+  }
+  String _formatDate(String dateString) {
+    try {
+      final dateTime = DateTime.parse(dateString);
+      return DateFormat('E, dd MMM yyyy').format(dateTime);
+    } catch (e) {
+      return dateString;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +194,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
             ),
           ),
           // Right Side
+          // Right Side
           SizedBox(height: 44),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22),
@@ -119,7 +202,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Dynamic list of address containers
+                // Dynamic list of order containers
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,12 +217,27 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Orders list
-                    Column(
+                    // Orders list with empty state handling
+                    _isLoading
+                        ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: RotatingSvgLoader(
+                          assetPath: 'assets/footer/footerbg.svg',
+                        ),
+                      ),
+                    )
+                        : orders.isEmpty
+                        ? Center(
+                      child: CartEmpty(
+                        cralikaText: "No Orders Yet!",
+                        barlowText:
+                        "Browse our catalog and complete your purchase. All your orders will appear here.",
+                      ),
+                    )
+                        : Column(
                       children:
-                          orders
-                              .map((order) => _buildOrderItem(order))
-                              .toList(),
+                      orders.map((order) => _buildOrderItem(order)).toList(),
                     ),
                   ],
                 ),
@@ -182,7 +280,10 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                   Expanded(
                     child: BarlowText(
                       text:
-                          "Placed On: ${order['placedDate']} / Delivered On: ${order['deliveredDate']}",
+                      "Placed On: ${order['placedDate']}" +
+                          (order['deliveredDate'] != null
+                              ? " / Delivered On: ${order['deliveredDate']}"
+                              : ""),
                       fontWeight: FontWeight.w400,
                       fontSize: 14,
                       lineHeight: 1.4,
@@ -194,11 +295,11 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                   Flexible(
                     child: BarlowText(
                       text: order['status'],
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w600,
                       fontSize: 14,
                       lineHeight: 1.4,
                       letterSpacing: 0,
-                      color: const Color(0xFF268FA2),
+                      color: getStatusColor(order['status']),
                       // Optional: Add maxLines if you want to restrict height
                       // maxLines: 2,
                       // overflow: TextOverflow.ellipsis,
@@ -232,7 +333,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       BarlowText(
-                        text: "Order# ${order['orderNumber']}",
+                        text: "${order['orderNumber']}",
                         fontWeight: FontWeight.w400,
                         fontSize: 16,
                         lineHeight: 1.0,
@@ -242,7 +343,9 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                       const SizedBox(height: 10),
                       GestureDetector(
                         onTap: () {
-                       context.go(AppRoutes.viewDetails);
+                          context.go(
+                            '${AppRoutes.viewDetails}?orderId=${order['orderNumber']}',
+                          );
                         },
                         child: BarlowText(
                           text: "VIEW DETAILS",

@@ -4,11 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/no_result_found/no_order_yet.dart';
 import '../../../component/api_helper/api_helper.dart';
+import '../../../component/cart_length/cart_loader.dart';
 import '../../../component/no_result_found/no_result_found.dart';
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../component/product_details/product_details_modal.dart';
 import '../../../component/app_routes/routes.dart' show AppRoutes;
 import '../../../component/shared_preferences/shared_preferences.dart';
+import '../../../web_desktop_common/component/rotating_svg_loader.dart';
+import '../../../web_desktop_common/notify_me/notify_me.dart';
 
 class WishlistUiMobile extends StatefulWidget {
   final Function(String)? onWishlistChanged; // Updated callback
@@ -116,7 +119,9 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF30578E)));
+      return Center(
+        child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+      );
     }
 
     if (errorMessage.isNotEmpty) {
@@ -231,9 +236,11 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
                                 crossAxisSpacing: 24,
-                                mainAxisSpacing: 24, // Increased vertical spacing
+                                mainAxisSpacing:
+                                    24, // Increased vertical spacing
                                 childAspectRatio: () {
-                                  double width = MediaQuery.of(context).size.width;
+                                  double width =
+                                      MediaQuery.of(context).size.width;
                                   if (width > 320 && width <= 410) {
                                     return 0.48;
                                   } else if (width > 410 && width <= 500) {
@@ -404,218 +411,135 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                 return Row(
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
-                                                    Builder(
-                                                      builder: (context) {
-                                                        final List<Widget>
-                                                        badges = [];
-
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        // First badge (maker_choice)
                                                         if (product
                                                                 .isMakerChoice ==
-                                                            1) {
-                                                          badges.add(
-                                                            SvgPicture.asset(
+                                                            1)
+                                                          Padding(
+                                                            padding:
+                                                                const EdgeInsets.only(
+                                                                  top: 2,
+                                                                ), // manual top offset to align
+                                                            child: SvgPicture.asset(
                                                               "assets/home_page/maker_choice.svg",
-                                                              height:
-                                                                  isMobile
-                                                                      ? 40
-                                                                      : 32,
+                                                              height: 40,
+                                                              fit:
+                                                                  BoxFit
+                                                                      .contain,
+                                                              alignment:
+                                                                  Alignment
+                                                                      .topCenter,
                                                             ),
-                                                          );
-                                                        }
-
-                                                        if (quantity != null &&
-                                                            quantity < 2) {
-                                                          if (badges.isNotEmpty)
-                                                            badges.add(
-                                                              SizedBox(
-                                                                height: 10,
-                                                              ),
-                                                            );
-                                                          badges.add(
-                                                            ElevatedButton(
-                                                              onPressed:
-                                                                  () {}, // Replace with your logic
+                                                          ),
+                                                        if (product.isMakerChoice ==
+                                                                1 &&
+                                                            product.discount !=
+                                                                0)
+                                                          const SizedBox(
+                                                            height: 5,
+                                                          ), // <-- This adds the 5px gap between badges
+                                                        if (product.discount !=
+                                                            0)
+                                                          Container(
+                                                            margin:
+                                                                const EdgeInsets.only(
+                                                                  top: 2,
+                                                                ),
+                                                            height: 32,
+                                                            width: 80,
+                                                            child: ElevatedButton(
+                                                              onPressed: () {},
                                                               style: ElevatedButton.styleFrom(
                                                                 backgroundColor:
-                                                                Colors
-                                                                    .white,
-                                                                foregroundColor:
-                                                                const Color(
-                                                                  0xFFF46856,
-                                                                ),
-                                                                minimumSize:
-                                                                const Size(
-                                                                  110,
-                                                                  32,
-                                                                ),
-                                                                maximumSize:
-                                                                const Size(
-                                                                  110,
-                                                                  32,
-                                                                ),
-                                                                padding:
-                                                                const EdgeInsets.fromLTRB(
-                                                                  14,
-                                                                  7,
-                                                                  14,
-                                                                  7,
-                                                                ),
-                                                                elevation: 0,
-                                                                shape: RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    79,
-                                                                  ),
-                                                                  side: const BorderSide(
-                                                                    color: Color(
+                                                                    const Color(
                                                                       0xFFF46856,
                                                                     ),
-                                                                    width: 1,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              child: Text(
-                                                                "Few Pieces Left",
-                                                                style: TextStyle(
-                                                                  fontFamily:
-                                                                  GoogleFonts.barlow()
-                                                                      .fontFamily,
-                                                                  fontSize:
-                                                                  10,
-                                                                  fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  color: const Color(
-                                                                    0xFFF46856,
-                                                                  ),
-                                                                  letterSpacing:
-                                                                  0.48,
-                                                                ),
-                                                                textAlign:
-                                                                TextAlign
-                                                                    .center,
-                                                              ),
-                                                            ),
-
-                                                          );
-                                                        }
-
-                                                        if (product.discount !=
-                                                            0) {
-                                                          if (badges.isNotEmpty)
-                                                            badges.add(
-                                                              SizedBox(
-                                                                height: 10,
-                                                              ),
-                                                            );
-                                                          badges.add(
-                                                            ElevatedButton(
-                                                              onPressed:
-                                                                  () {}, // Replace with your logic
-                                                              style: ElevatedButton.styleFrom(
-                                                                backgroundColor:
-                                                                Color(
-                                                                  0xFFF46856,
-                                                                ),
                                                                 foregroundColor:
-                                                                const Color(
-                                                                  0xFFF46856,
-                                                                ),
-                                                                minimumSize:
-                                                                const Size(
-                                                                  110,
-                                                                  32,
-                                                                ),
-                                                                maximumSize:
-                                                                const Size(
-                                                                  110,
-                                                                  32,
-                                                                ),
+                                                                    Colors
+                                                                        .white,
                                                                 padding:
-                                                                const EdgeInsets.fromLTRB(
-                                                                  14,
-                                                                  7,
-                                                                  14,
-                                                                  7,
-                                                                ),
+                                                                    EdgeInsets
+                                                                        .zero,
                                                                 elevation: 0,
                                                                 shape: RoundedRectangleBorder(
                                                                   borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    79,
-                                                                  ),
+                                                                      BorderRadius.circular(
+                                                                        79,
+                                                                      ),
                                                                 ),
                                                               ),
                                                               child: Text(
                                                                 "${product.discount}% OFF",
                                                                 style: TextStyle(
                                                                   fontFamily:
-                                                                  GoogleFonts.barlow()
-                                                                      .fontFamily,
-                                                                  fontSize:
-                                                                  10,
+                                                                      GoogleFonts.barlow()
+                                                                          .fontFamily,
+                                                                  fontSize: 10,
                                                                   fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  color:
-                                                                  Colors
-                                                                      .white,
+                                                                      FontWeight
+                                                                          .w600,
                                                                   letterSpacing:
-                                                                  0.48,
+                                                                      0.65,
                                                                 ),
-                                                                textAlign:
-                                                                TextAlign
-                                                                    .center,
                                                               ),
                                                             ),
-                                                          );
-                                                        }
-
-                                                        return Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: badges,
-                                                        );
-                                                      },
-                                                    ),
-                                                    Spacer(),
-                                                    FutureBuilder<bool>(
-                                                      future:
-                                                          SharedPreferencesHelper.isInWishlist(
-                                                            product.id
-                                                                .toString(),
                                                           ),
-                                                      builder: (
-                                                        context,
-                                                        snapshot,
-                                                      ) {
-                                                        final isInWishlist =
-                                                            snapshot.data ??
-                                                            false;
-                                                        return GestureDetector(
-                                                          onTap: () {
-                                                            toggleWishlist(
+                                                      ],
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                            top: 5,
+                                                          ),
+                                                      child: FutureBuilder<
+                                                        bool
+                                                      >(
+                                                        future:
+                                                            SharedPreferencesHelper.isInWishlist(
                                                               product.id
                                                                   .toString(),
-                                                            );
-                                                          },
-                                                          child: SvgPicture.asset(
-                                                            isInWishlist
-                                                                ? 'assets/home_page/IconWishlist.svg'
-                                                                : 'assets/home_page/IconWishlistEmpty.svg',
-                                                            width:
-                                                                isMobile
-                                                                    ? 20
-                                                                    : 24,
-                                                            height:
-                                                                isMobile
-                                                                    ? 18
-                                                                    : 20,
-                                                          ),
-                                                        );
-                                                      },
+                                                            ),
+                                                        builder: (
+                                                          context,
+                                                          snapshot,
+                                                        ) {
+                                                          final isInWishlist =
+                                                              snapshot.data ??
+                                                              false;
+                                                          return GestureDetector(
+                                                            onTap: () {
+                                                              toggleWishlist(
+                                                                product.id
+                                                                    .toString(),
+                                                              );
+                                                            },
+                                                            child: SvgPicture.asset(
+                                                              isInWishlist
+                                                                  ? 'assets/home_page/IconWishlist.svg'
+                                                                  : 'assets/home_page/IconWishlistEmpty.svg',
+                                                              width:
+                                                                  isMobile
+                                                                      ? 20
+                                                                      : 24,
+                                                              height:
+                                                                  isMobile
+                                                                      ? 18
+                                                                      : 20,
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
                                                     ),
                                                   ],
                                                 );
@@ -638,13 +562,13 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                             lineHeight: 1.2,
                                             letterSpacing: 0.64,
                                             color: Color(0xFF30578E),
-                                            maxLines: 1,
+                                            maxLines: 2,
                                           ),
                                           const SizedBox(height: 8),
                                           if (!isOutOfStock) ...[
                                             Row(
                                               crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.start,
 
                                               children: [
                                                 // Original price with strikethrough
@@ -655,32 +579,37 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                       color: Color(
                                                         0xFF30578E,
                                                       ).withOpacity(0.7),
-                                                      fontWeight: FontWeight.w400,
+                                                      fontWeight:
+                                                          FontWeight.w400,
                                                       fontSize: 14,
                                                       height: 1.2,
                                                       decoration:
-                                                      TextDecoration.lineThrough,
+                                                          TextDecoration
+                                                              .lineThrough,
                                                       decorationColor: Color(
                                                         0xFF30578E,
                                                       ).withOpacity(0.7),
                                                       fontFamily:
-                                                      GoogleFonts.barlow()
-                                                          .fontFamily,
+                                                          GoogleFonts.barlow()
+                                                              .fontFamily,
                                                     ),
                                                   ),
 
                                                 // Vertical divider
-                                                SizedBox(width: 6),
+                                                if (product.discount != 0)
+                                                  SizedBox(width: 6),
                                                 // Discounted price
                                                 BarlowText(
                                                   text:
-                                                  product.discount != 0
-                                                      ? "Rs. ${(product.price * (1 - product.discount / 100)).toStringAsFixed(2)}"
-                                                      : "Rs. ${product.price.toStringAsFixed(2)}",
+                                                      product.discount != 0
+                                                          ? "Rs. ${(product.price * (1 - product.discount / 100)).toStringAsFixed(2)}"
+                                                          : "Rs. ${product.price.toStringAsFixed(2)}",
                                                   fontWeight: FontWeight.w400,
                                                   fontSize: 14,
                                                   lineHeight: 1.2,
-                                                  color: const Color(0xFF30578E),
+                                                  color: const Color(
+                                                    0xFF30578E,
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -689,61 +618,55 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                           if (isOutOfStock) ...[
                                             BarlowText(
                                               text:
-                                              "Rs. ${product.price.toStringAsFixed(2)}",
+                                                  "Rs. ${product.price.toStringAsFixed(2)}",
                                               fontWeight: FontWeight.w400,
                                               fontSize: 14,
                                               lineHeight: 1.2,
                                               color: const Color(0xFF30578E),
                                             ),
-                                          ],                                          const SizedBox(height: 8),
+                                          ],
+                                          const SizedBox(height: 8),
                                           GestureDetector(
                                             onTap:
                                                 isOutOfStock
-                                                    ? () async {
-                                                      bool isLoggedIn =
-                                                          await _isLoggedIn();
-
-                                                      if (isLoggedIn) {
-                                                        widget.onWishlistChanged
-                                                            ?.call(
-                                                              "We'll notify you when this product is back in stock.",
-                                                            );
-                                                      } else {
-                                                        context.go(
-                                                          AppRoutes.logIn,
-                                                        );
-                                                      }
-                                                    }
-                                                    : () {
-                                                  widget.onWishlistChanged
-                                                      ?.call(
-                                                    'Product Added To Cart',
-                                                  );
-                                                  Future.delayed(
-                                                    Duration(
-                                                      seconds: 2,
-                                                    ),
-                                                        () {
-                                                      context.go(
-                                                        AppRoutes.cartDetails(
-                                                          product.id,
-                                                        ),
+                                                    ? null
+                                                    : () async {
+                                                      widget.onWishlistChanged
+                                                          ?.call(
+                                                            'Product Added To Cart',
+                                                          );
+                                                      await SharedPreferencesHelper.addProductId(
+                                                        product.id,
                                                       );
+                                                      cartNotifier.refresh();
                                                     },
-                                                  );
-                                                },
-                                            child: Text(
-                                              isOutOfStock
-                                                  ? "NOTIFY ME"
-                                                  : "ADD TO CART",
-                                              style: GoogleFonts.barlow(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
-                                                height: 1.2,
-                                                letterSpacing: 0.56,
-                                                color: const Color(0xFF30578E),
-                                              ),
-                                            ),
+                                            child:
+                                                isOutOfStock
+                                                    ? NotifyMeButton(
+                                                      productId: product.id,
+                                                      onWishlistChanged:
+                                                          widget
+                                                              .onWishlistChanged,
+                                                      onErrorWishlistChanged: (
+                                                        error,
+                                                      ) {
+                                                        widget.onWishlistChanged
+                                                            ?.call(error);
+                                                      },
+                                                    )
+                                                    : Text(
+                                                      "ADD TO CART",
+                                                      style: GoogleFonts.barlow(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 14,
+                                                        height: 1.2,
+                                                        letterSpacing: 0.56,
+                                                        color: const Color(
+                                                          0xFF30578E,
+                                                        ),
+                                                      ),
+                                                    ),
                                           ),
                                         ],
                                       ),

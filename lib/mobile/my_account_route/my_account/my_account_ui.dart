@@ -38,29 +38,6 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
     AddAddressController(),
   );
 
-  void _showDeleteConfirmationBanner(String addressId, Offset tapPosition) {
-    setState(() {
-      _addressIdToDelete = addressId;
-      _tapPosition = tapPosition; // Store tap position
-      _showDeleteConfirmation = true;
-    });
-  }
-
-  void _hideDeleteConfirmationBanner() {
-    setState(() {
-      _addressIdToDelete = null;
-      _tapPosition = null; // Clear tap position
-      _showDeleteConfirmation = false;
-    });
-  }
-
-  void _confirmDelete() {
-    if (_addressIdToDelete != null) {
-      addAddressController.deleteAddress(_addressIdToDelete!);
-      _hideDeleteConfirmationBanner();
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -255,7 +232,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                       children: [
                         CralikaFont(
                           text: "My Details",
-                          fontWeight: FontWeight.w400,
+                          fontWeight: FontWeight.w600,
                           fontSize: 20,
                           lineHeight: 27 / 20,
                           letterSpacing: 0.04 * 20,
@@ -341,7 +318,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                       children: [
                         CralikaFont(
                           text: "My Addresses",
-                          fontWeight: FontWeight.w400,
+                          fontWeight: FontWeight.w600,
                           fontSize: 20,
                           lineHeight: 27 / 20,
                           letterSpacing: 0.04 * 20,
@@ -591,25 +568,6 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
             ],
           ),
         ),
-        if (_showDeleteConfirmation && _tapPosition != null)
-          Positioned(
-            top: _tapPosition!.dy, // Use tap position Y
-            left:
-                _tapPosition!.dx -
-                150, // Adjust X to center banner (assuming banner width ~300)
-            child: NotificationBanner(
-              message: "Are you sure you want to delete this address?",
-              iconPath: "assets/icons/i_icons.svg",
-              bannerColor: const Color(0xFF2876E4),
-              textColor: Colors.black,
-              confirmation: true,
-              yesText: "Yes",
-              noText: "No",
-              onYes: _confirmDelete,
-              onNo: _hideDeleteConfirmationBanner,
-              onClose: _hideDeleteConfirmationBanner,
-            ),
-          ),
       ],
     );
   }

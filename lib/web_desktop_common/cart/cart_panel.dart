@@ -8,12 +8,14 @@ import 'package:go_router/go_router.dart';
 import 'package:kireimics/component/no_result_found/no_order_yet.dart';
 
 import '../../component/api_helper/api_helper.dart';
+import '../../component/cart_length/cart_loader.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/utilities/utility.dart';
 import '../../web/checkout/checkout_controller.dart';
+import '../component/rotating_svg_loader.dart';
 
 class CartPanel extends StatefulWidget {
   final int? productId;
@@ -50,6 +52,28 @@ class _CartPanelState extends State<CartPanel> {
   void initState() {
     super.initState();
     initCart();
+    preloadCheckoutData(); // New method to preload data
+  }
+
+  Future<void> preloadCheckoutData() async {
+    try {
+      await checkoutController.loadAddressData();
+      String? savedPincode = checkoutController.zipController.text.trim();
+      if (savedPincode != null && savedPincode.isNotEmpty) {
+        await checkoutController.fetchPincodeData(savedPincode);
+      }
+    } catch (e) {
+      print('Error preloading checkout data: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    // Dispose all ValueNotifier instances to prevent memory leaks
+    for (var quantity in quantityList) {
+      quantity.dispose();
+    }
+    super.dispose();
   }
 
   final CheckoutController checkoutController = Get.put(CheckoutController());
@@ -118,7 +142,9 @@ class _CartPanelState extends State<CartPanel> {
     final isLargeScreen = screenWidth > 1400;
 
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF30578E)));
+      return Center(
+        child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+      );
     }
 
     if (errorMessage.isNotEmpty) {
@@ -334,6 +360,7 @@ class _CartPanelState extends State<CartPanel> {
                                                     index,
                                                   );
                                                 });
+                                                await cartNotifier.refresh();
                                               },
                                               child: BarlowText(
                                                 text: "REMOVE",
@@ -405,7 +432,6 @@ class _CartPanelState extends State<CartPanel> {
                                       router.routeInformationProvider.value.uri
                                           .toString();
 
-                                  // Calculate subtotal and prepare data for URL
                                   final subtotal = calculateTotal();
                                   final productIds = productList
                                       .map((product) => product.id.toString())
@@ -449,7 +475,7 @@ class _CartPanelState extends State<CartPanel> {
                                       .join(',');
                                   final heights = productList
                                       .map(
-                                        (product) => product.length.toString(),
+                                        (product) => product.height.toString(),
                                       )
                                       .join(',');
                                   final breadths = productList
@@ -463,7 +489,7 @@ class _CartPanelState extends State<CartPanel> {
                                       )
                                       .join(',');
 
-                                  // Update checkout controller with product details
+                                  // Update checkout controller
                                   checkoutController
                                       .productIds
                                       .value = productIds.split(',');
@@ -479,26 +505,6 @@ class _CartPanelState extends State<CartPanel> {
                                   checkoutController.lengths.value = lengths
                                       .split(',');
 
-                                  // Try to get the user's saved pincode if available
-                                  String? savedPincode;
-                                  try {
-                                    await checkoutController.loadAddressData();
-                                    savedPincode =
-                                        checkoutController.zipController.text
-                                            .trim();
-                                  } catch (e) {
-                                    print('Error loading address data: $e');
-                                  }
-
-                                  // If we have a saved pincode, fetch shipping data
-                                  if (savedPincode != null &&
-                                      savedPincode.isNotEmpty) {
-                                    await checkoutController.fetchPincodeData(
-                                      savedPincode,
-                                    );
-                                  }
-
-                                  // Construct the new checkout route with updated parameters
                                   final newCheckoutRoute =
                                       '${AppRoutes.checkOut}?subtotal=${subtotal.toStringAsFixed(2)}'
                                       '&productIds=$productIds'
@@ -513,12 +519,13 @@ class _CartPanelState extends State<CartPanel> {
                                   if (currentRoute.contains(
                                     AppRoutes.checkOut,
                                   )) {
-                                    // If already on checkout route, replace the current route with updated parameters
+                                    await checkoutController.loadUserData();
+                                    await checkoutController.loadAddressData();
+                                    await checkoutController.getShippingTax();
                                     router.replace(newCheckoutRoute);
-                                    // Close the cart modal
+
                                     Navigator.of(context).pop();
                                   } else {
-                                    // Navigate to checkout route if not already there
                                     context.go(newCheckoutRoute);
                                   }
                                 },

@@ -1,47 +1,191 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kireimics/component/text_fonts/custom_text.dart';
 import 'package:kireimics/web_desktop_common/sale/sale_gridview_compoennt.dart';
-import 'package:kireimics/component/no_result_found/no_product_yet.dart';
+import 'package:kireimics/web_desktop_common/sale/sale_modal.dart';
 import 'package:kireimics/web_desktop_common/sale/sale_navigation.dart';
 import '../../component/no_result_found/no_order_yet.dart';
-import '../catalog_sale_gridview/catalog_sale_navigation.dart';
-import '../collection/collection.dart';
-import 'sale_controller.dart';
+import '../../component/api_helper/api_helper.dart';
+import '../component/rotating_svg_loader.dart';
 
-class Sale extends StatelessWidget {
+class Sale extends StatefulWidget {
   final Function(String)? onWishlistChanged;
+
   const Sale({super.key, this.onWishlistChanged});
 
   @override
+  _SaleState createState() => _SaleState();
+}
+
+class _SaleState extends State<Sale> {
+  String? _selectedFilter = 'All'; // Initialize with 'All' by default
+  String _selectedDescription =
+      '/ Browse our collection of handcrafted pottery, where each one-of-a-kind piece adds charm to your home while serving a purpose you\'ll appreciate every day /';
+  int _selectedCategoryId = 1; // Default to "All" category ID
+  String _selectedCategoryName = 'All'; // Track category name
+  List<SaleModal> _productsSale = []; // Store fetched products
+  List<SaleModal> _originalProductsSale = []; // Store original product list
+  bool _isLoading = false; // Track loading state
+  List<bool> _isHoveredList = []; // Track hover state for grid items
+  bool _showSortOptions = false; // Track if sort options are visible
+  bool _showFilterOptions = false; // Track if filter options are visible
+  final _sortFilterKey = GlobalKey(); // Key for sort/filter widgets
+
+  @override
+  void initState() {
+    super.initState();
+    _handleInitialCategory();
+  }
+
+  // Handle clicks outside the sort/filter options
+  void _handleOutsideClick(PointerDownEvent event) {
+    final renderBox =
+        _sortFilterKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final offset = renderBox.localToGlobal(Offset.zero);
+      final size = renderBox.size;
+      final Rect widgetRect = Rect.fromLTWH(
+        offset.dx,
+        offset.dy,
+        size.width,
+        size.height,
+      );
+
+      if (!widgetRect.contains(event.position)) {
+        setState(() {
+          _showSortOptions = false;
+          _showFilterOptions = false;
+        });
+      }
+    }
+  }
+
+  void _handleInitialCategory() {
+    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
+    final uri = Uri.parse(route.uri.toString());
+    final catId = uri.queryParameters['cat_id'];
+
+    if (catId != null && catId.isNotEmpty) {
+      final categoryId = int.tryParse(catId);
+      if (categoryId != null) {
+        setState(() {
+          _selectedCategoryId = categoryId;
+        });
+        _fetchProductsByCategory(categoryId);
+        return;
+      }
+    }
+    // Default to "All" if no category specified
+    _fetchProductsForAllCategory();
+  }
+
+  Future<void> _fetchProductsForAllCategory() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final allProducts = await ApiHelper.fetchProductsSale();
+      setState(() {
+        _productsSale = allProducts;
+        _originalProductsSale = List.from(
+          allProducts,
+        ); // Store filtered list as original
+        _isHoveredList = List<bool>.filled(allProducts.length, false);
+        _isLoading = false;
+        _selectedFilter = null; // Reset filter
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to load products: $e')));
+    }
+  }
+
+  Future<void> _fetchProductsByCategory(int catId) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final allProducts = await ApiHelper.fetchProductByCatIdSale(catId);
+      setState(() {
+        _productsSale = allProducts;
+        _originalProductsSale = List.from(
+          allProducts,
+        ); // Store filtered list as original
+        _isHoveredList = List<bool>.filled(allProducts.length, false);
+        _isLoading = false;
+        _selectedFilter = null; // Reset filter
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to load products: $e')));
+    }
+  }
+
+  void _onHoverChanged(int index, bool isHovered) {
+    setState(() {
+      _isHoveredList[index] = isHovered;
+    });
+  }
+
+  void onCategorySelected(int id, String name, String desc) {
+    setState(() {
+      _selectedDescription = desc;
+      _selectedCategoryId = id;
+      _selectedCategoryName = name;
+      _showSortOptions = false;
+      _showFilterOptions = false;
+      _selectedFilter = null; // Reset filter when category changes
+    });
+
+    if (name.toLowerCase() == 'all') {
+      _fetchProductsForAllCategory();
+    } else {
+      _fetchProductsByCategory(id);
+    }
+  }
+
+  void _toggleSortOptions() {
+    setState(() {
+      _showSortOptions = !_showSortOptions;
+      if (_showSortOptions) _showFilterOptions = false;
+    });
+  }
+
+  void _toggleFilterOptions() {
+    setState(() {
+      _showFilterOptions = !_showFilterOptions;
+      if (_showFilterOptions) _showSortOptions = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final SaleController saleController = Get.put(SaleController());
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1400;
 
-    return Obx(() {
-      if (saleController.filteredProductList.isNotEmpty &&
-          !saleController.isCollectionView.value) {
-        saleController.initializeStates(
-          saleController.filteredProductList.length,
-        );
-      } else if (saleController.isCollectionView.value &&
-          saleController.collectionList.isNotEmpty) {
-        saleController.initializeStates(saleController.collectionList.length);
-      }
-
-      return Expanded(
-        child: Stack(
-          children: [
-            Column(
+    return Expanded(
+      child: Stack(
+        children: [
+          Listener(
+            onPointerDown: _handleOutsideClick,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                // Category Description
+                SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: Padding(
                     padding: EdgeInsets.only(
                       left: isLargeScreen ? 545 : 453,
-                      right: isLargeScreen ? 172 : 0, // Updated line
+                      right: isLargeScreen ? 172 : 0,
                     ),
                     child: Container(
                       decoration: BoxDecoration(
@@ -51,45 +195,52 @@ class Sale extends StatelessWidget {
                           ),
                           fit: BoxFit.cover,
                           colorFilter: ColorFilter.mode(
-                            const Color(0xFFf36250).withOpacity(0.9),
+                            const Color(0xFFffb853).withOpacity(0.9),
                             BlendMode.srcATop,
                           ),
                         ),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.only(
-                          top: 41,
                           right: 90,
+                          top: 41,
                           left: 46,
                           bottom: 41,
                         ),
                         child: BarlowText(
-                          text: saleController.currentDescription.value,
+                          text: _selectedDescription,
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFFFFFFFF),
+                          color: const Color(0xFF414141),
                         ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
+                // Item Count (Products)
                 Container(
                   width: MediaQuery.of(context).size.width,
                   child: Padding(
                     padding: EdgeInsets.only(left: isLargeScreen ? 389 : 292),
                     child: CralikaFont(
                       text:
-                          saleController.isCollectionView.value
-                              ? "${saleController.collectionList.length} ${(saleController.collectionList.length == 1 || saleController.collectionList.length == 0) ? 'Collection' : 'Collections'}"
-                              : "${saleController.filteredProductList.length} ${(saleController.filteredProductList.length == 1 || saleController.filteredProductList.length == 0) ? 'Product' : 'Products'}",
+                          _isLoading
+                              ? 'Loading...'
+                              : '${_productsSale.length} Product${_productsSale.length == 1
+                                  ? ''
+                                  : _productsSale.length == 0
+                                  ? ''
+                                  : 's'}',
                       fontWeight: FontWeight.w400,
-                      fontSize: 28,
+                      fontSize: 32,
                     ),
                   ),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
+                // Category Navigation
                 Container(
+                  key: _sortFilterKey,
                   width: MediaQuery.of(context).size.width,
                   child: Padding(
                     padding: EdgeInsets.only(
@@ -103,155 +254,99 @@ class Sale extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         SaleNavigation(
-                          selectedCategoryId:
-                              saleController.selectedCategoryId.value,
-                          onCategorySelected: saleController.updateCategory,
-                          fetchAllProducts: saleController.fetchAllProducts,
+                          selectedCategoryId: _selectedCategoryId,
+                          onCategorySelected: onCategorySelected,
                           context: context,
                         ),
                         Row(
                           children: [
-                            if (saleController.isCollectionView.value)
-                              GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onTap: () {
-                                  saleController.showSortMenu.value =
-                                      !saleController.showSortMenu.value;
-                                },
-                                child: BarlowText(
-                                  text: "Sort / New",
-                                  color: const Color(0xFF30578E),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                ),
+                            GestureDetector(
+                              onTap: _toggleSortOptions,
+                              child: BarlowText(
+                                text: "Sort / New",
+                                color: const Color(0xFF30578E),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                enableUnderlineForActiveRoute: true,
+                                decorationColor: Color(0xFF30578E),
+                                hoverTextColor: const Color(0xFF2876E4),
                               ),
-
-                            if (!saleController.isCollectionView.value)
-                              GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onTap: () {
-                                  saleController.showSortMenu.value =
-                                      !saleController.showSortMenu.value;
-                                },
-                                child: BarlowText(
-                                  text: "Sort / New",
-                                  color: const Color(0xFF30578E),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                  enableUnderlineForActiveRoute: true,
-                                  decorationColor: Color(0xFF30578E),
-                                  hoverTextColor: const Color(0xFF2876E4),
-                                ),
-                              ),
+                            ),
                             SizedBox(width: 24),
-                            if (!saleController.isCollectionView.value)
-                              GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onTap: () {
-                                  saleController.showFilterMenu.value =
-                                      !saleController.showFilterMenu.value;
-                                },
-                                child: BarlowText(
-                                  text:
-                                      "Filter / ${saleController.currentFilter.value}",
-                                  color: const Color(0xFF30578E),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                  enableUnderlineForActiveRoute: true,
-                                  decorationColor: Color(0xFF30578E),
-                                  hoverTextColor: const Color(0xFF2876E4),
-                                ),
+                            GestureDetector(
+                              onTap: _toggleFilterOptions,
+                              child: BarlowText(
+                                text: "Filter / ${_selectedFilter ?? 'All'}",
+                                color: const Color(0xFF30578E),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                enableUnderlineForActiveRoute: true,
+                                decorationColor: Color(0xFF30578E),
+                                hoverTextColor: const Color(0xFF2876E4),
                               ),
+                            ),
                           ],
                         ),
                       ],
                     ),
                   ),
                 ),
-                saleController.isLoading.value
+                const SizedBox(height: 20),
+                // Product Grid Rendering
+                _isLoading
+                    ? const Center(
+                      child: RotatingSvgLoader(
+                        assetPath: 'assets/footer/footerbg.svg',
+                      ),
+                    )
+                    : _productsSale.isNotEmpty
                     ? Padding(
                       padding: EdgeInsets.only(
+                        right:
+                            isLargeScreen
+                                ? MediaQuery.of(context).size.width * 0.15
+                                : MediaQuery.of(context).size.width * 0.07,
                         left: isLargeScreen ? 389 : 292,
-                        top: 80,
+                        top: 30,
                       ),
-                      child: Center(child: CircularProgressIndicator()),
+                      child: SaleProductGrid(
+                        productList: _productsSale,
+                        onWishlistChanged: widget.onWishlistChanged,
+                        isHoveredList: _isHoveredList,
+                        onHoverChanged: _onHoverChanged,
+                      ),
                     )
-                    : saleController.isCollectionView.value &&
-                        saleController.collectionList.isEmpty
-                    ? Padding(
+                    : Padding(
                       padding: EdgeInsets.only(
                         left: isLargeScreen ? 613 : 516,
                         top: 80,
                       ),
                       child: CartEmpty(
                         hideBrowseButton: true,
-
                         cralikaText: "No products here yet!",
                         barlowText:
                             "Try another category, hopefully you'll find something you like there!",
-                      ),
-                    )
-                    : saleController.filteredProductList.isEmpty &&
-                        !saleController.isCollectionView.value
-                    ? Padding(
-                      padding: EdgeInsets.only(
-                        left: isLargeScreen ? 613 : 516,
-                        top: 80,
-                      ),
-                      child: CartEmpty(
-                        hideBrowseButton: true,
-
-                        cralikaText: "No products here yet!",
-                        barlowText:
-                            "Try another category, hopefully you'll find something you like there!",
-                      ),
-                    )
-                    : SizedBox(
-                      width: double.infinity,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          right:
-                              isLargeScreen
-                                  ? MediaQuery.of(context).size.width * 0.15
-                                  : MediaQuery.of(context).size.width * 0.07,
-                          left: isLargeScreen ? 389 : 292,
-                          top: 30,
-                        ),
-                        child:
-                            saleController.isCollectionView.value
-                                ? CollectionGrid(
-                                  collectionList: saleController.collectionList,
-                                )
-                                : SaleProductGrid(
-                                  productList:
-                                      saleController.filteredProductList,
-                                  onWishlistChanged: onWishlistChanged,
-                                  isHoveredList: saleController.isHoveredList,
-                                  onHoverChanged:
-                                      saleController.updateHoverState,
-                                ),
                       ),
                     ),
-                SizedBox(height: 40),
               ],
             ),
-            Obx(
-                  () => saleController.showSortMenu.value
-                  ? Positioned(
-                right: isLargeScreen ? 300 : 120,
-                top: 230,
+          ),
+          // Sort Options Dropdown
+          if (_showSortOptions)
+            Positioned(
+              right: isLargeScreen ? 300 : 120,
+              top: 230,
+              child: Material(
+                elevation: 4,
                 child: Container(
                   width: 180,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    border: Border.all(
-                      color: Color(0xFFE7E7E7), // #E7E7E7
-                      width: 1.0,
-                    ),
+                    border: Border.all(color: Color(0xFFE7E7E7), width: 1.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0x0F000000), // #0000000F (6% opacity black)
+                        color: Color(0x0F000000),
                         blurRadius: 20,
                         spreadRadius: 0,
                         offset: Offset(20, 20),
@@ -260,153 +355,56 @@ class Sale extends StatelessWidget {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _buildSortOptions(saleController),
+                    children: _buildSortOptions(),
                   ),
                 ),
-              )
-                  : SizedBox.shrink(),
-            )
-            ,
-
-            Obx(
-                  () => saleController.showFilterMenu.value
-                  ? Positioned(
-                right: isLargeScreen ? 250 : 80,
-                top: 230,
-                child: Container(
-                  width: 180,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: Color(0xFFE7E7E7), // #E7E7E7
-                      width: 1.0,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x0F000000), // #0000000F (6% opacity black)
-                        blurRadius: 20,
-                        spreadRadius: 0,
-                        offset: Offset(20, 20),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _buildFilterOptions(saleController),
-                  ),
-                ),
-              )
-                  : SizedBox.shrink(),
-            )
-
-          ],
-        ),
-      );
-    });
-  }
-
-  List<Widget> _buildSortOptions(SaleController controller) {
-    final isCollectionView =
-        controller.isCollectionView.value; // Fixed condition
-
-    final options =
-        isCollectionView
-            ? [
-              {
-                'label': 'Newest',
-                'onTap': () {
-                  controller.showSortMenu.value = false;
-                  controller.fetchCollectionList(
-                    controller.selectedCategoryId.value,
-                  );
-                },
-              },
-              {
-                'label': 'Oldest',
-                'onTap': () {
-                  controller.showSortMenu.value = false;
-                  controller.fetchCollectionListSort(
-                    controller.selectedCategoryId.value,
-                  );
-                },
-              },
-            ]
-            : [
-              {
-                'label': 'Price Low - High',
-                'onTap': () {
-                  controller.showSortMenu.value = false;
-                  controller.sortProductsLowToHigh();
-                },
-              },
-              {
-                'label': 'Price High - Low',
-                'onTap': () {
-                  controller.showSortMenu.value = false;
-                  controller.sortProductsHighToLow();
-                },
-              },  {
-                'label': 'New',
-                'onTap': () {
-                  controller.showSortMenu.value = false;
-                  controller.sortProductsHighToLow();
-                },
-              },
-            ];
-
-    return options.map((option) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: option['onTap'] as void Function(),
-              child: BarlowText(
-                text: option['label'] as String,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-                color: const Color(0xFF30578E),
-                hoverTextColor: const Color(0xFF2876E4),
-
               ),
             ),
-          ),
+          // Filter Options Dropdown
+          if (_showFilterOptions)
+            Positioned(
+              right: isLargeScreen ? 250 : 80,
+              top: 230,
+              child: Material(
+                elevation: 4,
+                child: Container(
+                  width: 180,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Color(0xFFE7E7E7), width: 1.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x0F000000),
+                        blurRadius: 20,
+                        spreadRadius: 0,
+                        offset: Offset(20, 20),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _buildFilterOptions(),
+                  ),
+                ),
+              ),
+            ),
         ],
-      );
-    }).toList();
+      ),
+    );
   }
 
-  List<Widget> _buildFilterOptions(SaleController controller) {
+  List<Widget> _buildSortOptions() {
     final options = [
       {
-        'label': 'All',
-        'onTap': () {
-          controller.showFilterMenu.value = false;
-          controller.resetFilters();
-        },
+        'label': 'Price Low - High',
+        'onTap': () => _handleSortSelected('Price Low - High'),
       },
       {
-        'label': "Maker's Choice",
-        'onTap': () {
-          controller.showFilterMenu.value = false;
-          if (!controller.isCollectionView.value) {
-            controller.filterMakersChoice();
-          }
-        },
+        'label': 'Price High - Low',
+        'onTap': () => _handleSortSelected('Price High - Low'),
       },
-      {
-        'label': 'Few Pieces Left',
-        'onTap': () {
-          controller.showFilterMenu.value = false;
-          if (!controller.isCollectionView.value) {
-            controller.filterFewPiecesLeft();
-          }
-        },
-      },
+      {'label': 'New', 'onTap': () => _handleSortSelected('New')},
     ];
 
     return options.map((option) {
@@ -418,19 +416,101 @@ class Sale extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: option['onTap'] as void Function(),
+              onTap: () {
+                (option['onTap'] as Function)();
+                setState(() {
+                  _showSortOptions = false;
+                });
+              },
               child: BarlowText(
                 text: option['label'] as String,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: const Color(0xFF30578E),
                 hoverTextColor: const Color(0xFF2876E4),
-
               ),
             ),
           ),
         ],
       );
     }).toList();
+  }
+
+  List<Widget> _buildFilterOptions() {
+    final options = [
+      {'label': 'All', 'onTap': () => _handleFilterSelected('All')},
+      {
+        'label': "Maker's Choice",
+        'onTap': () => _handleFilterSelected("Maker's Choice"),
+      },
+
+    ];
+
+    return options.map((option) {
+      final label = option['label'] as String;
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: GestureDetector(
+              onTap: () {
+                (option['onTap'] as Function)();
+                setState(() => _showFilterOptions = false);
+              },
+              child: BarlowText(
+                text: label,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: const Color(0xFF30578E),
+                hoverTextColor: const Color(0xFF2876E4),
+                enableUnderlineForCurrentFilter: true,
+                currentFilterValue: _selectedFilter ?? 'All',
+                decorationColor: const Color(0xFF30578E),
+                activeUnderlineDecoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ],
+      );
+    }).toList();
+  }
+
+  void _handleSortSelected(String sortOption) {
+    setState(() {
+      if (sortOption == 'Price Low - High') {
+        _productsSale.sort((a, b) => (a.price ?? 0).compareTo(b.price ?? 0));
+      } else if (sortOption == 'Price High - Low') {
+        _productsSale.sort((a, b) => (b.price ?? 0).compareTo(a.price ?? 0));
+      } else if (sortOption == 'New') {
+        _productsSale = List.from(
+          _originalProductsSale,
+        ); // Restore original list
+        _isHoveredList = List<bool>.filled(_productsSale.length, false);
+      }
+    });
+  }
+
+  void _handleFilterSelected(String filterOption) {
+    setState(() {
+      _selectedFilter = filterOption; // Update selected filter
+      if (filterOption == 'All') {
+        _productsSale = List.from(
+          _originalProductsSale,
+        ); // Restore original list
+        _isHoveredList = List<bool>.filled(_productsSale.length, false);
+      } else if (filterOption == "Maker's Choice") {
+        _productsSale =
+            _originalProductsSale
+                .where((product) => product.isMakerChoice == 1)
+                .toList();
+        _isHoveredList = List<bool>.filled(_productsSale.length, false);
+      } else if (filterOption == 'Few Pieces Left') {
+        _productsSale =
+            _originalProductsSale
+                .where((product) => product.quantity! <= 2)
+                .toList();
+        _isHoveredList = List<bool>.filled(_productsSale.length, false);
+      }
+    });
   }
 }

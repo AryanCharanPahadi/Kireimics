@@ -200,11 +200,13 @@ class PaymentResultPage extends StatelessWidget {
                             text: "VIEW MY ORDERS",
                             color: const Color(0xFFFFFFFF),
                             fontWeight: FontWeight.w600,
-                            fontSize: (16 * fontScale).clamp(12, 16),
+                            fontSize: 16,
                             lineHeight: 1.0,
                             letterSpacing: 0.64 * fontScale,
                             backgroundColor: Color(0xFF67a8cf),
                             hoverTextColor: Color(0xFF2876E4),
+                            enableHoverBackground: true,
+                            hoverBackgroundColor: Colors.white,
                             onTap: () {
                               context.go(AppRoutes.myOrder);
                             },

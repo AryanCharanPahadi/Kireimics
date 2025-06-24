@@ -8,18 +8,14 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:kireimics/component/app_routes/routes.dart';
 import 'package:kireimics/web_desktop_common/login_signup/signup/signup_controller.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../component/api_helper/api_helper.dart';
-import '../../../component/google_sign_in/auth.dart';
 import '../../../component/google_sign_in/google_sign_in_button.dart';
-import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/utilities/utility.dart';
+import '../../component/rotating_svg_loader.dart';
 import '../login/login_page.dart';
 
 class Signup extends StatefulWidget {
@@ -34,11 +30,11 @@ class _SignupState extends State<Signup> {
   bool isChecked = false;
   bool showSuccessBanner = false;
   bool showErrorBanner = false;
-  String errorMessage = "";
+  String errorMessage = '';
 
   @override
   void dispose() {
-    // Clear all text controllers to prevent memory leaks
+    // Clear text controllers
     signupController.firstNameController.clear();
     signupController.lastNameController.clear();
     signupController.emailController.clear();
@@ -49,6 +45,8 @@ class _SignupState extends State<Signup> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isWideScreen = MediaQuery.of(context).size.width > 1400;
+
     return Stack(
       children: [
         BlurredBackdrop(),
@@ -59,7 +57,7 @@ class _SignupState extends State<Signup> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            width: MediaQuery.of(context).size.width > 1400 ? 550 : 504,
+            width: isWideScreen ? 550 : 504,
             child: Material(
               color: Colors.white,
               child: SingleChildScrollView(
@@ -73,7 +71,7 @@ class _SignupState extends State<Signup> {
                         GestureDetector(
                           onTap: () => Navigator.of(context).pop(),
                           child: BarlowText(
-                            text: "Close",
+                            text: 'Close',
                             color: Color(0xFF30578E),
                             fontWeight: FontWeight.w600,
                             fontSize: 16.0,
@@ -85,34 +83,32 @@ class _SignupState extends State<Signup> {
                           ),
                         ),
                         if (showSuccessBanner || showErrorBanner)
-                          if (showSuccessBanner || showErrorBanner)
-                            NotificationBanner(
-                              iconPath:
-                                  showSuccessBanner
-                                      ? "assets/icons/success.svg"
-                                      : "assets/icons/error.svg",
-
-                              message:
-                                  showSuccessBanner
-                                      ? "Signed Up successfully!"
-                                      : errorMessage,
-                              bannerColor:
-                                  showSuccessBanner
-                                      ? Color(0xFF268FA2)
-                                      : Color(0xFFF46856),
-                              textColor: Color(0xFF28292A),
-                              onClose: () {
-                                setState(() {
-                                  showSuccessBanner = false;
-                                  showErrorBanner = false;
-                                });
-                              },
-                            ),
+                          NotificationBanner(
+                            iconPath:
+                                showSuccessBanner
+                                    ? 'assets/icons/success.svg'
+                                    : 'assets/icons/error.svg',
+                            message:
+                                showSuccessBanner
+                                    ? 'Signed Up successfully!'
+                                    : errorMessage,
+                            bannerColor:
+                                showSuccessBanner
+                                    ? Color(0xFF268FA2)
+                                    : Color(0xFFF46856),
+                            textColor: Color(0xFF28292A),
+                            onClose: () {
+                              setState(() {
+                                showSuccessBanner = false;
+                                showErrorBanner = false;
+                              });
+                            },
+                          ),
                       ],
                     ),
                     SizedBox(height: 33),
                     CralikaFont(
-                      text: "Sign Up",
+                      text: 'Sign Up',
                       color: Color(0xFF414141),
                       fontWeight: FontWeight.w600,
                       fontSize: 32.0,
@@ -122,7 +118,7 @@ class _SignupState extends State<Signup> {
                     SizedBox(height: 8),
                     BarlowText(
                       text:
-                          "Create a free Kireimics account for a quick checkout.",
+                          'Create a free Kireimics account for a quick checkout.',
                       fontWeight: FontWeight.w400,
                       fontSize: 16,
                       lineHeight: 1.0,
@@ -134,7 +130,7 @@ class _SignupState extends State<Signup> {
                       child: Column(
                         children: [
                           customTextFormField(
-                            hintText: "FIRST NAME",
+                            hintText: 'FIRST NAME',
                             controller: signupController.firstNameController,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -148,7 +144,7 @@ class _SignupState extends State<Signup> {
                           ),
                           SizedBox(height: 28),
                           customTextFormField(
-                            hintText: "LAST NAME",
+                            hintText: 'LAST NAME',
                             controller: signupController.lastNameController,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -162,7 +158,7 @@ class _SignupState extends State<Signup> {
                           ),
                           SizedBox(height: 28),
                           customTextFormField(
-                            hintText: "EMAIL",
+                            hintText: 'EMAIL',
                             controller: signupController.emailController,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -178,7 +174,7 @@ class _SignupState extends State<Signup> {
                           ),
                           SizedBox(height: 28),
                           customTextFormField(
-                            hintText: "PHONE",
+                            hintText: 'PHONE',
                             controller: signupController.phoneController,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -192,7 +188,7 @@ class _SignupState extends State<Signup> {
                           ),
                           SizedBox(height: 28),
                           customTextFormField(
-                            hintText: "CREATE PASSWORD",
+                            hintText: 'CREATE PASSWORD',
                             controller: signupController.passwordController,
                             isPassword: true,
                             validator: (value) {
@@ -243,14 +239,31 @@ class _SignupState extends State<Signup> {
                                         }
                                       }
                                     },
-                                    child: BarlowText(
-                                      text: "SIGN UP",
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                      lineHeight: 1.0,
-                                      letterSpacing: 0.64,
-                                      color: Color(0xFF30578E),
-                                      backgroundColor: Color(0xFFb9d6ff),
+                                    child: Obx(
+                                      () =>
+                                          signupController.isLoading.value
+                                              ? RotatingSvgLoader(
+                                                assetPath:
+                                                    'assets/footer/footerbg.svg',
+                                              )
+                                              : BarlowText(
+                                                text: 'SIGN UP',
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 16,
+                                                color: Color(0xFF30578E),
+                                                backgroundColor: Color(
+                                                  0xFFb9d8ff,
+                                                ),
+                                                decorationColor: const Color(
+                                                  0xFF30578E,
+                                                ),
+                                                hoverTextColor: const Color(
+                                                  0xFF2876E4,
+                                                ),
+                                                hoverDecorationColor: Color(
+                                                  0xFF2876E4,
+                                                ),
+                                              ),
                                     ),
                                   ),
                                   SizedBox(height: 30),
@@ -317,7 +330,7 @@ class _SignupState extends State<Signup> {
                                   ),
                                   SizedBox(height: 30),
                                   BarlowText(
-                                    text: "Or",
+                                    text: 'Or',
                                     fontWeight: FontWeight.w400,
                                     fontSize: 16,
                                     lineHeight: 1.0,
@@ -339,95 +352,113 @@ class _SignupState extends State<Signup> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 62),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0xFFDDEAFF).withOpacity(0.6),
-                            offset: Offset(20, 20),
-                            blurRadius: 20,
-                          ),
-                        ],
-                        border: Border.all(color: Color(0xFFDDEAFF), width: 1),
-                      ),
-                      padding: const EdgeInsets.only(
-                        left: 16.0,
-                        top: 13,
-                        bottom: 13,
-                        right: 10,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            height: 56,
-                            width: 56,
-                            decoration: BoxDecoration(
-                              color: Color(0xFFDDEAFF),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: SvgPicture.asset(
-                                "assets/header/IconProfile.svg",
-                                height: 27,
-                                width: 25,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 24),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BarlowText(
-                                text: "Already have an account?",
-                                fontWeight: FontWeight.w400,
-                                fontSize: 20,
-                                lineHeight: 1.0,
-                                color: Color(0xFF000000),
-                              ),
-                              SizedBox(height: 10),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  Future.delayed(Duration.zero, () {
-                                    showDialog(
-                                      context: context,
-                                      barrierColor: Colors.transparent,
-                                      builder: (BuildContext context) {
-                                        return LoginPage();
-                                      },
-                                    );
-                                  });
-                                },
-                                child: BarlowText(
-                                  text: "LOG IN NOW",
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  lineHeight: 1.5,
-                                  color: Color(0xFF30578E),
-                                  hoverBackgroundColor: Color(0xFFb9d6ff),
-                                  enableHoverBackground: true,
-                                  decorationColor: const Color(0xFF30578E),
-                                  hoverTextColor: const Color(0xFF2876E4),
-                                  hoverDecorationColor: Color(0xFF2876E4),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 22),
+                    if (!isWideScreen) ...[
+                      SizedBox(height: 62),
+                      buildLoginContainer(context),
+                      SizedBox(height: 22),
+                    ],
                   ],
                 ),
               ),
             ),
           ),
         ),
+        if (isWideScreen)
+          Positioned(
+            bottom: 20,
+            right: 44,
+            child: Container(
+              width: 504,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 22.0),
+                child: buildLoginContainer(context),
+              ),
+            ),
+          ),
       ],
+    );
+  }
+
+  Widget buildLoginContainer(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Color(0xFFDDEAFF).withOpacity(0.6),
+            offset: Offset(20, 20),
+            blurRadius: 20,
+          ),
+        ],
+        border: Border.all(color: Color(0xFFDDEAFF), width: 1),
+      ),
+      padding: const EdgeInsets.only(
+        left: 16.0,
+        top: 13,
+        bottom: 13,
+        right: 10,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 56,
+            width: 56,
+            decoration: BoxDecoration(
+              color: Color(0xFFDDEAFF),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: SvgPicture.asset(
+                'assets/header/IconProfile.svg',
+                height: 27,
+                width: 25,
+              ),
+            ),
+          ),
+          SizedBox(width: 24),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BarlowText(
+                text: 'Already have an account?',
+                fontWeight: FontWeight.w400,
+                fontSize: 20,
+                lineHeight: 1.0,
+                color: Color(0xFF000000),
+              ),
+              SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  Future.delayed(Duration.zero, () {
+                    showDialog(
+                      context: context,
+                      barrierColor: Colors.transparent,
+                      builder: (BuildContext context) {
+                        return LoginPage();
+                      },
+                    );
+                  });
+                },
+                child: BarlowText(
+                  text: 'LOG IN NOW',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  color: Color(0xFF30578E),
+                  hoverBackgroundColor: Color(0xFFb9d6ff),
+                  enableHoverBackground: true,
+                  decorationColor: const Color(0xFF30578E),
+                  hoverTextColor: const Color(0xFF2876E4),
+                  hoverDecorationColor: Color(0xFF2876E4),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -435,10 +466,9 @@ class _SignupState extends State<Signup> {
     required String hintText,
     TextEditingController? controller,
     String? Function(String?)? validator,
-    bool isPassword = false, // Add isPassword parameter
+    bool isPassword = false,
   }) {
-    bool obscureText =
-        isPassword; // Initially hide password if isPassword is true
+    bool obscureText = isPassword;
     return StatefulBuilder(
       builder: (context, setState) {
         return Stack(
@@ -459,10 +489,7 @@ class _SignupState extends State<Signup> {
               controller: controller,
               textAlign: TextAlign.right,
               cursorColor: const Color(0xFF414141),
-              obscureText:
-                  isPassword
-                      ? obscureText
-                      : false, // Apply obscureText for password
+              obscureText: isPassword ? obscureText : false,
               validator: validator,
               decoration: InputDecoration(
                 border: UnderlineInputBorder(
@@ -485,18 +512,14 @@ class _SignupState extends State<Signup> {
                 ),
                 contentPadding: EdgeInsets.only(
                   top: isPassword ? 16 : 10,
-                  right:
-                      isPassword
-                          ? 40
-                          : 0, // Conditionally add padding only if it's a password field
+                  right: isPassword ? 40 : 0,
                 ),
-
                 suffixIcon:
                     isPassword
                         ? GestureDetector(
                           onTap: () {
                             setState(() {
-                              obscureText = !obscureText; // Toggle visibility
+                              obscureText = !obscureText;
                             });
                           },
                           child: Icon(

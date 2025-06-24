@@ -8,6 +8,8 @@ import 'package:kireimics/component/text_fonts/custom_text.dart';
 
 import '../../component/above_footer/above_footer.dart';
 import '../../component/utilities/url_launcher.dart';
+import '../../component/utilities/utility.dart';
+import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import 'contact_us_controller.dart';
 
 class ContactUs extends StatefulWidget {
@@ -23,7 +25,6 @@ class ContactUs extends StatefulWidget {
 }
 
 class _ContactUsState extends State<ContactUs> {
-
   final ContactController contactController = ContactController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
@@ -46,8 +47,10 @@ class _ContactUsState extends State<ContactUs> {
     super.dispose();
   }
 
-  void _submitForm() {
-    // Check validation in order of priority
+  Future<void> _submitForm() async {
+    final String formattedDate = getFormattedDate();
+
+    // Validation checks
     if (_nameController.text.isEmpty) {
       widget.onErrorWishlistChanged?.call('Please enter your name');
       return;
@@ -70,14 +73,32 @@ class _ContactUsState extends State<ContactUs> {
       return;
     }
 
-    // If all validations pass
-    widget.onWishlistChanged?.call('Form submitted successfully!');
+    try {
+      final response = await ApiHelper.contactQuery(
+        name: _nameController.text,
+        email: _emailController.text,
+        message: "${_messageController.text} ${_anotherMessageController.text}",
+        createdAt: formattedDate,
+      );
 
-    // Clear the fields
-    _nameController.clear();
-    _emailController.clear();
-    _messageController.clear();
-    _anotherMessageController.clear();
+      if (response['error'] == true) {
+        widget.onErrorWishlistChanged?.call(
+          response['message'] ?? 'Submission failed',
+        );
+      } else {
+        widget.onWishlistChanged?.call('Form submitted successfully!');
+
+        // Clear fields
+        _nameController.clear();
+        _emailController.clear();
+        _messageController.clear();
+        _anotherMessageController.clear();
+      }
+    } catch (e) {
+      widget.onErrorWishlistChanged?.call(
+        'An unexpected error occurred: ${e.toString()}',
+      );
+    }
   }
 
   @override
@@ -94,7 +115,9 @@ class _ContactUsState extends State<ContactUs> {
   @override
   Widget build(BuildContext context) {
     return contactController.isLoading
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(
+          child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+        )
         : contactController.contactData == null
         ? const Center(child: Text("Failed to load contact details."))
         : Column(
@@ -142,7 +165,13 @@ class _ContactUsState extends State<ContactUs> {
               padding: const EdgeInsets.only(left: 292, top: 35),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [CralikaFont(text: "Contact Us", fontSize: 28)],
+                children: [
+                  CralikaFont(
+                    text: "Contact Us",
+                    fontSize: 32,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
@@ -171,12 +200,11 @@ class _ContactUsState extends State<ContactUs> {
                           onTap:
                               () => UrlLauncherHelper.launchURL(
                                 context,
-                                "tel:${contactController.contactData!['phone'].toString()}",
+                                "tel:+91${contactController.contactData!['phone'].toString()}",
                               ),
                           child: BarlowText(
                             text:
-                                contactController.contactData!['phone']
-                                    .toString(),
+                                "+91 ${contactController.contactData!['phone'].toString()}",
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF30578E),
@@ -236,7 +264,8 @@ class _ContactUsState extends State<ContactUs> {
                               focusNode: _messageFocusNode,
                               nextFocusNode: _anotherMessageFocusNode,
                               controller: _messageController,
-                              nextController: _anotherMessageController, // REQUIRED
+                              nextController:
+                                  _anotherMessageController, // REQUIRED
                             ),
                             const SizedBox(height: 10),
                             customTextFormField(
@@ -271,7 +300,13 @@ class _ContactUsState extends State<ContactUs> {
               padding: const EdgeInsets.only(left: 292, top: 35),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [CralikaFont(text: "FAQ's", fontSize: 28)],
+                children: [
+                  CralikaFont(
+                    text: "FAQ's",
+                    fontSize: 32,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 32),
@@ -425,6 +460,7 @@ class _ContactUsState extends State<ContactUs> {
       return []; // Return empty list if parsing fails
     }
   }
+
   Widget customTextFormField({
     required String hintText,
     TextEditingController? controller,
@@ -473,9 +509,8 @@ class _ContactUsState extends State<ContactUs> {
                 // Move word to next controller
                 if (nextController != null) {
                   final nextText = nextController.text;
-                  final updatedNextText = nextText.isEmpty
-                      ? wordToMove
-                      : '$nextText $wordToMove';
+                  final updatedNextText =
+                      nextText.isEmpty ? wordToMove : '$nextText $wordToMove';
 
                   nextController.text = updatedNextText;
                   nextController.selection = TextSelection.fromPosition(
@@ -515,5 +550,4 @@ class _ContactUsState extends State<ContactUs> {
       ],
     );
   }
-
 }

@@ -10,6 +10,9 @@ import 'package:kireimics/component/text_fonts/custom_text.dart';
 
 import '../../component/api_helper/api_helper.dart';
 import '../cart/cart_panel.dart';
+import '../component/badges_web_desktop.dart';
+import '../component/height_weight.dart';
+import '../notify_me/notify_me.dart';
 
 class CategoryProductGrid extends StatelessWidget {
   final List<Product> productList;
@@ -205,159 +208,12 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
 
                           double paddingVertical = getResponsiveValue(6, 10);
 
-                          if (isOutOfStock) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: SvgPicture.asset(
-                                    "assets/home_page/outofstock.svg",
-                                    height: 25,
-                                    width: 25,
-                                  ),
-                                ),
-                                FutureBuilder<bool>(
-                                  future: SharedPreferencesHelper.isInWishlist(
-                                    widget.product.id.toString(),
-                                  ),
-                                  builder: (context, snapshot) {
-                                    final isInWishlist = snapshot.data ?? false;
-                                    return GestureDetector(
-                                      onTap: () async {
-                                        if (isInWishlist) {
-                                          await SharedPreferencesHelper.removeFromWishlist(
-                                            widget.product.id.toString(),
-                                          );
-                                          widget.onWishlistChanged?.call(
-                                            'Product Removed From Wishlist',
-                                          );
-                                        } else {
-                                          await SharedPreferencesHelper.addToWishlist(
-                                            widget.product.id.toString(),
-                                          );
-                                          widget.onWishlistChanged?.call(
-                                            'Product Added To Wishlist',
-                                          );
-                                        }
-                                        setState(() {});
-                                      },
-                                      child: SvgPicture.asset(
-                                        isInWishlist
-                                            ? 'assets/home_page/IconWishlist.svg'
-                                            : 'assets/home_page/IconWishlistEmpty.svg',
-                                        width: 23,
-                                        height: 20,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            );
-                          }
-
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Builder(
-                                builder: (context) {
-                                  final List<Widget> badges = [];
-
-                                  if (widget.product.isMakerChoice == 1) {
-                                    badges.add(
-                                      SvgPicture.asset(
-                                        "assets/home_page/maker_choice.svg",
-                                        height: 50,
-                                      ),
-                                    );
-                                  }
-
-                                  if (quantity != null && quantity < 2) {
-                                    if (badges.isNotEmpty)
-                                      badges.add(SizedBox(height: 10));
-                                    badges.add(
-                                      SvgPicture.asset(
-                                        "assets/home_page/fewPiecesLeft.svg",
-                                      ),
-                                    );
-                                  }
-
-                                  if (widget.product.discount != 0) {
-                                    if (badges.isNotEmpty)
-                                      badges.add(SizedBox(height: 10));
-                                    badges.add(
-                                      ElevatedButton(
-                                        onPressed: null,
-                                        style: ElevatedButton.styleFrom(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: paddingVertical,
-                                            horizontal: 32,
-                                          ),
-                                          backgroundColor: const Color(
-                                            0xFFF46856,
-                                          ),
-                                          disabledBackgroundColor: const Color(
-                                            0xFFF46856,
-                                          ),
-                                          disabledForegroundColor: Colors.white,
-                                          elevation: 0,
-                                          side: BorderSide.none,
-                                        ),
-                                        child: BarlowText(
-                                          text:
-                                          "${widget.product.discount}% OFF",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    );
-                                  }
-
-                                  return Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: badges,
-                                  );
-                                },
-                              ),
-                              Spacer(),
-                              FutureBuilder<bool>(
-                                future: SharedPreferencesHelper.isInWishlist(
-                                  widget.product.id.toString(),
-                                ),
-                                builder: (context, snapshot) {
-                                  final isInWishlist = snapshot.data ?? false;
-                                  return GestureDetector(
-                                    onTap: () async {
-                                      if (isInWishlist) {
-                                        await SharedPreferencesHelper.removeFromWishlist(
-                                          widget.product.id.toString(),
-                                        );
-                                        widget.onWishlistChanged?.call(
-                                          'Product Removed From Wishlist',
-                                        );
-                                      } else {
-                                        await SharedPreferencesHelper.addToWishlist(
-                                          widget.product.id.toString(),
-                                        );
-                                        widget.onWishlistChanged?.call(
-                                          'Product Added To Wishlist',
-                                        );
-                                      }
-                                      setState(() {});
-                                    },
-                                    child: SvgPicture.asset(
-                                      isInWishlist
-                                          ? 'assets/home_page/IconWishlist.svg'
-                                          : 'assets/home_page/IconWishlistEmpty.svg',
-                                      width: 23,
-                                      height: 20,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
+                          return WishlistBadgeRow(
+                            product: widget.product,
+                            isOutOfStock: isOutOfStock,
+                            quantity: quantity,
+                            onWishlistChanged: widget.onWishlistChanged,
+                            paddingVertical: paddingVertical,
                           );
                         },
                       ),
@@ -370,8 +226,12 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                         duration: Duration(milliseconds: 300),
                         opacity: widget.isHovered ? 1.0 : 0.0,
                         child: Container(
-                          width: imageWidth * 0.95,
-                          height: imageHeight * 0.35,
+                          width: ResponsiveUtil(
+                            context,
+                          ).getResponsiveWidth(imageWidth),
+                          height: ResponsiveUtil(
+                            context,
+                          ).getResponsiveHeight(imageHeight),
                           padding: EdgeInsets.symmetric(
                             horizontal: imageWidth * 0.05,
                             vertical: imageHeight * 0.02,
@@ -405,14 +265,15 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                           fontWeight: FontWeight.w400,
                                           fontSize: 14,
                                           height: 1.2,
-                                          decoration: TextDecoration.lineThrough,
+                                          decoration:
+                                              TextDecoration.lineThrough,
                                           decorationColor: Colors.white
                                               .withOpacity(
-                                            0.7,
-                                          ), // Match strikethrough color
+                                                0.7,
+                                              ), // Match strikethrough color
                                           fontFamily:
-                                          GoogleFonts.barlow()
-                                              .fontFamily, // Match Barlow font
+                                              GoogleFonts.barlow()
+                                                  .fontFamily, // Match Barlow font
                                         ),
                                       ),
                                     if (widget.product.discount != 0)
@@ -420,9 +281,9 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                     // Discounted price
                                     BarlowText(
                                       text:
-                                      widget.product.discount != 0
-                                          ? "Rs. ${(widget.product.price * (1 - widget.product.discount / 100)).toStringAsFixed(2)}"
-                                          : "Rs. ${widget.product.price.toStringAsFixed(2)}",
+                                          widget.product.discount != 0
+                                              ? "Rs. ${(widget.product.price * (1 - widget.product.discount / 100)).toStringAsFixed(2)}"
+                                              : "Rs. ${widget.product.price.toStringAsFixed(2)}",
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 14,
@@ -432,10 +293,10 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                 ),
                               ],
 
-                              if(isOutOfStock)...[
+                              if (isOutOfStock) ...[
                                 BarlowText(
                                   text:
-                                  "Rs. ${widget.product.price.toStringAsFixed(2)}",
+                                      "Rs. ${widget.product.price.toStringAsFixed(2)}",
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
@@ -472,29 +333,17 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontFamily:
-                                        GoogleFonts.barlow().fontFamily,
+                                            GoogleFonts.barlow().fontFamily,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15,
                                         height: 1.0,
                                       ),
                                     ),
                                     SizedBox(width: imageWidth * 0.02),
-                                    GestureDetector(
-                                      onTap: () {
-                                        widget.onWishlistChanged?.call(
-                                          "We'll notify you when this product is back in stock.",
-                                        );
-                                      },
-                                      child: BarlowText(
-                                        text: "NOTIFY ME",
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        lineHeight: 1.0,
-                                        enableHoverBackground: true,
-                                        hoverBackgroundColor: Colors.white,
-                                        hoverTextColor: Color(0xFF30578E),
-                                      ),
+                                    NotifyMeButton(
+                                      onWishlistChanged:
+                                          widget.onWishlistChanged,
+                                      productId: widget.product.id,
                                     ),
                                   ],
                                 )
@@ -526,47 +375,38 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontFamily:
-                                        GoogleFonts.barlow().fontFamily,
+                                            GoogleFonts.barlow().fontFamily,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15,
                                         height: 1.0,
                                       ),
                                     ),
                                     SizedBox(width: imageWidth * 0.02),
-                                    GestureDetector(
-                                      onTap: () {
-                                        // Call the wishlist changed callback immediately
+                                    BarlowText(
+                                      text: "ADD TO CART",
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      lineHeight: 1.0,
+                                      enableHoverBackground: true,
+                                      hoverBackgroundColor: Colors.white,
+                                      hoverTextColor: Color(0xFF30578E),
+                                      onTap: () async {
+                                        // 1. Call the wishlist changed callback immediately
                                         widget.onWishlistChanged?.call(
                                           'Product Added To Cart',
                                         );
 
-                                        // Delay the modal opening by 3 seconds
-                                        Future.delayed(
-                                          Duration(seconds: 2),
-                                              () {
-                                            showDialog(
-                                              context: context,
-                                              barrierColor: Colors.transparent,
-                                              builder: (BuildContext context) {
-                                                cartNotifier.refresh();
-                                                return CartPanel(
-                                                  productId: widget.product.id,
-                                                );
-                                              },
-                                            );
-                                          },
+                                        // 2. Store the product ID in SharedPreferences
+                                        await SharedPreferencesHelper.addProductId(
+                                          widget.product.id,
                                         );
+
+                                        // 3. Refresh the cart state
+                                        cartNotifier.refresh();
+
+                                        // Note: Removed the Future.delayed and showDialog parts
                                       },
-                                      child: BarlowText(
-                                        text: "ADD TO CART",
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        lineHeight: 1.0,
-                                        enableHoverBackground: true,
-                                        hoverBackgroundColor: Colors.white,
-                                        hoverTextColor: Color(0xFF30578E),
-                                      ),
                                     ),
                                   ],
                                 ),

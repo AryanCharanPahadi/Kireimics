@@ -11,12 +11,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
 import '../../component/above_footer/above_footer.dart';
+import '../../component/api_helper/api_helper.dart';
 import '../../component/cart_length/cart_loader.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/custom_text_form_field/custom_text_form_field.dart';
 import '../../component/product_details/product_details_controller.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
+import '../../component/utilities/utility.dart';
+import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../web_desktop_common/home_page_gridview/product_gridview_homepage.dart';
 import '../../web_desktop_common/component/animation_gridview.dart';
 
@@ -125,8 +128,10 @@ class _HomePageDesktopState extends State<HomePageDesktop>
     super.dispose();
   }
 
-  void _submitForm() {
-    // Check validation in order of priority
+  Future<void> _submitForm() async {
+    final String formattedDate = getFormattedDate();
+
+    // Validation checks
     if (_nameController.text.isEmpty) {
       widget.onErrorWishlistChanged?.call('Please enter your name');
       return;
@@ -149,14 +154,32 @@ class _HomePageDesktopState extends State<HomePageDesktop>
       return;
     }
 
-    // If all validations pass
-    widget.onWishlistChanged?.call('Form submitted successfully!');
+    try {
+      final response = await ApiHelper.contactQuery(
+        name: _nameController.text,
+        email: _emailController.text,
+        message: "${_messageController.text} ${_anotherMessageController.text}",
+        createdAt: formattedDate,
+      );
 
-    // Clear the fields
-    _nameController.clear();
-    _emailController.clear();
-    _messageController.clear();
-    _anotherMessageController.clear();
+      if (response['error'] == true) {
+        widget.onErrorWishlistChanged?.call(
+          response['message'] ?? 'Submission failed',
+        );
+      } else {
+        widget.onWishlistChanged?.call('Form submitted successfully!');
+
+        // Clear fields
+        _nameController.clear();
+        _emailController.clear();
+        _messageController.clear();
+        _anotherMessageController.clear();
+      }
+    } catch (e) {
+      widget.onErrorWishlistChanged?.call(
+        'An unexpected error occurred: ${e.toString()}',
+      );
+    }
   }
 
   @override
@@ -264,12 +287,13 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                         isMessageField: true,
                                         focusNode: _messageFocusNode,
                                         nextFocusNode: _anotherMessageFocusNode,
-                                        nextController: _anotherMessageController, // REQUIRED
+                                        nextController:
+                                            _anotherMessageController, // REQUIRED
                                       ),
                                     ),
                                     const SizedBox(height: 10),
                                     SizedBox(
-                                      child:CustomTextFormField(
+                                      child: CustomTextFormField(
                                         hintText: "",
                                         controller: _anotherMessageController,
                                         focusNode: _anotherMessageFocusNode,
@@ -451,17 +475,8 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                                     if (loadingProgress == null)
                                                       return child;
                                                     return Center(
-                                                      child: CircularProgressIndicator(
-                                                        value:
-                                                            loadingProgress
-                                                                        .expectedTotalBytes !=
-                                                                    null
-                                                                ? loadingProgress
-                                                                        .cumulativeBytesLoaded /
-                                                                    (loadingProgress
-                                                                            .expectedTotalBytes ??
-                                                                        1)
-                                                                : null,
+                                                      child: RotatingSvgLoader(
+                                                        assetPath: 'assets/footer/footerbg.svg',
                                                       ),
                                                     );
                                                   },
@@ -557,9 +572,7 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                           hoverTextColor: Colors.white,
                                           onTap: () async {
                                             context.go(
-                                              AppRoutes.idCollectionView(
-                                                bannerId!,
-                                              ),
+                                              "${AppRoutes.idCollectionView(bannerId!)}?collection_name=${bannerText}",
                                             );
                                           },
                                         ),

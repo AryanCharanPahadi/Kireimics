@@ -11,6 +11,9 @@ import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../component/animation_gridview.dart';
 import '../cart/cart_panel.dart';
+import '../component/height_weight.dart';
+import '../component/rotating_svg_loader.dart';
+import '../notify_me/notify_me.dart';
 
 class ProductGridView extends StatefulWidget {
   final Function(String)? onWishlistChanged;
@@ -33,7 +36,9 @@ class _ProductGridViewState extends State<ProductGridView> {
     final isLargeScreen = screenWidth > 1400;
     return Obx(() {
       if (widget.productController.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
+        return Center(
+          child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+        );
       }
 
       if (widget.productController.errorMessage.isNotEmpty) {
@@ -297,20 +302,12 @@ class _ProductGridItemState extends State<ProductGridItem>
                                     badges.add(
                                       SvgPicture.asset(
                                         "assets/home_page/maker_choice.svg",
-                                        height: 65,
+                                        height: 50,
                                       ),
                                     );
                                   }
 
-                                  if (quantity != null && quantity < 2) {
-                                    if (badges.isNotEmpty)
-                                      badges.add(SizedBox(height: 10));
-                                    badges.add(
-                                      SvgPicture.asset(
-                                        "assets/home_page/fewPiecesLeft.svg",
-                                      ),
-                                    );
-                                  }
+
 
                                   if (widget.product.discount != 0) {
                                     if (badges.isNotEmpty)
@@ -320,8 +317,8 @@ class _ProductGridItemState extends State<ProductGridItem>
                                         onPressed: null,
                                         style: ElevatedButton.styleFrom(
                                           padding: EdgeInsets.symmetric(
-                                            vertical: paddingVertical,
-                                            horizontal: 32,
+                                            vertical: 7.5,
+                                            horizontal: 14,
                                           ),
                                           backgroundColor: const Color(
                                             0xFFF46856,
@@ -339,6 +336,9 @@ class _ProductGridItemState extends State<ProductGridItem>
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.white,
+                                          lineHeight: 1.0, // 100% of font size
+                                          letterSpacing:
+                                              0.56, // 4% of 14px = 0.56
                                         ),
                                       ),
                                     );
@@ -401,8 +401,12 @@ class _ProductGridItemState extends State<ProductGridItem>
                         duration: const Duration(milliseconds: 300),
                         opacity: _isHovered ? 1.0 : 0.0, // Show on hover
                         child: Container(
-                          width: imageWidth * 0.95,
-                          height: imageHeight * 0.35,
+                          width: ResponsiveUtil(
+                            context,
+                          ).getResponsiveWidth(imageWidth),
+                          height: ResponsiveUtil(
+                            context,
+                          ).getResponsiveHeight(imageHeight),
                           padding: EdgeInsets.symmetric(
                             horizontal: imageWidth * 0.05,
                             vertical: imageHeight * 0.02,
@@ -511,22 +515,11 @@ class _ProductGridItemState extends State<ProductGridItem>
                                       ),
                                     ),
                                     SizedBox(width: imageWidth * 0.02),
-                                    GestureDetector(
-                                      onTap: () {
-                                        widget.onWishlistChanged?.call(
-                                          "We'll notify you when this product is back in stock.",
-                                        );
-                                      },
-                                      child: BarlowText(
-                                        text: "NOTIFY ME",
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        lineHeight: 1.0,
-                                        enableHoverBackground: true,
-                                        hoverBackgroundColor: Colors.white,
-                                        hoverTextColor: Color(0xFF30578E),
-                                      ),
+                                    NotifyMeButton(
+                                      onWishlistChanged:
+                                          widget.onWishlistChanged,
+
+                                      productId: widget.product.id,
                                     ),
                                   ],
                                 )
@@ -565,40 +558,31 @@ class _ProductGridItemState extends State<ProductGridItem>
                                       ),
                                     ),
                                     SizedBox(width: imageWidth * 0.02),
-                                    GestureDetector(
-                                      onTap: () {
-                                        // Call the wishlist changed callback immediately
+                                    BarlowText(
+                                      text: "ADD TO CART",
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      lineHeight: 1.0,
+                                      enableHoverBackground: true,
+                                      hoverBackgroundColor: Colors.white,
+                                      hoverTextColor: Color(0xFF30578E),
+                                      onTap: () async {
+                                        // 1. Call the wishlist changed callback immediately
                                         widget.onWishlistChanged?.call(
                                           'Product Added To Cart',
                                         );
 
-                                        // Delay the modal opening by 3 seconds
-                                        Future.delayed(
-                                          Duration(seconds: 2),
-                                          () {
-                                            showDialog(
-                                              context: context,
-                                              barrierColor: Colors.transparent,
-                                              builder: (BuildContext context) {
-                                                cartNotifier.refresh();
-                                                return CartPanel(
-                                                  productId: widget.product.id,
-                                                );
-                                              },
-                                            );
-                                          },
+                                        // 2. Store the product ID in SharedPreferences
+                                        await SharedPreferencesHelper.addProductId(
+                                          widget.product.id,
                                         );
+
+                                        // 3. Refresh the cart state
+                                        cartNotifier.refresh();
+
+                                        // Note: Removed the Future.delayed and showDialog parts
                                       },
-                                      child: BarlowText(
-                                        text: "ADD TO CART",
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        lineHeight: 1.0,
-                                        enableHoverBackground: true,
-                                        hoverBackgroundColor: Colors.white,
-                                        hoverTextColor: Color(0xFF30578E),
-                                      ),
                                     ),
                                   ],
                                 ),

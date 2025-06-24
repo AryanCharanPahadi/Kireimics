@@ -168,12 +168,18 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
               top: 24,
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment:
+                  MediaQuery.of(context).size.width < 1963
+                      ? MainAxisAlignment.spaceBetween
+                      : MainAxisAlignment.start, // No spacing if width >= 1963
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Left Column - My Details
                 SizedBox(
-                  width: 370, // Fixed width for left column
+                  width:
+                      MediaQuery.of(context).size.width > 1963
+                          ? 541
+                          : 344, // Fixed width for left column
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -224,9 +230,14 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
                     ],
                   ),
                 ),
+                if (MediaQuery.of(context).size.width > 1963)
+                  SizedBox(width: 66),
                 // Right Column - My Addresses
                 SizedBox(
-                  width: 468, // Fixed width for right column
+                  width:
+                      MediaQuery.of(context).size.width > 1963
+                          ? 653
+                          : 468, // Fixed width for right column
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -286,7 +297,7 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
       children: [
         CralikaFont(
           text: title,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w600,
           fontSize: 20,
           lineHeight: 27 / 20,
           letterSpacing: 0.04 * 20,
@@ -307,7 +318,7 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
           child: BarlowText(
             text: actionText,
             fontWeight: FontWeight.w600,
-            fontSize: 16,
+            fontSize: 20,
             lineHeight: 1.0,
             letterSpacing: 0.04 * 16,
             color: Color(0xFF3E5B84),

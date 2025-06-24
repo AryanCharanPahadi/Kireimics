@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kireimics/component/api_helper/api_helper.dart';
+import '../../../component/app_routes/routes.dart';
 import '../../../component/text_fonts/custom_text.dart';
+import '../../../component/utilities/utility.dart';
+import '../../component/rotating_svg_loader.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
   final Function(String)? onWishlistChanged;
@@ -17,12 +22,20 @@ class ForgetPasswordPage extends StatefulWidget {
 }
 
 class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
+  final String formattedDate = getFormattedDate();
+  bool _isLoading = false;
+
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
+    final uri = Uri.parse(route.uri.toString());
+
+    final email = uri.queryParameters['email'];
+
     return Stack(
       children: [
         Positioned(
@@ -140,45 +153,71 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                   ),
 
                   const SizedBox(height: 44),
-                  BarlowText(
-                    text: "UPDATE PASSWORD",
-                    color: const Color(0xFF30578E),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                    lineHeight: 1.0,
-                    backgroundColor: Color(0xFFb9d6ff),
-                    hoverTextColor: Color(0xFF2876E4),
-                    onTap: () {
-                      String password = _passwordController.text.trim();
-                      String confirmPassword =
-                          _confirmPasswordController.text.trim();
+                  _isLoading
+                      ?  RotatingSvgLoader(
+    assetPath: 'assets/footer/footerbg.svg',
+    )
+                      : BarlowText(
+                      text: "UPDATE PASSWORD",
+                      color: const Color(0xFF30578E),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      lineHeight: 1.0,
+                      backgroundColor: Color(0xFFb9d6ff),
+                      hoverTextColor: Color(0xFF2876E4),
+                      onTap: () async {
+                        String password = _passwordController.text.trim();
+                        String confirmPassword = _confirmPasswordController.text.trim();
 
-                      if (password.isEmpty) {
-                        widget.onErrorWishlistChanged?.call(
-                          "Please enter password",
-                        );
-                        return;
-                      }
-                      if (confirmPassword.isEmpty) {
-                        widget.onErrorWishlistChanged?.call(
-                          "Please re-enter password",
-                        );
-                        return;
-                      }
-                      if (password != confirmPassword) {
-                        widget.onErrorWishlistChanged?.call(
-                          "Password is mismatched",
-                        );
-                        return;
-                      }
+                        if (password.isEmpty) {
+                          widget.onErrorWishlistChanged?.call("Please enter password");
+                          return;
+                        }
+                        if (confirmPassword.isEmpty) {
+                          widget.onErrorWishlistChanged?.call("Please re-enter password");
+                          return;
+                        }
+                        if (password != confirmPassword) {
+                          widget.onErrorWishlistChanged?.call("Password is mismatched");
+                          return;
+                        }
 
-                      // If all validations pass
-                      widget.onWishlistChanged?.call(
-                        "Password Reset Successfully",
-                      );
-                      _passwordController.clear();
-                      _confirmPasswordController.clear();
-                    },
+                        setState(() {
+                          _isLoading = true;
+                        });
+
+                        try {
+                          final response = await ApiHelper.passwordReset(
+                            email: email.toString(),
+                            password: _passwordController.text,
+                            updatedAt: formattedDate,
+                          );
+
+                          if (response['error'] == true) {
+                            widget.onErrorWishlistChanged?.call(response['message'] ?? "Unknown error");
+                          } else {
+                            await ApiHelper.resetPasswordSuccessfullyMail(email: email.toString());
+
+                            widget.onWishlistChanged?.call("Password Reset Successfully");
+                            _passwordController.clear();
+                            _confirmPasswordController.clear();
+
+                            Future.delayed(Duration(seconds: 3), () {
+                              if (mounted) {
+                                context.go(AppRoutes.home);
+                              }
+                            });
+                          }
+                        } catch (e) {
+                          widget.onErrorWishlistChanged?.call("Something went wrong: $e");
+                        } finally {
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        }
+                      }
                   ),
                 ],
               ),

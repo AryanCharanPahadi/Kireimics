@@ -19,7 +19,7 @@ class CartEmpty extends StatelessWidget {
     super.key,
     this.cralikaText = "Your cart is empty!",
     this.barlowText =
-    "What are you waiting for? Browse our wide range of products and bring home something new to love!",
+        "What are you waiting for? Browse our wide range of products and bring home something new to love!",
     this.hideBrowseButton = false,
 
     // DEFAULT FONT SIZES
@@ -52,7 +52,7 @@ class CartEmpty extends StatelessWidget {
             onTap: () {
               final router = GoRouter.of(context);
               final currentRoute =
-              router.routeInformationProvider.value.uri.toString();
+                  router.routeInformationProvider.value.uri.toString();
 
               if (currentRoute.contains(AppRoutes.catalog)) {
                 context.pop(); // Already on catalog → pop back
@@ -66,6 +66,7 @@ class CartEmpty extends StatelessWidget {
               color: const Color(0xFF30578E),
               fontSize: browseButtonFontSize,
               fontWeight: FontWeight.w600,
+              hoverTextColor: Color(0xFF2876E4),
             ),
           ),
       ],

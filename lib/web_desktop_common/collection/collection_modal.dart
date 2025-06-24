@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 class CollectionModal {
   final int? id;

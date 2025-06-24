@@ -1,8 +1,11 @@
 // lib/screens/policy/ShippingPolicy.dart
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:kireimics/component/api_helper/api_helper.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../component/text_fonts/custom_text.dart';
+import '../component/rotating_svg_loader.dart';
 import 'ShippingPolicyModal.dart'; // <-- Import API class
 
 class ShippingPolicy extends StatefulWidget {
@@ -33,7 +36,9 @@ class _ShippingPolicyState extends State<ShippingPolicy> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+      );
     }
 
     if (_policyModel == null) {
@@ -83,24 +88,95 @@ class _ShippingPolicyState extends State<ShippingPolicy> {
                 CralikaFont(
                   text: section.title,
                   fontSize: 20,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w600,
                 ),
                 const SizedBox(height: 16),
                 ...List.generate(
                   section.content.length,
                   (i) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: BarlowText(
-                      text: section.content[i],
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                    ),
+                    child: buildContentWithLinks(section.content[i]),
                   ),
                 ),
                 const SizedBox(height: 24),
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget buildContentWithLinks(String text) {
+    final RegExp linkRegex = RegExp(
+      r'<a\s*(.*?)<\/a>',
+    ); // Matches <a something</a>
+    final matches = linkRegex.allMatches(text);
+
+    if (matches.isEmpty) {
+      return BarlowText(text: text, fontSize: 16, fontWeight: FontWeight.w400);
+    }
+
+    final spans = <TextSpan>[];
+    int lastMatchEnd = 0;
+
+    for (final match in matches) {
+      final linkText = match.group(1)!.trim();
+
+      // Add plain text before the <a> tag
+      if (match.start > lastMatchEnd) {
+        spans.add(
+          TextSpan(
+            text: text.substring(lastMatchEnd, match.start),
+            style: const TextStyle(color: Colors.black),
+          ),
+        );
+      }
+
+      // Add link text
+      spans.add(
+        TextSpan(
+          text: linkText,
+          style: const TextStyle(color: Color(0xFF30578E)),
+          recognizer:
+              TapGestureRecognizer()
+                ..onTap = () async {
+                  final uri =
+                      linkText.contains('@')
+                          ? Uri.parse('mailto:$linkText')
+                          : Uri.parse(
+                            linkText.startsWith('http')
+                                ? linkText
+                                : 'https://$linkText',
+                          );
+
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri);
+                  }
+                },
+        ),
+      );
+
+      lastMatchEnd = match.end;
+    }
+
+    // Add any text after the last <a> tag
+    if (lastMatchEnd < text.length) {
+      spans.add(
+        TextSpan(
+          text: text.substring(lastMatchEnd),
+          style: const TextStyle(color: Colors.black),
+        ),
+      );
+    }
+
+    return SelectableText.rich(
+      TextSpan(
+        children: spans,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          height: 1.5,
         ),
       ),
     );

@@ -11,6 +11,9 @@ import '../../component/product_details/product_details_modal.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../cart/cart_panel.dart';
+import '../component/height_weight.dart';
+import '../component/rotating_svg_loader.dart';
+import '../notify_me/notify_me.dart';
 
 class WishlistUi extends StatefulWidget {
   final Function(String)? onWishlistChanged;
@@ -112,7 +115,9 @@ class _WishlistUiState extends State<WishlistUi> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF30578E)));
+      return Center(
+        child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+      );
     }
 
     if (errorMessage.isNotEmpty) {
@@ -213,7 +218,7 @@ class _WishlistUiState extends State<WishlistUi> {
                   children: [
                     CralikaFont(
                       text: "${productList.length} Items Added",
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w600,
                       fontSize: 20,
                       lineHeight: 36 / 32,
                       letterSpacing: 1.28,
@@ -454,23 +459,7 @@ class _WishlistUiState extends State<WishlistUi> {
                                                             );
                                                           }
 
-                                                          if (quantity !=
-                                                                  null &&
-                                                              quantity < 2) {
-                                                            if (badges
-                                                                .isNotEmpty)
-                                                              badges.add(
-                                                                SizedBox(
-                                                                  height: 10,
-                                                                ),
-                                                              );
-                                                            badges.add(
-                                                              SvgPicture.asset(
-                                                                "assets/home_page/fewPiecesLeft.svg",
 
-                                                              ),
-                                                            );
-                                                          }
 
                                                           if (product
                                                                   .discount !=
@@ -487,10 +476,8 @@ class _WishlistUiState extends State<WishlistUi> {
                                                                 onPressed: null,
                                                                 style: ElevatedButton.styleFrom(
                                                                   padding: EdgeInsets.symmetric(
-                                                                    vertical:
-                                                                        paddingVertical,
-                                                                    horizontal:
-                                                                        32,
+                                                                    vertical: 7.5,
+                                                                    horizontal: 14,
                                                                   ),
                                                                   backgroundColor:
                                                                       const Color(
@@ -508,16 +495,13 @@ class _WishlistUiState extends State<WishlistUi> {
                                                                       BorderSide
                                                                           .none,
                                                                 ),
-                                                                child: BarlowText(
-                                                             text:      "${product.discount}% OFF",
-                                                                  fontSize:
-                                                                  14,
-                                                                  fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                                  color:
-                                                                  Colors
-                                                                      .white,
+                                                                child:BarlowText(
+                                                                  text: "${product.discount}% OFF",
+                                                                  fontSize: 14,
+                                                                  fontWeight: FontWeight.w600,
+                                                                  color: Colors.white,
+                                                                  lineHeight: 1.0, // 100% of font size
+                                                                  letterSpacing: 0.56, // 4% of 14px = 0.56
                                                                 ),
                                                               ),
                                                             );
@@ -571,8 +555,16 @@ class _WishlistUiState extends State<WishlistUi> {
                                                         ? 1.0
                                                         : 0.0,
                                                 child: Container(
-                                                  width: imageWidth * 0.95,
-                                                  height: imageHeight * 0.35,
+                                                  width: ResponsiveUtil(
+                                                    context,
+                                                  ).getResponsiveWidth(
+                                                    imageWidth,
+                                                  ),
+                                                  height: ResponsiveUtil(
+                                                    context,
+                                                  ).getResponsiveHeight(
+                                                    imageHeight,
+                                                  ),
                                                   padding: EdgeInsets.symmetric(
                                                     horizontal:
                                                         imageWidth * 0.05,
@@ -613,34 +605,53 @@ class _WishlistUiState extends State<WishlistUi> {
                                                         Row(
                                                           children: [
                                                             // Original price with strikethrough
-                                                            if (product.discount != 0)
+                                                            if (product
+                                                                    .discount !=
+                                                                0)
                                                               Text(
                                                                 "Rs. ${product.price.toStringAsFixed(2)}",
                                                                 style: TextStyle(
-                                                                  color: Colors.white.withOpacity(0.7),
-                                                                  fontWeight: FontWeight.w400,
+                                                                  color: Colors
+                                                                      .white
+                                                                      .withOpacity(
+                                                                        0.7,
+                                                                      ),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
                                                                   fontSize: 14,
                                                                   height: 1.2,
-                                                                  decoration: TextDecoration.lineThrough,
-                                                                  decorationColor: Colors.white
+                                                                  decoration:
+                                                                      TextDecoration
+                                                                          .lineThrough,
+                                                                  decorationColor: Colors
+                                                                      .white
                                                                       .withOpacity(
-                                                                    0.7,
-                                                                  ), // Match strikethrough color
+                                                                        0.7,
+                                                                      ), // Match strikethrough color
                                                                   fontFamily:
-                                                                  GoogleFonts.barlow()
-                                                                      .fontFamily, // Match Barlow font
+                                                                      GoogleFonts.barlow()
+                                                                          .fontFamily, // Match Barlow font
                                                                 ),
                                                               ),
-                                                            if (product.discount != 0)
-                                                              SizedBox(width: 8),
+                                                            if (product
+                                                                    .discount !=
+                                                                0)
+                                                              SizedBox(
+                                                                width: 8,
+                                                              ),
                                                             // Discounted price
                                                             BarlowText(
                                                               text:
-                                                              product.discount != 0
-                                                                  ? "Rs. ${(product.price * (1 - product.discount / 100)).toStringAsFixed(2)}"
-                                                                  : "Rs. ${product.price.toStringAsFixed(2)}",
-                                                              color: Colors.white,
-                                                              fontWeight: FontWeight.w600,
+                                                                  product.discount !=
+                                                                          0
+                                                                      ? "Rs. ${(product.price * (1 - product.discount / 100)).toStringAsFixed(2)}"
+                                                                      : "Rs. ${product.price.toStringAsFixed(2)}",
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
                                                               fontSize: 14,
                                                               lineHeight: 1.2,
                                                             ),
@@ -648,18 +659,22 @@ class _WishlistUiState extends State<WishlistUi> {
                                                         ),
                                                       ],
 
-                                                      if(isOutOfStock)...[
+                                                      if (isOutOfStock) ...[
                                                         BarlowText(
                                                           text:
-                                                          "Rs. ${product.price.toStringAsFixed(2)}",
+                                                              "Rs. ${product.price.toStringAsFixed(2)}",
                                                           color: Colors.white,
-                                                          fontWeight: FontWeight.w600,
+                                                          fontWeight:
+                                                              FontWeight.w600,
                                                           fontSize: 14,
                                                           lineHeight: 1.2,
                                                         ),
                                                       ],
 
-                                                      SizedBox(height: imageHeight * 0.04),
+                                                      SizedBox(
+                                                        height:
+                                                            imageHeight * 0.04,
+                                                      ),
                                                       if (isOutOfStock)
                                                         Row(
                                                           children: [
@@ -718,37 +733,14 @@ class _WishlistUiState extends State<WishlistUi> {
                                                                   imageWidth *
                                                                   0.02,
                                                             ),
-                                                            GestureDetector(
-                                                              onTap: () {
-                                                                widget
-                                                                    .onWishlistChanged
-                                                                    ?.call(
-                                                                      "We'll notify you when this product is back in stock.",
-                                                                    );
-                                                              },
-                                                              child: BarlowText(
-                                                                text:
-                                                                    "NOTIFY ME",
-                                                                color:
-                                                                    Colors
-                                                                        .white,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                fontSize: 16,
-                                                                lineHeight: 1.0,
-                                                                enableHoverBackground:
-                                                                    true,
-                                                                hoverBackgroundColor:
-                                                                    Colors
-                                                                        .white,
-                                                                hoverTextColor:
-                                                                    Color(
-                                                                      0xFF30578E,
-                                                                    ),
-                                                              ),
-                                                            ),
-                                                          ],
+                                                            NotifyMeButton(
+                                                              onWishlistChanged:
+                                                              widget
+                                                                  .onWishlistChanged,
+
+                                                              productId:
+                                                              product.id,
+                                                            ),                                                          ],
                                                         )
                                                       else
                                                         Row(
@@ -802,46 +794,43 @@ class _WishlistUiState extends State<WishlistUi> {
                                                                   imageWidth *
                                                                   0.02,
                                                             ),
-                                                            GestureDetector(
-                                                              onTap: () {
-                                                                // Call the wishlist changed callback immediately
-                                                                widget.onWishlistChanged?.call('Product Added To Cart');
+                                                            BarlowText(
+                                                              text:
+                                                                  "ADD TO CART",
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              fontSize: 16,
+                                                              lineHeight: 1.0,
+                                                              enableHoverBackground:
+                                                                  true,
+                                                              hoverBackgroundColor:
+                                                                  Colors.white,
+                                                              hoverTextColor:
+                                                                  const Color(
+                                                                    0xFF30578E,
+                                                                  ),
+                                                              onTap: () async {
+                                                                // 1. Call the wishlist changed callback immediately
+                                                                widget
+                                                                    .onWishlistChanged
+                                                                    ?.call(
+                                                                      'Product Added To Cart',
+                                                                    );
 
-                                                                // Delay the modal opening by 3 seconds
-                                                                Future.delayed(Duration(seconds: 2), () {
-                                                                  showDialog(
-                                                                    context: context,
-                                                                    barrierColor: Colors.transparent,
-                                                                    builder: (BuildContext context) {
-                                                                      cartNotifier.refresh();
-                                                                      return CartPanel(
-                                                                        productId: product.id,
-                                                                      );
-                                                                    },
-                                                                  );
-                                                                });
+                                                                // 2. Store the product ID in SharedPreferences
+                                                                await SharedPreferencesHelper.addProductId(
+                                                                  product.id,
+                                                                );
+
+                                                                // 3. Refresh the cart state
+                                                                cartNotifier
+                                                                    .refresh();
+
+                                                                // Note: Removed the Future.delayed and showDialog parts
                                                               },
-                                                              child: BarlowText(
-                                                                text:
-                                                                    "ADD TO CART",
-                                                                color:
-                                                                    Colors
-                                                                        .white,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                fontSize: 16,
-                                                                lineHeight: 1.0,
-                                                                enableHoverBackground:
-                                                                    true,
-                                                                hoverBackgroundColor:
-                                                                    Colors
-                                                                        .white,
-                                                                hoverTextColor:
-                                                                    const Color(
-                                                                      0xFF30578E,
-                                                                    ),
-                                                              ),
                                                             ),
                                                           ],
                                                         ),

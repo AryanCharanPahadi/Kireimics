@@ -9,11 +9,14 @@ import 'package:kireimics/component/app_routes/routes.dart';
 import 'package:kireimics/mobile/address_page/add_address_ui/add_address_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../component/api_helper/api_helper.dart';
 import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
+import '../../../component/utilities/utility.dart';
 import '../../../web/checkout/checkout_controller.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_controller.dart';
+import '../../../web_desktop_common/component/rotating_svg_loader.dart';
 
 class ForgotPasswordMainMobile extends StatefulWidget {
   final Function(String)? onWishlistChanged;
@@ -33,8 +36,15 @@ class _ForgotPasswordMainMobileState extends State<ForgotPasswordMainMobile> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final String formattedDate = getFormattedDate();
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
+    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
+    final uri = Uri.parse(route.uri.toString());
+
+    final email = uri.queryParameters['email'];
     return Stack(
       children: [
         Positioned(
@@ -144,49 +154,96 @@ class _ForgotPasswordMainMobileState extends State<ForgotPasswordMainMobile> {
                         children: [
                           Column(
                             children: [
-                              BarlowText(
-                                text: "UPDATE PASSWORD",
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                lineHeight: 1.0,
-                                letterSpacing: 0.64,
-                                color: Color(0xFF30578E),
-                                backgroundColor: Color(0xFFb9d6ff),
-                                hoverTextColor: Color(0xFF2876E4),
-                                onTap: () {
-                                  String password =
-                                      _passwordController.text.trim();
-                                  String confirmPassword =
-                                      _confirmPasswordController.text.trim();
+                              _isLoading
+                                  ?  RotatingSvgLoader(
+                        assetPath: 'assets/footer/footerbg.svg',
+                      )
+                                  : BarlowText(
+                                    text: "UPDATE PASSWORD",
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                    lineHeight: 1.0,
+                                    letterSpacing: 0.64,
+                                    color: Color(0xFF30578E),
+                                    backgroundColor: Color(0xFFb9d6ff),
+                                    hoverTextColor: Color(0xFF2876E4),
+                                    onTap: () async {
+                                      String password =
+                                          _passwordController.text.trim();
+                                      String confirmPassword =
+                                          _confirmPasswordController.text
+                                              .trim();
 
-                                  if (password.isEmpty) {
-                                    widget.onErrorWishlistChanged?.call(
-                                      "Please enter password",
-                                    );
-                                    return;
-                                  }
-                                  if (confirmPassword.isEmpty) {
-                                    widget.onErrorWishlistChanged?.call(
-                                      "Please re-enter password",
-                                    );
-                                    return;
-                                  }
-                                  if (password != confirmPassword) {
-                                    widget.onErrorWishlistChanged?.call(
-                                      "Password is mismatched",
-                                    );
-                                    return;
-                                  }
+                                      if (password.isEmpty) {
+                                        widget.onErrorWishlistChanged?.call(
+                                          "Please enter password",
+                                        );
+                                        return;
+                                      }
+                                      if (confirmPassword.isEmpty) {
+                                        widget.onErrorWishlistChanged?.call(
+                                          "Please re-enter password",
+                                        );
+                                        return;
+                                      }
+                                      if (password != confirmPassword) {
+                                        widget.onErrorWishlistChanged?.call(
+                                          "Password is mismatched",
+                                        );
+                                        return;
+                                      }
 
-                                  // If all validations pass
-                                  widget.onWishlistChanged?.call(
-                                    "Password Reset Successfully",
-                                  );
-                                  _passwordController.clear();
-                                  _confirmPasswordController.clear();
-                                  context.go(AppRoutes.logIn);
-                                },
-                              ),
+                                      setState(() {
+                                        _isLoading = true;
+                                      });
+
+                                      try {
+                                        final response =
+                                            await ApiHelper.passwordReset(
+                                              email: email.toString(),
+                                              password:
+                                                  _passwordController.text,
+                                              updatedAt: formattedDate,
+                                            );
+
+                                        if (response['error'] == true) {
+                                          widget.onErrorWishlistChanged?.call(
+                                            response['message'] ??
+                                                "Unknown error",
+                                          );
+                                        } else {
+                                          await ApiHelper.resetPasswordSuccessfullyMail(
+                                            email: email.toString(),
+                                          );
+
+                                          widget.onWishlistChanged?.call(
+                                            "Password Reset Successfully",
+                                          );
+                                          _passwordController.clear();
+                                          _confirmPasswordController.clear();
+
+                                          Future.delayed(
+                                            Duration(seconds: 3),
+                                            () {
+                                              if (mounted) {
+                                                context.go(AppRoutes.home);
+                                              }
+                                            },
+                                          );
+                                        }
+                                      } catch (e) {
+                                        widget.onErrorWishlistChanged?.call(
+                                          "Something went wrong: $e",
+                                        );
+                                      } finally {
+                                        if (mounted) {
+                                          setState(() {
+                                            _isLoading = false;
+                                          });
+                                        }
+                                      }
+                                    },
+                                  ),
                             ],
                           ),
                         ],

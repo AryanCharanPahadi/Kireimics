@@ -10,12 +10,16 @@ import 'package:kireimics/component/text_fonts/custom_text.dart';
 import 'package:kireimics/component/app_routes/routes.dart';
 import '../../component/api_helper/api_helper.dart';
 import '../../component/cart_length/cart_loader.dart';
-import '../../component/no_result_found/no_order_yet.dart';
+import '../../component/no_found_page/404_page.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../web_desktop_common/cart/cart_panel.dart';
 import '../catalog_sale_gridview/catalog_controller1.dart';
+import '../component/badges_web_desktop.dart';
+import '../component/height_weight.dart';
+import '../component/rotating_svg_loader.dart';
 import '../login_signup/login/login_page.dart';
+import '../notify_me/notify_me.dart';
 
 class ProductDetails extends StatefulWidget {
   final int productId;
@@ -127,19 +131,25 @@ class _ProductDetailsState extends State<ProductDetails>
                     .where(
                       (p) => p.id != widget.productId,
                     ) // Exclude current product
-                    .toList(); // Remove the .take(3) limit
+                    .toList();
           });
         }
       } else {
-        setState(() {
-          errorMessage = "Product not found";
-          isLoading = false;
+        // Navigate to page not found if product is not found
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NoFoundPage()),
+          );
         });
       }
     } catch (e) {
-      setState(() {
-        errorMessage = "Something went wrong";
-        isLoading = false;
+      // Navigate to page not found for any error
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => NoFoundPage()),
+        );
       });
     }
   }
@@ -158,7 +168,9 @@ class _ProductDetailsState extends State<ProductDetails>
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1400;
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFF30578E)));
+      return Center(
+        child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+      );
     }
 
     if (errorMessage.isNotEmpty) {
@@ -276,28 +288,20 @@ class _ProductDetailsState extends State<ProductDetails>
                               color: Color(0xFF414141),
                             ),
                             SizedBox(height: 19),
-                            GestureDetector(
+                            BarlowText(
+                              text: "BROWSE OUR CATALOG",
+                              textAlign: TextAlign.right,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              lineHeight: 1.0,
+                              letterSpacing: 0.64,
+                              color: Color(0xFF30578E),
+                              backgroundColor: Color(0xFFb9d6ff),
                               onTap: () {
-                                final controller = Get.put(
-                                  CatalogPageController(),
-                                );
-                                controller.selectedCategoryId.value =
-                                    product!.catId;
                                 context.go(
-                                  AppRoutes.catalog,
-                                  extra: {'categoryId': product!.catId},
+                                  '${AppRoutes.catalog}?cat_id=${product!.catId}', // Use URL parameter
                                 );
                               },
-                              child: BarlowText(
-                                text: "BROWSE OUR CATALOG",
-                                textAlign: TextAlign.right,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                lineHeight: 1.0,
-                                letterSpacing: 0.64,
-                                color: Color(0xFF30578E),
-                                backgroundColor: Color(0xFFb9d6ff),
-                              ),
                             ),
                           ],
                         ),
@@ -403,8 +407,8 @@ class _ProductDetailsState extends State<ProductDetails>
 
                                         Positioned(
                                           top: 10,
-                                          left: 6,
-                                          right: 6,
+                                          left: 15,
+                                          right: 15,
                                           child: LayoutBuilder(
                                             builder: (context, constraints) {
                                               double screenWidth =
@@ -427,223 +431,14 @@ class _ProductDetailsState extends State<ProductDetails>
                                               double paddingVertical =
                                                   getResponsiveValue(6, 12);
 
-                                              if (isOutOfStock) {
-                                                return Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Align(
-                                                      alignment:
-                                                          Alignment.centerLeft,
-                                                      child: SvgPicture.asset(
-                                                        "assets/home_page/outofstock.svg",
-                                                        height: 25,
-                                                        width: 25,
-                                                      ),
-                                                    ),
-                                                    Align(
-                                                      alignment:
-                                                          Alignment.centerRight,
-                                                      child: FutureBuilder<
-                                                        bool
-                                                      >(
-                                                        future:
-                                                            SharedPreferencesHelper.isInWishlist(
-                                                              relatedProduct.id
-                                                                  .toString(),
-                                                            ),
-                                                        builder: (
-                                                          context,
-                                                          snapshot,
-                                                        ) {
-                                                          final isInWishlist =
-                                                              snapshot.data ??
-                                                              false;
-                                                          return GestureDetector(
-                                                            onTap: () async {
-                                                              if (isInWishlist) {
-                                                                await SharedPreferencesHelper.removeFromWishlist(
-                                                                  relatedProduct
-                                                                      .id
-                                                                      .toString(),
-                                                                );
-                                                                widget
-                                                                    .onWishlistChanged
-                                                                    ?.call(
-                                                                      'Product Removed From Wishlist',
-                                                                    );
-                                                              } else {
-                                                                await SharedPreferencesHelper.addToWishlist(
-                                                                  relatedProduct
-                                                                      .id
-                                                                      .toString(),
-                                                                );
-                                                                widget
-                                                                    .onWishlistChanged
-                                                                    ?.call(
-                                                                      'Product Added To Wishlist',
-                                                                    );
-                                                              }
-                                                              setState(() {});
-                                                            },
-                                                            child: SvgPicture.asset(
-                                                              isInWishlist
-                                                                  ? 'assets/home_page/IconWishlist.svg'
-                                                                  : 'assets/home_page/IconWishlistEmpty.svg',
-                                                              width: 23,
-                                                              height: 20,
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ],
-                                                );
-                                              }
-
-                                              return Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Builder(
-                                                    builder: (context) {
-                                                      final List<Widget>
-                                                      badges = [];
-
-                                                      if (relatedProduct
-                                                              .isMakerChoice ==
-                                                          1) {
-                                                        badges.add(
-                                                          SvgPicture.asset(
-                                                            "assets/home_page/maker_choice.svg",
-                                                            height: 50,
-                                                          ),
-                                                        );
-                                                      }
-
-                                                      if (quantity != null &&
-                                                          quantity < 2) {
-                                                        if (badges.isNotEmpty)
-                                                          badges.add(
-                                                            SizedBox(
-                                                              height: 10,
-                                                            ),
-                                                          );
-                                                        badges.add(
-                                                          SvgPicture.asset(
-                                                            "assets/home_page/fewPiecesLeft.svg",
-                                                          ),
-                                                        );
-                                                      }
-
-                                                      if (relatedProduct
-                                                              .discount !=
-                                                          0) {
-                                                        if (badges.isNotEmpty)
-                                                          badges.add(
-                                                            SizedBox(
-                                                              height: 10,
-                                                            ),
-                                                          );
-                                                        badges.add(
-                                                          ElevatedButton(
-                                                            onPressed: null,
-                                                            style: ElevatedButton.styleFrom(
-                                                              padding:
-                                                                  EdgeInsets.symmetric(
-                                                                    vertical:
-                                                                        paddingVertical,
-                                                                    horizontal:
-                                                                        32,
-                                                                  ),
-                                                              backgroundColor:
-                                                                  const Color(
-                                                                    0xFFF46856,
-                                                                  ),
-                                                              disabledBackgroundColor:
-                                                                  const Color(
-                                                                    0xFFF46856,
-                                                                  ),
-                                                              disabledForegroundColor:
-                                                                  Colors.white,
-                                                              elevation: 0,
-                                                              side:
-                                                                  BorderSide
-                                                                      .none,
-                                                            ),
-                                                            child: BarlowText(
-                                                              text:
-                                                                  "${relatedProduct.discount}% OFF",
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
-                                                          ),
-                                                        );
-                                                      }
-
-                                                      return Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: badges,
-                                                      );
-                                                    },
-                                                  ),
-                                                  Spacer(),
-                                                  FutureBuilder<bool>(
-                                                    future:
-                                                        SharedPreferencesHelper.isInWishlist(
-                                                          relatedProduct.id
-                                                              .toString(),
-                                                        ),
-                                                    builder: (
-                                                      context,
-                                                      snapshot,
-                                                    ) {
-                                                      final isInWishlist =
-                                                          snapshot.data ??
-                                                          false;
-                                                      return GestureDetector(
-                                                        onTap: () async {
-                                                          if (isInWishlist) {
-                                                            await SharedPreferencesHelper.removeFromWishlist(
-                                                              relatedProduct.id
-                                                                  .toString(),
-                                                            );
-                                                            widget
-                                                                .onWishlistChanged
-                                                                ?.call(
-                                                                  'Product Removed From Wishlist',
-                                                                );
-                                                          } else {
-                                                            await SharedPreferencesHelper.addToWishlist(
-                                                              relatedProduct.id
-                                                                  .toString(),
-                                                            );
-                                                            widget
-                                                                .onWishlistChanged
-                                                                ?.call(
-                                                                  'Product Added To Wishlist',
-                                                                );
-                                                          }
-                                                          setState(() {});
-                                                        },
-                                                        child: SvgPicture.asset(
-                                                          isInWishlist
-                                                              ? 'assets/home_page/IconWishlist.svg'
-                                                              : 'assets/home_page/IconWishlistEmpty.svg',
-                                                          width: 23,
-                                                          height: 20,
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                ],
+                                              return WishlistBadgeRow(
+                                                product: relatedProduct,
+                                                isOutOfStock: isOutOfStock,
+                                                quantity: quantity,
+                                                onWishlistChanged:
+                                                    widget.onWishlistChanged,
+                                                paddingVertical:
+                                                    paddingVertical,
                                               );
                                             },
                                           ),
@@ -800,30 +595,13 @@ class _ProductDetailsState extends State<ProductDetails>
                                                           ),
                                                         ),
                                                         SizedBox(width: 5),
-                                                        GestureDetector(
-                                                          onTap: () {
-                                                            widget
-                                                                .onWishlistChanged
-                                                                ?.call(
-                                                                  "We'll notify you when this product is back in stock.",
-                                                                );
-                                                          },
-                                                          child: BarlowText(
-                                                            text: "NOTIFY ME",
-                                                            color: Colors.white,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 16,
-                                                            lineHeight: 1.0,
-                                                            enableHoverBackground:
-                                                                true,
-                                                            hoverBackgroundColor:
-                                                                Colors.white,
-                                                            hoverTextColor:
-                                                                Color(
-                                                                  0xFF30578E,
-                                                                ),
-                                                          ),
+                                                        NotifyMeButton(
+                                                          onWishlistChanged:
+                                                              widget
+                                                                  .onWishlistChanged,
+
+                                                          productId:
+                                                              relatedProduct.id,
                                                         ),
                                                       ],
                                                     )
@@ -866,43 +644,40 @@ class _ProductDetailsState extends State<ProductDetails>
                                                           lineHeight: 1.0,
                                                         ),
                                                         SizedBox(width: 5),
-                                                        GestureDetector(
-                                                          onTap: () {
-                                                            showDialog(
-                                                              context: context,
-                                                              barrierColor:
-                                                                  Colors
-                                                                      .transparent,
-                                                              builder: (
-                                                                BuildContext
-                                                                context,
-                                                              ) {
-                                                                cartNotifier
-                                                                    .refresh();
-                                                                return CartPanel(
-                                                                  productId:
-                                                                      relatedProduct
-                                                                          .id,
+                                                        BarlowText(
+                                                          text: "ADD TO CART",
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 16,
+                                                          lineHeight: 1.0,
+                                                          enableHoverBackground:
+                                                              true,
+                                                          hoverBackgroundColor:
+                                                              Colors.white,
+                                                          hoverTextColor:
+                                                              const Color(
+                                                                0xFF30578E,
+                                                              ),
+                                                          onTap: () async {
+                                                            // 1. Call the wishlist changed callback immediately
+                                                            widget
+                                                                .onWishlistChanged
+                                                                ?.call(
+                                                                  'Product Added To Cart',
                                                                 );
-                                                              },
+
+                                                            // 2. Store the product ID in SharedPreferences
+                                                            await SharedPreferencesHelper.addProductId(
+                                                              relatedProduct.id,
                                                             );
+
+                                                            // 3. Refresh the cart state
+                                                            cartNotifier
+                                                                .refresh();
+
+                                                            // Note: Removed the Future.delayed and showDialog parts
                                                           },
-                                                          child: BarlowText(
-                                                            text: "ADD TO CART",
-                                                            color: Colors.white,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 16,
-                                                            lineHeight: 1.0,
-                                                            enableHoverBackground:
-                                                                true,
-                                                            hoverBackgroundColor:
-                                                                Colors.white,
-                                                            hoverTextColor:
-                                                                const Color(
-                                                                  0xFF30578E,
-                                                                ),
-                                                          ),
                                                         ),
                                                       ],
                                                     ),
@@ -972,17 +747,8 @@ class _ProductDetailsState extends State<ProductDetails>
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
                           onTap: () {
-                            final controller = Get.put(
-                              CatalogPageController(),
-                            ); // Access the controller
-                            controller.selectedCategoryId.value =
-                                product!.catId; // Update selectedCategoryId
                             context.go(
-                              AppRoutes
-                                  .catalog, // Navigate to the CatalogPage route
-                              extra: {
-                                'categoryId': product!.catId,
-                              }, // Pass categoryId as extra data if needed
+                              '${AppRoutes.catalog}?cat_id=${product!.catId}', // Use URL parameter
                             );
                           },
                         ),
@@ -1048,6 +814,11 @@ class _ProductDetailsState extends State<ProductDetails>
                               lineHeight: 1.0,
                               letterSpacing: 1 * 0.04, // 4% of 32px
                               color: Color(0xFF30578E),
+                              onTap: () {
+                                context.go(
+                                  '${AppRoutes.catalog}?cat_id=${product!.catId}', // Use URL parameter
+                                );
+                              },
                             ),
 
                             SizedBox(height: 14),
@@ -1132,28 +903,30 @@ class _ProductDetailsState extends State<ProductDetails>
                                         ),
                                       ],
                                     )
-                                    : GestureDetector(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          barrierColor: Colors.transparent,
-                                          builder: (BuildContext context) {
-                                            cartNotifier.refresh();
-                                            return CartPanel(
-                                              productId: product!.id,
-                                            );
-                                          },
+                                    : BarlowText(
+                                      text: "ADD TO CART",
+                                      color: Color(0xFF30578E),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      lineHeight: 1.0,
+                                      letterSpacing: 1 * 0.04,
+                                      backgroundColor: Color(0xFFb9d6ff),
+                                      onTap: () async {
+                                        // 1. Call the wishlist changed callback immediately
+                                        widget.onWishlistChanged?.call(
+                                          'Product Added To Cart',
                                         );
+
+                                        // 2. Store the product ID in SharedPreferences
+                                        await SharedPreferencesHelper.addProductId(
+                                          product!.id,
+                                        );
+
+                                        // 3. Refresh the cart state
+                                        cartNotifier.refresh();
+
+                                        // Note: Removed the Future.delayed and showDialog parts
                                       },
-                                      child: BarlowText(
-                                        text: "ADD TO CART",
-                                        color: Color(0xFF30578E),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        lineHeight: 1.0,
-                                        letterSpacing: 1 * 0.04,
-                                        backgroundColor: Color(0xFFb9d6ff),
-                                      ),
                                     );
                               },
                             ),

@@ -9,14 +9,22 @@ import 'package:kireimics/component/app_routes/routes.dart';
 import 'package:kireimics/mobile/address_page/add_address_ui/add_address_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../component/api_helper/api_helper.dart';
 import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../web/checkout/checkout_controller.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_controller.dart';
+import '../../../web_desktop_common/component/rotating_svg_loader.dart';
 
 class ForgotPasswordUiMobile extends StatefulWidget {
-  const ForgotPasswordUiMobile({super.key});
+  final Function(String)? onWishlistChanged;
+  final Function(String)? onErrorWishlistChanged;
+  const ForgotPasswordUiMobile({
+    super.key,
+    this.onWishlistChanged,
+    this.onErrorWishlistChanged,
+  });
 
   @override
   State<ForgotPasswordUiMobile> createState() => _ForgotPasswordUiMobileState();
@@ -25,6 +33,7 @@ class ForgotPasswordUiMobile extends StatefulWidget {
 class _ForgotPasswordUiMobileState extends State<ForgotPasswordUiMobile> {
   final TextEditingController emailController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  bool isSendingMail = false;
 
   @override
   Widget build(BuildContext context) {
@@ -97,19 +106,71 @@ class _ForgotPasswordUiMobileState extends State<ForgotPasswordUiMobile> {
                       Column(
                         children: [
                           GestureDetector(
-                            onTap: () {
-                              context.go(AppRoutes.forgotPasswordMain);
+                            onTap: () async {
+                              if (formKey.currentState!.validate()) {
+                                setState(() {
+                                  isSendingMail = true;
+                                });
+
+                                final mailResponse =
+                                    await ApiHelper.resetPasswordMail(
+                                      email: emailController.text,
+                                    );
+
+                                print(
+                                  "Password Reset Mail Response: $mailResponse",
+                                );
+
+                                if (mailResponse is Map &&
+                                    mailResponse['error'] == false) {
+                                  widget.onWishlistChanged?.call(
+                                    "Password reset link sent successfully.",
+                                  );
+
+                                  setState(() {
+                                    isSendingMail = false;
+                                  });
+                                  emailController.clear();
+
+                                  Future.delayed(Duration(seconds: 3), () {
+                                    if (mounted) context.go(AppRoutes.logIn);
+                                    ;
+                                  });
+                                } else {
+                                  final errorMsg =
+                                      mailResponse is Map &&
+                                              mailResponse['message'] != null
+                                          ? mailResponse['message']
+                                          : 'Something went wrong. Please try again.';
+
+                                  widget.onErrorWishlistChanged?.call(errorMsg);
+
+                                  setState(() {
+                                    isSendingMail = false;
+                                  });
+                                }
+                              }
                             },
-                            child: BarlowText(
-                              text: "SEND RESET LINK",
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              lineHeight: 1.0,
-                              letterSpacing: 0.64,
-                              color: Color(0xFF30578E),
-                              backgroundColor: Color(0xFFb9d6ff),
-                              hoverTextColor: Color(0xFF2876E4),
-                            ),
+
+                            child:
+                                isSendingMail
+                                    ? SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child:  RotatingSvgLoader(
+                                        assetPath: 'assets/footer/footerbg.svg',
+                                      ),
+                                    )
+                                    : BarlowText(
+                                      text: "SEND RESET LINK",
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                      lineHeight: 1.0,
+                                      letterSpacing: 0.64,
+                                      color: Color(0xFF30578E),
+                                      backgroundColor: Color(0xFFb9d6ff),
+                                      hoverTextColor: Color(0xFF2876E4),
+                                    ),
                           ),
                         ],
                       ),

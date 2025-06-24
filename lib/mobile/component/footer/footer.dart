@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../component/app_routes/routes.dart';
+import '../../../web_desktop_common/component/rotating_svg_loader.dart';
 import 'footer_controller.dart';
 
 class Footer extends StatefulWidget {
@@ -110,7 +111,9 @@ class _FooterState extends State<Footer> {
                 Obx(
                   () =>
                       footerController.isLoading.value
-                          ? const Center(child: CircularProgressIndicator())
+                          ? const Center(child:  RotatingSvgLoader(
+                        assetPath: 'assets/footer/footerbg.svg',
+                      ),)
                           : footerController.errorMessage.value.isNotEmpty
                           ? Center(
                             child: Text(footerController.errorMessage.value),

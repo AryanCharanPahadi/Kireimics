@@ -87,7 +87,6 @@ class MyApp extends StatelessWidget {
                   const ResponsiveLayout(initialRoute: AppRoutes.about),
         ),
 
-
         GoRoute(
           path: AppRoutes.searchQuery,
           builder:

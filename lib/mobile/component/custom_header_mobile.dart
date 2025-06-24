@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/text_fonts/custom_text.dart';
 import '../../component/app_routes/routes.dart';
+import '../../component/cart_length/cart_loader.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import 'drawer.dart';
 
@@ -143,28 +144,37 @@ class _CustomHeaderMobileState extends State<CustomHeaderMobile>
             ),
           ),
         ),
-        if (_cartItemCount > 0)
-          Positioned(
-            top: 13,
-            right: 10,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Colors.redAccent,
-                shape: BoxShape.circle,
-              ),
-              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-              child: Text(
-                '$_cartItemCount',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
+        ValueListenableBuilder<int>(
+          valueListenable: cartNotifier,
+          builder: (context, count, _) {
+            return count > 0
+                ? Positioned(
+                  top: 13,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      '$count', // ✅ Use notifier value directly
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+                : const SizedBox.shrink();
+          },
+        ),
       ],
     );
   }
@@ -378,10 +388,11 @@ class _Column1State extends State<Column1> {
                               : 'assets/icons/closeIcon.svg',
                           height: 17,
                           width: 17,
-                          color: const Color(0xFF30578E), // remove this if SVG has its own colors
+                          color: const Color(
+                            0xFF30578E,
+                          ), // remove this if SVG has its own colors
                         ),
                       ),
-
                     ],
                   ),
                   const SizedBox(height: 05),
