@@ -112,6 +112,25 @@ class _ForgotPasswordUiMobileState extends State<ForgotPasswordUiMobile> {
                                   isSendingMail = true;
                                 });
 
+                                final response = await ApiHelper.fetchUserData(
+                                  emailController.text,
+                                );
+
+                                // If user not found
+                                if (response == null ||
+                                    response['error'] == true ||
+                                    response['data'] == null ||
+                                    (response['data'] as List).isEmpty) {
+                                  setState(() {
+                                    isSendingMail = false;
+                                  });
+
+                                  widget.onErrorWishlistChanged?.call(
+                                    "Data not found with this email",
+                                  );
+                                  return;
+                                }
+
                                 final mailResponse =
                                     await ApiHelper.resetPasswordMail(
                                       email: emailController.text,
@@ -121,8 +140,7 @@ class _ForgotPasswordUiMobileState extends State<ForgotPasswordUiMobile> {
                                   "Password Reset Mail Response: $mailResponse",
                                 );
 
-                                if (mailResponse is Map &&
-                                    mailResponse['error'] == false) {
+                                if (mailResponse['error'] == false) {
                                   widget.onWishlistChanged?.call(
                                     "Password reset link sent successfully.",
                                   );
@@ -138,10 +156,8 @@ class _ForgotPasswordUiMobileState extends State<ForgotPasswordUiMobile> {
                                   });
                                 } else {
                                   final errorMsg =
-                                      mailResponse is Map &&
-                                              mailResponse['message'] != null
-                                          ? mailResponse['message']
-                                          : 'Something went wrong. Please try again.';
+                                      mailResponse['message'] ??
+                                      'Something went wrong. Please try again.';
 
                                   widget.onErrorWishlistChanged?.call(errorMsg);
 
@@ -157,7 +173,7 @@ class _ForgotPasswordUiMobileState extends State<ForgotPasswordUiMobile> {
                                     ? SizedBox(
                                       height: 24,
                                       width: 24,
-                                      child:  RotatingSvgLoader(
+                                      child: RotatingSvgLoader(
                                         assetPath: 'assets/footer/footerbg.svg',
                                       ),
                                     )

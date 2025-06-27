@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:kireimics/mobile/component/scrolling_header.dart';
 import 'package:kireimics/component/app_routes/routes.dart'; // Import your routes file
+import '../../component/cart_length/cart_loader.dart';
 import '../../component/google_sign_in/auth.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/text_fonts/custom_text.dart';
@@ -109,17 +110,14 @@ class _DrawerMobileState extends State<DrawerMobile>
                         },
                       ),
 
-                      const Text(
-                        "MENU",
+                      const CralikaFont(
+                        text: "MENU",
                         textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontFamily: "Cralika",
-                          fontWeight: FontWeight.w400,
-                          fontSize: 32,
-                          height: 1.0,
-                          letterSpacing: 1.28,
-                          color: Colors.white,
-                        ),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 32,
+                        lineHeight: 1.0,
+                        letterSpacing: 1.28,
+                        color: Colors.white,
                       ),
                     ],
                   ),
@@ -303,10 +301,12 @@ class _DrawerMobileState extends State<DrawerMobile>
                                     // Clear custom shared user data
                                     await SharedPreferencesHelper.clearUserData();
                                     await SharedPreferencesHelper.clearSelectedAddress();
+                                    cartNotifier.value = 0;
 
                                     // Refresh CheckoutController
-                                    final checkoutController =
-                                    Get.put(CheckoutController());
+                                    final checkoutController = Get.put(
+                                      CheckoutController(),
+                                    );
                                     checkoutController.reset();
                                     context.go(
                                       AppRoutes.home,

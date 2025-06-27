@@ -163,9 +163,11 @@ class _SearchGridviewState extends State<SearchGridview>
                     final resultCount =
                         productController.filteredProducts.length;
                     final resultText =
-                        resultCount == 1
-                            ? '1 Result'
-                            : '$resultCount Result${resultCount == 0 ? '' : 's'}';
+                    resultCount == 1
+                        ? '1 Result'
+                        : resultCount == 0
+                        ? '0 Result'
+                        : '$resultCount Results';
 
                     if (productController.filteredProducts.isEmpty) {
                       return Column(
@@ -178,7 +180,7 @@ class _SearchGridviewState extends State<SearchGridview>
                             color: const Color(0xFF414141),
                           ),
                           const SizedBox(height: 8),
-                          BarlowText(
+                          CralikaFont(
                             text: resultText,
                             fontSize: 20,
                             fontWeight: FontWeight.w400,

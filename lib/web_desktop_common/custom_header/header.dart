@@ -19,7 +19,6 @@ class Header extends StatefulWidget {
 }
 
 class _HeaderState extends State<Header> {
-  int _cartItemCount = 0;
 
   final Map<String, bool> _isHovered = {};
   bool showSearchField = false;
@@ -43,7 +42,6 @@ class _HeaderState extends State<Header> {
   Future<void> _loadCartItemCount() async {
     final ids = await SharedPreferencesHelper.getAllProductIds();
     setState(() {
-      _cartItemCount = ids.length;
     });
   }
 
@@ -260,31 +258,32 @@ class _HeaderState extends State<Header> {
           builder: (context, count, _) {
             return count > 0
                 ? Positioned(
-              top: 30,
-              right: isLargeScreen ? 160 : 63,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: Colors.redAccent,
-                  shape: BoxShape.circle,
-                ),
-                constraints:
-                const BoxConstraints(minWidth: 18, minHeight: 18),
-                child: Text(
-                  '$count',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                  top: 30,
+                  right: isLargeScreen ? 160 : 63,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            )
+                )
                 : const SizedBox.shrink();
           },
         ),
-
       ],
     );
   }

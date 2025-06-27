@@ -227,9 +227,12 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                   children: [
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Container(
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Image.network(
                                 product.thumbnail,
@@ -240,12 +243,12 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                             ],
                           ),
                         ),
-                        SizedBox(width: 17),
+                        SizedBox(width: 5),
                         Expanded(
                           child: Container(
                             padding: EdgeInsets.symmetric(
                               horizontal: 8.0,
-                              vertical: 4.0,
+                              // vertical: 4.0,
                             ),
                             child: SizedBox(
                               height: 123,
@@ -257,6 +260,8 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
                                         child: BarlowText(
@@ -270,10 +275,8 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
                                                   ? Colors.grey
                                                   : Color(0xFF414141),
                                           softWrap: true,
-                                          maxLines: 2,
                                         ),
                                       ),
-                                      SizedBox(width: 8),
                                       BarlowText(
                                         text:
                                             isOutOfStock

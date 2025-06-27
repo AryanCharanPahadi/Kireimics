@@ -25,7 +25,7 @@ class CustomTextDrawer extends StatelessWidget {
     this.color = Colors.white,
     this.textAlign = TextAlign.left,
     this.decoration,
-    this.softWrap = true, // Default value set to true
+    this.softWrap = true,
   });
 
   @override
@@ -57,7 +57,7 @@ class CralikaFont extends StatelessWidget {
   final TextAlign textAlign;
   final TextDecoration? decoration;
   final bool softWrap;
-  final int? maxLines; // Optional maxLines parameter
+  final int? maxLines;
 
   const CralikaFont({
     Key? key,
@@ -70,8 +70,65 @@ class CralikaFont extends StatelessWidget {
     this.textAlign = TextAlign.start,
     this.decoration,
     this.softWrap = true,
-    this.maxLines, // Accept from constructor
+    this.maxLines,
   }) : super(key: key);
+
+  FontWeight getIncreasedFontWeight(FontWeight original) {
+    // Convert to numeric weight (e.g., w400 → 400), add 200
+    int weightValue = _fontWeightToValue(original);
+    int increased = (weightValue + 200).clamp(100, 900);
+    return _fontWeightFromValue(increased);
+  }
+
+  int _fontWeightToValue(FontWeight fw) {
+    switch (fw) {
+      case FontWeight.w100:
+        return 100;
+      case FontWeight.w200:
+        return 200;
+      case FontWeight.w300:
+        return 300;
+      case FontWeight.w400:
+        return 400;
+      case FontWeight.w500:
+        return 500;
+      case FontWeight.w600:
+        return 600;
+      case FontWeight.w700:
+        return 700;
+      case FontWeight.w800:
+        return 800;
+      case FontWeight.w900:
+        return 900;
+      default:
+        return 400;
+    }
+  }
+
+  FontWeight _fontWeightFromValue(int value) {
+    switch (value) {
+      case 100:
+        return FontWeight.w100;
+      case 200:
+        return FontWeight.w200;
+      case 300:
+        return FontWeight.w300;
+      case 400:
+        return FontWeight.w400;
+      case 500:
+        return FontWeight.w500;
+      case 600:
+        return FontWeight.w600;
+      case 700:
+        return FontWeight.w700;
+      case 800:
+        return FontWeight.w800;
+      case 900:
+        return FontWeight.w900;
+      default:
+        return FontWeight.normal;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +140,7 @@ class CralikaFont extends StatelessWidget {
       overflow: maxLines != null ? TextOverflow.ellipsis : null,
       style: TextStyle(
         fontFamily: "Cralika",
-        fontWeight: fontWeight,
+        fontWeight: getIncreasedFontWeight(fontWeight),
         fontSize: fontSize + 1,
         height: lineHeight,
         letterSpacing: letterSpacing,

@@ -65,6 +65,8 @@ class _HomePageDesktopState extends State<HomePageDesktop>
     if (mounted) setState(() {});
   }
 
+  bool isSubmitting = false; // New flag to track form submission
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -154,6 +156,10 @@ class _HomePageDesktopState extends State<HomePageDesktop>
       return;
     }
 
+    setState(() {
+      isSubmitting = true; // Show loader
+    });
+
     try {
       final response = await ApiHelper.contactQuery(
         name: _nameController.text,
@@ -179,6 +185,10 @@ class _HomePageDesktopState extends State<HomePageDesktop>
       widget.onErrorWishlistChanged?.call(
         'An unexpected error occurred: ${e.toString()}',
       );
+    } finally {
+      setState(() {
+        isSubmitting = false; // Hide loader
+      });
     }
   }
 
@@ -306,20 +316,32 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                     Padding(
                                       padding: const EdgeInsets.only(top: 24),
                                       child: GestureDetector(
-                                        onTap: () {
-                                          _submitForm();
-                                        },
-                                        child: BarlowText(
-                                          text: "SUBMIT",
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 16,
-                                          lineHeight: 1.0,
-                                          letterSpacing: 0.64,
-                                          backgroundColor: Color(0xFFb9d6ff),
-                                          enableHoverBackground: true,
-                                          color: Color(0xFF30578E),
-                                          hoverTextColor: Color(0xFFb9d6ff),
-                                        ),
+                                        onTap:
+                                            isSubmitting
+                                                ? null
+                                                : _submitForm, // Disable tap during submission
+                                        child:
+                                            isSubmitting
+                                                ? RotatingSvgLoader(
+                                                  size: 20,
+                                                  assetPath:
+                                                      'assets/footer/footerbg.svg',
+                                                )
+                                                : BarlowText(
+                                                  text: "SUBMIT",
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 16,
+                                                  lineHeight: 1.0,
+                                                  letterSpacing: 0.64,
+                                                  backgroundColor: Color(
+                                                    0xFFb9d6ff,
+                                                  ),
+                                                  enableHoverBackground: true,
+                                                  color: Color(0xFF30578E),
+                                                  hoverTextColor: Color(
+                                                    0xFFb9d6ff,
+                                                  ),
+                                                ),
                                       ),
                                     ),
                                   ],
@@ -334,30 +356,25 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        "LET'S CONNECT!",
-                                        style: TextStyle(
-                                          fontFamily: 'Cralika',
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 32,
-                                          letterSpacing: 0.04 * 32,
-                                          color: Colors.white,
-                                        ),
+                                      const CralikaFont(
+                                        text: "LET'S CONNECT!",
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 32,
+                                        letterSpacing: 0.04 * 32,
+                                        color: Colors.white,
                                         textAlign: TextAlign.left,
                                       ),
                                       SizedBox(
                                         width: screenWidth * 0.25,
-                                        child: Text(
-                                          "Looking for gifting options, or want to get a piece commissioned? Let's connect and create something wonderful!",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                            fontFamily:
-                                                GoogleFonts.barlow().fontFamily,
-                                            fontWeight: FontWeight.w400,
-                                            height: 1.0,
-                                            letterSpacing: 0.0,
-                                          ),
+                                        child: BarlowText(
+                                          text:
+                                              "Looking for gifting options, or want to get a piece commissioned? Let's connect and create something wonderful!",
+                                          color: Colors.white,
+                                          fontSize: 14,
+
+                                          fontWeight: FontWeight.w400,
+                                          lineHeight: 1.0,
+                                          letterSpacing: 0.0,
                                           textAlign: TextAlign.left,
                                         ),
                                       ),
@@ -476,7 +493,8 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                                       return child;
                                                     return Center(
                                                       child: RotatingSvgLoader(
-                                                        assetPath: 'assets/footer/footerbg.svg',
+                                                        assetPath:
+                                                            'assets/footer/footerbg.svg',
                                                       ),
                                                     );
                                                   },
@@ -488,11 +506,9 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                                     return Container(
                                                       color: Colors.grey[300],
                                                       child: Center(
-                                                        child: Text(
-                                                          'Failed to load image',
-                                                          style: TextStyle(
-                                                            color: Colors.red,
-                                                          ),
+                                                        child: RotatingSvgLoader(
+                                                          assetPath:
+                                                              'assets/footer/footerbg.svg',
                                                         ),
                                                       ),
                                                     );
@@ -501,11 +517,9 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                                 : Container(
                                                   color: Colors.grey[300],
                                                   child: Center(
-                                                    child: Text(
-                                                      'No image available',
-                                                      style: TextStyle(
-                                                        color: Colors.black54,
-                                                      ),
+                                                    child: RotatingSvgLoader(
+                                                      assetPath:
+                                                          'assets/footer/footerbg.svg',
                                                     ),
                                                   ),
                                                 ),
@@ -527,32 +541,25 @@ class _HomePageDesktopState extends State<HomePageDesktop>
                                     children: [
                                       FittedBox(
                                         fit: BoxFit.scaleDown,
-                                        child: Text(
-                                          bannerText,
-                                          style: TextStyle(
-                                            fontFamily: 'Cralika',
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 20,
-                                            height: 36 / 20,
-                                            letterSpacing: 0.04 * 20,
-                                            color: Color(0xFF0D2C54),
-                                          ),
+                                        child: CralikaFont(
+                                          text: bannerText,
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 20,
+                                          lineHeight: 36 / 20,
+                                          letterSpacing: 0.04 * 20,
+                                          color: Color(0xFF0D2C54),
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       FittedBox(
                                         fit: BoxFit.scaleDown,
-                                        child: Text(
-                                          "$bannerQuantity Pieces",
-                                          style: TextStyle(
-                                            fontFamily:
-                                                GoogleFonts.barlow().fontFamily,
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 14,
-                                            height: 1.0,
-                                            letterSpacing: 0.0,
-                                            color: Color(0xFF30578E),
-                                          ),
+                                        child: BarlowText(
+                                          text: "$bannerQuantity Pieces",
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 14,
+                                          lineHeight: 1.0,
+                                          letterSpacing: 0.0,
+                                          color: Color(0xFF30578E),
                                         ),
                                       ),
                                       const SizedBox(height: 14),

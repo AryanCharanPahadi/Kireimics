@@ -41,6 +41,23 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
   void initState() {
     super.initState();
     _router = GoRouter.of(context);
+    // Reset showLoginBox to ensure it's true by default
+    checkoutController.showLoginBox.value = true;
+    print(
+      'Initial showLoginBox: ${checkoutController.showLoginBox.value}',
+    ); // Debug log
+
+    // Ensure login status is checked before setting showLoginBox
+    isUserLoggedIn().then((loggedIn) {
+      checkoutController.isLoggedIn.value = loggedIn;
+      checkoutController.showLoginBox.value = !loggedIn;
+      print(
+        'After check: isLoggedIn: ${checkoutController.isLoggedIn.value}, '
+        'showLoginBox: ${checkoutController.showLoginBox.value}',
+      ); // Debug log
+      setState(() {}); // Force rebuild after async login check
+    });
+
     checkoutController.loadUserData();
     checkoutController.loadAddressData().then((_) {
       if (checkoutController.zipController.text.length == 6) {
@@ -59,6 +76,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
   @override
   void dispose() {
     _router.routeInformationProvider.removeListener(updateFromRoute);
+    checkoutController.reset();
     super.dispose();
   }
 
@@ -104,10 +122,21 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                   BarlowText(
                     text: "My Cart",
                     color: const Color(0xFF30578E),
+                    hoverTextColor: Color(0xFF2876E4),
+
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
                     letterSpacing: 0.04 * (contentWidth / 600),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        barrierColor: Colors.transparent,
+                        builder: (BuildContext context) {
+                          return CartPanel();
+                        },
+                      );
+                    },
                   ),
                   const SizedBox(width: 9),
                   SvgPicture.asset(
@@ -118,11 +147,13 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                   ),
                   const SizedBox(width: 9),
                   BarlowText(
-                    text: "View Details",
+                    text: "Checkout",
                     color: const Color(0xFF30578E),
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
+                    hoverTextColor: Color(0xFF2876E4),
+
                     route: AppRoutes.checkOut,
                     enableUnderlineForActiveRoute: true,
                     decorationColor: const Color(0xFF30578E),
@@ -163,11 +194,15 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
       final isLoggedIn = checkoutController.isLoggedIn.value;
       final addressExists = checkoutController.addressExists.value;
       final isLoading = checkoutController.isLoading.value;
-
+      print(
+        'buildLeftColumn: isLoggedIn: $isLoggedIn, '
+        'showLoginBox: ${checkoutController.showLoginBox.value}, '
+        'addressExists: $addressExists, isLoading: $isLoading',
+      ); //
       if (isLoading) {
-        return Center(child:RotatingSvgLoader(
-          assetPath: 'assets/footer/footerbg.svg',
-        ),);
+        return Center(
+          child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+        );
       }
 
       return Column(
@@ -175,7 +210,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
         children: [
           CralikaFont(
             text: "Checkout",
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w400,
             fontSize: 32,
             lineHeight: 36 / 32,
             letterSpacing: 1.28 * fontScale,
@@ -262,9 +297,9 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                     ),
                     InkWell(
                       onTap: () {
-                        setState(() {
-                          checkoutController.showLoginBox.value = false;
-                        });
+                        checkoutController.showLoginBox.value = false;
+                        checkoutController.update(); // Force update
+                        setState(() {}); // Ensure stateful widget rebuilds
                       },
                       child: CircleAvatar(
                         radius: 12 * fontScale,

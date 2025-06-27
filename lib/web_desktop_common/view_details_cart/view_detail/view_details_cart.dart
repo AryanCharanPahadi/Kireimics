@@ -445,16 +445,6 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
                                                     productId,
                                                   ),
                                                 );
-                                              } else {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
-                                                      'Invalid product ID',
-                                                    ),
-                                                  ),
-                                                );
                                               }
                                             },
                                           ),

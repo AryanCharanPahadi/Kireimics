@@ -195,7 +195,7 @@ class _SaleState extends State<Sale> {
                           ),
                           fit: BoxFit.cover,
                           colorFilter: ColorFilter.mode(
-                            const Color(0xFFffb853).withOpacity(0.9),
+                            const Color(0xFFf46554).withOpacity(0.9),
                             BlendMode.srcATop,
                           ),
                         ),
@@ -211,7 +211,7 @@ class _SaleState extends State<Sale> {
                           text: _selectedDescription,
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF414141),
+                          color: const Color(0xFFFFFFFF),
                         ),
                       ),
                     ),
@@ -443,7 +443,6 @@ class _SaleState extends State<Sale> {
         'label': "Maker's Choice",
         'onTap': () => _handleFilterSelected("Maker's Choice"),
       },
-
     ];
 
     return options.map((option) {

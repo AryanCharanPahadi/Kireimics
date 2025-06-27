@@ -45,6 +45,23 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
   void initState() {
     super.initState();
     _router = GoRouter.of(context);
+    // Reset showLoginBox to ensure it's true by default
+    checkoutController.showLoginBox.value = true;
+    print(
+      'Initial showLoginBox: ${checkoutController.showLoginBox.value}',
+    ); // Debug log
+
+    // Ensure login status is checked before setting showLoginBox
+    isUserLoggedIn().then((loggedIn) {
+      checkoutController.isLoggedIn.value = loggedIn;
+      checkoutController.showLoginBox.value = !loggedIn;
+      print(
+        'After check: isLoggedIn: ${checkoutController.isLoggedIn.value}, '
+            'showLoginBox: ${checkoutController.showLoginBox.value}',
+      ); // Debug log
+      setState(() {}); // Force rebuild after async login check
+    });
+
     checkoutController.loadUserData();
     checkoutController.loadAddressData().then((_) {
       if (checkoutController.zipController.text.length == 6) {
@@ -112,7 +129,18 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
+                    hoverTextColor: Color(0xFF2876E4),
+
                     letterSpacing: 0.04 * fontScale,
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        barrierColor: Colors.transparent,
+                        builder: (BuildContext context) {
+                          return CartPanel();
+                        },
+                      );
+                    },
                   ),
                   SizedBox(width: 9),
                   SvgPicture.asset(
@@ -123,11 +151,13 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
                   ),
                   SizedBox(width: 9),
                   BarlowText(
-                    text: "View Details",
+                    text: "Checkout",
                     color: const Color(0xFF30578E),
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
+                    hoverTextColor: Color(0xFF2876E4),
+
                     route: AppRoutes.checkOut,
                     enableUnderlineForActiveRoute: true,
                     decorationColor: const Color(0xFF30578E),
@@ -793,7 +823,7 @@ class _CheckoutPageDesktopState extends State<CheckoutPageDesktop> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Image.asset(
-                  'assets/icons/razorpay.png',
+                  'assets/icons/razorpay1.png',
                   width: 76,
                   height: 16,
                   color: const Color(0xFF30578E),

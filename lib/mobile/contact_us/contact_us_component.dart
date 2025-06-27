@@ -47,6 +47,8 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
     super.dispose();
   }
 
+  bool isSubmitting = false; // New flag to track form submission
+
   Future<void> _submitForm() async {
     final String formattedDate = getFormattedDate();
 
@@ -73,6 +75,10 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
       return;
     }
 
+    setState(() {
+      isSubmitting = true; // Show loader
+    });
+
     try {
       final response = await ApiHelper.contactQuery(
         name: _nameController.text,
@@ -98,6 +104,10 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
       widget.onErrorWishlistChanged?.call(
         'An unexpected error occurred: ${e.toString()}',
       );
+    } finally {
+      setState(() {
+        isSubmitting = false; // Hide loader
+      });
     }
   }
 
@@ -160,7 +170,19 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                   ),
                 ),
               ),
-
+              Padding(
+                padding: const EdgeInsets.only(left: 22, top: 24, right: 22),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CralikaFont(
+                      text: "Contact Us",
+                      fontSize: 24,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ],
+                ),
+              ),
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: Padding(
@@ -197,16 +219,26 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                         ),
                         const SizedBox(height: 24),
                         GestureDetector(
-                          onTap: _submitForm,
+                          onTap: isSubmitting ? null : _submitForm,
 
-                          child: Align(
-                            alignment: Alignment.bottomRight,
-                            child: SvgPicture.asset(
-                              "assets/icons/submit_new2.svg",
-                              height: 19,
-                              width: 58,
-                            ),
-                          ),
+                          child:
+                              isSubmitting
+                                  ? Align(
+                                    alignment: Alignment.bottomRight,
+
+                                    child: RotatingSvgLoader(
+                                      size: 20,
+                                      assetPath: 'assets/footer/footerbg.svg',
+                                    ),
+                                  )
+                                  : Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: SvgPicture.asset(
+                                      "assets/icons/submit_new2.svg",
+                                      height: 19,
+                                      width: 58,
+                                    ),
+                                  ),
                         ),
                       ],
                     ),
@@ -241,17 +273,10 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
               //     ),
               //   ),
               // ),
-              Padding(
-                padding: const EdgeInsets.only(left: 22, top: 24, right: 22),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [CralikaFont(text: "Contact Us", fontSize: 24)],
-                ),
-              ),
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 22, top: 32),
+                  padding: const EdgeInsets.only(left: 22, top: 35),
                   child: Row(
                     children: [
                       Column(
@@ -261,6 +286,7 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                             text:
                                 "Our address:\n${contactController.contactData!['address'].toString()}",
                             fontSize: 14,
+                            fontWeight: FontWeight.w400,
                             softWrap: true,
                           ),
                           const SizedBox(height: 24),
@@ -321,7 +347,13 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                 padding: const EdgeInsets.only(left: 22, top: 46),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [CralikaFont(text: "FAQ's", fontSize: 28)],
+                  children: [
+                    CralikaFont(
+                      text: "FAQ's",
+                      fontSize: 24,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 32),
@@ -379,29 +411,30 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    contactController.faqData[index]["question"]
-                                        .toString()!,
-                                    style: GoogleFonts.barlow(
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w400,
-                                      height: 1.0,
-                                      letterSpacing: 0.0,
-                                      color: Color(0xFF414141),
-                                    ),
+                                  BarlowText(
+                                    text:
+                                        contactController
+                                            .faqData[index]["question"]
+                                            .toString()!,
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.w400,
+                                    lineHeight: 1.0,
+                                    letterSpacing: 0.0,
+                                    color: Color(0xFF414141),
+
                                     softWrap: true,
                                   ),
                                   const SizedBox(height: 4.0),
-                                  Text(
-                                    contactController.faqData[index]["answer"]
-                                        .toString()!,
-                                    style: GoogleFonts.barlow(
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w400,
-                                      height: 1.4,
-                                      letterSpacing: 0.0,
-                                      color: Color(0xFF636363),
-                                    ),
+                                  BarlowText(
+                                    text:
+                                        contactController
+                                            .faqData[index]["answer"]
+                                            .toString()!,
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w400,
+                                    lineHeight: 1.4,
+                                    letterSpacing: 0.0,
+                                    color: Color(0xFF636363),
                                     softWrap: true,
                                   ),
                                 ],

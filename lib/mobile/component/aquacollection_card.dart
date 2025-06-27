@@ -99,17 +99,18 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
 
                   errorBuilder: (context, error, stackTrace) {
                     return Center(
-                      child: Text(
-                        'Failed to load image',
-                        style: TextStyle(color: Colors.red),
+                      child: RotatingSvgLoader(
+                        assetPath: 'assets/footer/footerbg.svg',
                       ),
                     );
                   },
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
-                    return Center(child:  RotatingSvgLoader(
-                      assetPath: 'assets/footer/footerbg.svg',
-                    ),);
+                    return Center(
+                      child: RotatingSvgLoader(
+                        assetPath: 'assets/footer/footerbg.svg',
+                      ),
+                    );
                   },
                 ),
                 SizedBox(height: 14),

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
 import 'package:kireimics/component/app_routes/routes.dart';
 import 'package:kireimics/mobile/sign_in/sign_in.dart';
+import 'dart:html' as html;
 
 import '../../component/google_sign_in/google_sign_in_button.dart';
 import '../../component/text_fonts/custom_text.dart';
@@ -53,7 +54,8 @@ class _LoginMobileState extends State<LoginMobile> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    context.go(AppRoutes.home);
+                    // Go back in browser history
+                    html.window.history.back();
                   },
                   child: SvgPicture.asset(
                     "assets/icons/closeIcon.svg",
@@ -233,6 +235,7 @@ class _LoginMobileState extends State<LoginMobile> {
                                     widget.onWishlistChanged?.call(
                                       "Login successful!",
                                     );
+                                    html.window.history.back();
                                   } else {
                                     showSuccessBanner = false;
                                     showErrorBanner = true;
@@ -303,7 +306,7 @@ class _LoginMobileState extends State<LoginMobile> {
                 hintText,
                 style: GoogleFonts.barlow(
                   fontWeight: FontWeight.w400,
-                  fontSize: 14,
+                  fontSize: 12,
                   color: const Color(0xFF414141),
                 ),
               ),
@@ -330,7 +333,7 @@ class _LoginMobileState extends State<LoginMobile> {
                 hintText: '',
                 hintStyle: GoogleFonts.barlow(
                   fontWeight: FontWeight.w400,
-                  fontSize: 14,
+                  fontSize: 12,
                   height: 1.0,
                   letterSpacing: 0.0,
                   color: const Color(0xFF414141),

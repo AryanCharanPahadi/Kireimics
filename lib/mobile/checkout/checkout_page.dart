@@ -42,6 +42,21 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
   @override
   void initState() {
     super.initState();
+    checkoutController.showLoginBox.value = true;
+    print(
+      'Initial showLoginBox: ${checkoutController.showLoginBox.value}',
+    ); // Debug log
+
+    // Ensure login status is checked before setting showLoginBox
+    isUserLoggedIn().then((loggedIn) {
+      checkoutController.isLoggedIn.value = loggedIn;
+      checkoutController.showLoginBox.value = !loggedIn;
+      print(
+        'After check: isLoggedIn: ${checkoutController.isLoggedIn.value}, '
+        'showLoginBox: ${checkoutController.showLoginBox.value}',
+      ); // Debug log
+      setState(() {}); // Force rebuild after async login check
+    });
     checkoutController.setCallbacks(
       onWishlistChanged: widget.onWishlistChanged,
       onErrorWishlistChanged: widget.onErrorWishlistChanged,
@@ -97,6 +112,9 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                             fontWeight: FontWeight.w600,
                             lineHeight: 1.0,
                             letterSpacing: 1 * 0.04, // 4% of 32px
+                            onTap: () {
+                              context.go(AppRoutes.addToCart);
+                            },
                           ),
 
                           SizedBox(width: 9.0),
@@ -507,7 +525,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                         color: Color(0xFFFFFFFF),
 
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         lineHeight:
                                             36 /
                                             16, // line-height / font-size = 2.25
@@ -519,7 +537,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                         color: Color(0xFFFFFFFF),
 
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         lineHeight:
                                             36 /
                                             16, // line-height / font-size = 2.25
@@ -540,7 +558,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                         color: Color(0xFFFFFFFF),
 
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         lineHeight:
                                             36 /
                                             16, // line-height / font-size = 2.25
@@ -553,7 +571,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                         color: Color(0xFFFFFFFF),
 
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         lineHeight:
                                             36 /
                                             16, // line-height / font-size = 2.25
@@ -577,7 +595,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                         color: Color(0xFFFFFFFF),
 
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 16,
+                                        fontSize: 20,
                                         lineHeight:
                                             36 /
                                             16, // line-height / font-size = 2.25
@@ -589,7 +607,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                         color: Color(0xFFFFFFFF),
 
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 16,
+                                        fontSize: 20,
                                         lineHeight:
                                             36 /
                                             16, // line-height / font-size = 2.25
@@ -655,7 +673,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                   text: hintText,
                   style: GoogleFonts.barlow(
                     fontWeight: FontWeight.w400,
-                    fontSize: 14,
+                    fontSize: 12,
                     color: const Color(0xFF414141),
                   ),
                 ),
@@ -664,7 +682,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                     text: ' *',
                     style: GoogleFonts.barlow(
                       fontWeight: FontWeight.w400,
-                      fontSize: 14,
+                      fontSize: 12,
                       color: Colors.red,
                     ),
                   ),
@@ -695,7 +713,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
             hintText: '', // Empty hint since we're showing our own
             hintStyle: GoogleFonts.barlow(
               fontWeight: FontWeight.w400,
-              fontSize: 14,
+              fontSize: 12,
               height: 1.0,
               letterSpacing: 0.0,
               color: const Color(0xFF414141),
@@ -706,7 +724,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
           ),
           style: const TextStyle(
             color: Color(0xFF414141),
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.w400,
           ),
         ),

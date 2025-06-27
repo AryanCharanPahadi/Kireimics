@@ -11,6 +11,7 @@ import '../../../component/google_sign_in/google_sign_in_button.dart';
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/utilities/utility.dart';
+import '../../../web/checkout/checkout_controller.dart';
 import '../../../web/checkout/checkout_controller_new.dart';
 import '../signup/signup.dart' show Signup;
 import 'login_controller.dart';
@@ -37,13 +38,13 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  final CheckoutControllerNew checkoutControllerNew = Get.put(
-    CheckoutControllerNew(),
+  final CheckoutController checkoutControllerNew = Get.put(
+    CheckoutController(),
   );
 
   @override
   Widget build(BuildContext context) {
-    final bool isWideScreen = MediaQuery.of(context).size.width > 1400;
+    final bool isWideScreen = MediaQuery.of(context).size.width > 1900;
 
     return Stack(
       children: [
@@ -156,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter your password';
                                 }
-                                if (value.length < 8) {
+                                if (value.length < 9) {
                                   return 'Password must be at least 8 characters';
                                 }
                                 return null;
@@ -243,8 +244,6 @@ class _LoginPageState extends State<LoginPage> {
                                               widget.onLoginSuccess?.call();
                                               checkoutControllerNew
                                                   .loadUserData();
-                                              checkoutControllerNew
-                                                  .checkIfDefaultAddressExists();
                                             } else {
                                               showSuccessBanner = false;
                                               showErrorBanner = true;
@@ -415,7 +414,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: BarlowText(
                     text: "SIGN UP NOW",
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 16,
                     lineHeight: 1.5,
                     color: Color(0xFF30578E),
                     hoverBackgroundColor: Color(0xFFb9d6ff),
@@ -503,7 +502,11 @@ class _LoginPageState extends State<LoginPage> {
                         )
                         : null,
               ),
-              style: const TextStyle(color: Color(0xFF414141)),
+              style: const TextStyle(
+                color: Color(0xFF414141),
+                fontWeight: FontWeight.w400,
+                fontSize: 14,
+              ),
             ),
           ],
         );

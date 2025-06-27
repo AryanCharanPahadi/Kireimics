@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart'; // Add GetX for state management
 import '../../../component/api_helper/api_helper.dart';
+import '../../../component/app_routes/routes.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/utilities/utility.dart';
+import '../../../web/checkout/checkout_controller.dart';
 
 class SignupController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -15,6 +18,7 @@ class SignupController extends GetxController {
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
+  final CheckoutController checkoutController = Get.put(CheckoutController());
 
   // Add loading state
   var isLoading = false.obs; // Observable boolean for loading state
@@ -106,6 +110,16 @@ class SignupController extends GetxController {
       phoneController.clear();
       passwordController.clear();
       signupMessage = 'Signup successfully';
+      final currentRoute =
+      GoRouter.of(context).routeInformationProvider.value.uri.toString();
+
+      if (currentRoute.contains(AppRoutes.checkOut)) {
+        // Load user data and address data
+        await checkoutController.loadUserData();
+        await checkoutController.loadAddressData();
+
+
+      }
 
       isLoading.value = false; // Stop loading
       update();

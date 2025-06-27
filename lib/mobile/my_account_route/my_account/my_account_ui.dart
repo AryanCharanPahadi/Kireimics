@@ -30,9 +30,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController mobileController = TextEditingController();
-  String? _addressIdToDelete; // Track address ID for deletion
-  bool _showDeleteConfirmation = false; // Track banner visibility
-  Offset? _tapPosition; // Store tap position
+
   bool isEditing = false; // Track edit state
   final AddAddressController addAddressController = Get.put(
     AddAddressController(),
@@ -443,16 +441,51 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                                                         CrossAxisAlignment
                                                             .start,
                                                     children: [
-                                                      BarlowText(
-                                                        text: address["city"],
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        fontSize: 16,
-                                                        lineHeight: 1.0,
-                                                        letterSpacing: 0.0,
-                                                        color: Color(
-                                                          0xFF414141,
-                                                        ),
+                                                      Row(
+                                                        children: [
+                                                          BarlowText(
+                                                            text:
+                                                                address["city"],
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontSize: 16,
+                                                            lineHeight: 1.0,
+                                                            letterSpacing: 0.0,
+
+                                                            color: Color(
+                                                              0xFF414141,
+                                                            ),
+                                                          ),
+                                                          if (address['default_address'] ==
+                                                              true) ...[
+                                                            SizedBox(
+                                                              width: 8,
+                                                            ), // Space between city and badge
+                                                            Text(
+                                                              "(DEFAULT)",
+                                                              style: TextStyle(
+                                                                fontFamily:
+                                                                    GoogleFonts.barlow()
+                                                                        .fontFamily,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400, // Equivalent to 400
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic,
+                                                                fontSize: 16.0,
+                                                                color: Color(
+                                                                  0xFF414141,
+                                                                ),
+
+                                                                height:
+                                                                    1.0, // line-height 100%
+                                                                letterSpacing:
+                                                                    0.0, // letter-spacing 0%
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ],
                                                       ),
                                                       SizedBox(height: 3),
                                                       BarlowText(
@@ -586,7 +619,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
             hintText,
             style: GoogleFonts.barlow(
               fontWeight: FontWeight.w400,
-              fontSize: 14,
+              fontSize: 12,
               color: const Color(0xFF414141),
             ),
           ),

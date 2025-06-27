@@ -41,6 +41,19 @@ class ApiHelper {
     }
   }
 
+  static Future<Map<String, dynamic>?> fetchUserData(String email) async {
+    final response = await http.get(
+      Uri.parse("$baseUrlC/user_data/get_user_data.php?email=$email"),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      print("Error: ${response.statusCode}");
+      return null;
+    }
+  }
+
   static Future<ShippingPolicyModel?> fetchShippingPolicy() async {
     final url = Uri.parse(
       "https://vedvika.com/v1/apis/common/shipping_policy/get_shipping_policy.php",

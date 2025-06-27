@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'dart:html' as html;
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,19 +8,12 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
-import 'package:http/http.dart' as http;
-import 'package:kireimics/mobile/login/login.dart';
-import 'package:shared_preferences/shared_preferences.dart'
-    show SharedPreferences;
 
-import '../../component/api_helper/api_helper.dart';
-import '../../component/google_sign_in/auth.dart';
 import '../../component/google_sign_in/google_sign_in_button.dart';
-import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/notification_toast/custom_toast.dart';
 import '../../component/app_routes/routes.dart';
-import '../../component/utilities/utility.dart';
+import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../web_desktop_common/login_signup/signup/signup_controller.dart';
 
 class SignInMobile extends StatefulWidget {
@@ -65,7 +58,7 @@ class _SignInMobileState extends State<SignInMobile> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    context.go(AppRoutes.home);
+                    html.window.history.back();
                   },
                   child: SvgPicture.asset(
                     "assets/icons/closeIcon.svg",
@@ -166,7 +159,7 @@ class _SignInMobileState extends State<SignInMobile> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
                       }
-                      if (value.length < 8) {
+                      if (value.length < 9) {
                         return 'Password must be at least 8 characters';
                       }
                       return null;
@@ -191,6 +184,7 @@ class _SignInMobileState extends State<SignInMobile> {
                                     widget.onWishlistChanged?.call(
                                       "Sign Up successful!",
                                     );
+                                    html.window.history.back();
                                   } else {
                                     showSuccessBanner = false;
                                     showErrorBanner = true;
@@ -203,14 +197,25 @@ class _SignInMobileState extends State<SignInMobile> {
                                 });
                               }
                             },
-                            child: BarlowText(
-                              text: "SIGN UP",
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                              lineHeight: 1.0,
-                              letterSpacing: 0.64,
-                              color: Color(0xFF30578E),
-                              backgroundColor: Color(0xFFb9d6ff),
+
+                            child: Obx(
+                              () =>
+                                  signupController.isLoading.value
+                                      ? RotatingSvgLoader(
+                                        assetPath: 'assets/footer/footerbg.svg',
+                                      )
+                                      : BarlowText(
+                                        text: 'SIGN UP',
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        color: Color(0xFF30578E),
+                                        backgroundColor: Color(0xFFb9d8ff),
+                                        decorationColor: const Color(
+                                          0xFF30578E,
+                                        ),
+                                        hoverTextColor: const Color(0xFF2876E4),
+                                        hoverDecorationColor: Color(0xFF2876E4),
+                                      ),
                             ),
                           ),
                           SizedBox(height: 30),
@@ -233,7 +238,7 @@ class _SignInMobileState extends State<SignInMobile> {
                                     style: TextStyle(
                                       color: Color(0xFF30578E),
                                       fontWeight: FontWeight.w600,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       height: 1.5,
                                     ),
                                     recognizer:
@@ -248,7 +253,7 @@ class _SignInMobileState extends State<SignInMobile> {
                                     style: TextStyle(
                                       color: Color(0xFF30578E),
                                       fontWeight: FontWeight.w600,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       height: 1.5,
                                     ),
                                     recognizer:
@@ -316,7 +321,7 @@ class _SignInMobileState extends State<SignInMobile> {
                 hintText,
                 style: GoogleFonts.barlow(
                   fontWeight: FontWeight.w400,
-                  fontSize: 14,
+                  fontSize: 12,
                   color: const Color(0xFF414141),
                 ),
               ),
@@ -357,7 +362,7 @@ class _SignInMobileState extends State<SignInMobile> {
                 hintText: '',
                 hintStyle: GoogleFonts.barlow(
                   fontWeight: FontWeight.w400,
-                  fontSize: 14,
+                  fontSize: 12,
                   height: 1.0,
                   letterSpacing: 0.0,
                   color: const Color(0xFF414141),

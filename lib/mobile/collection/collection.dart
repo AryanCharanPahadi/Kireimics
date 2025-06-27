@@ -99,16 +99,36 @@ class _CollectionMobileState extends State<CollectionMobile> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  collection.name ?? 'Unnamed Collection',
-                                  style: const TextStyle(
-                                    fontFamily: "Cralika",
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 16,
-                                    height: 1.2,
-                                    letterSpacing: 0.64,
-                                    color: Color(0xFF30578E),
-                                  ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        collection.name ?? 'Unnamed Collection',
+                                        style: const TextStyle(
+                                          fontFamily: "Cralika",
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 16,
+                                          height: 1.2,
+                                          letterSpacing: 0.64,
+                                          color: Color(0xFF30578E),
+                                        ),
+                                      ),
+                                    ),
+                                    BarlowText(
+                                      text: "VIEW",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      lineHeight: 1.2,
+                                      letterSpacing: 0.56,
+                                      color: const Color(0xFF30578E),
+                                      onTap: () {
+                                        context.go(
+                                          '${AppRoutes.idCollectionView(collection.id!)}?collection_name=${collection.name}',
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
@@ -121,21 +141,6 @@ class _CollectionMobileState extends State<CollectionMobile> {
                                     height: 1.2,
                                     color: const Color(0xFF30578E),
                                   ),
-                                ),
-                                const SizedBox(height: 10),
-
-                                BarlowText(
-                                  text: "VIEW",
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  lineHeight: 1.2,
-                                  letterSpacing: 0.56,
-                                  color: const Color(0xFF30578E),
-                                  onTap: () {
-                                    context.go(
-                                      '${AppRoutes.idCollectionView(collection.id!)}?collection_name=${collection.name}',
-                                    );
-                                  },
                                 ),
                               ],
                             ),

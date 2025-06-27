@@ -111,7 +111,11 @@ class _GridviewSearchState extends State<GridviewSearch> {
 
         final resultCount = controller.filteredProducts.length;
         final resultText =
-            resultCount == 1 ? '1 Result' : '$resultCount Results';
+            resultCount == 1
+                ? '1 Result'
+                : resultCount == 0
+                ? '0 Result'
+                : '$resultCount Results';
 
         if (controller.filteredProducts.isEmpty) {
           return Column(
@@ -152,7 +156,7 @@ class _GridviewSearchState extends State<GridviewSearch> {
           children: [
             CralikaFont(
               text: '"$_currentQuery"',
-              fontSize: 32,
+              fontSize: 24,
               fontWeight: FontWeight.w400,
               color: Color(0xFF414141),
             ),
@@ -365,53 +369,40 @@ class _GridviewSearchState extends State<GridviewSearch> {
                                   ],
                                   const SizedBox(height: 8),
                                   GestureDetector(
-                                    onTap: isOutOfStock
-                                        ? null
-                                        : () async {
-                                      widget
-                                          .onWishlistChanged
-                                          ?.call(
-                                          'Product Added To Cart');
-                                      await SharedPreferencesHelper
-                                          .addProductId(
-                                          product
-                                              .id);
-                                      cartNotifier
-                                          .refresh();
-                                    },
-                                    child: isOutOfStock
-                                        ? NotifyMeButton(
-                                      productId:
-                                      product.id,
-                                      onWishlistChanged:
-                                      widget
-                                          .onWishlistChanged,
-                                      onErrorWishlistChanged:
-                                          (error) {
-                                        widget
-                                            .onWishlistChanged
-                                            ?.call(
-                                            error);
-                                      },
-                                    )
-                                        : Text(
-                                      "ADD TO CART",
-                                      style:
-                                      GoogleFonts
-                                          .barlow(
-                                        fontWeight:
-                                        FontWeight
-                                            .w600,
-                                        fontSize:
-                                        14,
-                                        height:
-                                        1.2,
-                                        letterSpacing:
-                                        0.56,
-                                        color: const Color(
-                                            0xFF30578E),
-                                      ),
-                                    ),
+                                    onTap:
+                                        isOutOfStock
+                                            ? null
+                                            : () async {
+                                              widget.onWishlistChanged?.call(
+                                                'Product Added To Cart',
+                                              );
+                                              await SharedPreferencesHelper.addProductId(
+                                                product.id,
+                                              );
+                                              cartNotifier.refresh();
+                                            },
+                                    child:
+                                        isOutOfStock
+                                            ? NotifyMeButton(
+                                              productId: product.id,
+                                              onWishlistChanged:
+                                                  widget.onWishlistChanged,
+                                              onErrorWishlistChanged: (error) {
+                                                widget.onWishlistChanged?.call(
+                                                  error,
+                                                );
+                                              },
+                                            )
+                                            : BarlowText(
+                                          text:   "ADD TO CART",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          lineHeight: 1.0,
+                                          letterSpacing: 0.56,
+                                          color: const Color(
+                                            0xFF30578E,
+                                          ),
+                                        ),
                                   ),
                                 ],
                               ),

@@ -75,7 +75,7 @@ class _CatalogPageState extends State<CatalogPage> {
           _selectedCategoryId = -1; // Use a special ID for collections
           _selectedCategoryName = 'Collections';
           _selectedDescription =
-          '/ Discover our curated collections of handcrafted pottery, each telling a unique story /'; // Customize description
+              '/ Discover our curated collections of handcrafted pottery, each telling a unique story /'; // Customize description
         });
         _fetchCollections();
         return;
@@ -84,7 +84,8 @@ class _CatalogPageState extends State<CatalogPage> {
         if (categoryId != null) {
           setState(() {
             _selectedCategoryId = categoryId;
-            _selectedCategoryName = 'Category $categoryId'; // Update with actual name if available
+            _selectedCategoryName =
+                'Category $categoryId'; // Update with actual name if available
             // Optionally fetch category name and description from API
           });
           _fetchProductsByCategory(categoryId);
@@ -97,10 +98,11 @@ class _CatalogPageState extends State<CatalogPage> {
       _selectedCategoryId = 1;
       _selectedCategoryName = 'All';
       _selectedDescription =
-      '/ Browse our collection of handcrafted pottery, where each one-of-a-kind piece adds charm to your home while serving a purpose you\'ll appreciate every day /';
+          '/ Browse our collection of handcrafted pottery, where each one-of-a-kind piece adds charm to your home while serving a purpose you\'ll appreciate every day /';
     });
     _fetchProductsForAllCategory();
   }
+
   Future<void> _fetchProductsForAllCategory() async {
     setState(() {
       _isLoading = true;
@@ -305,7 +307,7 @@ class _CatalogPageState extends State<CatalogPage> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                // Item Count (Products or Collections)
+                // Item Coyunt (Products or Collections)
                 Container(
                   width: MediaQuery.of(context).size.width,
                   child: Padding(
@@ -575,7 +577,6 @@ class _CatalogPageState extends State<CatalogPage> {
         'label': "Maker's Choice",
         'onTap': () => _handleFilterSelected("Maker's Choice"),
       },
-
     ];
 
     return options.map((option) {
@@ -650,7 +651,9 @@ class _CatalogPageState extends State<CatalogPage> {
       } else if (filterOption == 'Few Pieces Left') {
         _products =
             _originalProducts
-                .where((product) => product.quantity! <= 2 && product.quantity! > 0)
+                .where(
+                  (product) => product.quantity! <= 2 && product.quantity! > 0,
+                )
                 .toList();
 
         _isHoveredList = List<bool>.filled(_products.length, false);

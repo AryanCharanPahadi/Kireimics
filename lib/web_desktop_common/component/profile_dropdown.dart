@@ -182,13 +182,13 @@ class _ProfileDropdownState extends State<ProfileDropdown> {
           await SharedPreferencesHelper.clearUserData();
           await SharedPreferencesHelper.clearSelectedAddress();
           await SharedPreferencesHelper.clearAllProductIds();
-          await cartNotifier;
+          cartNotifier.value = 0;
 
           // Refresh CheckoutController
           final CheckoutController checkoutController = Get.put(
             CheckoutController(),
           );
-          ;
+          await checkoutController.showLoginBox == true;
           checkoutController.reset();
 
           // Navigate to home

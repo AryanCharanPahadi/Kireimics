@@ -16,6 +16,8 @@ class ResponsiveUtil {
 
   double getResponsiveHeight(double imageHeight) {
     if (screenWidth >= 1400 && screenWidth <= 1750) {
+      return imageHeight * 0.50;
+    } else if (screenWidth >= 1750 && screenWidth <= 1900) {
       return imageHeight * 0.45;
     } else {
       return imageHeight * 0.35;
@@ -26,6 +28,3 @@ class ResponsiveUtil {
     return imageWidth * 0.95; // You can modify this logic if needed
   }
 }
-
-
-

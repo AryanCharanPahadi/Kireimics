@@ -15,6 +15,7 @@ import '../../component/shared_preferences/shared_preferences.dart';
 import '../../web_desktop_common/collection/collection_controller.dart';
 import '../../web_desktop_common/collection/collection_navigation.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
+import '../../web_desktop_common/notify_me/notify_me.dart';
 import '../component/badges_mobile.dart';
 
 class CollectionViewMobile extends StatefulWidget {
@@ -358,7 +359,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                               text: "Sort / New",
                               color: Color(0xFF30578E),
                               fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: 16,
                               lineHeight: 1.0,
                               letterSpacing: 0.04 * 16,
                             ),
@@ -372,7 +373,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                               text: "Filter / ${_selectedFilter ?? 'All'}",
                               color: Color(0xFF30578E),
                               fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: 16,
                               lineHeight: 1.0,
                               letterSpacing: 0.04 * 16,
                             ),
@@ -665,57 +666,52 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                   GestureDetector(
                                                     onTap:
                                                         isOutOfStock
-                                                            ? () async {
-                                                              bool isLoggedIn =
-                                                                  await _isLoggedIn();
-
-                                                              if (isLoggedIn) {
-                                                                widget
-                                                                    .onWishlistChanged
-                                                                    ?.call(
-                                                                      "We'll notify you when this product is back in stock.",
-                                                                    );
-                                                              } else {
-                                                                context.go(
-                                                                  AppRoutes
-                                                                      .logIn,
-                                                                );
-                                                              }
-                                                            }
+                                                            ? null
                                                             : () async {
-                                                              // 1. Call the wishlist changed callback immediately
                                                               widget
                                                                   .onWishlistChanged
                                                                   ?.call(
                                                                     'Product Added To Cart',
                                                                   );
-
-                                                              // 2. Store the product ID in SharedPreferences
                                                               await SharedPreferencesHelper.addProductId(
                                                                 product.id,
                                                               );
-
-                                                              // 3. Refresh the cart state
                                                               cartNotifier
                                                                   .refresh();
-
-                                                              // Note: Removed the Future.delayed and showDialog parts
                                                             },
-                                                    child: Text(
-                                                      isOutOfStock
-                                                          ? "NOTIFY ME"
-                                                          : "ADD TO CART",
-                                                      style: GoogleFonts.barlow(
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 14,
-                                                        height: 1.2,
-                                                        letterSpacing: 0.56,
-                                                        color: const Color(
-                                                          0xFF30578E,
-                                                        ),
-                                                      ),
-                                                    ),
+                                                    child:
+                                                        isOutOfStock
+                                                            ? NotifyMeButton(
+                                                              productId:
+                                                                  product.id,
+                                                              onWishlistChanged:
+                                                                  widget
+                                                                      .onWishlistChanged,
+                                                              onErrorWishlistChanged: (
+                                                                error,
+                                                              ) {
+                                                                widget
+                                                                    .onWishlistChanged
+                                                                    ?.call(
+                                                                      error,
+                                                                    );
+                                                              },
+                                                            )
+                                                            : BarlowText(
+                                                              text:
+                                                                  "ADD TO CART",
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              lineHeight: 1.0,
+                                                              letterSpacing:
+                                                                  0.56,
+                                                              color:
+                                                                  const Color(
+                                                                    0xFF30578E,
+                                                                  ),
+                                                            ),
                                                   ),
                                                 ],
                                               ),

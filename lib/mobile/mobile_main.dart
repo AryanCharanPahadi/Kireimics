@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'dart:html' as html;
+
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kireimics/mobile/address_page/add_address_ui/add_address_ui.dart';
@@ -570,7 +572,15 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                     const SizedBox(height: 6),
                                     GestureDetector(
                                       onTap: () {
-                                        context.go(AppRoutes.signIn);
+                                        // Call browser history back
+                                        html.window.history.back();
+
+                                        // Navigate to signup page after a slight delay
+                                        Future.delayed(const Duration(milliseconds: 100), () {
+                                          if (context.mounted) {
+                                            context.go(AppRoutes.signIn);
+                                          }
+                                        });
                                       },
                                       child: BarlowText(
                                         text: "SIGN UP NOW",
@@ -650,7 +660,15 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                     const SizedBox(height: 6),
                                     GestureDetector(
                                       onTap: () {
-                                        context.go(AppRoutes.logIn);
+                                        // Call browser history back
+                                        html.window.history.back();
+
+                                        // Navigate to signup page after a slight delay
+                                        Future.delayed(const Duration(milliseconds: 100), () {
+                                          if (context.mounted) {
+                                            context.go(AppRoutes.logIn);
+                                          }
+                                        });
                                       },
                                       child: BarlowText(
                                         text: "LOG IN NOW",
@@ -702,7 +720,9 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                         !isAddAddressRoute &&
                         !isForgotPasswordResetRoute &&
                         !isViewDetailsRoute &&
-                        isCheckoutRoute)
+                        isCheckoutRoute &&
+                        MediaQuery.of(context).viewInsets.bottom ==
+                            0) // Add this condition to hide the entire container
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -715,7 +735,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                       .totalDeliveryCharge
                                       .value;
                           final double total = _subtotal + finalDeliveryCharge;
-
                           final isLoading =
                               !checkoutController.isShippingTaxLoaded.value;
 
@@ -756,8 +775,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                             letterSpacing: 0.04,
                                           ),
                                       SizedBox(height: 8),
-
-                                      /// Main Button
                                       checkoutController
                                               .isSignupProcessing
                                               .value
@@ -1012,8 +1029,6 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                             },
                                           ),
                                       SizedBox(height: 8),
-
-                                      /// Razorpay info
                                       Row(
                                         children: [
                                           Image.asset(

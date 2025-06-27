@@ -445,14 +445,6 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
                                       context.go(
                                         AppRoutes.productDetails(productId),
                                       );
-                                    } else {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Invalid product ID'),
-                                        ),
-                                      );
                                     }
                                   },
                                 ),
@@ -629,6 +621,9 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
                                 fontSize: 14,
                                 lineHeight: 1.5,
                                 color: const Color(0xFF30578E),
+                                onTap: () {
+                                  context.go(AppRoutes.contactUs);
+                                },
                               ),
                             ),
                           ],

@@ -159,7 +159,7 @@ class AboutPageWeb extends StatelessWidget {
                                     'N/A',
                                 textAlign: TextAlign.left,
                                 fontWeight: FontWeight.w400,
-                                fontSize: 18,
+                                fontSize: 16,
                                 lineHeight: 1.0,
                                 letterSpacing: 0.0,
                                 color: const Color(0xFF414141),
@@ -197,7 +197,7 @@ class AboutPageWeb extends StatelessWidget {
                                         ?.toString() ??
                                     'N/A',
                                 fontWeight: FontWeight.w400,
-                                fontSize: 18,
+                                fontSize: 16,
                                 lineHeight: 1.0,
                                 letterSpacing: 0.0,
                                 color: const Color(0xFF414141),

@@ -103,9 +103,9 @@ class CheckoutController extends GetxController {
     if (result['error'] == true) {
       print('Error: ${result['message']}');
       totalDeliveryCharge.value = 0.0;
-      onErrorWishlistChanged?.call(
-        result['message'] ?? 'Failed to calculate shipping',
-      );
+      // onErrorWishlistChanged?.call(
+      //   result['message'] ?? 'Failed to calculate shipping',
+      // );
       isShippingTaxLoaded.value = true;
       return;
     }
@@ -920,17 +920,19 @@ class CheckoutController extends GetxController {
         );
       }),
       'modal': {
-        'ondismiss': js.allowInterop(() async {
-          print('Razorpay modal dismissed'); // Debug log
-          try {
-            double itemTotal = 0.0;
-            for (var product in productDetailsList) {
-              final price = double.tryParse(product['price'] ?? '0.0') ?? 0.0;
-              final quantity =
-                  double.tryParse(product['quantity'] ?? '0') ?? 0.0;
-              itemTotal += price * quantity;
-            }
+        'ondismiss': js.allowInterop(([dynamic _]) async {
+          print('Razorpay modal dismissed');
+          isPaymentProcessing.value = false;
+          onPaymentProcessing?.call(false);
 
+          double itemTotal = 0.0;
+          for (var product in productDetailsList) {
+            final price = double.tryParse(product['price'] ?? '0.0') ?? 0.0;
+            final quantity = double.tryParse(product['quantity'] ?? '0') ?? 0.0;
+            itemTotal += price * quantity;
+          }
+
+          try {
             final orderResponse = await ApiHelper.orderPurchaseDetails(
               userId: userId ?? 'N/A',
               productDetails: productDetailsJson,
@@ -946,6 +948,7 @@ class CheckoutController extends GetxController {
                   subtotal > 2500 ? '0' : totalDeliveryCharge.value.toString(),
               createdAt: formattedDate,
             );
+
             if (orderResponse['error'] == true) {
               print(
                 'Order Response Error (Dismiss): ${orderResponse['message']}',
@@ -963,19 +966,18 @@ class CheckoutController extends GetxController {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error saving order details: $e')),
             );
-          }
-
-          // Perform navigation regardless of API result
-          try {
-            context.go(
-              '${AppRoutes.paymentResult}?success=false&orderId=$orderId&amount=$finalAmount',
-            );
-            print('Navigation to failure page successful');
-          } catch (e) {
-            print('Navigation error: $e');
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Navigation error: $e')));
+          } finally {
+            try {
+              context.go(
+                '${AppRoutes.paymentResult}?success=false&orderId=$orderId&amount=$finalAmount',
+              );
+              print('Navigation to payment failure page successful');
+            } catch (e) {
+              print('Navigation error: $e');
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Navigation error: $e')));
+            }
           }
         }),
       },
@@ -994,6 +996,7 @@ class CheckoutController extends GetxController {
   void reset() {
     isLoading(false);
     addressExists(false);
+
     firstNameController.clear();
     lastNameController.clear();
     emailController.clear();
@@ -1011,6 +1014,8 @@ class CheckoutController extends GetxController {
     lengths.clear();
     totalDeliveryCharge.value = 0.0;
     isShippingTaxLoaded.value = false; // Reset
+    showLoginBox.value = true; // Ensure login box is shown after reset
+
     totalLength.value = 0.0;
     totalHeight.value = 0.0;
     totalBreadth.value = 0.0;

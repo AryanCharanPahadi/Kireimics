@@ -71,7 +71,7 @@ class _PrivacyPolicyMobileState extends State<PrivacyPolicyMobile> {
                             CralikaFont(
                               text: "Privacy Policy",
                               fontSize: 24,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w400,
                             ),
                             BarlowText(
                               text:
@@ -94,7 +94,7 @@ class _PrivacyPolicyMobileState extends State<PrivacyPolicyMobile> {
                     children: [
                       CralikaFont(
                         text: section.title,
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.88, // 4% of 22
                         lineHeight: 27 / 22, // 1.227

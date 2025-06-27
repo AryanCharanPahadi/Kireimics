@@ -176,7 +176,19 @@ class _CartPanelState extends State<CartPanel> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
+                      onTap: () async {
+                        final router = GoRouter.of(context);
+                        final currentRoute =
+                            router.routeInformationProvider.value.uri
+                                .toString();
+
+                        if (currentRoute.contains(AppRoutes.checkOut)) {
+                          await checkoutController.loadUserData();
+                          await checkoutController.loadAddressData();
+                          await checkoutController.getShippingTax();
+                        }
+                        Navigator.of(context).pop();
+                      },
                       child: BarlowText(
                         text: "Close",
                         color: Color(0xFF30578E),
@@ -192,7 +204,7 @@ class _CartPanelState extends State<CartPanel> {
                       text: "My Cart",
                       color: Color(0xFF414141),
                       fontWeight: FontWeight.w400,
-                      fontSize: 32.0,
+                      fontSize: 24.0,
                       lineHeight: 1.0,
                       letterSpacing: 0.128,
                     ),
@@ -246,7 +258,7 @@ class _CartPanelState extends State<CartPanel> {
                                                   child: BarlowText(
                                                     text: product.name,
                                                     fontWeight: FontWeight.w400,
-                                                    fontSize: 18,
+                                                    fontSize: 16,
                                                     lineHeight: 1.0,
                                                     letterSpacing: 0.0,
                                                     color:
@@ -265,7 +277,7 @@ class _CartPanelState extends State<CartPanel> {
                                                           ? "Rs ${(product.price * (1 - product.discount / 100)).toStringAsFixed(2)}"
                                                           : "Rs ${product.price.toStringAsFixed(2)}",
                                                   fontWeight: FontWeight.w400,
-                                                  fontSize: 18,
+                                                  fontSize: 16,
                                                   lineHeight: 1.0,
                                                   letterSpacing: 0.0,
                                                   color:
@@ -416,7 +428,7 @@ class _CartPanelState extends State<CartPanel> {
                                   text:
                                       "Rs ${calculateTotal().toStringAsFixed(2)}",
                                   color: Color(0xFF414141),
-                                  fontSize: isLargeScreen ? 27 : 24,
+                                  fontSize: 24,
                                   fontWeight: FontWeight.w400,
                                   lineHeight: 1.0,
                                 ),

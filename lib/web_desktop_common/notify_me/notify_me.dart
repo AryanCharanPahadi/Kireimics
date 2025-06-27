@@ -1,20 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kireimics/component/api_helper/api_helper.dart';
-import '../../component/shared_preferences/shared_preferences.dart';
-import '../../component/text_fonts/custom_text.dart';
-import '../../component/utilities/utility.dart';
+import 'package:kireimics/component/app_routes/routes.dart';
+import 'package:kireimics/component/shared_preferences/shared_preferences.dart';
+import 'package:kireimics/component/text_fonts/custom_text.dart';
+import 'package:kireimics/component/utilities/utility.dart';
 import '../login_signup/login/login_page.dart';
-
 class NotifyMeButton extends StatefulWidget {
   final void Function(String)? onWishlistChanged;
   final void Function(String)? onErrorWishlistChanged;
   final int? productId;
+  final Color? backgroundColor; // <-- add this
+  final bool? enableHoverBackground; // <-- Add this
+
+
+  // Optional text style parameters
+  final Color? textColor;
+  final FontWeight? fontWeight;
+  final double? fontSize;
+  final double? lineHeight;
+  final Color? hoverBackgroundColor;
+  final Color? hoverTextColor;
 
   const NotifyMeButton({
     Key? key,
+    this.enableHoverBackground, // <-- Add here
+
     this.onWishlistChanged,
-    this.productId,
     this.onErrorWishlistChanged,
+    this.productId,
+    this.textColor,
+    this.fontWeight,
+    this.fontSize,
+    this.lineHeight,
+    this.hoverBackgroundColor,
+    this.hoverTextColor,
+    this.backgroundColor, // <-- include here
+
   }) : super(key: key);
 
   @override
@@ -22,27 +44,21 @@ class NotifyMeButton extends StatefulWidget {
 }
 
 class _NotifyMeButtonState extends State<NotifyMeButton> {
+  String email = "";
+
   Future<bool> _isLoggedIn() async {
     String? userData = await SharedPreferencesHelper.getUserData();
     return userData != null && userData.isNotEmpty;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-  }
-
-  String email = "";
-
   Future<void> _loadUserData() async {
     String? storedUser = await SharedPreferencesHelper.getUserData();
-
     if (storedUser != null) {
       List<String> userDetails = storedUser.split(', ');
-
       if (userDetails.length >= 4) {
-        email = userDetails[3];
+        setState(() {
+          email = userDetails[3];
+        });
       } else {
         print('Invalid user data format: $storedUser');
       }
@@ -51,87 +67,83 @@ class _NotifyMeButtonState extends State<NotifyMeButton> {
     }
   }
 
+  Future<void> _callNotifyQuery() async {
+    if (widget.productId == null || email.isEmpty) {
+      widget.onErrorWishlistChanged?.call("Product ID or email is missing");
+      return;
+    }
+
+    String formattedDate = getFormattedDate();
+    final response = await ApiHelper.notifyQuery(
+      pId: widget.productId.toString(),
+      email: email,
+      createdAt: formattedDate,
+    );
+
+    if (response['error'] == true) {
+      widget.onErrorWishlistChanged?.call("Error: ${response['message']}");
+    } else {
+      widget.onWishlistChanged?.call("We'll notify you when this product is back in stock.");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 800;
+
     return GestureDetector(
       onTap: () async {
-        String formattedDate = getFormattedDate();
-
-        print('NotifyMeButton tapped with productId: ${widget.productId}');
         bool isLoggedIn = await _isLoggedIn();
-        print("This is the user email: $email");
+        final screenWidth = MediaQuery.of(context).size.width;
 
-        if (isLoggedIn && widget.productId != null && email.isNotEmpty) {
-          // Call the notifyQuery API
-          final response = await ApiHelper.notifyQuery(
-            pId: widget.productId.toString(),
-            email: email,
-            createdAt: formattedDate,
+        if (isLoggedIn) {
+          await _loadUserData();
+          await _callNotifyQuery();
+        } else if (screenWidth < 800) {
+          final result = await context.push(
+            "${AppRoutes.logIn}?source=notify_me&productId=${widget.productId}",
           );
-
-          // Handle API response
-          if (response['error'] == true) {
-            widget.onErrorWishlistChanged?.call(
-              "Error: ${response['message']}",
-            );
+          if (result == true && await _isLoggedIn()) {
+            await _loadUserData();
+            await _callNotifyQuery();
           } else {
-            // Success: Notify user
-            widget.onWishlistChanged?.call(
-              "We'll notify you when this product is back in stock.",
-            );
+            widget.onErrorWishlistChanged?.call("Login was not completed");
           }
-        } else if (!isLoggedIn) {
-          // Show login dialog if not logged in
+        } else {
           showDialog(
             context: context,
             barrierColor: Colors.transparent,
-            builder:
-                (BuildContext context) => LoginPage(
-                  onLoginSuccess: () async {
-                    print("User logged in via Notify Me button.");
-                    await _loadUserData(); // Reload user data after login
-                    Navigator.of(context).pop(); // Close login dialog
-
-                    // Call API after successful login
-                    if (widget.productId != null && email.isNotEmpty) {
-                      final response = await ApiHelper.notifyQuery(
-                        pId: widget.productId.toString(),
-                        email: email,
-                        createdAt: formattedDate,
-                      );
-
-                      if (response['error'] == true) {
-                        widget.onErrorWishlistChanged?.call(
-                          "Error: ${response['message']}",
-                        );
-                      } else {
-                        widget.onWishlistChanged?.call(
-                          "We'll notify you when this product is back in stock.",
-                        );
-                      }
-                    }
-                  },
-                ),
-          );
-        } else {
-          // Handle case where productId or email is missing
-          widget.onErrorWishlistChanged?.call(
-            "Product Id and Email is missing",
+            builder: (BuildContext context) => LoginPage(
+              onLoginSuccess: () async {
+                await _loadUserData();
+                Navigator.of(context).pop();
+                await _callNotifyQuery();
+              },
+            ),
           );
         }
       },
-      child: BarlowText(
-        text: "NOTIFY ME",
-        color:
-            MediaQuery.of(context).size.width < 800
-                ? Color(0xFF30578E)
-                : Colors.white,
-        fontWeight: FontWeight.w600,
-        fontSize: MediaQuery.of(context).size.width < 800 ? 14 : 16,
-        lineHeight: 1.0,
-        enableHoverBackground: true,
-        hoverBackgroundColor: Colors.white,
-        hoverTextColor: Color(0xFF30578E),
+      child: Container(
+        decoration: widget.backgroundColor != null
+            ? BoxDecoration(color: widget.backgroundColor)
+            : null,
+        child: BarlowText(
+          text: "NOTIFY ME",
+          color: widget.textColor ??
+              (isMobile ? const Color(0xFF30578E) : Colors.white),
+          fontWeight: widget.fontWeight ?? FontWeight.w600,
+          fontSize: widget.fontSize ?? (isMobile ? 14 : 16),
+          lineHeight: widget.lineHeight ?? 1.0,
+          enableHoverBackground: widget.enableHoverBackground ?? true, // <-- respect user flag
+          hoverBackgroundColor: widget.hoverBackgroundColor ?? Colors.white,
+          hoverTextColor: widget.hoverTextColor ?? const Color(0xFF30578E),
+        ),
       ),
     );
   }

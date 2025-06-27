@@ -226,23 +226,20 @@ class PaymentResultPage extends StatelessWidget {
                                 '${AppRoutes.checkOut}?subtotal=$subtotal',
                               );
                             },
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16 * fontScale,
-                                vertical: 8 * fontScale,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFb9d6ff),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: BarlowText(
-                                text: "Retry Payment",
-                                color: const Color(0xFF30578E),
-                                fontWeight: FontWeight.w600,
-                                fontSize: (16 * fontScale).clamp(12, 16),
-                                lineHeight: 1.0,
-                                letterSpacing: 0.64 * fontScale,
-                              ),
+                            child: BarlowText(
+                              text: "RETRY PAYMENT",
+                              color: const Color(0xFFFFFFFF),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              lineHeight: 1.0,
+                              letterSpacing: 0.64 * fontScale,
+                              backgroundColor: Color(0xFF67a8cf),
+                              hoverTextColor: Color(0xFF2876E4),
+                              enableHoverBackground: true,
+                              hoverBackgroundColor: Colors.white,
+                              onTap: () {
+                                context.go(AppRoutes.contactUs);
+                              },
                             ),
                           ),
                         ],

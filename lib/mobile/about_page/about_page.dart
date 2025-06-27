@@ -1,10 +1,7 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/utilities/url_launcher.dart';
 import '../../web/about_us/about_us_controller.dart';
@@ -25,9 +22,11 @@ class _AboutPageState extends State<AboutPage> {
     return Obx(
       () =>
           aboutUsController.isLoading.value
-              ? const Center(child:  RotatingSvgLoader(
-            assetPath: 'assets/footer/footerbg.svg',
-          ),)
+              ? const Center(
+                child: RotatingSvgLoader(
+                  assetPath: 'assets/footer/footerbg.svg',
+                ),
+              )
               : aboutUsController.errorMessage.value.isNotEmpty
               ? Center(child: Text(aboutUsController.errorMessage.value))
               : aboutUsController.profileData.value == null

@@ -45,7 +45,7 @@ class _SignupState extends State<Signup> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isWideScreen = MediaQuery.of(context).size.width > 1400;
+    final bool isWideScreen = MediaQuery.of(context).size.width > 1900;
 
     return Stack(
       children: [
@@ -195,7 +195,7 @@ class _SignupState extends State<Signup> {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter your password';
                               }
-                              if (value.length < 8) {
+                              if (value.length < 9) {
                                 return 'Password must be at least 8 characters';
                               }
                               return null;
@@ -445,7 +445,7 @@ class _SignupState extends State<Signup> {
                 child: BarlowText(
                   text: 'LOG IN NOW',
                   fontWeight: FontWeight.w600,
-                  fontSize: 14,
+                  fontSize: 16,
                   lineHeight: 1.5,
                   color: Color(0xFF30578E),
                   hoverBackgroundColor: Color(0xFFb9d6ff),

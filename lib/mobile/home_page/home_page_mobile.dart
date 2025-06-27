@@ -63,6 +63,8 @@ class _HomePageMobileState extends State<HomePageMobile> {
     super.dispose();
   }
 
+  bool isSubmitting = false; // New flag to track form submission
+
   Future<void> _submitForm() async {
     final String formattedDate = getFormattedDate();
 
@@ -89,6 +91,10 @@ class _HomePageMobileState extends State<HomePageMobile> {
       return;
     }
 
+    setState(() {
+      isSubmitting = true; // Show loader
+    });
+
     try {
       final response = await ApiHelper.contactQuery(
         name: _nameController.text,
@@ -114,12 +120,11 @@ class _HomePageMobileState extends State<HomePageMobile> {
       widget.onErrorWishlistChanged?.call(
         'An unexpected error occurred: ${e.toString()}',
       );
+    } finally {
+      setState(() {
+        isSubmitting = false; // Hide loader
+      });
     }
-  }
-
-  Future<bool> _isLoggedIn() async {
-    String? userData = await SharedPreferencesHelper.getUserData();
-    return userData != null && userData.isNotEmpty;
   }
 
   @override
@@ -398,53 +403,41 @@ class _HomePageMobileState extends State<HomePageMobile> {
 
                                     const SizedBox(height: 8),
                                     GestureDetector(
-                                      onTap: isOutOfStock
-                                          ? null
-                                          : () async {
-                                        widget
-                                            .onWishlistChanged
-                                            ?.call(
-                                            'Product Added To Cart');
-                                        await SharedPreferencesHelper
-                                            .addProductId(
-                                            product
-                                                .id);
-                                        cartNotifier
-                                            .refresh();
-                                      },
-                                      child: isOutOfStock
-                                          ? NotifyMeButton(
-                                        productId:
-                                        product.id,
-                                        onWishlistChanged:
-                                        widget
-                                            .onWishlistChanged,
-                                        onErrorWishlistChanged:
-                                            (error) {
-                                          widget
-                                              .onWishlistChanged
-                                              ?.call(
-                                              error);
-                                        },
-                                      )
-                                          : Text(
-                                        "ADD TO CART",
-                                        style:
-                                        GoogleFonts
-                                            .barlow(
-                                          fontWeight:
-                                          FontWeight
-                                              .w600,
-                                          fontSize:
-                                          14,
-                                          height:
-                                          1.2,
-                                          letterSpacing:
-                                          0.56,
-                                          color: const Color(
-                                              0xFF30578E),
-                                        ),
-                                      ),
+                                      onTap:
+                                          isOutOfStock
+                                              ? null
+                                              : () async {
+                                                widget.onWishlistChanged?.call(
+                                                  'Product Added To Cart',
+                                                );
+                                                await SharedPreferencesHelper.addProductId(
+                                                  product.id,
+                                                );
+                                                cartNotifier.refresh();
+                                              },
+                                      child:
+                                          isOutOfStock
+                                              ? NotifyMeButton(
+                                                productId: product.id,
+                                                onWishlistChanged:
+                                                    widget.onWishlistChanged,
+                                                onErrorWishlistChanged: (
+                                                  error,
+                                                ) {
+                                                  widget.onWishlistChanged
+                                                      ?.call(error);
+                                                },
+                                              )
+                                              : BarlowText(
+                                              text:   "ADD TO CART",
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            lineHeight: 1.0,
+                                            letterSpacing: 0.56,
+                                            color: const Color(
+                                              0xFF30578E,
+                                            ),
+                                              ),
                                     ),
                                   ],
                                 ),
@@ -582,20 +575,24 @@ class _HomePageMobileState extends State<HomePageMobile> {
                                 Alignment
                                     .centerRight, // Aligns the submit button to the left
                             child: GestureDetector(
-                              onTap: () {
-                                _submitForm();
-                              },
-                              child: BarlowText(
-                                text: "SUBMIT",
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                lineHeight: 1.0,
-                                letterSpacing: 0.64,
-                                backgroundColor: Color(0xFFb9d6ff),
-                                enableHoverBackground: true,
-                                color: Color(0xFF30578E),
-                                hoverTextColor: Color(0xFFb9d6ff),
-                              ),
+                              onTap: isSubmitting ? null : _submitForm,
+                              child:
+                                  isSubmitting
+                                      ? RotatingSvgLoader(
+                                        size: 15,
+                                        assetPath: 'assets/footer/footerbg.svg',
+                                      )
+                                      : BarlowText(
+                                        text: "SUBMIT",
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        lineHeight: 1.0,
+                                        letterSpacing: 0.64,
+                                        backgroundColor: Color(0xFFb9d6ff),
+                                        enableHoverBackground: true,
+                                        color: Color(0xFF30578E),
+                                        hoverTextColor: Color(0xFFb9d6ff),
+                                      ),
                             ),
                           ),
                         ),

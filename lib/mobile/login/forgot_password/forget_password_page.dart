@@ -155,13 +155,13 @@ class _ForgotPasswordMainMobileState extends State<ForgotPasswordMainMobile> {
                           Column(
                             children: [
                               _isLoading
-                                  ?  RotatingSvgLoader(
-                        assetPath: 'assets/footer/footerbg.svg',
-                      )
+                                  ? RotatingSvgLoader(
+                                    assetPath: 'assets/footer/footerbg.svg',
+                                  )
                                   : BarlowText(
                                     text: "UPDATE PASSWORD",
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     lineHeight: 1.0,
                                     letterSpacing: 0.64,
                                     color: Color(0xFF30578E),
@@ -183,6 +183,12 @@ class _ForgotPasswordMainMobileState extends State<ForgotPasswordMainMobile> {
                                       if (confirmPassword.isEmpty) {
                                         widget.onErrorWishlistChanged?.call(
                                           "Please re-enter password",
+                                        );
+                                        return;
+                                      }
+                                      if (password.length < 9) {
+                                        widget.onErrorWishlistChanged?.call(
+                                          "Password must be at least 9 characters long",
                                         );
                                         return;
                                       }
@@ -221,12 +227,13 @@ class _ForgotPasswordMainMobileState extends State<ForgotPasswordMainMobile> {
                                           );
                                           _passwordController.clear();
                                           _confirmPasswordController.clear();
+                                          context.go(AppRoutes.home);
 
                                           Future.delayed(
-                                            Duration(seconds: 3),
+                                            const Duration(milliseconds: 100),
                                             () {
-                                              if (mounted) {
-                                                context.go(AppRoutes.home);
+                                              if (context.mounted) {
+                                                context.go(AppRoutes.logIn);
                                               }
                                             },
                                           );

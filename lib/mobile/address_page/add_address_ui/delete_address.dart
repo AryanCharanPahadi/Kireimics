@@ -116,7 +116,7 @@ class _DeleteAddressMobileState extends State<DeleteAddressMobile> {
                 text: "DELETE NOW",
                 color: const Color(0xFF30578E),
                 fontWeight: FontWeight.w600,
-                fontSize: 16,
+                fontSize: 14,
                 lineHeight: 1.0,
                 letterSpacing: 0.64,
                 backgroundColor: const Color(0xFFb9d6ff),
@@ -160,15 +160,12 @@ class _DeleteAddressMobileState extends State<DeleteAddressMobile> {
               child: BarlowText(
                 text: "CANCEL",
                 color: const Color(0xFF30578E),
-                hoverBackgroundColor: const Color(0xFFb9d6ff),
-                enableHoverBackground: true,
-                decorationColor: const Color(0xFF30578E),
-                hoverTextColor: const Color(0xFF2876E4),
-                hoverDecorationColor: const Color(0xFF2876E4),
                 fontWeight: FontWeight.w600,
-                fontSize: 16,
+                fontSize: 14,
                 lineHeight: 1.0,
                 letterSpacing: 0.64,
+                backgroundColor: const Color(0xFFb9d6ff),
+                hoverTextColor: const Color(0xFF2876E4),
                 onTap: () {
                   Navigator.of(context).pop();
                 },

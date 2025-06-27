@@ -46,6 +46,8 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
     super.dispose();
   }
 
+  bool isSubmitting = false; // New flag to track form submission
+
   Future<void> _submitForm() async {
     final String formattedDate = getFormattedDate();
 
@@ -72,6 +74,10 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
       return;
     }
 
+    setState(() {
+      isSubmitting = true; // Show loader
+    });
+
     try {
       final response = await ApiHelper.contactQuery(
         name: _nameController.text,
@@ -97,6 +103,10 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
       widget.onErrorWishlistChanged?.call(
         'An unexpected error occurred: ${e.toString()}',
       );
+    } finally {
+      setState(() {
+        isSubmitting = false; // Hide loader
+      });
     }
   }
 
@@ -114,9 +124,9 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
   @override
   Widget build(BuildContext context) {
     return contactController.isLoading
-        ? const Center(child: RotatingSvgLoader(
-      assetPath: 'assets/footer/footerbg.svg',
-    ),)
+        ? const Center(
+          child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
+        )
         : contactController.contactData == null
         ? const Center(child: Text("Failed to load contact details."))
         : Column(
@@ -152,7 +162,7 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                     style: TextStyle(
                       fontFamily: GoogleFonts.barlow().fontFamily,
                       fontWeight: FontWeight.w400,
-                      fontSize: 18,
+                      fontSize: 20,
                       height: 1.5,
                       letterSpacing: 0.04 * 20,
                       color: Colors.white,
@@ -166,7 +176,13 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
               padding: const EdgeInsets.only(left: 395, top: 35),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [CralikaFont(text: "Contact Us", fontSize: 32,fontWeight: FontWeight.w400,)],
+                children: [
+                  CralikaFont(
+                    text: "Contact Us",
+                    fontSize: 32,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
@@ -189,12 +205,14 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                         ),
                         const SizedBox(height: 24),
                         InkWell(
-                          onTap: () => UrlLauncherHelper.launchURL(
-                            context,
-                            "tel:+91${contactController.contactData!['phone'].toString()}",
-                          ),
+                          onTap:
+                              () => UrlLauncherHelper.launchURL(
+                                context,
+                                "tel:+91${contactController.contactData!['phone'].toString()}",
+                              ),
                           child: BarlowText(
-                            text: "+91 ${contactController.contactData!['phone'].toString()}",
+                            text:
+                                "+91 ${contactController.contactData!['phone'].toString()}",
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF30578E),
@@ -266,16 +284,28 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                             ),
                             const SizedBox(height: 24),
                             GestureDetector(
-                              onTap: _submitForm,
+                              onTap:
+                                  isSubmitting
+                                      ? null
+                                      : _submitForm, // Disable tap during submission
+                              child:
+                                  isSubmitting
+                                      ? Align(
+                                    alignment: Alignment.bottomRight,
 
-                              child: Align(
-                                alignment: Alignment.bottomRight,
-                                child: SvgPicture.asset(
-                                  "assets/home_page/submit.svg",
-                                  height: 19,
-                                  width: 58,
-                                ),
-                              ),
+                                    child: RotatingSvgLoader(
+                                          size: 20,
+                                          assetPath: 'assets/footer/footerbg.svg',
+                                        ),
+                                      )
+                                      : Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: SvgPicture.asset(
+                                          "assets/home_page/submit.svg",
+                                          height: 19,
+                                          width: 58,
+                                        ),
+                                      ),
                             ),
                           ],
                         ),
@@ -290,7 +320,13 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
               padding: const EdgeInsets.only(left: 395, top: 35),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [CralikaFont(text: "FAQ's", fontSize: 32,fontWeight: FontWeight.w400,)],
+                children: [
+                  CralikaFont(
+                    text: "FAQ's",
+                    fontSize: 32,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 32),
@@ -348,27 +384,27 @@ class _ContactUsDesktopState extends State<ContactUsDesktop> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  contactController.faqData[index]["question"]!,
-                                  style: GoogleFonts.barlow(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.0,
-                                    letterSpacing: 0.0,
-                                    color: Color(0xFF414141),
-                                  ),
+                                BarlowText(
+                                  text:
+                                      contactController
+                                          .faqData[index]["question"]!,
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w400,
+                                  lineHeight: 1.0,
+                                  letterSpacing: 0.0,
+                                  color: Color(0xFF414141),
                                   softWrap: true,
                                 ),
                                 const SizedBox(height: 4.0),
-                                Text(
-                                  contactController.faqData[index]["answer"]!,
-                                  style: GoogleFonts.barlow(
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.4,
-                                    letterSpacing: 0.0,
-                                    color: Color(0xFF636363),
-                                  ),
+                                BarlowText(
+                                  text:
+                                      contactController
+                                          .faqData[index]["answer"]!,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w400,
+                                  lineHeight: 1.4,
+                                  letterSpacing: 0.0,
+                                  color: Color(0xFF636363),
                                   softWrap: true,
                                 ),
                               ],

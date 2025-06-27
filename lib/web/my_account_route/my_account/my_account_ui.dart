@@ -371,270 +371,212 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                         SizedBox(height: 24),
                         // Use Obx to reactively update UI based on _addressList
                         Obx(
-                          () =>
-                              addAddressController.addressList.isEmpty
-                                  ? Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Color(
-                                            0xFFDDEAFF,
-                                          ).withOpacity(0.6),
-                                          offset: Offset(20, 20),
-                                          blurRadius: 20,
+                              () => addAddressController.addressList.isEmpty
+                              ? Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0xFFDDEAFF).withOpacity(0.6),
+                                  offset: Offset(20, 20),
+                                  blurRadius: 20,
+                                ),
+                              ],
+                              border: Border.all(
+                                color: Color(0xFFDDEAFF),
+                                width: 1,
+                              ),
+                            ),
+                            width: rightSectionWidth,
+                            padding: const EdgeInsets.all(16.0),
+                            child: Center(
+                              child: BarlowText(
+                                text: "No addresses found. Add a new address.",
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                lineHeight: 1.4,
+                                letterSpacing: 0.0,
+                                color: Color(0xFF636363),
+                              ),
+                            ),
+                          )
+                              : Column(
+                            children: addAddressController.addressList.map((address) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Color(0xFFDDEAFF).withOpacity(0.6),
+                                        offset: Offset(20, 20),
+                                        blurRadius: 20,
+                                      ),
+                                    ],
+                                    border: Border.all(
+                                      color: Color(0xFFDDEAFF),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  width: rightSectionWidth,
+                                  child: Stack(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 16.0,
+                                          top: 13,
+                                          bottom: 13,
+                                          right: 10,
                                         ),
-                                      ],
-                                      border: Border.all(
-                                        color: Color(0xFFDDEAFF),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    width: rightSectionWidth,
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Center(
-                                      child: BarlowText(
-                                        text:
-                                            "No addresses found. Add a new address.",
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 16,
-                                        lineHeight: 1.4,
-                                        letterSpacing: 0.0,
-                                        color: Color(0xFF636363),
-                                      ),
-                                    ),
-                                  )
-                                  : Column(
-                                    children:
-                                        addAddressController.addressList.map((
-                                          address,
-                                        ) {
-                                          return Padding(
-                                            padding: const EdgeInsets.only(
-                                              bottom: 16.0,
-                                            ),
-                                            child: Container(
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              height: 56,
+                                              width: 56,
                                               decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Color(
-                                                      0xFFDDEAFF,
-                                                    ).withOpacity(0.6),
-                                                    offset: Offset(20, 20),
-                                                    blurRadius: 20,
+                                                color: Color(0xFFDDEAFF),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Center(
+                                                child: SvgPicture.asset(
+                                                  "assets/icons/location.svg",
+                                                  height: 27,
+                                                  width: 25,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 24),
+                                            Expanded(
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  BarlowText(
+                                                    text: address["city"]?.toString() ?? '',
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 20,
+                                                    lineHeight: 1.0,
+                                                    letterSpacing: 0.0,
+                                                    color: Color(0xFF414141),
+                                                  ),
+                                                  SizedBox(height: 3),
+                                                  BarlowText(
+                                                    text: address["name"]?.toString() ?? '',
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 14,
+                                                    lineHeight: 1.4,
+                                                    letterSpacing: 0.0,
+                                                    color: Color(0xFF636363),
+                                                  ),
+                                                  SizedBox(height: 3),
+                                                  BarlowText(
+                                                    text: address["address"]?.toString() ?? '',
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 14,
+                                                    lineHeight: 1.4,
+                                                    letterSpacing: 0.0,
+                                                    color: Color(0xFF636363),
+                                                  ),
+                                                  SizedBox(height: 3),
+                                                  BarlowText(
+                                                    text: "${address["postalCode"]?.toString() ?? ''} - ${address["city"]?.toString() ?? ''}",
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 14,
+                                                    lineHeight: 1.4,
+                                                    letterSpacing: 0.0,
+                                                    color: Color(0xFF636363),
+                                                  ),
+                                                  SizedBox(height: 3),
+                                                  Row(
+                                                    children: [
+                                                      BarlowText(
+                                                        text: "EDIT",
+                                                        fontWeight: FontWeight.w600,
+                                                        fontSize: 16,
+                                                        lineHeight: 1.5,
+                                                        letterSpacing: 0.0,
+                                                        color: Color(0xFF30578E),
+                                                        hoverBackgroundColor: Color(0xFFb9d6ff),
+                                                        decorationColor: Color(0xFF30578E),
+                                                        hoverTextColor: Color(0xFF2876E4),
+                                                        hoverDecorationColor: Color(0xFF2876E4),
+                                                        enableHoverBackground: true,
+                                                        onTap: () {
+                                                          showDialog(
+                                                            context: context,
+                                                            barrierColor: Colors.transparent,
+                                                            builder: (BuildContext context) {
+                                                              return AddAddressUi(
+                                                                address: address,
+                                                                isEditing: true,
+                                                              );
+                                                            },
+                                                          );
+                                                        },
+                                                      ),
+                                                      BarlowText(
+                                                        text: " / ",
+                                                        fontWeight: FontWeight.w600,
+                                                        fontSize: 16,
+                                                        lineHeight: 1.5,
+                                                        letterSpacing: 0.0,
+                                                        color: Color(0xFF30578E),
+                                                      ),
+                                                      BarlowText(
+                                                        text: "DELETE",
+                                                        decorationColor: Color(0xFF30578E),
+                                                        hoverTextColor: Color(0xFF2876E4),
+                                                        hoverDecorationColor: Color(0xFF2876E4),
+                                                        fontWeight: FontWeight.w600,
+                                                        fontSize: 16,
+                                                        lineHeight: 1.5,
+                                                        letterSpacing: 0.0,
+                                                        color: Color(0xFF30578E),
+                                                        hoverBackgroundColor: Color(0xFFb9d6ff),
+                                                        enableHoverBackground: true,
+                                                        onTap: () {
+                                                          showDialog(
+                                                            context: context,
+                                                            barrierColor: Colors.transparent,
+                                                            builder: (BuildContext context) {
+                                                              return DeleteAddress(
+                                                                addressId: address["id"].toString(),
+                                                              );
+                                                            },
+                                                          );
+                                                        },
+                                                      ),
+                                                    ],
                                                   ),
                                                 ],
-                                                border: Border.all(
-                                                  color: Color(0xFFDDEAFF),
-                                                  width: 1,
-                                                ),
-                                              ),
-                                              width: rightSectionWidth,
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(
-                                                  left: 16.0,
-                                                  top: 13,
-                                                  bottom: 13,
-                                                  right: 10,
-                                                ),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  children: [
-                                                    Container(
-                                                      height: 56,
-                                                      width: 56,
-                                                      decoration: BoxDecoration(
-                                                        color: Color(
-                                                          0xFFDDEAFF,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              8,
-                                                            ),
-                                                      ),
-                                                      child: Center(
-                                                        child: SvgPicture.asset(
-                                                          "assets/icons/location.svg",
-                                                          height: 27,
-                                                          width: 25,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 24),
-                                                    Expanded(
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceAround,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          BarlowText(
-                                                            text:
-                                                                address["city"],
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            fontSize: 20,
-                                                            lineHeight: 1.0,
-                                                            letterSpacing: 0.0,
-                                                            color: Color(
-                                                              0xFF414141,
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 3),
-                                                          BarlowText(
-                                                            text:
-                                                                address["name"],
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            fontSize: 14,
-                                                            lineHeight: 1.4,
-                                                            letterSpacing: 0.0,
-                                                            color: Color(
-                                                              0xFF636363,
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 3),
-                                                          BarlowText(
-                                                            text:
-                                                                address["address"],
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            fontSize: 14,
-                                                            lineHeight: 1.4,
-                                                            letterSpacing: 0.0,
-                                                            color: Color(
-                                                              0xFF636363,
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 3),
-                                                          BarlowText(
-                                                            text:
-                                                                "${address["postalCode"]} - ${address["city"]}",
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            fontSize: 14,
-                                                            lineHeight: 1.4,
-                                                            letterSpacing: 0.0,
-                                                            color: Color(
-                                                              0xFF636363,
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 3),
-                                                          Row(
-                                                            children: [
-                                                              BarlowText(
-                                                                text: "EDIT",
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                fontSize: 16,
-                                                                lineHeight: 1.5,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                                color: Color(
-                                                                  0xFF30578E,
-                                                                ),
-                                                                hoverBackgroundColor:
-                                                                    Color(
-                                                                      0xFFb9d6ff,
-                                                                    ),
-                                                                decorationColor: const Color(0xFF30578E),
-                                                                hoverTextColor: const Color(0xFF2876E4),
-                                                                hoverDecorationColor: Color(0xFF2876E4),
-                                                                enableHoverBackground:
-                                                                    true,
-                                                                onTap: () {
-                                                                  showDialog(
-                                                                    context:
-                                                                        context,
-                                                                    barrierColor:
-                                                                        Colors
-                                                                            .transparent,
-                                                                    builder: (
-                                                                      BuildContext
-                                                                      context,
-                                                                    ) {
-                                                                      return AddAddressUi(
-                                                                        address:
-                                                                            address,
-                                                                        isEditing:
-                                                                            true,
-                                                                      );
-                                                                    },
-                                                                  );
-                                                                },
-                                                              ),
-                                                              BarlowText(
-                                                                text: " / ",
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                fontSize: 16,
-                                                                lineHeight: 1.5,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                                color: Color(
-                                                                  0xFF30578E,
-                                                                ),
-                                                              ),
-                                                              BarlowText(
-                                                                text: "DELETE",
-                                                                decorationColor: const Color(0xFF30578E),
-                                                                hoverTextColor: const Color(0xFF2876E4),
-                                                                hoverDecorationColor: Color(0xFF2876E4),
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                fontSize: 16,
-                                                                lineHeight: 1.5,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                                color: Color(
-                                                                  0xFF30578E,
-                                                                ),
-                                                                hoverBackgroundColor:
-                                                                    Color(
-                                                                      0xFFb9d6ff,
-                                                                    ),
-                                                                enableHoverBackground:
-                                                                    true,
-                                                                onTap: () {
-                                                                  showDialog(
-                                                                    context:
-                                                                        context,
-                                                                    barrierColor:
-                                                                        Colors
-                                                                            .transparent,
-                                                                    builder: (
-                                                                      BuildContext
-                                                                      context,
-                                                                    ) {
-                                                                      return DeleteAddress(
-                                                                        addressId:
-                                                                            address["id"].toString(),
-                                                                      ); // Pass address ID
-                                                                    },
-                                                                  );
-                                                                },
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
                                               ),
                                             ),
-                                          );
-                                        }).toList(),
+                                          ],
+                                        ),
+                                      ),
+                                      // Add DEFAULT badge if this is the default address
+                                      if (address['default_address'] == true)
+                                        Positioned(
+                                          top: 14,
+                                          right: 38,
+                                          child: BarlowText(
+                                            text: "DEFAULT",
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                            lineHeight: 1.4,
+                                            letterSpacing: 0.0,
+                                            color: Color(0xFFB9D6FF),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                        ),
-                      ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        )                      ],
                     ),
                   ),
                 ),

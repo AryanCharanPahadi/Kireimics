@@ -292,6 +292,8 @@ class _ProductDetailsState extends State<ProductDetails>
                               text: "BROWSE OUR CATALOG",
                               textAlign: TextAlign.right,
                               fontWeight: FontWeight.w600,
+                              hoverTextColor: Color(0xFF2876E4),
+
                               fontSize: 16,
                               lineHeight: 1.0,
                               letterSpacing: 0.64,
@@ -724,6 +726,8 @@ class _ProductDetailsState extends State<ProductDetails>
                           text: "Catalog",
                           color: Color(0xFF30578E),
                           fontSize: 16,
+                          hoverTextColor: Color(0xFF2876E4),
+
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
                           letterSpacing: 1 * 0.04, // 4% of 32px
@@ -744,6 +748,8 @@ class _ProductDetailsState extends State<ProductDetails>
                           text: product!.catName,
                           color: Color(0xFF30578E),
                           fontSize: 16,
+                          hoverTextColor: Color(0xFF2876E4),
+
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
                           onTap: () {
@@ -765,6 +771,8 @@ class _ProductDetailsState extends State<ProductDetails>
                           text: "View Details",
                           color: Color(0xFF30578E),
                           fontSize: 16,
+                          hoverTextColor: Color(0xFF2876E4),
+
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
                           route: AppRoutes.productDetails(product!.id),
@@ -808,6 +816,7 @@ class _ProductDetailsState extends State<ProductDetails>
 
                             BarlowText(
                               text: product!.catName,
+                              hoverTextColor: Color(0xFF2876E4),
 
                               fontWeight: FontWeight.w600, // 400 weight
                               fontSize: 16, // 32px
@@ -885,27 +894,27 @@ class _ProductDetailsState extends State<ProductDetails>
                                           height: 32,
                                         ),
                                         SizedBox(height: 24),
-                                        BarlowText(
-                                          text: "NOTIFY ME",
-                                          color: Color(0xFF30578E),
+
+                                        NotifyMeButton(
+                                          backgroundColor: Color(0xFFb9d6ff),
                                           fontWeight: FontWeight.w600,
                                           fontSize: 16,
+                                          textColor: Color(0xFF30578E),
                                           lineHeight: 1.0,
-                                          backgroundColor: Color(0xFFb9d6ff),
-                                          hoverTextColor: Color(
-                                            0xFF2876E4,
-                                          ), // Changes to blue on hover
-                                          onTap: () {
-                                            widget.onWishlistChanged?.call(
-                                              "We'll notify you when this product is back in stock.",
-                                            );
-                                          },
+                                          hoverTextColor: Color(0xFF2876E4),
+                                          enableHoverBackground: false,
+
+                                          onWishlistChanged:
+                                              widget.onWishlistChanged,
+                                          productId: widget.productId,
                                         ),
                                       ],
                                     )
                                     : BarlowText(
                                       text: "ADD TO CART",
                                       color: Color(0xFF30578E),
+                                      hoverTextColor: Color(0xFF2876E4),
+
                                       fontWeight: FontWeight.w600,
                                       fontSize: 16,
                                       lineHeight: 1.0,
@@ -969,6 +978,8 @@ class _ProductDetailsState extends State<ProductDetails>
                                     text: "WISHLIST",
                                     color: const Color(0xFF30578E),
                                     fontWeight: FontWeight.w600,
+                                    hoverTextColor: Color(0xFF2876E4),
+
                                     fontSize: 16,
                                     lineHeight: 1.0,
                                     letterSpacing: 1 * 0.04,
@@ -1023,14 +1034,18 @@ class _ProductDetailsState extends State<ProductDetails>
                 title,
                 style: TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w400,
                   fontSize: 14,
                 ),
               ),
               SizedBox(height: 4),
               Text(
                 description,
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ],
           ),

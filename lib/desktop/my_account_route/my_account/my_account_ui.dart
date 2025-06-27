@@ -17,8 +17,8 @@ import '../../../web_desktop_common/add_address_ui/add_address_ui.dart';
 import '../../../web_desktop_common/add_address_ui/delete_address.dart';
 
 class MyAccountUiDesktop extends StatefulWidget {
-  final Function(String)? onWishlistChanged; // Callback to notify parent
-  final Function(String)? onErrorWishlistChanged; // Callback to notify parent
+  final Function(String)? onWishlistChanged;
+  final Function(String)? onErrorWishlistChanged;
 
   const MyAccountUiDesktop({
     super.key,
@@ -31,15 +31,25 @@ class MyAccountUiDesktop extends StatefulWidget {
 }
 
 class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
-  // Sample JSON data for addresses
-  // Get the AddAddressController instance
   final AddAddressController addAddressController = Get.put(
     AddAddressController(),
   );
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  String signupMessage = "";
 
-  String signupMessage = ""; // Add this
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController mobileController = TextEditingController();
+
+  bool isEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
 
   Future<bool> handleSignUp(BuildContext context) async {
     String? userId = await SharedPreferencesHelper.getUserId();
@@ -102,11 +112,10 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
       List<String> userDetails = storedUser.split(', ');
 
       if (userDetails.length >= 4) {
-        // Adjusted to expect at least 4 parts
         List<String> nameParts = userDetails[1].split(' ');
         String firstName = nameParts.isNotEmpty ? nameParts[0] : '';
         String lastName =
-            nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+        nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
         String phone = userDetails[2];
         String email = userDetails[3];
 
@@ -126,19 +135,6 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
     }
   }
 
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController mobileController = TextEditingController();
-
-  bool isEditing = false; // Track edit state
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-  }
-
   void _toggleEditing() {
     setState(() {
       isEditing = !isEditing;
@@ -156,30 +152,29 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final rightPadding = screenWidth * 0.15;
+    final contentWidth = screenWidth - 389 - rightPadding - 66; // Subtract gap
+    final leftSectionWidth = contentWidth * 0.45;
+    final rightSectionWidth = contentWidth * 0.55;
+
     return Stack(
       children: [
         SizedBox(
-          // color: Colors.green,
-          width: MediaQuery.of(context).size.width,
+          width: screenWidth,
           child: Padding(
             padding: EdgeInsets.only(
               left: 389,
-              right: MediaQuery.of(context).size.width * 0.15,
+              right: rightPadding,
               top: 24,
             ),
             child: Row(
-              mainAxisAlignment:
-                  MediaQuery.of(context).size.width < 1963
-                      ? MainAxisAlignment.spaceBetween
-                      : MainAxisAlignment.start, // No spacing if width >= 1963
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Left Column - My Details
                 SizedBox(
-                  width:
-                      MediaQuery.of(context).size.width > 1963
-                          ? 541
-                          : 344, // Fixed width for left column
+                  width: leftSectionWidth,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -230,20 +225,14 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
                     ],
                   ),
                 ),
-                if (MediaQuery.of(context).size.width > 1963)
-                  SizedBox(width: 66),
+                const SizedBox(width: 66), // Gap between columns
                 // Right Column - My Addresses
                 SizedBox(
-                  width:
-                      MediaQuery.of(context).size.width > 1963
-                          ? 653
-                          : 468, // Fixed width for right column
+                  width: rightSectionWidth,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(
-                        height: 100,
-                      ), // Vertical offset to align with left column
+                      const SizedBox(height: 100),
                       // My Addresses Section
                       _buildSectionHeader(
                         title: "My Addresses",
@@ -252,15 +241,14 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
                           showDialog(
                             context: context,
                             barrierColor: Colors.transparent,
-                            builder:
-                                (BuildContext context) => const AddAddressUi(),
+                            builder: (BuildContext context) => const AddAddressUi(),
                           );
                         },
                       ),
                       const SizedBox(height: 24),
 
                       // Address List
-                      _buildAddressList(),
+                      _buildAddressList(rightSectionWidth),
                     ],
                   ),
                 ),
@@ -304,17 +292,16 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
           color: const Color(0xFF414141),
         ),
         GestureDetector(
-          onTap:
-              isEditing && title == "My Details"
-                  ? () async {
-                    bool success = await handleSignUp(context);
-                    if (success && mounted) {
-                      setState(() {
-                        isEditing = false; // Exit edit mode on success
-                      });
-                    }
-                  }
-                  : onAction,
+          onTap: isEditing && title == "My Details"
+              ? () async {
+            bool success = await handleSignUp(context);
+            if (success && mounted) {
+              setState(() {
+                isEditing = false;
+              });
+            }
+          }
+              : onAction,
           child: BarlowText(
             text: actionText,
             fontWeight: FontWeight.w600,
@@ -351,10 +338,10 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
   }
 
   Widget _buildCustomTextField(
-    String hintText,
-    TextEditingController controller,
-    bool readOnly,
-  ) {
+      String hintText,
+      TextEditingController controller,
+      bool readOnly,
+      ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Stack(
@@ -389,10 +376,7 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
               contentPadding: const EdgeInsets.only(top: 16),
             ),
             style: TextStyle(
-              color:
-                  isEditing
-                      ? Colors.black
-                      : Color(0xFF636363), // Change color based on isEditing
+              color: isEditing ? Colors.black : Color(0xFF636363),
             ),
           ),
         ],
@@ -400,134 +384,131 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
     );
   }
 
-  Widget _buildAddressList() {
+  Widget _buildAddressList(double rightSectionWidth) {
     return Obx(
-      () =>
-          addAddressController.addressList.isEmpty
-              ? Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFDDEAFF).withOpacity(0.6),
-                      offset: const Offset(20, 20),
-                      blurRadius: 20,
+          () => addAddressController.addressList.isEmpty
+          ? Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFDDEAFF).withOpacity(0.6),
+              offset: const Offset(20, 20),
+              blurRadius: 20,
+            ),
+          ],
+          border: Border.all(color: const Color(0xFFDDEAFF), width: 1),
+        ),
+        width: rightSectionWidth,
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: BarlowText(
+            text: "No addresses found. Add a new address.",
+            fontWeight: FontWeight.w400,
+            fontSize: 16,
+            lineHeight: 1.4,
+            letterSpacing: 0.0,
+            color: const Color(0xFF636363),
+          ),
+        ),
+      )
+          : Column(
+        children: addAddressController.addressList.map((address) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFDDEAFF).withOpacity(0.6),
+                    offset: const Offset(20, 20),
+                    blurRadius: 20,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFFDDEAFF),
+                  width: 1,
+                ),
+              ),
+              width: rightSectionWidth,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 56,
+                      width: 56,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDDEAFF),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: SvgPicture.asset(
+                          "assets/icons/location.svg",
+                          height: 27,
+                          width: 25,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BarlowText(
+                            text: address["city"],
+                            fontWeight: FontWeight.w400,
+                            fontSize: 20,
+                            lineHeight: 1.0,
+                            color: const Color(0xFF414141),
+                          ),
+                          const SizedBox(height: 3),
+                          _buildAddressDetail(address["name"]),
+                          _buildAddressDetail(address["address"]),
+                          _buildAddressDetail(
+                            "${address["postalCode"]} - ${address["country"]}",
+                          ),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              _buildActionButton("EDIT", () {
+                                showDialog(
+                                  context: context,
+                                  barrierColor: Colors.transparent,
+                                  builder: (BuildContext context) {
+                                    return AddAddressUi(
+                                      address: address,
+                                      isEditing: true,
+                                    );
+                                  },
+                                );
+                              }),
+                              const Text(" / "),
+                              _buildActionButton("DELETE", () {
+                                showDialog(
+                                  context: context,
+                                  barrierColor: Colors.transparent,
+                                  builder: (BuildContext context) {
+                                    return DeleteAddress(
+                                      addressId: address["id"].toString(),
+                                    );
+                                  },
+                                );
+                              }),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
-                  border: Border.all(color: const Color(0xFFDDEAFF), width: 1),
                 ),
-                // width: rightSectionWidth,
-                padding: const EdgeInsets.all(16.0),
-                child: Center(
-                  child: BarlowText(
-                    text: "No addresses found. Add a new address.",
-                    fontWeight: FontWeight.w400,
-                    fontSize: 16,
-                    lineHeight: 1.4,
-                    letterSpacing: 0.0,
-                    color: const Color(0xFF636363),
-                  ),
-                ),
-              )
-              : Column(
-                children:
-                    addAddressController.addressList.map((address) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFDDEAFF).withOpacity(0.6),
-                                offset: const Offset(20, 20),
-                                blurRadius: 20,
-                              ),
-                            ],
-                            border: Border.all(
-                              color: const Color(0xFFDDEAFF),
-                              width: 1,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  height: 56,
-                                  width: 56,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFDDEAFF),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Center(
-                                    child: SvgPicture.asset(
-                                      "assets/icons/location.svg",
-                                      height: 27,
-                                      width: 25,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 24),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      BarlowText(
-                                        text: address["city"],
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 20,
-                                        lineHeight: 1.0,
-                                        color: const Color(0xFF414141),
-                                      ),
-                                      const SizedBox(height: 3),
-                                      _buildAddressDetail(address["name"]),
-                                      _buildAddressDetail(address["address"]),
-                                      _buildAddressDetail(
-                                        "${address["postalCode"]} - ${address["country"]}",
-                                      ),
-                                      const SizedBox(height: 3),
-                                      Row(
-                                        children: [
-                                          _buildActionButton("EDIT", () {
-                                            showDialog(
-                                              context: context,
-                                              barrierColor: Colors.transparent,
-                                              builder: (BuildContext context) {
-                                                return AddAddressUi(
-                                                  address: address,
-                                                  isEditing: true,
-                                                );
-                                              },
-                                            );
-                                          }),
-                                          const Text(" / "),
-                                          _buildActionButton("DELETE", () {
-                                            showDialog(
-                                              context: context,
-                                              barrierColor: Colors.transparent,
-                                              builder: (BuildContext context) {
-                                                return DeleteAddress(
-                                                  addressId:
-                                                      address["id"].toString(),
-                                                ); // Pass address ID
-                                              },
-                                            );
-                                          }),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
               ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 

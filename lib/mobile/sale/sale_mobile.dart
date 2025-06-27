@@ -282,7 +282,7 @@ class _SaleMobileState extends State<SaleMobile> {
                               text: "Sort / New",
                               color: Color(0xFF30578E),
                               fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: 16,
                               lineHeight: 1.0,
                               letterSpacing: 0.04 * 16,
                             ),
@@ -296,7 +296,7 @@ class _SaleMobileState extends State<SaleMobile> {
                               text: "Filter / ${_selectedFilter ?? 'All'}",
                               color: Color(0xFF30578E),
                               fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: 16,
                               lineHeight: 1.0,
                               letterSpacing: 0.04 * 16,
                             ),
@@ -561,24 +561,14 @@ class _SaleMobileState extends State<SaleMobile> {
 
                                                       // Note: Removed the Future.delayed and showDialog parts
                                                     },
-                                                    child: Text(
-                                                      "ADD TO CART",
-                                                      style: GoogleFonts.barlow(
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 14,
-                                                        height: 1.2,
-                                                        letterSpacing: 0.56,
-                                                        color:
-                                                            isOutOfStock
-                                                                ? const Color(
-                                                                  0xFF30578E,
-                                                                ).withOpacity(
-                                                                  0.5,
-                                                                )
-                                                                : const Color(
-                                                                  0xFF30578E,
-                                                                ),
+                                                    child:BarlowText(
+                                                      text:   "ADD TO CART",
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                      lineHeight: 1.0,
+                                                      letterSpacing: 0.56,
+                                                      color: const Color(
+                                                        0xFF30578E,
                                                       ),
                                                     ),
                                                   ),

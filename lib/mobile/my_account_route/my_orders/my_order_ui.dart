@@ -97,7 +97,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
   }
   Color getStatusColor(String status) {
     if (status.toLowerCase() == 'delivered') {
-      return Colors.green;
+      return Color(0xFF268FA2);
     } else if (status.toLowerCase() == 'canceled') {
       return Colors.red;
     } else {
@@ -209,7 +209,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                   children: [
                     CralikaFont(
                       text: "${orders.length} Orders",
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w600,
                       fontSize: 20,
                       lineHeight: 36 / 32,
                       letterSpacing: 1.28,

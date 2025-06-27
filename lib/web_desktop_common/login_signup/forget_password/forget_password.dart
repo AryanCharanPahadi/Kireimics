@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kireimics/component/app_routes/routes.dart';
 import '../../../component/api_helper/api_helper.dart';
 import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/text_fonts/custom_text.dart';
@@ -25,6 +24,16 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   bool showSuccessBanner = false;
   bool showErrorBanner = false;
   String errorMessage = "";
+
+  Future<void> userData() async {
+    final response = await ApiHelper.fetchUserData(emailController.text);
+
+    if (response!['error'] == false) {
+      print(response['data']);
+    } else {
+      print(response['error'] == true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +157,28 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                             showErrorBanner = false;
                                           });
 
+                                          final response =
+                                              await ApiHelper.fetchUserData(
+                                                emailController.text,
+                                              );
+
+                                          // If user not found
+                                          if (response == null ||
+                                              response['error'] == true ||
+                                              response['data'] == null ||
+                                              (response['data'] as List)
+                                                  .isEmpty) {
+                                            setState(() {
+                                              isSendingMail = false;
+                                              errorMessage =
+                                                  "Data not found with this email";
+                                              showErrorBanner = true;
+                                              showSuccessBanner = false;
+                                            });
+
+                                            return;
+                                          }
+
                                           final mailResponse =
                                               await ApiHelper.resetPasswordMail(
                                                 email: emailController.text,
@@ -157,8 +188,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                             "Password Reset Mail Response: $mailResponse",
                                           );
 
-                                          if (mailResponse is Map &&
-                                              mailResponse['error'] == false) {
+                                          if (mailResponse['error'] == false) {
                                             setState(() {
                                               showSuccessBanner = true;
                                               showErrorBanner = false;
@@ -177,11 +207,8 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                               showErrorBanner = true;
                                               showSuccessBanner = false;
                                               errorMessage =
-                                                  mailResponse is Map &&
-                                                          mailResponse['message'] !=
-                                                              null
-                                                      ? mailResponse['message']
-                                                      : 'Something went wrong. Please try again.';
+                                                  mailResponse['message'] ??
+                                                  'Something went wrong. Please try again.';
                                               isSendingMail = false;
                                             });
                                           }
@@ -193,9 +220,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                               ? SizedBox(
                                                 height: 24,
                                                 width: 24,
-                                                child:
-                                                RotatingSvgLoader(
-                                                  assetPath: 'assets/footer/footerbg.svg',
+                                                child: RotatingSvgLoader(
+                                                  assetPath:
+                                                      'assets/footer/footerbg.svg',
                                                 ),
                                               )
                                               : BarlowText(

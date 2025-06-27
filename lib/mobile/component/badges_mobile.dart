@@ -101,7 +101,9 @@ class ProductBadgesRow extends StatelessWidget {
                 ),
               ),
             if (product.isMakerChoice == 1 && product.discount != 0)
-              const SizedBox(height: 5), // <-- This adds the 5px gap between badges
+              const SizedBox(
+                height: 5,
+              ), // <-- This adds the 5px gap between badges
 
             if (product.discount != 0)
               Container(

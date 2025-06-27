@@ -50,6 +50,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Container(
           child: Padding(
@@ -280,7 +281,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
 
                           SizedBox(width: 11),
                           BarlowText(
-                            text: "Save as my default shipping address.",
+                            text: "Save as my default shipping address.",fontWeight: FontWeight.w400,fontSize: 14,
                           ),
                         ],
                       ),
@@ -333,7 +334,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                                             ? "UPDATE ADDRESS"
                                             : "SAVE NEW ADDRESS",
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     lineHeight: 1.0,
                                     letterSpacing: 0.64,
                                     color: const Color(0xFF30578E),
@@ -378,7 +379,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                   text: hintText,
                   style: GoogleFonts.barlow(
                     fontWeight: FontWeight.w400,
-                    fontSize: 14,
+                    fontSize: 12,
                     color: Color(0xFF414141),
                   ),
                 ),
@@ -387,7 +388,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
                     text: ' *',
                     style: GoogleFonts.barlow(
                       fontWeight: FontWeight.w400,
-                      fontSize: 14,
+                      fontSize: 12,
                       color: Colors.red,
                     ),
                   ),
@@ -419,7 +420,7 @@ class _AddAddressUiMobileState extends State<AddAddressUiMobile> {
             hintText: '',
             hintStyle: GoogleFonts.barlow(
               fontWeight: FontWeight.w400,
-              fontSize: 14,
+              fontSize: 12,
               height: 1.0,
               letterSpacing: 0.0,
               color: const Color(0xFF414141),

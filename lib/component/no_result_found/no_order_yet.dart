@@ -25,7 +25,7 @@ class CartEmpty extends StatelessWidget {
     // DEFAULT FONT SIZES
     this.cralikaFontSize = 20,
     this.barlowFontSize = 16,
-    this.browseButtonFontSize = 16,
+    this.browseButtonFontSize = 14,
   });
 
   @override

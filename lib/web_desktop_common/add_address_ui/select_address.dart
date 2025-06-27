@@ -391,6 +391,8 @@ class _SelectAddressState extends State<SelectAddress> {
               lineHeight: 1.0,
               letterSpacing: 0.64,
               hoverBackgroundColor: Color(0xFFb9d6ff),
+              backgroundColor:
+              const Color(0xFFb9d6ff),
               enableHoverBackground: true,
               hoverTextColor: Color(0xFF2876E4),
               onTap: () {

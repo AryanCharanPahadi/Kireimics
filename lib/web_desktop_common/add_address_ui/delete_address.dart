@@ -163,6 +163,8 @@ class _DeleteAddressState extends State<DeleteAddress> {
                           enableHoverBackground: true,
                           decorationColor: const Color(0xFF30578E),
                           hoverTextColor: const Color(0xFF2876E4),
+                          backgroundColor: const Color(0xFFb9d6ff),
+
                           hoverDecorationColor: Color(0xFF2876E4),
                           fontWeight: FontWeight.w600,
                           fontSize: 16,

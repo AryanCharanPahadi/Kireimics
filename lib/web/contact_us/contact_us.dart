@@ -35,6 +35,7 @@ class _ContactUsState extends State<ContactUs> {
   final FocusNode _messageFocusNode = FocusNode();
   final FocusNode _anotherMessageFocusNode = FocusNode();
   bool isLoading = false;
+  bool isSubmitting = false; // New flag to track form submission
 
   @override
   void dispose() {
@@ -73,6 +74,10 @@ class _ContactUsState extends State<ContactUs> {
       return;
     }
 
+    setState(() {
+      isSubmitting = true; // Show loader
+    });
+
     try {
       final response = await ApiHelper.contactQuery(
         name: _nameController.text,
@@ -98,6 +103,10 @@ class _ContactUsState extends State<ContactUs> {
       widget.onErrorWishlistChanged?.call(
         'An unexpected error occurred: ${e.toString()}',
       );
+    } finally {
+      setState(() {
+        isSubmitting = false; // Hide loader
+      });
     }
   }
 
@@ -144,18 +153,16 @@ class _ContactUsState extends State<ContactUs> {
                     bottom: 40,
                     right: 50,
                   ),
-                  child: Text(
-                    contactController.contactData!['band_text'] ??
+                  child: BarlowText(
+                    text:
+                        contactController.contactData!['band_text'] ??
                         "/Looking for gifting options, or want to get a piece commissioned? Let's connect and create something wonderful/",
                     textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontFamily: GoogleFonts.barlow().fontFamily,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 18,
-                      height: 1.5,
-                      letterSpacing: 0.04 * 20,
-                      color: Colors.white,
-                    ),
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20,
+                    lineHeight: 1.5,
+                    letterSpacing: 0.04 * 20,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -276,16 +283,29 @@ class _ContactUsState extends State<ContactUs> {
                             ),
                             const SizedBox(height: 24),
                             GestureDetector(
-                              onTap: _submitForm,
+                              onTap:
+                                  isSubmitting
+                                      ? null
+                                      : _submitForm, // Disable tap during submission
+                              child:
+                                  isSubmitting
+                                      ? Align(
+                                        alignment: Alignment.bottomRight,
 
-                              child: Align(
-                                alignment: Alignment.bottomRight,
-                                child: SvgPicture.asset(
-                                  "assets/home_page/submit.svg",
-                                  height: 19,
-                                  width: 58,
-                                ),
-                              ),
+                                        child: RotatingSvgLoader(
+                                          size: 20,
+                                          assetPath:
+                                              'assets/footer/footerbg.svg',
+                                        ),
+                                      )
+                                      : Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: SvgPicture.asset(
+                                          "assets/home_page/submit.svg",
+                                          height: 19,
+                                          width: 58,
+                                        ),
+                                      ),
                             ),
                           ],
                         ),
@@ -367,27 +387,27 @@ class _ContactUsState extends State<ContactUs> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  contactController.faqData[index]["question"]!,
-                                  style: GoogleFonts.barlow(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.0,
-                                    letterSpacing: 0.0,
-                                    color: Color(0xFF414141),
-                                  ),
+                                BarlowText(
+                                  text:
+                                      contactController
+                                          .faqData[index]["question"]!,
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w400,
+                                  lineHeight: 1.0,
+                                  letterSpacing: 0.0,
+                                  color: Color(0xFF414141),
                                   softWrap: true,
                                 ),
                                 const SizedBox(height: 4.0),
-                                Text(
-                                  contactController.faqData[index]["answer"]!,
-                                  style: GoogleFonts.barlow(
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.4,
-                                    letterSpacing: 0.0,
-                                    color: Color(0xFF636363),
-                                  ),
+                                BarlowText(
+                                  text:
+                                      contactController
+                                          .faqData[index]["answer"]!,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w400,
+                                  lineHeight: 1.4,
+                                  letterSpacing: 0.0,
+                                  color: Color(0xFF636363),
                                   softWrap: true,
                                 ),
                               ],
@@ -483,13 +503,14 @@ class _ContactUsState extends State<ContactUs> {
             style: GoogleFonts.barlow(
               fontSize: 14,
               color: const Color(0xFF414141),
+              fontWeight: FontWeight.w400,
             ),
           ),
         ),
         TextFormField(
           controller: controller,
           focusNode: focusNode,
-          cursorColor: Colors.black,
+          cursorColor: Color(0xFF414141),
           textAlign: TextAlign.right,
           maxLength: effectiveMaxLength,
           onChanged: (value) {
@@ -529,7 +550,7 @@ class _ContactUsState extends State<ContactUs> {
           decoration: InputDecoration(
             counterText: '', // hides the maxLength counter
             hintStyle: TextStyle(
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: FontWeight.w400,
               fontFamily: GoogleFonts.barlow().fontFamily,
             ),
@@ -543,6 +564,8 @@ class _ContactUsState extends State<ContactUs> {
             contentPadding: const EdgeInsets.only(bottom: 5),
           ),
           style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
             color: const Color(0xFF414141),
             fontFamily: GoogleFonts.barlow().fontFamily,
           ),
