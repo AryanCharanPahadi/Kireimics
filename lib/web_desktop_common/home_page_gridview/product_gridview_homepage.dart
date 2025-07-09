@@ -11,6 +11,7 @@ import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../component/animation_gridview.dart';
 import '../cart/cart_panel.dart';
+import '../component/badges_web_desktop.dart';
 import '../component/height_weight.dart';
 import '../component/rotating_svg_loader.dart';
 import '../notify_me/notify_me.dart';
@@ -228,7 +229,6 @@ class _ProductGridItemState extends State<ProductGridItem>
                         builder: (context, constraints) {
                           double screenWidth = constraints.maxWidth;
 
-                          // Responsive scaling for 800–1400px
                           double getResponsiveValue(double min, double max) {
                             if (screenWidth <= 800) return min;
                             if (screenWidth >= 1400) return max;
@@ -239,160 +239,17 @@ class _ProductGridItemState extends State<ProductGridItem>
 
                           double paddingVertical = getResponsiveValue(6, 10);
 
-                          if (isOutOfStock) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: SvgPicture.asset(
-                                    "assets/home_page/outofstock.svg",
-                                    height: 25,
-                                    width: 25,
-                                  ),
-                                ),
-                                FutureBuilder<bool>(
-                                  future: SharedPreferencesHelper.isInWishlist(
-                                    widget.product.id.toString(),
-                                  ),
-                                  builder: (context, snapshot) {
-                                    final isInWishlist = snapshot.data ?? false;
-                                    return GestureDetector(
-                                      onTap: () async {
-                                        if (isInWishlist) {
-                                          await SharedPreferencesHelper.removeFromWishlist(
-                                            widget.product.id.toString(),
-                                          );
-                                          widget.onWishlistChanged?.call(
-                                            'Product Removed From Wishlist',
-                                          );
-                                        } else {
-                                          await SharedPreferencesHelper.addToWishlist(
-                                            widget.product.id.toString(),
-                                          );
-                                          widget.onWishlistChanged?.call(
-                                            'Product Added To Wishlist',
-                                          );
-                                        }
-                                        setState(() {});
-                                      },
-                                      child: SvgPicture.asset(
-                                        isInWishlist
-                                            ? 'assets/home_page/IconWishlist.svg'
-                                            : 'assets/home_page/IconWishlistEmpty.svg',
-                                        width: 23,
-                                        height: 20,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            );
-                          }
-
-                          // Normal UI when product is in stock
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Builder(
-                                builder: (context) {
-                                  final List<Widget> badges = [];
-
-                                  if (widget.product.isMakerChoice == 1) {
-                                    badges.add(
-                                      SvgPicture.asset(
-                                        "assets/home_page/maker_choice.svg",
-                                        height: 50,
-                                      ),
-                                    );
-                                  }
-
-
-
-                                  if (widget.product.discount != 0) {
-                                    if (badges.isNotEmpty)
-                                      badges.add(SizedBox(height: 10));
-                                    badges.add(
-                                      ElevatedButton(
-                                        onPressed: null,
-                                        style: ElevatedButton.styleFrom(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 7.5,
-                                            horizontal: 14,
-                                          ),
-                                          backgroundColor: const Color(
-                                            0xFFF46856,
-                                          ),
-                                          disabledBackgroundColor: const Color(
-                                            0xFFF46856,
-                                          ),
-                                          disabledForegroundColor: Colors.white,
-                                          elevation: 0,
-                                          side: BorderSide.none,
-                                        ),
-                                        child: BarlowText(
-                                          text:
-                                              "${widget.product.discount}% OFF",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                          lineHeight: 1.0, // 100% of font size
-                                          letterSpacing:
-                                              0.56, // 4% of 14px = 0.56
-                                        ),
-                                      ),
-                                    );
-                                  }
-
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: badges,
-                                  );
-                                },
-                              ),
-                              Spacer(),
-                              FutureBuilder<bool>(
-                                future: SharedPreferencesHelper.isInWishlist(
-                                  widget.product.id.toString(),
-                                ),
-                                builder: (context, snapshot) {
-                                  final isInWishlist = snapshot.data ?? false;
-
-                                  return GestureDetector(
-                                    onTap: () async {
-                                      if (isInWishlist) {
-                                        await SharedPreferencesHelper.removeFromWishlist(
-                                          widget.product.id.toString(),
-                                        );
-                                        widget.onWishlistChanged?.call(
-                                          'Product Removed From Wishlist',
-                                        );
-                                      } else {
-                                        await SharedPreferencesHelper.addToWishlist(
-                                          widget.product.id.toString(),
-                                        );
-                                        widget.onWishlistChanged?.call(
-                                          'Product Added To Wishlist',
-                                        );
-                                      }
-                                      setState(() {});
-                                    },
-                                    child: SvgPicture.asset(
-                                      isInWishlist
-                                          ? 'assets/home_page/IconWishlist.svg'
-                                          : 'assets/home_page/IconWishlistEmpty.svg',
-                                      width: 23,
-                                      height: 20,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
+                          return WishlistBadgeRow(
+                            product: widget.product,
+                            isOutOfStock: isOutOfStock,
+                            quantity: quantity,
+                            onWishlistChanged: widget.onWishlistChanged,
+                            paddingVertical: paddingVertical,
                           );
                         },
                       ),
                     ),
+
                     Positioned(
                       bottom: imageHeight * 0.02,
                       left: imageWidth * 0.02,

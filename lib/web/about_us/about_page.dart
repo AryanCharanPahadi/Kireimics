@@ -6,10 +6,23 @@ import 'package:kireimics/component/above_footer/above_footer.dart';
 import 'package:kireimics/web/about_us/about_us_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../component/title_service.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
 
-class AboutPageWeb extends StatelessWidget {
+class AboutPageWeb extends StatefulWidget {
   const AboutPageWeb({super.key});
+
+  @override
+  State<AboutPageWeb> createState() => _AboutPageWebState();
+}
+
+class _AboutPageWebState extends State<AboutPageWeb> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    TitleService.setTitle("Kireimics | About Me");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +109,7 @@ class AboutPageWeb extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Container(height: 500),
+                          Container(height: 600),
                         ],
                       ),
                       Positioned(
@@ -116,7 +129,7 @@ class AboutPageWeb extends StatelessWidget {
                         ),
                       ),
                       Positioned(
-                        top: 250,
+                        top: 200,
                         left:
                             MediaQuery.of(context).size.width > 1700
                                 ? 395
@@ -217,7 +230,7 @@ class AboutPageWeb extends StatelessWidget {
 
   Widget _buildProfileImage(Map<String, dynamic> profile) {
     final profileImage = profile['profile_image'];
-    print('Profile Image: $profileImage'); // Debug log
+    // print('Profile Image: $profileImage'); // Debug log
 
     if (profileImage is String && profileImage.isNotEmpty) {
       return Image.network(
@@ -287,7 +300,7 @@ class AboutPageWeb extends StatelessWidget {
         );
       });
     } catch (e) {
-      debugPrint("Error parsing social links: $e");
+      // debugPrint("Error parsing social links: $e");
       return []; // Return empty list if parsing fails
     }
   }
@@ -311,10 +324,10 @@ class AboutPageWeb extends StatelessWidget {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        debugPrint("Could not launch $url");
+        // debugPrint("Could not launch $url");
       }
     } catch (e) {
-      debugPrint("Error launching URL: $e");
+      // debugPrint("Error launching URL: $e");
     }
   }
 }

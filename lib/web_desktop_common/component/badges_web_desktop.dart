@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/text_fonts/custom_text.dart';
+import '../login_signup/login/login_page.dart';
 
 class WishlistBadgeRow extends StatelessWidget {
   final Product product;
@@ -25,6 +26,11 @@ class WishlistBadgeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future<bool> isUserLoggedIn() async {
+      String? userData = await SharedPreferencesHelper.getUserData();
+      return userData != null && userData.isNotEmpty;
+    }
+
     if (isOutOfStock) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,20 +52,28 @@ class WishlistBadgeRow extends StatelessWidget {
                 final isInWishlist = snapshot.data ?? false;
                 return GestureDetector(
                   onTap: () async {
+                    bool loggedIn = await isUserLoggedIn();
+                    if (!loggedIn) {
+                      showDialog(
+                        context: context,
+                        barrierColor: Colors.transparent,
+                        builder: (BuildContext context) {
+                          return LoginPage();
+                        },
+                      );
+                      return;
+                    }
+
                     if (isInWishlist) {
                       await SharedPreferencesHelper.removeFromWishlist(
                         product.id.toString(),
                       );
-                      onWishlistChanged?.call(
-                        'Product Removed From Wishlist',
-                      );
+                      onWishlistChanged?.call('Product Removed From Wishlist');
                     } else {
                       await SharedPreferencesHelper.addToWishlist(
                         product.id.toString(),
                       );
-                      onWishlistChanged?.call(
-                        'Product Added To Wishlist',
-                      );
+                      onWishlistChanged?.call('Product Added To Wishlist');
                     }
                   },
                   child: SvgPicture.asset(
@@ -91,15 +105,6 @@ class WishlistBadgeRow extends StatelessWidget {
                 ),
               );
             }
-
-            // if (quantity != null && quantity! <= 2) {
-            //   if (badges.isNotEmpty) badges.add(const SizedBox(height: 10));
-            //   badges.add(
-            //     SvgPicture.asset(
-            //       "assets/home_page/fewPiecesLeft.svg",
-            //     ),
-            //   );
-            // }
 
             if (product.discount != 0) {
               if (badges.isNotEmpty) badges.add(const SizedBox(height: 10));
@@ -138,29 +143,35 @@ class WishlistBadgeRow extends StatelessWidget {
         const Spacer(),
         if (!hideWishlistIcon) // Conditionally show wishlist icon
           FutureBuilder<bool>(
-            future: SharedPreferencesHelper.isInWishlist(
-              product.id.toString(),
-            ),
+            future: SharedPreferencesHelper.isInWishlist(product.id.toString()),
             builder: (context, snapshot) {
               final isInWishlist = snapshot.data ?? false;
               return Padding(
                 padding: const EdgeInsets.only(top: 4.0),
                 child: GestureDetector(
                   onTap: () async {
+                    bool loggedIn = await isUserLoggedIn();
+                    if (!loggedIn) {
+                      showDialog(
+                        context: context,
+                        barrierColor: Colors.transparent,
+                        builder: (BuildContext context) {
+                          return LoginPage();
+                        },
+                      );
+                      return;
+                    }
+
                     if (isInWishlist) {
                       await SharedPreferencesHelper.removeFromWishlist(
                         product.id.toString(),
                       );
-                      onWishlistChanged?.call(
-                        'Product Removed From Wishlist',
-                      );
+                      onWishlistChanged?.call('Product Removed From Wishlist');
                     } else {
                       await SharedPreferencesHelper.addToWishlist(
                         product.id.toString(),
                       );
-                      onWishlistChanged?.call(
-                        'Product Added To Wishlist',
-                      );
+                      onWishlistChanged?.call('Product Added To Wishlist');
                     }
                   },
                   child: SvgPicture.asset(

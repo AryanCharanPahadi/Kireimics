@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../component/api_helper/api_helper.dart';
 import '../../component/text_fonts/custom_text.dart';
+import '../../component/title_service.dart';
 import '../../component/utilities/url_launcher.dart';
 import '../../component/utilities/utility.dart';
 import '../../web/contact_us/contact_us_controller.dart';
@@ -114,6 +115,8 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Contact");
+
     _loadData();
   }
 
@@ -608,7 +611,7 @@ class _ContactUsComponentState extends State<ContactUsComponent> {
         );
       });
     } catch (e) {
-      debugPrint("Error parsing social links: $e");
+      // debugPrint("Error parsing social links: $e");
       return []; // Return empty list if parsing fails
     }
   }

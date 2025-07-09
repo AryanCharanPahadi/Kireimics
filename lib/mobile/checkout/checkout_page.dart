@@ -6,11 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
 import 'package:kireimics/component/app_routes/routes.dart';
 
-import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/text_fonts/custom_text.dart';
+import '../../component/title_service.dart';
+import '../../component/utilities/delivery_charge.dart';
 import '../../web/checkout/checkout_controller.dart';
 
-import '../../web_desktop_common/add_address_ui/select_address.dart';
 import '../address_page/add_address_ui/select_address_mobile.dart';
 
 class CheckoutPageMobile extends StatefulWidget {
@@ -29,58 +29,48 @@ class CheckoutPageMobile extends StatefulWidget {
 }
 
 class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
-  bool showLoginBox = true;
-  bool isChecked = false;
-  late double subtotal;
-  late double total;
-  Future<bool> isUserLoggedIn() async {
-    String? userData = await SharedPreferencesHelper.getUserData();
-    return userData != null && userData.isNotEmpty;
-  }
-
   final CheckoutController checkoutController = Get.put(CheckoutController());
+
   @override
   void initState() {
     super.initState();
-    checkoutController.showLoginBox.value = true;
-    print(
-      'Initial showLoginBox: ${checkoutController.showLoginBox.value}',
-    ); // Debug log
+    TitleService.setTitle("Kireimics | Checkout");
 
-    // Ensure login status is checked before setting showLoginBox
-    isUserLoggedIn().then((loggedIn) {
-      checkoutController.isLoggedIn.value = loggedIn;
-      checkoutController.showLoginBox.value = !loggedIn;
-      print(
-        'After check: isLoggedIn: ${checkoutController.isLoggedIn.value}, '
-        'showLoginBox: ${checkoutController.showLoginBox.value}',
-      ); // Debug log
-      setState(() {}); // Force rebuild after async login check
+    checkoutController.initializeRouter(context);
+    checkoutController.showLoginBox.value = true;
+    // print('Initial showLoginBox: ${checkoutController.showLoginBox.value}');
+
+    checkoutController.checkLoginStatus().then((_) {
+      // print(
+      //   'After check: isLoggedIn: ${checkoutController.isLoggedIn.value}, '
+      //   'showLoginBox: ${checkoutController.showLoginBox.value}',
+      // );
+      setState(() {});
     });
-    checkoutController.setCallbacks(
-      onWishlistChanged: widget.onWishlistChanged,
-      onErrorWishlistChanged: widget.onErrorWishlistChanged,
-      onPaymentProcessing: widget.onPaymentProcessing,
-    );
+
     checkoutController.loadUserData();
     checkoutController.loadAddressData().then((_) {
       if (checkoutController.zipController.text.length == 6) {
         checkoutController.getShippingTax();
       }
     });
-    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
-    final uri = Uri.parse(route.uri.toString());
-    subtotal = double.tryParse(uri.queryParameters['subtotal'] ?? '') ?? 0.0;
+    checkoutController.updateFromRoute(context);
+    checkoutController.setCallbacks(
+      onWishlistChanged: widget.onWishlistChanged,
+      onErrorWishlistChanged: widget.onErrorWishlistChanged,
+      onPaymentProcessing: widget.onPaymentProcessing,
+    );
+  }
 
-    checkoutController.loadProductIds(context);
+  @override
+  void dispose() {
+    checkoutController.disposeRouter();
+    checkoutController.reset();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final double finalDeliveryCharge =
-        subtotal > 2500 ? 0.0 : checkoutController.totalDeliveryCharge.value;
-    final double total = subtotal + finalDeliveryCharge;
-
     return Stack(
       children: [
         Obx(() {
@@ -165,7 +155,8 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                           if (isLoggedIn && addressExists)
                             SelectAddressMobile(),
 
-                          if (showLoginBox && !isLoggedIn) ...[
+                          if (checkoutController.showLoginBox.value &&
+                              !isLoggedIn) ...[
                             Container(
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -242,7 +233,9 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                     InkWell(
                                       onTap: () {
                                         setState(() {
-                                          showLoginBox = false; // Hide the box
+                                          checkoutController
+                                              .showLoginBox
+                                              .value = false; // Hide the box
                                         });
                                       },
                                       child: CircleAvatar(
@@ -533,7 +526,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                       ),
                                       BarlowText(
                                         text:
-                                            "Rs. ${subtotal.toStringAsFixed(2)}",
+                                            "Rs. ${checkoutController.subtotal.value.toStringAsFixed(2)}",
                                         color: Color(0xFFFFFFFF),
 
                                         fontWeight: FontWeight.w400,
@@ -566,7 +559,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                       ),
                                       BarlowText(
                                         text:
-                                            "Rs. ${finalDeliveryCharge.toStringAsFixed(2)}",
+                                            "Rs. ${(checkoutController.subtotal.value >AppConstants.deliveryCharge ? 0.0 : checkoutController.totalDeliveryCharge.value).toStringAsFixed(2)}",
 
                                         color: Color(0xFFFFFFFF),
 
@@ -602,7 +595,8 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                                         letterSpacing: 0.64, // 4% of 16 = 0.64
                                       ),
                                       BarlowText(
-                                        text: "Rs. ${total.toStringAsFixed(2)}",
+                                        text:
+                                            "Rs. ${(checkoutController.subtotal.value + (checkoutController.subtotal.value > AppConstants.deliveryCharge ? 0.0 : checkoutController.totalDeliveryCharge.value)).toStringAsFixed(2)}",
 
                                         color: Color(0xFFFFFFFF),
 
@@ -673,7 +667,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                   text: hintText,
                   style: GoogleFonts.barlow(
                     fontWeight: FontWeight.w400,
-                    fontSize: 12,
+                    fontSize: 14,
                     color: const Color(0xFF414141),
                   ),
                 ),
@@ -682,7 +676,7 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
                     text: ' *',
                     style: GoogleFonts.barlow(
                       fontWeight: FontWeight.w400,
-                      fontSize: 12,
+                      fontSize: 14,
                       color: Colors.red,
                     ),
                   ),
@@ -713,18 +707,18 @@ class _CheckoutPageMobileState extends State<CheckoutPageMobile> {
             hintText: '', // Empty hint since we're showing our own
             hintStyle: GoogleFonts.barlow(
               fontWeight: FontWeight.w400,
-              fontSize: 12,
+              fontSize: 14,
               height: 1.0,
               letterSpacing: 0.0,
               color: const Color(0xFF414141),
             ),
             contentPadding: const EdgeInsets.only(
-              top: 15,
+              top: 12,
             ), // Match the Positioned top value
           ),
           style: const TextStyle(
             color: Color(0xFF414141),
-            fontSize: 12,
+            fontSize: 14,
             fontWeight: FontWeight.w400,
           ),
         ),

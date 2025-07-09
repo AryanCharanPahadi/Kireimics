@@ -26,7 +26,7 @@ class _ScrollingHeaderMobileState extends State<ScrollingHeaderMobile> {
   Future<void> getBandDetails() async {
     final response = await http.get(
       Uri.parse(
-        "https://vedvika.com/v1/apis/common/band_details/get_band_details.php",
+        "https://www.kireimics.com/apis/common/band_details/get_band_details.php",
       ),
     );
 
@@ -51,7 +51,7 @@ class _ScrollingHeaderMobileState extends State<ScrollingHeaderMobile> {
         // print("Band Color: $bandColor");
       });
     } else {
-      print('Failed to fetch band details: ${response.statusCode}');
+      // print('Failed to fetch band details: ${response.statusCode}');
     }
   }
 

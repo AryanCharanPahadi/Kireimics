@@ -13,6 +13,7 @@ import '../../component/custom_text_form_field/custom_text_form_field.dart';
 import '../../component/product_details/product_details_controller.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
+import '../../component/title_service.dart';
 import '../../component/utilities/utility.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../web_desktop_common/notify_me/notify_me.dart';
@@ -130,6 +131,8 @@ class _HomePageMobileState extends State<HomePageMobile> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Premium Handmade Ceramics in India");
+
     // Initialize wishlist states when widget loads
     _initializeWishlistStates();
   }
@@ -151,7 +154,7 @@ class _HomePageMobileState extends State<HomePageMobile> {
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }
@@ -293,6 +296,7 @@ class _HomePageMobileState extends State<HomePageMobile> {
                                         child: Image.network(
                                           product.thumbnail,
                                           width: cappedWidth,
+
                                           height: cappedHeight,
                                           fit: BoxFit.cover,
                                         ),
@@ -429,14 +433,12 @@ class _HomePageMobileState extends State<HomePageMobile> {
                                                 },
                                               )
                                               : BarlowText(
-                                              text:   "ADD TO CART",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            lineHeight: 1.0,
-                                            letterSpacing: 0.56,
-                                            color: const Color(
-                                              0xFF30578E,
-                                            ),
+                                                text: "ADD TO CART",
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                lineHeight: 1.0,
+                                                letterSpacing: 0.56,
+                                                color: const Color(0xFF30578E),
                                               ),
                                     ),
                                   ],

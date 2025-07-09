@@ -132,7 +132,7 @@ class SaleController extends GetxController {
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }

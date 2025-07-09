@@ -31,7 +31,7 @@ class LoginController {
         password: passwordController.text.trim(),
       );
 
-      print("Login Response: $response");
+      // print("Login Response: $response");
 
       if (response['error'] == true) {
         loginMessage = response['message'] ?? "Login failed";
@@ -51,7 +51,7 @@ class LoginController {
             '$userId, $firstName $lastName, $phone, $email, $createdAt';
 
         await SharedPreferencesHelper.saveUserData(userDetails);
-        print("Stored user data: $userDetails");
+        // print("Stored user data: $userDetails");
 
         checkoutController.isLoggedIn.value = true;
         emailController.clear();
@@ -70,14 +70,14 @@ class LoginController {
           Navigator.of(context).pop();
         }
 
-        print('Login successful, user: $userDetails');
+        // print('Login successful, user: $userDetails');
         return true;
       } else {
         loginMessage = "Invalid user data received";
         return false;
       }
     } catch (e) {
-      print("Login exception: $e");
+      // print("Login exception: $e");
       loginMessage = "An error occurred during login";
       return false;
     }

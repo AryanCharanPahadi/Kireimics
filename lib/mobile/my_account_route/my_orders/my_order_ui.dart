@@ -10,6 +10,7 @@ import '../../../component/api_helper/api_helper.dart';
 import '../../../component/no_result_found/no_order_yet.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
+import '../../../component/title_service.dart';
 import '../../../web_desktop_common/component/rotating_svg_loader.dart';
 
 class MyOrderUiMobile extends StatefulWidget {
@@ -26,6 +27,8 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | View Your Orders");
+
     getOrderData();
   }
 
@@ -166,6 +169,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
+                      letterSpacing: 1 * 0.04, // 4% of 32px
                       route: AppRoutes.myOrder,
                       enableUnderlineForActiveRoute:
                           true, // Enable underline when active
@@ -184,6 +188,7 @@ class _MyOrderUiMobileState extends State<MyOrderUiMobile> {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
+                      letterSpacing: 1 * 0.04, // 4% of 32px
                       onTap: () {
                         context.go(AppRoutes.wishlist);
                       },

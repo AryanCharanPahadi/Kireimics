@@ -17,35 +17,34 @@ Future<User?> signInWithGoogle() async {
   User? user;
 
   if (kIsWeb) {
-    // For web
+    // For Web
+    // print('🌐 Attempting Google Sign-In on Web...');
     GoogleAuthProvider authProvider = GoogleAuthProvider();
     authProvider.setCustomParameters({'prompt': 'select_account'});
 
     try {
-      final UserCredential userCredential = await _auth.signInWithPopup(
-        authProvider,
-      );
+      final UserCredential userCredential =
+      await _auth.signInWithPopup(authProvider);
       user = userCredential.user;
+      // print('✅ Web Google sign-in successful: ${user?.email}');
     } catch (e) {
-      print('Web Google sign-in error: $e');
+      // print('❌ Web Google sign-in error: $e');
     }
   } else {
-    // For mobile
+    // For Mobile
+    // print('📱 Attempting Google Sign-In on Mobile...');
     final GoogleSignIn googleSignIn = GoogleSignIn(
       scopes: ['email'],
-      // This prompts user to select an account every time
-      // (essential on Android/iOS)
       signInOption: SignInOption.standard,
-      // Optional: pass hostedDomain or clientId if using G Suite or custom OAuth
     );
 
-    await googleSignIn.signOut(); // Ensure previous session is ended
-
+    await googleSignIn.signOut(); // Optional: clear any existing session
     final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
     if (googleUser != null) {
+      // print('🔑 Retrieved Google account: ${googleUser.email}');
       final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      await googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -53,13 +52,15 @@ Future<User?> signInWithGoogle() async {
       );
 
       try {
-        final UserCredential userCredential = await _auth.signInWithCredential(
-          credential,
-        );
+        final UserCredential userCredential =
+        await _auth.signInWithCredential(credential);
         user = userCredential.user;
+        // print('✅ Mobile Google sign-in successful: ${user?.email}');
       } catch (e) {
-        print('Mobile Google sign-in error: $e');
+        // print('❌ Mobile Google sign-in error: $e');
       }
+    } else {
+      // print('⚠️ User canceled Google sign-in on mobile');
     }
   }
 
@@ -71,35 +72,29 @@ Future<User?> signInWithGoogle() async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('auth', true);
+
+    // print('🎉 User info saved:\n- UID: $uid\n- Name: $name\n- Email: $userEmail');
   }
 
   return user;
 }
-
 Future<void> signOutGoogle() async {
   try {
-    // Sign out from Firebase
+    // print('🚪 Signing out user...');
     await FirebaseAuth.instance.signOut();
+    await GoogleSignIn().disconnect();
+    await GoogleSignIn().signOut();
 
-    // Sign out from Google
-    await GoogleSignIn().disconnect(); // Required to fully revoke token
-    await GoogleSignIn().signOut(); // Clear local session
-    await FirebaseAuth.instance.signOut();
-
-    // Clear local variables
     uid = null;
     name = null;
     userEmail = null;
     imageUrl = null;
 
-    // Clear auth state in SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // clears all saved user data
+    await prefs.clear();
 
-    print(
-      '✅ User completely signed out from Google, Firebase, and SharedPreferences',
-    );
+    // print('✅ User completely signed out from Google, Firebase, and SharedPreferences');
   } catch (e) {
-    print('❌ Error during sign-out: $e');
+    // print('❌ Error during sign-out: $e');
   }
 }

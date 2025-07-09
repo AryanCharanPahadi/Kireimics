@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../component/api_helper/api_helper.dart' show ApiHelper;
 import '../../component/text_fonts/custom_text.dart';
+import '../../component/title_service.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../web_desktop_common/shipping_policy/ShippingPolicyModal.dart';
 
@@ -22,6 +23,8 @@ class _ShippingPolicyMobileState extends State<ShippingPolicyMobile> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Shipping Policy");
+
     loadShippingPolicy();
   }
 

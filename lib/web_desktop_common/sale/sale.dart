@@ -6,6 +6,7 @@ import 'package:kireimics/web_desktop_common/sale/sale_modal.dart';
 import 'package:kireimics/web_desktop_common/sale/sale_navigation.dart';
 import '../../component/no_result_found/no_order_yet.dart';
 import '../../component/api_helper/api_helper.dart';
+import '../../component/title_service.dart';
 import '../component/rotating_svg_loader.dart';
 
 class Sale extends StatefulWidget {
@@ -19,6 +20,8 @@ class Sale extends StatefulWidget {
 
 class _SaleState extends State<Sale> {
   String? _selectedFilter = 'All'; // Initialize with 'All' by default
+  String _selectedSortOption = 'New'; // Track selected sort option
+
   String _selectedDescription =
       '/ Browse our collection of handcrafted pottery, where each one-of-a-kind piece adds charm to your home while serving a purpose you\'ll appreciate every day /';
   int _selectedCategoryId = 1; // Default to "All" category ID
@@ -34,6 +37,8 @@ class _SaleState extends State<Sale> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Sale & Discounted Products");
+
     _handleInitialCategory();
   }
 
@@ -93,14 +98,12 @@ class _SaleState extends State<Sale> {
         _isHoveredList = List<bool>.filled(allProducts.length, false);
         _isLoading = false;
         _selectedFilter = null; // Reset filter
+        _selectedSortOption = 'New'; // Reset sort option
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to load products: $e')));
     }
   }
 
@@ -118,14 +121,15 @@ class _SaleState extends State<Sale> {
         _isHoveredList = List<bool>.filled(allProducts.length, false);
         _isLoading = false;
         _selectedFilter = null; // Reset filter
+        _selectedSortOption = 'New'; // Reset sort option
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to load products: $e')));
+      // ScaffoldMessenger.of(
+      //   context,
+      // ).showSnackBar(SnackBar(content: Text('Failed to load products: $e')));
     }
   }
 
@@ -143,6 +147,7 @@ class _SaleState extends State<Sale> {
       _showSortOptions = false;
       _showFilterOptions = false;
       _selectedFilter = null; // Reset filter when category changes
+      _selectedSortOption = 'New';
     });
 
     if (name.toLowerCase() == 'all') {
@@ -230,7 +235,7 @@ class _SaleState extends State<Sale> {
                               : '${_productsSale.length} Product${_productsSale.length == 1
                                   ? ''
                                   : _productsSale.length == 0
-                                  ? ''
+                                  ? 's'
                                   : 's'}',
                       fontWeight: FontWeight.w400,
                       fontSize: 32,
@@ -263,7 +268,8 @@ class _SaleState extends State<Sale> {
                             GestureDetector(
                               onTap: _toggleSortOptions,
                               child: BarlowText(
-                                text: "Sort / New",
+                                text:
+                                    "Sort / $_selectedSortOption", // Updated to show selected sort option
                                 color: const Color(0xFF30578E),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
@@ -425,6 +431,10 @@ class _SaleState extends State<Sale> {
               child: BarlowText(
                 text: option['label'] as String,
                 fontWeight: FontWeight.w600,
+                currentFilterValue: _selectedSortOption,
+                enableUnderlineForCurrentFilter: true,
+                decorationColor: const Color(0xFF30578E),
+                activeUnderlineDecoration: TextDecoration.underline,
                 fontSize: 16,
                 color: const Color(0xFF30578E),
                 hoverTextColor: const Color(0xFF2876E4),
@@ -475,6 +485,9 @@ class _SaleState extends State<Sale> {
   }
 
   void _handleSortSelected(String sortOption) {
+    setState(() {
+      _selectedSortOption = sortOption; // Update selected sort option
+    });
     setState(() {
       if (sortOption == 'Price Low - High') {
         _productsSale.sort((a, b) => (a.price ?? 0).compareTo(b.price ?? 0));

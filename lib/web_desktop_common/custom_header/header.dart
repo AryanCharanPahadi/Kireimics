@@ -88,10 +88,15 @@ class _HeaderState extends State<Header> {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 44),
-                  child: Image.asset(
-                    'assets/header/newLogoMain.png',
-                    height: 31,
-                    width: 180,
+                  child: GestureDetector(
+                    onTap: (){
+                      context.go(AppRoutes.home);
+                    },
+                    child: Image.asset(
+                      'assets/header/newLogoMain.png',
+                      height: 31,
+                      width: 180,
+                    ),
                   ),
                 ),
                 Padding(
@@ -216,7 +221,7 @@ class _HeaderState extends State<Header> {
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
-                          print("Profile icon tapped");
+                          // print("Profile icon tapped");
                           setState(() {
                             showProfileDropdown = !showProfileDropdown;
                             widget.onProfileDropdownChanged?.call(
@@ -236,7 +241,7 @@ class _HeaderState extends State<Header> {
                         20,
                         19,
                         onTap: () {
-                          print("Cart icon tapped");
+                          // print("Cart icon tapped");
                           showDialog(
                             context: context,
                             barrierColor: Colors.transparent,
@@ -299,11 +304,11 @@ class _HeaderState extends State<Header> {
 
     return MouseRegion(
       onEnter: (_) {
-        print("Mouse entered $assetPath");
+        // print("Mouse entered $assetPath");
         setState(() => _isHovered[assetPath] = true);
       },
       onExit: (_) {
-        print("Mouse exited $assetPath");
+        // print("Mouse exited $assetPath");
         setState(() => _isHovered[assetPath] = false);
       },
       child: GestureDetector(

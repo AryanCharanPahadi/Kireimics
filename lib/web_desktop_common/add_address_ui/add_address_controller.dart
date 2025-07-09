@@ -45,7 +45,7 @@ class AddAddressController extends GetxController {
     try {
       String? userId = await SharedPreferencesHelper.getUserId();
       if (userId == null) {
-        print('Failed: User ID not found');
+        // print('Failed: User ID not found');
         return false; // Return false if userId is null
       }
 
@@ -55,15 +55,15 @@ class AddAddressController extends GetxController {
       );
 
       if (result['error'] == false) {
-        print('Server Message: ${result['message']}');
+        // print('Server Message: ${result['message']}');
         await fetchAddress(); // Refresh address list after deletion
         return true; // Return true on successful deletion
       } else {
-        print('Failed: ${result['message']}');
+        // print('Failed: ${result['message']}');
         return false; // Return false on API error
       }
     } catch (e) {
-      print('Error deleting address: $e');
+      // print('Error deleting address: $e');
       return false; // Return false on any exception
     }
   }
@@ -99,9 +99,9 @@ class AddAddressController extends GetxController {
               "default_address": address['default_address'] == '1',
             };
           }).toList();
-      print('Address Data: ${_addressList}');
+      // print('Address Data: ${_addressList}');
     } else {
-      print('Error: ${result['message']}');
+      // print('Error: ${result['message']}');
       _addressList.clear(); // Clear list on error
     }
   }
@@ -190,7 +190,7 @@ class AddAddressController extends GetxController {
           );
         }
 
-        print("${isEditing ? 'Update' : 'Add'} address Response: $response");
+        // print("${isEditing ? 'Update' : 'Add'} address Response: $response");
 
         if (response['error'] == true) {
           addressMessage =
@@ -213,7 +213,7 @@ class AddAddressController extends GetxController {
           return true;
         }
       } catch (e) {
-        print("${isEditing ? 'Update' : 'Add'} address exception: $e");
+        // print("${isEditing ? 'Update' : 'Add'} address exception: $e");
         addressMessage =
             "An error occurred while ${isEditing ? 'updating' : 'adding'} the address";
         return false;

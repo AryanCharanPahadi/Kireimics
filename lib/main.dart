@@ -2,12 +2,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kireimics/web/checkout/encription.dart';
 import 'package:kireimics/web_desktop_common/thankyou_page/thankyou.dart';
 
 import 'component/no_found_page/404_page.dart';
 import 'component/responsive_route_screen/responsive_layout.dart';
 import 'component/app_routes/routes.dart';
 import 'component/splash_screen/splash_screen.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'dart:html' as html;
 
@@ -15,23 +17,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: FirebaseOptions(
-      apiKey: "AIzaSyC48_4nuTzlxahYvhWpt85A72YXXsOi6ps",
-      authDomain: "kireimics-35393.firebaseapp.com",
-      projectId: "kireimics-35393",
-      storageBucket: "kireimics-35393.firebasestorage.app",
-      messagingSenderId: "542570800162",
-      appId: "1:542570800162:web:53a56183806aca5ca7167b",
+      apiKey: "AIzaSyB3fk9XwkfmG4L0nZDnGly7neJ8wfin7D0",
+      authDomain: "kireimics-login.firebaseapp.com",
+      projectId: "kireimics-login",
+      storageBucket: "kireimics-login.firebasestorage.app",
+      messagingSenderId: "593473253260",
+      appId: "1:593473253260:web:9eef0e420df916560db0a9",
     ),
   );
 
-  html.document.body?.style.cursor =
-      'url("https://vedvika.com/Vector.svg"), auto';
-
-  // ✅ Ensure cursor stays custom when moved
-  html.document.onMouseMove.listen((event) {
-    html.document.body?.style.cursor =
-        'url("https://vedvika.com/Vector.svg"), auto';
-  });
   runApp(const MyApp());
 }
 
@@ -55,31 +49,36 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: AppRoutes.paymentResult,
           builder: (context, state) {
-            final isSuccess = state.uri.queryParameters['success'] == 'true';
-            final orderId = state.uri.queryParameters['orderId'] ?? 'N/A';
-            final amount =
-                double.tryParse(state.uri.queryParameters['amount'] ?? '0') ??
-                0.0;
-            final orderDateString =
-                state.uri.queryParameters['orderDate'] ??
-                DateTime.now().toIso8601String();
-            DateTime orderDate;
-            try {
-              orderDate = DateTime.parse(orderDateString);
-            } catch (e) {
-              print('Error parsing orderDate: $e');
-              orderDate =
-                  DateTime.now(); // Fallback to current time if parsing fails
-            }
+            return FutureBuilder<Map<String, dynamic>?>(
+              future: PaymentStateService().getPaymentResult(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
 
-            return PaymentResultPage(
-              isSuccess: isSuccess,
-              orderId: orderId,
-              amount: amount,
-              orderDate: orderDate,
+                final result = snapshot.data!;
+                // print(
+                //   'Received payment result from shared preferences: $result',
+                // );
+
+                final isSuccess = result['success'] ?? false;
+                final orderId = result['orderId'] ?? 'N/A';
+                final amount = result['amount'] ?? 0.0;
+                final orderDate = result['orderDate'] ?? DateTime.now();
+
+                return PaymentResultPage(
+                  isSuccess: isSuccess,
+                  orderId: orderId,
+                  amount: amount,
+                  orderDate: orderDate,
+                );
+              },
             );
           },
         ),
+
         GoRoute(
           path: AppRoutes.about,
           builder:
@@ -248,7 +247,7 @@ class MyApp extends StatelessWidget {
         ),
 
         GoRoute(
-          path: '/:path(.*)', // Wildcard to match any undefined route
+          path: '/:path(.*)',
           builder: (context, state) => const NoFoundPage(),
         ),
       ],

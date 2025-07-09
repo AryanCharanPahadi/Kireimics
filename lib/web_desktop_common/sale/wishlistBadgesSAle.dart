@@ -5,6 +5,7 @@ import 'package:kireimics/web_desktop_common/sale/sale_modal.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/text_fonts/custom_text.dart';
+import '../login_signup/login/login_page.dart';
 
 class WishlistBadgeRowSale extends StatelessWidget {
   final SaleModal product;
@@ -26,6 +27,11 @@ class WishlistBadgeRowSale extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future<bool> isUserLoggedIn() async {
+      String? userData = await SharedPreferencesHelper.getUserData();
+      return userData != null && userData.isNotEmpty;
+    }
+
     if (isOutOfStock) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -47,6 +53,18 @@ class WishlistBadgeRowSale extends StatelessWidget {
                 final isInWishlist = snapshot.data ?? false;
                 return GestureDetector(
                   onTap: () async {
+                    bool loggedIn = await isUserLoggedIn();
+                    if (!loggedIn) {
+                      showDialog(
+                        context: context,
+                        barrierColor: Colors.transparent,
+                        builder: (BuildContext context) {
+                          return LoginPage();
+                        },
+                      );
+                      return;
+                    }
+
                     if (isInWishlist) {
                       await SharedPreferencesHelper.removeFromWishlist(
                         product.id.toString(),
@@ -142,6 +160,18 @@ class WishlistBadgeRowSale extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 4.0),
                 child: GestureDetector(
                   onTap: () async {
+                    bool loggedIn = await isUserLoggedIn();
+                    if (!loggedIn) {
+                      showDialog(
+                        context: context,
+                        barrierColor: Colors.transparent,
+                        builder: (BuildContext context) {
+                          return LoginPage();
+                        },
+                      );
+                      return;
+                    }
+
                     if (isInWishlist) {
                       await SharedPreferencesHelper.removeFromWishlist(
                         product.id.toString(),

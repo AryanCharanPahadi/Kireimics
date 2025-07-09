@@ -13,6 +13,7 @@ import '../../component/google_sign_in/google_sign_in_button.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/notification_toast/custom_toast.dart';
 import '../../component/app_routes/routes.dart';
+import '../../component/title_service.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../web_desktop_common/login_signup/signup/signup_controller.dart';
 
@@ -43,6 +44,13 @@ class _SignInMobileState extends State<SignInMobile> {
     signupController.phoneController.clear();
     signupController.passwordController.clear();
     super.dispose();
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    TitleService.setTitle("Kireimics | Sign Up For a Free Account");
+
   }
 
   @override

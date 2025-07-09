@@ -47,13 +47,13 @@ class GoogleSignInButton extends StatelessWidget {
 
         // Handle backend response
         if (response['error'] == true) {
-          print("Register error: ${response['message']}");
+          // print("Register error: ${response['message']}");
         } else {
-          print("User registered successfully via Google login");
+          // print("User registered successfully via Google login");
         }
 
         final String apiUrl =
-            'https://vedvika.com/v1/apis/common/user_data/get_user_data.php?email=$userEmail';
+            'https://www.kireimics.com/apis/common/user_data/get_user_data.php?email=$userEmail';
         try {
           final http.Response apiResponse = await http.get(Uri.parse(apiUrl));
           if (apiResponse.statusCode == 200) {
@@ -81,25 +81,25 @@ class GoogleSignInButton extends StatelessWidget {
               await SharedPreferencesHelper.saveUserData(userDetails);
 
               String? storedUser = await SharedPreferencesHelper.getUserData();
-              print("Stored user data from API: $storedUser");
+              // print("Stored user data from API: $storedUser");
 
               context.go(AppRoutes.myAccount);
             } else {
-              print("Failed to fetch user data: ${responseData['message']}");
+              // print("Failed to fetch user data: ${responseData['message']}");
             }
           } else {
-            print("API request failed with status: ${apiResponse.statusCode}");
+            // print("API request failed with status: ${apiResponse.statusCode}");
           }
         } catch (e) {
-          print("Error fetching data from API: $e");
+          // print("Error fetching data from API: $e");
         }
 
         context.go(AppRoutes.myAccount);
       } else {
-        print('Google Sign-In failed');
+        // print('Google Sign-In failed');
       }
     } catch (e) {
-      print('Error during Google Sign-In: $e');
+      // print('Error during Google Sign-In: $e');
     }
   }
 

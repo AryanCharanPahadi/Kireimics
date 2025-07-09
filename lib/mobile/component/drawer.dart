@@ -43,7 +43,7 @@ class _DrawerMobileState extends State<DrawerMobile>
   Future getSocialMediaLinks() async {
     final response = await http.get(
       Uri.parse(
-        "https://vedvika.com/v1/apis/common/general_links/get_general_links.php",
+        "https://www.kireimics.com/apis/common/general_links/get_general_links.php",
       ),
     );
 
@@ -55,9 +55,9 @@ class _DrawerMobileState extends State<DrawerMobile>
         instagramLink = jsonDecode(socialMediaLinks)['Instagram'];
         emailLink = jsonDecode(socialMediaLinks)['Email'];
       });
-      print(socialMediaLinks);
-      print(instagramLink);
-      print(emailLink);
+      // print(socialMediaLinks);
+      // print(instagramLink);
+      // print(emailLink);
     }
   }
 

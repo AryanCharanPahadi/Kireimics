@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:kireimics/component/text_fonts/custom_text.dart';
+import '../../component/api_helper/api_helper.dart';
 import '../../component/app_routes/routes.dart';
+import '../../web_desktop_common/collection/collection_modal.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
 
 class AquaCollectionCard extends StatefulWidget {
@@ -21,38 +23,32 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
   String bannerQuantity = '';
   int? bannerId;
 
-  // Add a boolean to track if the widget is disposed
-  bool _isDisposed = false;
-
   Future getCollectionBanner() async {
     try {
-      final response = await http.get(
-        Uri.parse(
-          "https://vedvika.com/v1/apis/common/collection_list/get_collection_banner.php",
-        ),
-      );
+      List<CollectionModal> collections =
+          await ApiHelper.fetchCollectionBanner();
 
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body.toString());
-        var bannerData = data['data'][0];
-        List<String> productIds = bannerData['product_id'].toString().split(
-          ',',
-        );
+      if (collections.isNotEmpty) {
+        final bannerData = collections.first;
 
-        // Check if the widget is still mounted before calling setState
-        if (mounted && !_isDisposed) {
-          setState(() {
-            bannerImg = bannerData['banner_img'].toString();
-            bannerText = bannerData['name'].toString();
-            bannerId = bannerData['id'];
-            bannerQuantity = productIds.length.toString();
-          });
+        // Safely handle empty or null product_id
+        List<String> productIds = [];
+        if (bannerData.productId != null &&
+            bannerData.productId!.trim().isNotEmpty) {
+          productIds = bannerData.productId!.split(',');
         }
+
+        setState(() {
+          bannerImg = bannerData.bannerImg ?? '';
+          bannerText = bannerData.name ?? '';
+          bannerId = bannerData.id;
+          bannerQuantity = productIds.length.toString();
+        });
       } else {
-        print('Error: Status code ${response.statusCode}');
+        // print("No collection data found.");
       }
     } catch (e) {
-      print('Error: ${e.toString()}');
+      // print('Error: ${e.toString()}');
     }
   }
 
@@ -65,7 +61,6 @@ class _AquaCollectionCardState extends State<AquaCollectionCard> {
   @override
   void dispose() {
     // Mark the widget as disposed to avoid further setState calls
-    _isDisposed = true;
     super.dispose();
   }
 

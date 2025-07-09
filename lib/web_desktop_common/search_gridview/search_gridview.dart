@@ -12,6 +12,7 @@ import '../../component/no_result_found/no_order_yet.dart';
 import '../../component/product_details/product_details_controller.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/text_fonts/custom_text.dart';
+import '../../component/title_service.dart';
 import '../cart/cart_panel.dart';
 import '../component/animation_gridview.dart';
 import '../component/badges_web_desktop.dart';
@@ -40,6 +41,8 @@ class _SearchGridviewState extends State<SearchGridview>
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Search Loading..."); // Placeholder title
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {
@@ -65,6 +68,8 @@ class _SearchGridviewState extends State<SearchGridview>
         });
         productController.resetFilter();
         productController.filterProducts(_currentQuery);
+        // Update title with new query (actual count set in build method)
+        TitleService.setTitle("Kireimics | Search Results for $_currentQuery");
       }
     }
   }
@@ -120,7 +125,6 @@ class _SearchGridviewState extends State<SearchGridview>
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
       return null;
     }
   }
@@ -146,7 +150,10 @@ class _SearchGridviewState extends State<SearchGridview>
                     top: 30,
                   ),
                   child: Obx(() {
-                    if (productController.isLoading.value) {
+                    if (productController.isLoading.value && productController.filteredProducts.isEmpty) {
+                      TitleService.setTitle(
+                        "Kireimics | Search Loading...",
+                      ); // Update title during loading
                       return const Center(
                         child: RotatingSvgLoader(
                           assetPath: 'assets/footer/footerbg.svg',
@@ -155,6 +162,9 @@ class _SearchGridviewState extends State<SearchGridview>
                     }
 
                     if (productController.errorMessage.isNotEmpty) {
+                      TitleService.setTitle(
+                        "Kireimics | Search Error",
+                      ); // Update title on error
                       return Center(
                         child: Text("Error: ${productController.errorMessage}"),
                       );
@@ -163,11 +173,16 @@ class _SearchGridviewState extends State<SearchGridview>
                     final resultCount =
                         productController.filteredProducts.length;
                     final resultText =
-                    resultCount == 1
-                        ? '1 Result'
-                        : resultCount == 0
-                        ? '0 Result'
-                        : '$resultCount Results';
+                        resultCount == 1
+                            ? '1 Result'
+                            : resultCount == 0
+                            ? '0 Results'
+                            : '$resultCount Results';
+
+                    // Update title with result count and query
+                    TitleService.setTitle(
+                      "Kireimics | Search Results $resultText found for \"$_currentQuery\"",
+                    );
 
                     if (productController.filteredProducts.isEmpty) {
                       return Column(
@@ -187,7 +202,6 @@ class _SearchGridviewState extends State<SearchGridview>
                             color: const Color(0xFF414141),
                           ),
                           const SizedBox(height: 40),
-
                           Center(
                             child: CartEmpty(
                               cralikaText: "No results found!",
@@ -292,7 +306,6 @@ class _SearchGridviewState extends State<SearchGridview>
                                                                     .thumbnail,
                                                           );
 
-                                                      // Apply grayscale filter if out of stock
                                                       if (isOutOfStock) {
                                                         imageWidget = ColorFiltered(
                                                           colorFilter:
@@ -341,13 +354,6 @@ class _SearchGridviewState extends State<SearchGridview>
                                                   ),
                                                 ),
                                               ),
-                                              // if (isOutOfStock)
-                                              //   Positioned.fill(
-                                              //     child: Container(
-                                              //       color: Colors.black
-                                              //           .withOpacity(0.5),
-                                              //     ),
-                                              //   ),
                                               Positioned(
                                                 top: imageHeight * 0.04,
                                                 left: imageWidth * 0.05,
@@ -360,7 +366,6 @@ class _SearchGridviewState extends State<SearchGridview>
                                                     double screenWidth =
                                                         constraints.maxWidth;
 
-                                                    // Responsive scaling for 800–1400px
                                                     double getResponsiveValue(
                                                       double min,
                                                       double max,
@@ -408,7 +413,7 @@ class _SearchGridviewState extends State<SearchGridview>
                                                   opacity:
                                                       _isHoveredList[index]
                                                           ? 1.0
-                                                          : 0.0, // Show on hover
+                                                          : 0.0,
                                                   child: Container(
                                                     width: ResponsiveUtil(
                                                       context,
@@ -458,11 +463,9 @@ class _SearchGridviewState extends State<SearchGridview>
                                                               imageHeight *
                                                               0.01,
                                                         ),
-
                                                         if (!isOutOfStock) ...[
                                                           Row(
                                                             children: [
-                                                              // Original price with strikethrough
                                                               if (product
                                                                       .discount !=
                                                                   0)
@@ -487,10 +490,10 @@ class _SearchGridviewState extends State<SearchGridview>
                                                                         .white
                                                                         .withOpacity(
                                                                           0.7,
-                                                                        ), // Match strikethrough color
+                                                                        ),
                                                                     fontFamily:
                                                                         GoogleFonts.barlow()
-                                                                            .fontFamily, // Match Barlow font
+                                                                            .fontFamily,
                                                                   ),
                                                                 ),
                                                               if (product
@@ -499,7 +502,6 @@ class _SearchGridviewState extends State<SearchGridview>
                                                                 SizedBox(
                                                                   width: 8,
                                                                 ),
-                                                              // Discounted price
                                                               BarlowText(
                                                                 text:
                                                                     product.discount !=
@@ -518,7 +520,6 @@ class _SearchGridviewState extends State<SearchGridview>
                                                             ],
                                                           ),
                                                         ],
-
                                                         if (isOutOfStock) ...[
                                                           BarlowText(
                                                             text:
@@ -530,13 +531,11 @@ class _SearchGridviewState extends State<SearchGridview>
                                                             lineHeight: 1.2,
                                                           ),
                                                         ],
-
                                                         SizedBox(
                                                           height:
                                                               imageHeight *
                                                               0.04,
                                                         ),
-
                                                         if (isOutOfStock)
                                                           Row(
                                                             children: [
@@ -601,7 +600,6 @@ class _SearchGridviewState extends State<SearchGridview>
                                                                 onWishlistChanged:
                                                                     widget
                                                                         .onWishlistChanged,
-
                                                                 productId:
                                                                     product.id,
                                                               ),
@@ -636,7 +634,7 @@ class _SearchGridviewState extends State<SearchGridview>
                                                                       Colors
                                                                           .white,
                                                                   hoverTextColor:
-                                                                      const Color(
+                                                                      Color(
                                                                         0xFF30578E,
                                                                       ),
                                                                 ),
@@ -683,23 +681,16 @@ class _SearchGridviewState extends State<SearchGridview>
                                                                       0xFF30578E,
                                                                     ),
                                                                 onTap: () async {
-                                                                  // 1. Call the wishlist changed callback immediately
                                                                   widget
                                                                       .onWishlistChanged
                                                                       ?.call(
                                                                         'Product Added To Cart',
                                                                       );
-
-                                                                  // 2. Store the product ID in SharedPreferences
                                                                   await SharedPreferencesHelper.addProductId(
                                                                     product.id,
                                                                   );
-
-                                                                  // 3. Refresh the cart state
                                                                   cartNotifier
                                                                       .refresh();
-
-                                                                  // Note: Removed the Future.delayed and showDialog parts
                                                                 },
                                                               ),
                                                             ],

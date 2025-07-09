@@ -70,13 +70,13 @@ class _SelectAddressMobileState extends State<SelectAddressMobile> {
     try {
       // Ensure the address has an ID
       if (address['id'] == null) {
-        print('Error: Address ID is missing');
+        // print('Error: Address ID is missing');
         // CustomToast.showToast('Error: Address ID is missing');
         return;
       }
 
       // Print the selected address ID for debugging
-      print('Saving Selected Address ID: ${address['id']}');
+      // print('Saving Selected Address ID: ${address['id']}');
 
       // Save the address ID to SharedPreferences
       await SharedPreferencesHelper.saveSelectedAddress(
@@ -88,12 +88,12 @@ class _SelectAddressMobileState extends State<SelectAddressMobile> {
       // Verify the saved address ID
       String? savedAddressId =
           await SharedPreferencesHelper.getSelectedAddress();
-      print('Verified Saved Address ID: $savedAddressId');
+      // print('Verified Saved Address ID: $savedAddressId');
 
       // Trigger reload of address data to ensure UI reflects the selected address
       await checkoutController.loadAddressData();
     } catch (e) {
-      print('Error saving selected address: $e');
+      // print('Error saving selected address: $e');
     }
   }
 
@@ -125,15 +125,15 @@ class _SelectAddressMobileState extends State<SelectAddressMobile> {
                     : Column(
                       children:
                           controller.addressList.map((address) {
-                            print(
-                              "Default Address Field: ${address['default_address']}",
-                            );
-                            print(
-                              "Is Default? ${address['default_address'] == true}",
-                            );
+                            // print(
+                            //   "Default Address Field: ${address['default_address']}",
+                            // );
+                            // print(
+                            //   "Is Default? ${address['default_address'] == true}",
+                            // );
 
-                            print('=== Address in List ===');
-                            print('Address Item: $address');
+                            // print('=== Address in List ===');
+                            // print('Address Item: $address');
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
                               child: Container(
@@ -274,15 +274,15 @@ class _SelectAddressMobileState extends State<SelectAddressMobile> {
                                                               .value ==
                                                           address['id']
                                                               .toString();
-                                                      print(
-                                                        'Address ID: ${address['id']}',
-                                                      );
-                                                      print(
-                                                        'Selected Address ID: ${selectedAddressId.value}',
-                                                      );
-                                                      print(
-                                                        'Is Selected: $isSelected',
-                                                      );
+                                                      // print(
+                                                      //   'Address ID: ${address['id']}',
+                                                      // );
+                                                      // print(
+                                                      //   'Selected Address ID: ${selectedAddressId.value}',
+                                                      // );
+                                                      // print(
+                                                      //   'Is Selected: $isSelected',
+                                                      // );
                                                       return InkWell(
                                                         onTap:
                                                             () =>

@@ -54,7 +54,7 @@ class CollectionViewController extends GetxController {
         }
       }
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
     }
     return null;
   }
@@ -111,10 +111,10 @@ class CollectionViewController extends GetxController {
       ).timeout(Duration(seconds: 10));
       _updateProductsList(products);
       for (var product in productList) {
-        print("Collection Name For Cat id and Id: ${product.collectionName}");
+        // print("Collection Name For Cat id and Id: ${product.collectionName}");
       }
     } catch (e) {
-      print('Error fetching products: $e');
+      // print('Error fetching products: $e');
       _updateProductsList([]);
     } finally {
       isLoading.value = false;
@@ -123,7 +123,7 @@ class CollectionViewController extends GetxController {
 
   Future<void> fetchProducts(int productIds) async {
     isLoading.value = true;
-    print('Fetching products with productIds: $productIds');
+    // print('Fetching products with productIds: $productIds');
     try {
       final products = await ApiHelper.fetchBannerProductById(
         productIds,
@@ -139,10 +139,10 @@ class CollectionViewController extends GetxController {
       currentFilter.value = 'All';
       initializeStates(productList.length);
       for (var product in productList) {
-        print("Collection Name: ${product.collectionName}");
+        // print("Collection Name: ${product.collectionName}");
       }
     } catch (e) {
-      print('Error fetching products: $e');
+      // print('Error fetching products: $e');
     } finally {
       isLoading.value = false;
     }

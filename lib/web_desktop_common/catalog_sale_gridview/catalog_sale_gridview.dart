@@ -114,7 +114,7 @@ class _CategoryProductGridItemState extends State<CategoryProductGridItem>
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }

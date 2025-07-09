@@ -60,10 +60,10 @@ class _NotifyMeButtonState extends State<NotifyMeButton> {
           email = userDetails[3];
         });
       } else {
-        print('Invalid user data format: $storedUser');
+        // print('Invalid user data format: $storedUser');
       }
     } else {
-      print('No user data found in SharedPreferences');
+      // print('No user data found in SharedPreferences');
     }
   }
 

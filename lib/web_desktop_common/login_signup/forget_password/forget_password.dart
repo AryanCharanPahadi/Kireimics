@@ -29,9 +29,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     final response = await ApiHelper.fetchUserData(emailController.text);
 
     if (response!['error'] == false) {
-      print(response['data']);
+      // print(response['data']);
     } else {
-      print(response['error'] == true);
+      // print(response['error'] == true);
     }
   }
 
@@ -184,9 +184,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                 email: emailController.text,
                                               );
 
-                                          print(
-                                            "Password Reset Mail Response: $mailResponse",
-                                          );
+                                          // print(
+                                          //   "Password Reset Mail Response: $mailResponse",
+                                          // );
 
                                           if (mailResponse['error'] == false) {
                                             setState(() {

@@ -9,6 +9,7 @@ import '../../component/text_fonts/custom_text.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
+import '../../component/title_service.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
 
 class CartPanelMobile extends StatefulWidget {
@@ -129,6 +130,8 @@ class _CartPanelMobileState extends State<CartPanelMobile> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Your Shopping Cart");
+
     initCart();
   }
 

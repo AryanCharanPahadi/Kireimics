@@ -11,7 +11,7 @@ class GeneralLinksController extends ChangeNotifier {
     try {
       final response = await http.get(
         Uri.parse(
-          "https://vedvika.com/v1/apis/common/general_links/get_general_links.php",
+          "https://www.kireimics.com/apis/common/general_links/get_general_links.php",
         ),
       );
 
@@ -25,7 +25,7 @@ class GeneralLinksController extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("Error fetching social media links: $e");
+      // debugPrint("Error fetching social media links: $e");
     }
   }
 }

@@ -68,10 +68,10 @@ class SignupController extends GetxController {
       }
 
       final mailResponse = await ApiHelper.registerMail(email: email);
-      print('Register Mail Response: $mailResponse');
+      // print('Register Mail Response: $mailResponse');
 
       final String apiUrl =
-          'https://vedvika.com/v1/apis/common/user_data/get_user_data.php?email=$email';
+          'https://www.kireimics.com/apis/common/user_data/get_user_data.php?email=$email';
       final http.Response apiResponse = await http.get(Uri.parse(apiUrl));
 
       if (apiResponse.statusCode != 200) {

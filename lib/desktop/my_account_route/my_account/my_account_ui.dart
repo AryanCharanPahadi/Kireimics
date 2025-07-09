@@ -11,6 +11,7 @@ import '../../../component/api_helper/api_helper.dart';
 import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
+import '../../../component/title_service.dart';
 import '../../../component/utilities/utility.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_controller.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_ui.dart';
@@ -48,12 +49,13 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | View Your Details & Addresses");
+
     _loadUserData();
   }
 
   Future<bool> handleSignUp(BuildContext context) async {
     String? userId = await SharedPreferencesHelper.getUserId();
-    print("User ID: $userId");
 
     if (userId == null || userId.isEmpty) {
       widget.onErrorWishlistChanged?.call("User ID is missing");
@@ -62,9 +64,7 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
 
     if (formKey.currentState!.validate()) {
       String formattedDate = getFormattedDate();
-      print(
-        "Input values: firstName=${firstNameController.text}, lastName=${lastNameController.text}, phone=${mobileController.text}, updatedAt=$formattedDate",
-      );
+
 
       try {
         final response = await ApiHelper.editRegisterUser(
@@ -75,7 +75,6 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
           updatedAt: formattedDate,
         );
 
-        print("Signup Response: $response");
 
         if (response['error'] == true) {
           String errorMessage =
@@ -86,14 +85,12 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
           String userData =
               "$userId, ${firstNameController.text.trim()} ${lastNameController.text.trim()}, ${mobileController.text.trim()}, ${emailController.text.trim()}";
           await SharedPreferencesHelper.saveUserData(userData);
-          print("Saved user data: $userData");
 
           await _loadUserData();
           widget.onWishlistChanged?.call('Updated Successfully');
           return true;
         }
       } catch (e) {
-        print("Signup exception: $e");
         widget.onErrorWishlistChanged?.call(
           "An error occurred during update: $e",
         );
@@ -115,7 +112,7 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
         List<String> nameParts = userDetails[1].split(' ');
         String firstName = nameParts.isNotEmpty ? nameParts[0] : '';
         String lastName =
-        nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+            nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
         String phone = userDetails[2];
         String email = userDetails[3];
 
@@ -128,10 +125,8 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
           });
         }
       } else {
-        print('Invalid user data format: $storedUser');
       }
     } else {
-      print('No user data found in SharedPreferences');
     }
   }
 
@@ -163,11 +158,7 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
         SizedBox(
           width: screenWidth,
           child: Padding(
-            padding: EdgeInsets.only(
-              left: 389,
-              right: rightPadding,
-              top: 24,
-            ),
+            padding: EdgeInsets.only(left: 389, right: rightPadding, top: 24),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,7 +232,8 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
                           showDialog(
                             context: context,
                             barrierColor: Colors.transparent,
-                            builder: (BuildContext context) => const AddAddressUi(),
+                            builder:
+                                (BuildContext context) => const AddAddressUi(),
                           );
                         },
                       ),
@@ -285,29 +277,30 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
       children: [
         CralikaFont(
           text: title,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w400,
           fontSize: 20,
           lineHeight: 27 / 20,
           letterSpacing: 0.04 * 20,
           color: const Color(0xFF414141),
         ),
         GestureDetector(
-          onTap: isEditing && title == "My Details"
-              ? () async {
-            bool success = await handleSignUp(context);
-            if (success && mounted) {
-              setState(() {
-                isEditing = false;
-              });
-            }
-          }
-              : onAction,
+          onTap:
+              isEditing && title == "My Details"
+                  ? () async {
+                    bool success = await handleSignUp(context);
+                    if (success && mounted) {
+                      setState(() {
+                        isEditing = false;
+                      });
+                    }
+                  }
+                  : onAction,
           child: BarlowText(
             text: actionText,
             fontWeight: FontWeight.w600,
-            fontSize: 20,
-            lineHeight: 1.0,
-            letterSpacing: 0.04 * 16,
+            fontSize: 16,
+            lineHeight: 1.0, // Line height (100%)
+            letterSpacing: 0.64,
             color: Color(0xFF3E5B84),
             backgroundColor: Color(0xFFb9d6ff),
             decorationColor: const Color(0xFF30578E),
@@ -338,10 +331,10 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
   }
 
   Widget _buildCustomTextField(
-      String hintText,
-      TextEditingController controller,
-      bool readOnly,
-      ) {
+    String hintText,
+    TextEditingController controller,
+    bool readOnly,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Stack(
@@ -386,129 +379,133 @@ class _MyAccountUiDesktopState extends State<MyAccountUiDesktop> {
 
   Widget _buildAddressList(double rightSectionWidth) {
     return Obx(
-          () => addAddressController.addressList.isEmpty
-          ? Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFDDEAFF).withOpacity(0.6),
-              offset: const Offset(20, 20),
-              blurRadius: 20,
-            ),
-          ],
-          border: Border.all(color: const Color(0xFFDDEAFF), width: 1),
-        ),
-        width: rightSectionWidth,
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: BarlowText(
-            text: "No addresses found. Add a new address.",
-            fontWeight: FontWeight.w400,
-            fontSize: 16,
-            lineHeight: 1.4,
-            letterSpacing: 0.0,
-            color: const Color(0xFF636363),
-          ),
-        ),
-      )
-          : Column(
-        children: addAddressController.addressList.map((address) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFDDEAFF).withOpacity(0.6),
-                    offset: const Offset(20, 20),
-                    blurRadius: 20,
-                  ),
-                ],
-                border: Border.all(
-                  color: const Color(0xFFDDEAFF),
-                  width: 1,
-                ),
-              ),
-              width: rightSectionWidth,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      height: 56,
-                      width: 56,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFDDEAFF),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          "assets/icons/location.svg",
-                          height: 27,
-                          width: 25,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 24),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          BarlowText(
-                            text: address["city"],
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20,
-                            lineHeight: 1.0,
-                            color: const Color(0xFF414141),
-                          ),
-                          const SizedBox(height: 3),
-                          _buildAddressDetail(address["name"]),
-                          _buildAddressDetail(address["address"]),
-                          _buildAddressDetail(
-                            "${address["postalCode"]} - ${address["country"]}",
-                          ),
-                          const SizedBox(height: 3),
-                          Row(
-                            children: [
-                              _buildActionButton("EDIT", () {
-                                showDialog(
-                                  context: context,
-                                  barrierColor: Colors.transparent,
-                                  builder: (BuildContext context) {
-                                    return AddAddressUi(
-                                      address: address,
-                                      isEditing: true,
-                                    );
-                                  },
-                                );
-                              }),
-                              const Text(" / "),
-                              _buildActionButton("DELETE", () {
-                                showDialog(
-                                  context: context,
-                                  barrierColor: Colors.transparent,
-                                  builder: (BuildContext context) {
-                                    return DeleteAddress(
-                                      addressId: address["id"].toString(),
-                                    );
-                                  },
-                                );
-                              }),
-                            ],
-                          ),
-                        ],
-                      ),
+      () =>
+          addAddressController.addressList.isEmpty
+              ? Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFDDEAFF).withOpacity(0.6),
+                      offset: const Offset(20, 20),
+                      blurRadius: 20,
                     ),
                   ],
+                  border: Border.all(color: const Color(0xFFDDEAFF), width: 1),
                 ),
+                width: rightSectionWidth,
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: BarlowText(
+                    text: "No addresses found. Add a new address.",
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16,
+                    lineHeight: 1.4,
+                    letterSpacing: 0.0,
+                    color: const Color(0xFF636363),
+                  ),
+                ),
+              )
+              : Column(
+                children:
+                    addAddressController.addressList.map((address) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFDDEAFF).withOpacity(0.6),
+                                offset: const Offset(20, 20),
+                                blurRadius: 20,
+                              ),
+                            ],
+                            border: Border.all(
+                              color: const Color(0xFFDDEAFF),
+                              width: 1,
+                            ),
+                          ),
+                          width: rightSectionWidth,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 56,
+                                  width: 56,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDDEAFF),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Center(
+                                    child: SvgPicture.asset(
+                                      "assets/icons/location.svg",
+                                      height: 27,
+                                      width: 25,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 24),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      BarlowText(
+                                        text: address["city"],
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 20,
+                                        lineHeight: 1.0,
+                                        color: const Color(0xFF414141),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      _buildAddressDetail(address["name"]),
+                                      _buildAddressDetail(address["address"]),
+                                      _buildAddressDetail(
+                                        "${address["postalCode"]} - ${address["country"]}",
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Row(
+                                        children: [
+                                          _buildActionButton("EDIT", () {
+                                            showDialog(
+                                              context: context,
+                                              barrierColor: Colors.transparent,
+                                              builder: (BuildContext context) {
+                                                return AddAddressUi(
+                                                  address: address,
+                                                  isEditing: true,
+                                                );
+                                              },
+                                            );
+                                          }),
+                                          const Text(" / "),
+                                          _buildActionButton("DELETE", () {
+                                            showDialog(
+                                              context: context,
+                                              barrierColor: Colors.transparent,
+                                              builder: (BuildContext context) {
+                                                return DeleteAddress(
+                                                  addressId:
+                                                      address["id"].toString(),
+                                                );
+                                              },
+                                            );
+                                          }),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
               ),
-            ),
-          );
-        }).toList(),
-      ),
     );
   }
 

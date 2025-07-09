@@ -121,7 +121,7 @@ class _CatalogViewAllState extends State<CatalogViewAll>
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }

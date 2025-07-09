@@ -55,15 +55,12 @@ class ProceedToCheckoutButton extends StatelessWidget {
 
     return Container(
       height: 100,
-      color: Colors.white.withOpacity(0.8),
+      color: Colors.white.withOpacity(0.94),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Horizontal line at the top
-          Container(
-            height: 1,
-            color: Color(0xFFB9D6FF),
-          ),
+          Container(height: 1, color: Color(0xFFB9D6FF)),
           Padding(
             padding: const EdgeInsets.only(left: 22.0, top: 21, bottom: 28),
             child: Column(
@@ -82,21 +79,12 @@ class ProceedToCheckoutButton extends StatelessWidget {
                   onTap: () async {
                     final router = GoRouter.of(context);
                     final currentRoute =
-                    router.routeInformationProvider.value.uri
-                        .toString();
-                    final checkoutUrl = '${AppRoutes.checkOut}?'
-                        'subtotal=${subtotal.toStringAsFixed(2)}'
+                        router.routeInformationProvider.value.uri.toString();
+                    final checkoutUrl =
+                        '${AppRoutes.checkOut}?'
                         '&productIds=$productIds'
-                        '&productNames=$names'
-                        '&productPrices=$prices'
-                        '&quantities=$quantities'
-                        '&lengths=$lengths'
-                        '&height=$heights'
-                        '&breadths=$breadths'
-                        '&weights=$weights';
-                    if (currentRoute.contains(
-                      AppRoutes.checkOut,
-                    )) {
+                        '&quantities=$quantities';
+                    if (currentRoute.contains(AppRoutes.checkOut)) {
                       await checkoutController.loadUserData();
                       await checkoutController.loadAddressData();
                       await checkoutController.getShippingTax();

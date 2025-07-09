@@ -45,7 +45,7 @@ class SharedPreferencesHelper {
       wishlist.add(productId);
       await prefs.setStringList(_wishlistKey, wishlist);
     }
-    print('Current wishlist: $wishlist');
+    // print('Current wishlist: $wishlist');
   }
 
   static Future<void> removeFromWishlist(String productId) async {
@@ -53,7 +53,7 @@ class SharedPreferencesHelper {
     final wishlist = await getWishlist();
     wishlist.remove(productId);
     await prefs.setStringList(_wishlistKey, wishlist);
-    print('Current wishlist: $wishlist');
+    // print('Current wishlist: $wishlist');
   }
 
   static Future<List<String>> getWishlist() async {
@@ -107,7 +107,7 @@ class SharedPreferencesHelper {
       final userId = userData.split(',')[0].trim();
       return userId.isNotEmpty ? userId : null;
     } catch (e) {
-      print('Error parsing user ID: $e');
+      // print('Error parsing user ID: $e');
       return null;
     }
   }

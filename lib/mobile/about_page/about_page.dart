@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../component/text_fonts/custom_text.dart';
+import '../../component/title_service.dart';
 import '../../component/utilities/url_launcher.dart';
 import '../../web/about_us/about_us_controller.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
@@ -15,6 +16,13 @@ class AboutPage extends StatefulWidget {
 }
 
 class _AboutPageState extends State<AboutPage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    TitleService.setTitle("Kireimics | About Me");
+
+  }
   @override
   Widget build(BuildContext context) {
     final AboutUsController aboutUsController = Get.put(AboutUsController());
@@ -204,7 +212,7 @@ class _AboutPageState extends State<AboutPage> {
 
   Widget _buildProfileImage(Map<String, dynamic> profile) {
     final profileImage = profile['profile_image'];
-    print('Profile Image: $profileImage'); // Debug log
+    // print('Profile Image: $profileImage'); // Debug log
 
     if (profileImage is String && profileImage.isNotEmpty) {
       return Image.network(
@@ -286,7 +294,7 @@ class _AboutPageState extends State<AboutPage> {
         );
       });
     } catch (e) {
-      debugPrint("Error parsing social links: $e");
+      // debugPrint("Error parsing social links: $e");
       return []; // Return empty list if parsing fails
     }
   }
@@ -304,10 +312,10 @@ class _AboutPageState extends State<AboutPage> {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        debugPrint("Could not launch $url");
+        // debugPrint("Could not launch $url");
       }
     } catch (e) {
-      debugPrint("Error launching URL: $e");
+      // debugPrint("Error launching URL: $e");
     }
   }
 }

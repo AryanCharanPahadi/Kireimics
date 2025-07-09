@@ -5,57 +5,50 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
 import 'package:kireimics/component/app_routes/routes.dart';
+import 'package:kireimics/component/text_fonts/custom_text.dart';
 import 'package:kireimics/web_desktop_common/add_address_ui/select_address.dart';
-import '../../component/shared_preferences/shared_preferences.dart';
-import '../../component/text_fonts/custom_text.dart';
-import '../../web_desktop_common/cart/cart_panel.dart';
-import '../../web_desktop_common/component/rotating_svg_loader.dart';
-import '../../web_desktop_common/login_signup/login/login_page.dart';
+import 'package:kireimics/web_desktop_common/cart/cart_panel.dart';
+import 'package:kireimics/web_desktop_common/component/rotating_svg_loader.dart';
+import 'package:kireimics/web_desktop_common/login_signup/login/login_page.dart';
+import '../../component/title_service.dart';
+import '../../component/utilities/delivery_charge.dart';
 import 'checkout_controller.dart';
+import 'dart:js' as js;
 
-class CheckoutPageWeb extends StatefulWidget {
+class CheckoutPage extends StatefulWidget {
   final Function(String)? onWishlistChanged;
   final Function(String)? onErrorWishlistChanged;
   final Function(bool)? onPaymentProcessing;
-  const CheckoutPageWeb({
+
+  const CheckoutPage({
     super.key,
     this.onWishlistChanged,
     this.onErrorWishlistChanged,
     this.onPaymentProcessing,
   });
+
   @override
-  State<CheckoutPageWeb> createState() => _CheckoutPageWebState();
+  State<CheckoutPage> createState() => _CheckoutPageState();
 }
 
-class _CheckoutPageWebState extends State<CheckoutPageWeb> {
-  late double subtotal;
-  late final GoRouter _router;
+class _CheckoutPageState extends State<CheckoutPage> {
   final CheckoutController checkoutController = Get.put(CheckoutController());
-
-  Future<bool> isUserLoggedIn() async {
-    String? userData = await SharedPreferencesHelper.getUserData();
-    return userData != null && userData.isNotEmpty;
-  }
 
   @override
   void initState() {
     super.initState();
-    _router = GoRouter.of(context);
-    // Reset showLoginBox to ensure it's true by default
-    checkoutController.showLoginBox.value = true;
-    print(
-      'Initial showLoginBox: ${checkoutController.showLoginBox.value}',
-    ); // Debug log
+    TitleService.setTitle("Kireimics | Checkout");
 
-    // Ensure login status is checked before setting showLoginBox
-    isUserLoggedIn().then((loggedIn) {
-      checkoutController.isLoggedIn.value = loggedIn;
-      checkoutController.showLoginBox.value = !loggedIn;
-      print(
-        'After check: isLoggedIn: ${checkoutController.isLoggedIn.value}, '
-        'showLoginBox: ${checkoutController.showLoginBox.value}',
-      ); // Debug log
-      setState(() {}); // Force rebuild after async login check
+    checkoutController.initializeRouter(context);
+    checkoutController.showLoginBox.value = true;
+    // print('Initial showLoginBox: ${checkoutController.showLoginBox.value}');
+
+    checkoutController.checkLoginStatus().then((_) {
+      // print(
+      //   'After check: isLoggedIn: ${checkoutController.isLoggedIn.value}, '
+      //   'showLoginBox: ${checkoutController.showLoginBox.value}',
+      // );
+      setState(() {});
     });
 
     checkoutController.loadUserData();
@@ -64,8 +57,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
         checkoutController.getShippingTax();
       }
     });
-    updateFromRoute();
-    _router.routeInformationProvider.addListener(updateFromRoute);
+    checkoutController.updateFromRoute(context);
     checkoutController.setCallbacks(
       onWishlistChanged: widget.onWishlistChanged,
       onErrorWishlistChanged: widget.onErrorWishlistChanged,
@@ -75,42 +67,34 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
 
   @override
   void dispose() {
-    _router.routeInformationProvider.removeListener(updateFromRoute);
+    checkoutController.disposeRouter();
     checkoutController.reset();
     super.dispose();
-  }
-
-  void updateFromRoute() {
-    if (!mounted) return;
-
-    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
-    final uri = Uri.parse(route.uri.toString());
-
-    setState(() {
-      subtotal =
-          double.tryParse(uri.queryParameters['subtotal'] ?? '0.0') ?? 0.0;
-    });
-
-    checkoutController.loadProductIds(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final effectiveWidth = screenWidth.clamp(800.0, 1400.0);
-    final contentWidth = (effectiveWidth - 289 - 140).clamp(
-      300.0,
-      double.infinity,
+    final isDesktop = screenWidth >= 1400;
+    final effectiveWidth =
+        isDesktop
+            ? screenWidth.clamp(1400.0, double.infinity)
+            : screenWidth.clamp(800.0, 1400.0);
+    final contentWidth =
+        isDesktop ? (effectiveWidth - 389 - 200) : (effectiveWidth - 289 - 140);
+    final fontScale = (contentWidth / (isDesktop ? 800 : 600)).clamp(
+      isDesktop ? 1.0 : 0.8,
+      isDesktop ? 1.5 : 1.0,
     );
-    final isVerticalLayout = effectiveWidth < 1000;
+    final isVerticalLayout = screenWidth < 1000;
 
     return SizedBox(
       width: screenWidth,
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(
-            left: 289,
-            right: 140,
+          padding: EdgeInsets.only(
+            left: isDesktop ? 389 : 289,
+            right: isDesktop ? 200 : 140,
             top: 24,
             bottom: 24,
           ),
@@ -122,27 +106,24 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                   BarlowText(
                     text: "My Cart",
                     color: const Color(0xFF30578E),
-                    hoverTextColor: Color(0xFF2876E4),
-
+                    hoverTextColor: const Color(0xFF2876E4),
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
-                    letterSpacing: 0.04 * (contentWidth / 600),
+                    letterSpacing: 0.04 * fontScale,
                     onTap: () {
                       showDialog(
                         context: context,
                         barrierColor: Colors.transparent,
-                        builder: (BuildContext context) {
-                          return CartPanel();
-                        },
+                        builder: (BuildContext context) => CartPanel(),
                       );
                     },
                   ),
                   const SizedBox(width: 9),
                   SvgPicture.asset(
                     'assets/icons/right_icon.svg',
-                    width: 24 * (contentWidth / 600),
-                    height: 24 * (contentWidth / 600),
+                    width: 24 * (isDesktop ? 1.0 : contentWidth / 600),
+                    height: 24 * (isDesktop ? 1.0 : contentWidth / 600),
                     color: const Color(0xFF30578E),
                   ),
                   const SizedBox(width: 9),
@@ -152,8 +133,7 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     lineHeight: 1.0,
-                    hoverTextColor: Color(0xFF2876E4),
-
+                    hoverTextColor: const Color(0xFF2876E4),
                     route: AppRoutes.checkOut,
                     enableUnderlineForActiveRoute: true,
                     decorationColor: const Color(0xFF30578E),
@@ -161,22 +141,35 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32 * fontScale),
               isVerticalLayout
                   ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      buildLeftColumn(context, contentWidth),
-                      const SizedBox(height: 32),
-                      buildRightColumn(context, contentWidth),
+                      buildLeftColumn(context, contentWidth, fontScale),
+                      SizedBox(height: 32 * fontScale),
+                      buildRightColumn(context, contentWidth, fontScale),
                     ],
                   )
                   : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: buildLeftColumn(context, contentWidth)),
-                      const SizedBox(width: 32),
-                      Expanded(child: buildRightColumn(context, contentWidth)),
+                      Expanded(
+                        child: buildLeftColumn(
+                          context,
+                          contentWidth,
+                          fontScale,
+                        ),
+                      ),
+                      SizedBox(width: 32 * fontScale),
+                      Expanded(
+                        child: buildRightColumn(
+                          context,
+                          contentWidth,
+                          fontScale,
+                        ),
+                      ),
                     ],
                   ),
             ],
@@ -186,19 +179,28 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
     );
   }
 
-  Widget buildLeftColumn(BuildContext context, double contentWidth) {
-    final containerWidth = (contentWidth * 0.45).clamp(200.0, 444.0);
-    final fontScale = (contentWidth / 600).clamp(0.8, 1.0);
+  Widget buildLeftColumn(
+    BuildContext context,
+    double contentWidth,
+    double fontScale,
+  ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final containerWidth = (contentWidth * 0.45).clamp(
+      screenWidth >= 1400 ? 444.0 : 200.0,
+      screenWidth >= 1400 ? 600.0 : 444.0,
+    );
 
     return Obx(() {
       final isLoggedIn = checkoutController.isLoggedIn.value;
       final addressExists = checkoutController.addressExists.value;
       final isLoading = checkoutController.isLoading.value;
-      print(
-        'buildLeftColumn: isLoggedIn: $isLoggedIn, '
-        'showLoginBox: ${checkoutController.showLoginBox.value}, '
-        'addressExists: $addressExists, isLoading: $isLoading',
-      ); //
+      // print(
+      //   'buildLeftColumn: isLoggedIn: $isLoggedIn, '
+      //   'showLoginBox: ${checkoutController.showLoginBox.value}, '
+      //   'addressExists: $addressExists, isLoading: $isLoading',
+      // );
+
       if (isLoading) {
         return Center(
           child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
@@ -210,18 +212,14 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
         children: [
           CralikaFont(
             text: "Checkout",
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w600,
             fontSize: 32,
             lineHeight: 36 / 32,
             letterSpacing: 1.28 * fontScale,
             color: const Color(0xFF414141),
           ),
           const SizedBox(height: 24),
-
-          // Show address selection if logged in and address exists
           if (isLoggedIn && addressExists) SelectAddress(),
-
-          // Show login box if not logged in and login box should be shown
           if (!isLoggedIn && checkoutController.showLoginBox.value) ...[
             Container(
               decoration: BoxDecoration(
@@ -297,9 +295,9 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                     ),
                     InkWell(
                       onTap: () {
-                        checkoutController.showLoginBox.value = false;
-                        checkoutController.update(); // Force update
-                        setState(() {}); // Ensure stateful widget rebuilds
+                        setState(() {
+                          checkoutController.showLoginBox.value = false;
+                        });
                       },
                       child: CircleAvatar(
                         radius: 12 * fontScale,
@@ -318,10 +316,6 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
             ),
             SizedBox(height: 43 * fontScale),
           ],
-
-          // Show address form if:
-          // 1. User is not logged in, OR
-          // 2. User is logged in but doesn't have an address
           if (!isLoggedIn || (isLoggedIn && !addressExists))
             SizedBox(
               width: containerWidth,
@@ -511,76 +505,87 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
     });
   }
 
-  Widget buildRightColumn(BuildContext context, double contentWidth) {
-    final containerWidth = (contentWidth * 0.45).clamp(220.0, 488.0);
-    final fontScale = (contentWidth / 600).clamp(0.8, 1.0);
+  Widget buildRightColumn(
+    BuildContext context,
+    double contentWidth,
+    double fontScale,
+  ) {
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    // Move non-reactive calculations and widgets outside Obx
-    final double finalDeliveryCharge =
-        subtotal > 2500 ? 0.0 : checkoutController.totalDeliveryCharge.value;
-    final double total = subtotal + finalDeliveryCharge;
+    final containerWidth = (contentWidth * 0.45).clamp(
+      screenWidth >= 1400 ? 488.0 : 220.0,
+      screenWidth >= 1400 ? 650.0 : 488.0,
+    );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Container(
-          color: const Color(0xFF30578E),
-          width: containerWidth,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 44 * fontScale,
-              vertical: 18 * fontScale,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CralikaFont(
-                  text: "Order Details",
-                  color: const Color(0xFFFFFFFF),
-                  fontWeight: FontWeight.w400,
-                  fontSize: 20,
-                  lineHeight: 36 / 20,
-                  letterSpacing: 0.8 * fontScale,
-                ),
-                SizedBox(height: 12 * fontScale),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    BarlowText(
-                      text: "Item Total",
-                      color: const Color(0xFFFFFFFF),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 16,
-                      lineHeight: 36 / 16,
-                      letterSpacing: 0.64 * fontScale,
-                    ),
-                    BarlowText(
-                      text: "Rs. ${subtotal.toStringAsFixed(2)}",
-                      color: const Color(0xFFFFFFFF),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 16,
-                      lineHeight: 36 / 16,
-                      letterSpacing: 0.64 * fontScale,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12 * fontScale),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    BarlowText(
-                      text: "Shipping & Taxes",
-                      color: const Color(0xFFFFFFFF),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 16,
-                      lineHeight: 36 / 16,
-                      letterSpacing: 0.64 * fontScale,
-                    ),
-                    Obx(() {
-                      return checkoutController.isShippingTaxLoaded.value
+    return Obx(() {
+      final double finalDeliveryCharge =
+          checkoutController.subtotal.value > AppConstants.deliveryCharge
+              ? 0.0
+              : checkoutController.totalDeliveryCharge.value;
+      final double total =
+          checkoutController.subtotal.value + finalDeliveryCharge;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Container(
+            color: const Color(0xFF30578E),
+            width: containerWidth,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 44 * fontScale,
+                vertical: 18 * fontScale,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CralikaFont(
+                    text: "Order Details",
+                    color: const Color(0xFFFFFFFF),
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20,
+                    lineHeight: 36 / 20,
+                    letterSpacing: 0.8 * fontScale,
+                  ),
+                  SizedBox(height: 12 * fontScale),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      BarlowText(
+                        text: "Item Total",
+                        color: const Color(0xFFFFFFFF),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                        lineHeight: 36 / 16,
+                        letterSpacing: 0.64 * fontScale,
+                      ),
+                      BarlowText(
+                        text:
+                            "Rs. ${checkoutController.subtotal.value.toStringAsFixed(2)}",
+                        color: const Color(0xFFFFFFFF),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                        lineHeight: 36 / 16,
+                        letterSpacing: 0.64 * fontScale,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12 * fontScale),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      BarlowText(
+                        text: "Shipping & Taxes",
+                        color: const Color(0xFFFFFFFF),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                        lineHeight: 36 / 16,
+                        letterSpacing: 0.64 * fontScale,
+                      ),
+                      checkoutController.isShippingTaxLoaded.value
                           ? BarlowText(
                             text:
-                                "Rs. ${(subtotal > 2500 ? 0.0 : checkoutController.totalDeliveryCharge.value).toStringAsFixed(2)}",
+                                "Rs. ${(checkoutController.subtotal.value > AppConstants.deliveryCharge ? 0.0 : checkoutController.totalDeliveryCharge.value).toStringAsFixed(2)}",
                             color: const Color(0xFFFFFFFF),
                             fontWeight: FontWeight.w400,
                             fontSize: 16,
@@ -593,252 +598,254 @@ class _CheckoutPageWebState extends State<CheckoutPageWeb> {
                             child: RotatingSvgLoader(
                               assetPath: 'assets/footer/footerbg.svg',
                             ),
-                          );
-                    }),
-                  ],
-                ),
-                SizedBox(height: 12 * fontScale),
-                const Divider(color: Color(0xFFFFFFFF)),
-                SizedBox(height: 12 * fontScale),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CralikaFont(
-                      text: "Subtotal",
-                      color: const Color(0xFFFFFFFF),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 20,
-                      lineHeight: 36 / 16,
-                      letterSpacing: 0.64 * fontScale,
-                    ),
-                    BarlowText(
-                      text:
-                          "Rs. ${(subtotal + (subtotal > 2500 ? 0.0 : checkoutController.totalDeliveryCharge.value)).toStringAsFixed(2)}",
-                      color: const Color(0xFFFFFFFF),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 24,
-                      lineHeight: 36 / 16,
-                      letterSpacing: 0.64 * fontScale,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: 32 * fontScale),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  barrierColor: Colors.transparent,
-                  builder: (BuildContext context) {
-                    return CartPanel();
-                  },
-                );
-              },
-              child: BarlowText(
-                text: "VIEW CART",
-                color: Color(0xFF30578E),
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-                lineHeight: 1.0,
-                letterSpacing: 0.64 * fontScale,
-                hoverBackgroundColor: Color(0xFFb9d6ff),
-                enableHoverBackground: true,
-                decorationColor: const Color(0xFF30578E),
-                hoverTextColor: const Color(0xFF2876E4),
-                hoverDecorationColor: Color(0xFF2876E4),
+                          ),
+                    ],
+                  ),
+                  SizedBox(height: 12 * fontScale),
+                  const Divider(color: Color(0xFFFFFFFF)),
+                  SizedBox(height: 12 * fontScale),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CralikaFont(
+                        text: "Subtotal",
+                        color: const Color(0xFFFFFFFF),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 20,
+                        lineHeight: 36 / 16,
+                        letterSpacing: 0.64 * fontScale,
+                      ),
+                      BarlowText(
+                        text:
+                            "Rs. ${(checkoutController.subtotal.value + (checkoutController.subtotal.value > AppConstants.deliveryCharge ? 0.0 : checkoutController.totalDeliveryCharge.value)).toStringAsFixed(2)}",
+                        color: const Color(0xFFFFFFFF),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 24,
+                        lineHeight: 36 / 16,
+                        letterSpacing: 0.64 * fontScale,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 24 * fontScale),
-            Obx(() {
-              final isLoading =
-                  !checkoutController.isShippingTaxLoaded.value ||
-                  checkoutController.isSignupProcessing.value;
-              return isLoading
-                  ? SizedBox(
-                    width: 16 * fontScale,
-                    height: 16 * fontScale,
-                    child: RotatingSvgLoader(
-                      assetPath: 'assets/footer/footerbg.svg',
-                    ),
-                  )
-                  : BarlowText(
-                    text: "MAKE PAYMENT",
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                    lineHeight: 1.0,
-                    letterSpacing: 0.64 * fontScale,
-                    color:
-                        isAnyRequiredFieldEmpty()
-                            ? const Color(0xFF30578E).withOpacity(0.5)
-                            : const Color(0xFF30578E),
-                    backgroundColor:
-                        isAnyRequiredFieldEmpty()
-                            ? const Color(0xFFb9d6ff).withOpacity(0.5)
-                            : const Color(0xFFb9d6ff),
-                    hoverTextColor:
-                        isAnyRequiredFieldEmpty()
-                            ? const Color(0xFF2876E4).withOpacity(0.5)
-                            : const Color(0xFF2876E4),
-                    onTap: () async {
-                      // First check if user is logged in
-                      bool isLoggedIn = await isUserLoggedIn();
-
-                      // Validate required fields
-                      if (checkoutController.firstNameController.text.isEmpty) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please enter your first name',
-                        );
-                        return;
-                      }
-                      if (checkoutController.firstNameController.text.length <
-                          2) {
-                        widget.onErrorWishlistChanged?.call(
-                          'First name too short',
-                        );
-                        return;
-                      }
-                      if (checkoutController.lastNameController.text.isEmpty) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please enter your last name',
-                        );
-                        return;
-                      }
-                      if (checkoutController.lastNameController.text.length <
-                          2) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Last name too short',
-                        );
-                        return;
-                      }
-                      if (checkoutController.emailController.text.isEmpty) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please enter your email',
-                        );
-                        return;
-                      }
-                      if (!RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      ).hasMatch(checkoutController.emailController.text)) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please enter a valid email',
-                        );
-                        return;
-                      }
-                      if (checkoutController.address1Controller.text.isEmpty) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please enter your ADDRESS LINE 1',
-                        );
-                        return;
-                      }
-                      if (checkoutController.zipController.text.isEmpty) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please enter your Zip',
-                        );
-                        return;
-                      }
-                      if (checkoutController.stateController.text.isEmpty) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please enter your state',
-                        );
-                        return;
-                      }
-                      if (checkoutController.cityController.text.isEmpty) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please enter your city',
-                        );
-                        return;
-                      }
-                      if (checkoutController.mobileController.text.isEmpty) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please enter your phone number',
-                        );
-                        return;
-                      }
-                      if (!RegExp(
-                        r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$',
-                      ).hasMatch(checkoutController.mobileController.text)) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please enter a valid phone number',
-                        );
-                        return;
-                      }
-
-                      // Checkbox validation
-                      if ((!isLoggedIn ||
-                              (isLoggedIn &&
-                                  !checkoutController.addressExists.value)) &&
-                          !checkoutController.isPrivacyPolicyChecked) {
-                        widget.onErrorWishlistChanged?.call(
-                          'Please accept the Privacy Policy',
-                        );
-                        return;
-                      }
-
-                      // Proceed with signup or address addition
-                      if (!isLoggedIn) {
-                        bool signUpSuccess = await checkoutController
-                            .handleSignUp(context);
-                        if (!signUpSuccess) {
-                          widget.onErrorWishlistChanged?.call(
-                            checkoutController.signupMessage.isNotEmpty
-                                ? checkoutController.signupMessage
-                                : 'Signup failed, please try again',
-                          );
-                          return;
-                        }
-                      } else if (!checkoutController.addressExists.value) {
-                        bool addressSuccess = await checkoutController
-                            .handleAddAddress(context);
-                        if (!addressSuccess) {
-                          widget.onErrorWishlistChanged?.call(
-                            checkoutController.signupMessage.isNotEmpty
-                                ? checkoutController.signupMessage
-                                : 'Failed to add address, please try again',
-                          );
-                          return;
-                        }
-                      }
-
-                      // Proceed to payment
-                      final orderId =
-                          'ORDER_${DateTime.now().millisecondsSinceEpoch}';
-                      checkoutController.openRazorpayCheckout(
-                        context,
-                        total,
-                        orderId,
-                      );
-                    },
+          ),
+          SizedBox(height: 32 * fontScale),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    barrierColor: Colors.transparent,
+                    builder: (BuildContext context) => CartPanel(),
                   );
-            }),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Image.asset(
-                  'assets/icons/razorpay1.png',
-                  width: 76,
-                  height: 16,
+                },
+                child: BarlowText(
+                  text: "VIEW CART",
                   color: const Color(0xFF30578E),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  lineHeight: 1.0,
+                  letterSpacing: 0.64 * fontScale,
+                  hoverBackgroundColor: const Color(0xFFb9d6ff),
+                  enableHoverBackground: true,
+                  decorationColor: const Color(0xFF30578E),
+                  hoverTextColor: const Color(0xFF2876E4),
+                  hoverDecorationColor: const Color(0xFF2876E4),
                 ),
-                SizedBox(width: 4),
+              ),
+              SizedBox(height: 24 * fontScale),
+              Obx(() {
+                final isLoading =
+                    !checkoutController.isShippingTaxLoaded.value ||
+                    checkoutController.isSignupProcessing.value;
+                return isLoading
+                    ? SizedBox(
+                      width: 16 * fontScale,
+                      height: 16 * fontScale,
+                      child: RotatingSvgLoader(
+                        assetPath: 'assets/footer/footerbg.svg',
+                      ),
+                    )
+                    : BarlowText(
+                      text: "MAKE PAYMENT",
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      lineHeight: 1.0,
+                      letterSpacing: 0.64 * fontScale,
+                      color:
+                          isAnyRequiredFieldEmpty()
+                              ? const Color(0xFF30578E).withOpacity(0.5)
+                              : const Color(0xFF30578E),
+                      backgroundColor:
+                          isAnyRequiredFieldEmpty()
+                              ? const Color(0xFFb9d6ff).withOpacity(0.5)
+                              : const Color(0xFFb9d6ff),
+                      hoverTextColor:
+                          isAnyRequiredFieldEmpty()
+                              ? const Color(0xFF2876E4).withOpacity(0.5)
+                              : const Color(0xFF2876E4),
+                      onTap: () async {
+                        bool isLoggedIn =
+                            await checkoutController.isUserLoggedIn();
 
-                BarlowText(
-                  text: "Secure (UPI, Cards, Wallets, NetBanking)",
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
+                        if (checkoutController
+                            .firstNameController
+                            .text
+                            .isEmpty) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please enter your first name',
+                          );
+                          return;
+                        }
+                        if (checkoutController.firstNameController.text.length <
+                            2) {
+                          widget.onErrorWishlistChanged?.call(
+                            'First name too short',
+                          );
+                          return;
+                        }
+                        if (checkoutController
+                            .lastNameController
+                            .text
+                            .isEmpty) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please enter your last name',
+                          );
+                          return;
+                        }
+                        if (checkoutController.lastNameController.text.length <
+                            2) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Last name too short',
+                          );
+                          return;
+                        }
+                        if (checkoutController.emailController.text.isEmpty) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please enter your email',
+                          );
+                          return;
+                        }
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(checkoutController.emailController.text)) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please enter a valid email',
+                          );
+                          return;
+                        }
+                        if (checkoutController
+                            .address1Controller
+                            .text
+                            .isEmpty) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please enter your ADDRESS LINE 1',
+                          );
+                          return;
+                        }
+                        if (checkoutController.zipController.text.isEmpty) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please enter your Zip',
+                          );
+                          return;
+                        }
+                        if (checkoutController.stateController.text.isEmpty) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please enter your state',
+                          );
+                          return;
+                        }
+                        if (checkoutController.cityController.text.isEmpty) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please enter your city',
+                          );
+                          return;
+                        }
+                        if (checkoutController.mobileController.text.isEmpty) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please enter your phone number',
+                          );
+                          return;
+                        }
+                        if (!RegExp(
+                          r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$',
+                        ).hasMatch(checkoutController.mobileController.text)) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please enter a valid phone number',
+                          );
+                          return;
+                        }
+
+                        if ((!isLoggedIn ||
+                                (isLoggedIn &&
+                                    !checkoutController.addressExists.value)) &&
+                            !checkoutController.isPrivacyPolicyChecked) {
+                          widget.onErrorWishlistChanged?.call(
+                            'Please accept the Privacy Policy',
+                          );
+                          return;
+                        }
+
+                        if (!isLoggedIn) {
+                          bool signUpSuccess = await checkoutController
+                              .handleSignUp(context);
+                          if (!signUpSuccess) {
+                            widget.onErrorWishlistChanged?.call(
+                              checkoutController.signupMessage.isNotEmpty
+                                  ? checkoutController.signupMessage
+                                  : 'Signup failed, please try again',
+                            );
+                            return;
+                          }
+                        } else if (!checkoutController.addressExists.value) {
+                          bool addressSuccess = await checkoutController
+                              .handleAddAddress(context);
+                          if (!addressSuccess) {
+                            widget.onErrorWishlistChanged?.call(
+                              checkoutController.signupMessage.isNotEmpty
+                                  ? checkoutController.signupMessage
+                                  : 'Failed to add address, please try again',
+                            );
+                            return;
+                          }
+                        }
+
+                        final orderId =
+                            'ORDER_${DateTime.now().millisecondsSinceEpoch}';
+                        checkoutController.openRazorpayCheckout(
+                          context,
+                          total,
+                          orderId,
+                        );
+                      },
+                    );
+              }),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Image.asset(
+                    'assets/icons/razorpay1.png',
+                    width: 76,
+                    height: 16,
+                    color: const Color(0xFF30578E),
+                  ),
+                  SizedBox(width: 4),
+                  BarlowText(
+                    text: "Secure (UPI, Cards, Wallets, NetBanking)",
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+    });
   }
 
   bool isAnyRequiredFieldEmpty() {

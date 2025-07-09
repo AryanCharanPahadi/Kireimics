@@ -12,6 +12,7 @@ import '../../component/no_result_found/no_order_yet.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/app_routes/routes.dart';
+import '../../component/title_service.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../web_desktop_common/sale/sale_modal.dart';
 import '../component/badges_mobile.dart';
@@ -26,6 +27,7 @@ class SaleMobile extends StatefulWidget {
 
 class _SaleMobileState extends State<SaleMobile> {
   String? _selectedFilter = 'All'; // Initialize with 'All' by default
+  String _selectedSortOption = 'New'; // Track selected sort option
   String _selectedDescription =
       '/ Browse our collection of handcrafted pottery, where each one-of-a-kind piece adds charm to your home while serving a purpose you\'ll appreciate every day /';
   int _selectedCategoryId = 1; // Default to "All" category ID
@@ -36,11 +38,13 @@ class _SaleMobileState extends State<SaleMobile> {
   List<bool> _isHoveredList = []; // Track hover state for grid items
   bool _showSortOptions = false; // Track if sort options are visible
   bool _showFilterOptions = false; // Track if filter options are visible
-  final _sortFilterKey = GlobalKey(); // Key for sort/filter widgets
+  final _sortKey = GlobalKey();
+  final _filterKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Sale & Discounted Products");
     _handleInitialCategory();
   }
 
@@ -56,31 +60,56 @@ class _SaleMobileState extends State<SaleMobile> {
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }
 
-  // Handle clicks outside the sort/filter options
   void _handleOutsideClick(PointerDownEvent event) {
-    final renderBox =
-        _sortFilterKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final offset = renderBox.localToGlobal(Offset.zero);
-      final size = renderBox.size;
-      final Rect widgetRect = Rect.fromLTWH(
-        offset.dx,
-        offset.dy,
-        size.width,
-        size.height,
-      );
+    bool shouldCloseSort = _showSortOptions;
+    bool shouldCloseFilter = _showFilterOptions;
 
-      if (!widgetRect.contains(event.position)) {
-        setState(() {
-          _showSortOptions = false;
-          _showFilterOptions = false;
-        });
+    if (_showSortOptions) {
+      final sortRenderBox =
+          _sortKey.currentContext?.findRenderObject() as RenderBox?;
+      if (sortRenderBox != null) {
+        final sortOffset = sortRenderBox.localToGlobal(Offset.zero);
+        final sortSize = sortRenderBox.size;
+        final sortRect = Rect.fromLTWH(
+          sortOffset.dx,
+          sortOffset.dy,
+          sortSize.width,
+          sortSize.height,
+        );
+        if (sortRect.contains(event.position)) {
+          shouldCloseSort = false;
+        }
       }
+    }
+
+    if (_showFilterOptions) {
+      final filterRenderBox =
+          _filterKey.currentContext?.findRenderObject() as RenderBox?;
+      if (filterRenderBox != null) {
+        final filterOffset = filterRenderBox.localToGlobal(Offset.zero);
+        final filterSize = filterRenderBox.size;
+        final filterRect = Rect.fromLTWH(
+          filterOffset.dx,
+          filterOffset.dy,
+          filterSize.width,
+          filterSize.height,
+        );
+        if (filterRect.contains(event.position)) {
+          shouldCloseFilter = false;
+        }
+      }
+    }
+
+    if (shouldCloseSort || shouldCloseFilter) {
+      setState(() {
+        _showSortOptions = false;
+        _showFilterOptions = false;
+      });
     }
   }
 
@@ -94,12 +123,15 @@ class _SaleMobileState extends State<SaleMobile> {
       if (categoryId != null) {
         setState(() {
           _selectedCategoryId = categoryId;
+          _selectedSortOption = 'New'; // Reset sort option
         });
         _fetchProductsByCategory(categoryId);
         return;
       }
     }
-    // Default to "All" if no category specified
+    setState(() {
+      _selectedSortOption = 'New'; // Reset sort option
+    });
     _fetchProductsForAllCategory();
   }
 
@@ -111,20 +143,16 @@ class _SaleMobileState extends State<SaleMobile> {
       final allProducts = await ApiHelper.fetchProductsSale();
       setState(() {
         _productsSale = allProducts;
-        _originalProductsSale = List.from(
-          allProducts,
-        ); // Store filtered list as original
+        _originalProductsSale = List.from(allProducts);
         _isHoveredList = List<bool>.filled(allProducts.length, false);
         _isLoading = false;
-        _selectedFilter = null; // Reset filter
+        _selectedFilter = null;
+        _selectedSortOption = 'New'; // Reset sort option
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to load products: $e')));
     }
   }
 
@@ -136,12 +164,11 @@ class _SaleMobileState extends State<SaleMobile> {
       final allProducts = await ApiHelper.fetchProductByCatIdSale(catId);
       setState(() {
         _productsSale = allProducts;
-        _originalProductsSale = List.from(
-          allProducts,
-        ); // Store filtered list as original
+        _originalProductsSale = List.from(allProducts);
         _isHoveredList = List<bool>.filled(allProducts.length, false);
         _isLoading = false;
-        _selectedFilter = null; // Reset filter
+        _selectedFilter = null;
+        _selectedSortOption = 'New'; // Reset sort option
       });
     } catch (e) {
       setState(() {
@@ -166,7 +193,8 @@ class _SaleMobileState extends State<SaleMobile> {
       _selectedCategoryName = name;
       _showSortOptions = false;
       _showFilterOptions = false;
-      _selectedFilter = null; // Reset filter when category changes
+      _selectedFilter = null;
+      _selectedSortOption = 'New'; // Reset sort option
     });
 
     if (name.toLowerCase() == 'all') {
@@ -196,7 +224,6 @@ class _SaleMobileState extends State<SaleMobile> {
       children: [
         Listener(
           onPointerDown: _handleOutsideClick,
-
           child: Column(
             children: [
               SizedBox(
@@ -246,7 +273,7 @@ class _SaleMobileState extends State<SaleMobile> {
                                   : '${_productsSale.length} Product${_productsSale.length == 1
                                       ? ''
                                       : _productsSale.length == 0
-                                      ? ''
+                                      ? 's'
                                       : 's'}',
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -260,7 +287,7 @@ class _SaleMobileState extends State<SaleMobile> {
                         selectedCategoryId: _selectedCategoryId,
                         onCategorySelected: onCategorySelected,
                         context: context,
-                        fontSize: 16,
+                        fontSize: 14,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -277,28 +304,27 @@ class _SaleMobileState extends State<SaleMobile> {
                           GestureDetector(
                             behavior: HitTestBehavior.translucent,
                             onTap: _toggleSortOptions,
-
                             child: BarlowText(
-                              text: "Sort / New",
+                              text:
+                                  "Sort / $_selectedSortOption", // Updated to show selected sort option
                               color: Color(0xFF30578E),
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              fontSize: 16,
                               lineHeight: 1.0,
-                              letterSpacing: 0.04 * 16,
+                              letterSpacing: 1 * 0.04,
                             ),
                           ),
                           SizedBox(width: 16),
                           GestureDetector(
                             behavior: HitTestBehavior.translucent,
                             onTap: _toggleFilterOptions,
-
                             child: BarlowText(
                               text: "Filter / ${_selectedFilter ?? 'All'}",
                               color: Color(0xFF30578E),
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              fontSize: 16,
                               lineHeight: 1.0,
-                              letterSpacing: 0.04 * 16,
+                              letterSpacing: 1 * 0.04,
                             ),
                           ),
                         ],
@@ -349,8 +375,7 @@ class _SaleMobileState extends State<SaleMobile> {
                                     SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2,
                                       crossAxisSpacing: 24,
-                                      mainAxisSpacing:
-                                          24, // Increased vertical spacing
+                                      mainAxisSpacing: 24,
                                       childAspectRatio: () {
                                         double width =
                                             MediaQuery.of(context).size.width;
@@ -428,7 +453,6 @@ class _SaleMobileState extends State<SaleMobile> {
                                                     ),
                                                   ),
                                                 ),
-
                                                 Positioned(
                                                   top: 10,
                                                   left: 10,
@@ -451,7 +475,6 @@ class _SaleMobileState extends State<SaleMobile> {
                                                         onWishlistChanged:
                                                             widget
                                                                 .onWishlistChanged,
-
                                                         index: index,
                                                       );
                                                     },
@@ -487,9 +510,7 @@ class _SaleMobileState extends State<SaleMobile> {
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
                                                               .start,
-
                                                       children: [
-                                                        // Original price with strikethrough
                                                         if (product.discount !=
                                                             0)
                                                           Text(
@@ -519,12 +540,9 @@ class _SaleMobileState extends State<SaleMobile> {
                                                                       .fontFamily,
                                                             ),
                                                           ),
-
-                                                        // Vertical divider
                                                         if (product.discount !=
                                                             0)
                                                           SizedBox(width: 6),
-                                                        // Discounted price
                                                         BarlowText(
                                                           text:
                                                               product.discount !=
@@ -542,29 +560,23 @@ class _SaleMobileState extends State<SaleMobile> {
                                                       ],
                                                     ),
                                                   ],
-
                                                   const SizedBox(height: 8),
                                                   GestureDetector(
-                                                    onTap:() async {
-                                                      // 1. Call the wishlist changed callback immediately
-                                                      widget.onWishlistChanged?.call(
-                                                        'Product Added To Cart',
-                                                      );
-
-                                                      // 2. Store the product ID in SharedPreferences
+                                                    onTap: () async {
+                                                      widget.onWishlistChanged
+                                                          ?.call(
+                                                            'Product Added To Cart',
+                                                          );
                                                       await SharedPreferencesHelper.addProductId(
                                                         product.id,
                                                       );
-
-                                                      // 3. Refresh the cart state
                                                       cartNotifier.refresh();
-
-                                                      // Note: Removed the Future.delayed and showDialog parts
                                                     },
-                                                    child:BarlowText(
-                                                      text:   "ADD TO CART",
+                                                    child: BarlowText(
+                                                      text: "ADD TO CART",
                                                       fontSize: 14,
-                                                      fontWeight: FontWeight.w600,
+                                                      fontWeight:
+                                                          FontWeight.w600,
                                                       lineHeight: 1.0,
                                                       letterSpacing: 0.56,
                                                       color: const Color(
@@ -594,6 +606,7 @@ class _SaleMobileState extends State<SaleMobile> {
         ),
         if (_showSortOptions)
           Positioned(
+            key: _sortKey,
             right: 50,
             top: 320,
             child: Container(
@@ -601,13 +614,10 @@ class _SaleMobileState extends State<SaleMobile> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(
-                  color: Color(0xFFE7E7E7), // #E7E7E7
-                  width: 1.0,
-                ),
+                border: Border.all(color: Color(0xFFE7E7E7), width: 1.0),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x0F000000), // #0000000F (6% opacity black)
+                    color: Color(0x0F000000),
                     blurRadius: 20,
                     spreadRadius: 0,
                     offset: Offset(20, 20),
@@ -622,6 +632,7 @@ class _SaleMobileState extends State<SaleMobile> {
           ),
         if (_showFilterOptions)
           Positioned(
+            key: _filterKey,
             right: 16,
             top: 320,
             child: Container(
@@ -629,13 +640,10 @@ class _SaleMobileState extends State<SaleMobile> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(
-                  color: Color(0xFFE7E7E7), // #E7E7E7
-                  width: 1.0,
-                ),
+                border: Border.all(color: Color(0xFFE7E7E7), width: 1.0),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x0F000000), // #0000000F (6% opacity black)
+                    color: Color(0x0F000000),
                     blurRadius: 20,
                     spreadRadius: 0,
                     offset: Offset(20, 20),
@@ -666,6 +674,7 @@ class _SaleMobileState extends State<SaleMobile> {
     ];
 
     return options.map((option) {
+      final label = option['label'] as String;
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -681,11 +690,15 @@ class _SaleMobileState extends State<SaleMobile> {
                 });
               },
               child: BarlowText(
-                text: option['label'] as String,
+                text: label,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: const Color(0xFF30578E),
                 hoverTextColor: const Color(0xFF2876E4),
+                enableUnderlineForCurrentFilter: true,
+                currentFilterValue: _selectedSortOption,
+                decorationColor: const Color(0xFF30578E),
+                activeUnderlineDecoration: TextDecoration.underline,
               ),
             ),
           ),
@@ -701,7 +714,6 @@ class _SaleMobileState extends State<SaleMobile> {
         'label': "Maker's Choice",
         'onTap': () => _handleFilterSelected("Maker's Choice"),
       },
-
     ];
 
     return options.map((option) {
@@ -735,14 +747,13 @@ class _SaleMobileState extends State<SaleMobile> {
 
   void _handleSortSelected(String sortOption) {
     setState(() {
+      _selectedSortOption = sortOption; // Update selected sort option
       if (sortOption == 'Price Low - High') {
         _productsSale.sort((a, b) => (a.price ?? 0).compareTo(b.price ?? 0));
       } else if (sortOption == 'Price High - Low') {
         _productsSale.sort((a, b) => (b.price ?? 0).compareTo(a.price ?? 0));
       } else if (sortOption == 'New') {
-        _productsSale = List.from(
-          _originalProductsSale,
-        ); // Restore original list
+        _productsSale = List.from(_originalProductsSale);
         _isHoveredList = List<bool>.filled(_productsSale.length, false);
       }
     });

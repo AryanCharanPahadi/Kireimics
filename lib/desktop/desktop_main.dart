@@ -7,6 +7,8 @@ import '../component/notification_toast/custom_toast.dart';
 import '../component/app_routes/routes.dart';
 import '../component/utilities/utility.dart';
 import '../web/about_us/about_page.dart';
+import '../web/checkout/checkout_page.dart';
+import '../web/contact_us/contact_us.dart';
 import '../web/my_account_route/my_orders/my_order_ui.dart';
 import '../web_desktop_common/add_address_ui/add_address_ui.dart';
 import '../web_desktop_common/cart/cart_panel.dart';
@@ -58,9 +60,7 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
   final ValueNotifier<bool> _showSideCartDetails = ValueNotifier(false);
   final ValueNotifier<String?> _notificationMessage = ValueNotifier(null);
   final ValueNotifier<String?> _notificationErrorMessage = ValueNotifier(null);
-  final ValueNotifier<bool> _isPaymentProcessing = ValueNotifier(
-    false,
-  );
+  final ValueNotifier<bool> _isPaymentProcessing = ValueNotifier(false);
   // Animation controller and animations
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
@@ -139,7 +139,7 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
             onErrorWishlistChanged: _showErrorNotification,
           ),
       AppRoutes.checkOut:
-          (_) => CheckoutPageDesktop(
+          (_) => CheckoutPage(
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
             onPaymentProcessing: (isProcessing) {
@@ -147,7 +147,7 @@ class _LandingPageDesktopState extends State<LandingPageDesktop>
             },
           ),
       AppRoutes.contactUs:
-          (_) => ContactUsDesktop(
+          (_) => ContactUs(
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
           ),

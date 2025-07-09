@@ -20,7 +20,7 @@ class CollectionNavigation extends StatelessWidget {
     required this.onCategorySelected,
     this.fetchAllProducts,
     required this.context,
-    this.fontSize = 16,
+    this.fontSize = 14,
     this.fontWeight = FontWeight.w600,
     this.productIds, // Add productIds to constructor
   });
@@ -28,7 +28,7 @@ class CollectionNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CategoriesController categoriesController =
-    Get.put(CategoriesController());;
+    Get.put(CategoriesController());
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 800;
 

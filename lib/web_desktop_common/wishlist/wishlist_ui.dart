@@ -10,6 +10,7 @@ import '../../component/text_fonts/custom_text.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
+import '../../component/title_service.dart';
 import '../cart/cart_panel.dart';
 import '../component/height_weight.dart';
 import '../component/rotating_svg_loader.dart';
@@ -33,6 +34,8 @@ class _WishlistUiState extends State<WishlistUi> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | View Your Wishlist");
+
     initWishlist();
   }
 
@@ -107,7 +110,7 @@ class _WishlistUiState extends State<WishlistUi> {
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }
@@ -217,7 +220,7 @@ class _WishlistUiState extends State<WishlistUi> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CralikaFont(
-                      text: "${productList.length} Items Added",
+                      text: "${productList.length} Item${productList.length == 1 ? '' : 's'} Added",
                       fontWeight: FontWeight.w600,
                       fontSize: 20,
                       lineHeight: 36 / 32,
@@ -459,8 +462,6 @@ class _WishlistUiState extends State<WishlistUi> {
                                                             );
                                                           }
 
-
-
                                                           if (product
                                                                   .discount !=
                                                               0) {
@@ -475,10 +476,13 @@ class _WishlistUiState extends State<WishlistUi> {
                                                               ElevatedButton(
                                                                 onPressed: null,
                                                                 style: ElevatedButton.styleFrom(
-                                                                  padding: EdgeInsets.symmetric(
-                                                                    vertical: 7.5,
-                                                                    horizontal: 14,
-                                                                  ),
+                                                                  padding:
+                                                                      EdgeInsets.symmetric(
+                                                                        vertical:
+                                                                            7.5,
+                                                                        horizontal:
+                                                                            14,
+                                                                      ),
                                                                   backgroundColor:
                                                                       const Color(
                                                                         0xFFF46856,
@@ -495,13 +499,20 @@ class _WishlistUiState extends State<WishlistUi> {
                                                                       BorderSide
                                                                           .none,
                                                                 ),
-                                                                child:BarlowText(
-                                                                  text: "${product.discount}% OFF",
+                                                                child: BarlowText(
+                                                                  text:
+                                                                      "${product.discount}% OFF",
                                                                   fontSize: 14,
-                                                                  fontWeight: FontWeight.w600,
-                                                                  color: Colors.white,
-                                                                  lineHeight: 1.0, // 100% of font size
-                                                                  letterSpacing: 0.56, // 4% of 14px = 0.56
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  color:
+                                                                      Colors
+                                                                          .white,
+                                                                  lineHeight:
+                                                                      1.0, // 100% of font size
+                                                                  letterSpacing:
+                                                                      0.56, // 4% of 14px = 0.56
                                                                 ),
                                                               ),
                                                             );
@@ -735,12 +746,13 @@ class _WishlistUiState extends State<WishlistUi> {
                                                             ),
                                                             NotifyMeButton(
                                                               onWishlistChanged:
-                                                              widget
-                                                                  .onWishlistChanged,
+                                                                  widget
+                                                                      .onWishlistChanged,
 
                                                               productId:
-                                                              product.id,
-                                                            ),                                                          ],
+                                                                  product.id,
+                                                            ),
+                                                          ],
                                                         )
                                                       else
                                                         Row(

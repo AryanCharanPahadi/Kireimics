@@ -26,7 +26,7 @@ class FooterController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'Error fetching footer details: $e';
-      print(errorMessage.value);
+      // print(errorMessage.value);
     } finally {
       isLoading.value = false;
     }

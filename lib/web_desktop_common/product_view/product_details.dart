@@ -13,10 +13,8 @@ import '../../component/cart_length/cart_loader.dart';
 import '../../component/no_found_page/404_page.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
-import '../../web_desktop_common/cart/cart_panel.dart';
-import '../catalog_sale_gridview/catalog_controller1.dart';
+import '../../component/title_service.dart';
 import '../component/badges_web_desktop.dart';
-import '../component/height_weight.dart';
 import '../component/rotating_svg_loader.dart';
 import '../login_signup/login/login_page.dart';
 import '../notify_me/notify_me.dart';
@@ -46,10 +44,17 @@ class _ProductDetailsState extends State<ProductDetails>
   List<String> _otherImages = []; // Track all other images
   late AnimationController _controller;
   late Animation<double> _animation;
+  String collectionName = '';
+  int? collectionId;
   @override
   void initState() {
     super.initState();
-    print("This is the product id ${widget.productId}");
+    TitleService.setTitle("Kireimics | Loading..."); // Reset title
+    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
+    final uri = Uri.parse(route.uri.toString());
+    collectionName = uri.queryParameters['collection_name'] ?? '';
+    collectionId = int.tryParse(uri.queryParameters['collection_id'] ?? '');
+    // print("This is the product id ${widget.productId}");
     fetchProduct();
     _controller = AnimationController(
       vsync: this,
@@ -78,7 +83,7 @@ class _ProductDetailsState extends State<ProductDetails>
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }
@@ -118,6 +123,9 @@ class _ProductDetailsState extends State<ProductDetails>
           _currentMainImage = fetchedProduct.thumbnail;
           _otherImages = List.from(fetchedProduct.otherImages);
           isLoading = false;
+          TitleService.setTitle(
+            "Kireimics | ${fetchedProduct.name}",
+          ); // Set dynamic title
         });
 
         // Fetch related products by category ID
@@ -156,10 +164,7 @@ class _ProductDetailsState extends State<ProductDetails>
 
   void _swapImageWithMain(int index) {
     setState(() {
-      // Swap the clicked image with the current main image
-      final clickedImage = _otherImages[index];
-      _otherImages[index] = _currentMainImage!;
-      _currentMainImage = clickedImage;
+      _currentMainImage = _otherImages[index];
     });
   }
 
@@ -745,7 +750,10 @@ class _ProductDetailsState extends State<ProductDetails>
                         SizedBox(width: 9.0),
 
                         BarlowText(
-                          text: product!.catName,
+                          text:
+                              collectionName.isEmpty
+                                  ? product!.catName
+                                  : "Collections",
                           color: Color(0xFF30578E),
                           fontSize: 16,
                           hoverTextColor: Color(0xFF2876E4),
@@ -753,9 +761,13 @@ class _ProductDetailsState extends State<ProductDetails>
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
                           onTap: () {
-                            context.go(
-                              '${AppRoutes.catalog}?cat_id=${product!.catId}', // Use URL parameter
-                            );
+                            collectionName.isEmpty
+                                ? context.go(
+                                  '${AppRoutes.catalog}?cat_id=${product!.catId}', // Use URL parameter
+                                )
+                                : context.go(
+                                  '${AppRoutes.catalog}?cat_id=${'collections'}', // Use URL parameter
+                                );
                           },
                         ),
                         SizedBox(width: 9.0),
@@ -765,7 +777,32 @@ class _ProductDetailsState extends State<ProductDetails>
                           height: 24,
                           color: Color(0xFF30578E),
                         ),
-                        SizedBox(width: 9.0),
+
+                        if (collectionName.isNotEmpty) ...[
+                          SizedBox(width: 9.0),
+                          BarlowText(
+                            text: collectionName,
+                            color: Color(0xFF30578E),
+                            fontSize: 16,
+                            hoverTextColor: Color(0xFF2876E4),
+
+                            fontWeight: FontWeight.w600,
+                            lineHeight: 1.0,
+                            onTap: () {
+                              context.go(
+                                '${AppRoutes.idCollectionView(collectionId!)}?collection_name=${collectionName}',
+                              );
+                            },
+                          ),
+                          SizedBox(width: 9.0),
+
+                          SvgPicture.asset(
+                            'assets/icons/right_icon.svg',
+                            width: 24,
+                            height: 24,
+                            color: Color(0xFF30578E),
+                          ),
+                        ],
 
                         BarlowText(
                           text: "View Details",
@@ -824,9 +861,13 @@ class _ProductDetailsState extends State<ProductDetails>
                               letterSpacing: 1 * 0.04, // 4% of 32px
                               color: Color(0xFF30578E),
                               onTap: () {
-                                context.go(
-                                  '${AppRoutes.catalog}?cat_id=${product!.catId}', // Use URL parameter
-                                );
+                                collectionName.isNotEmpty
+                                    ? context.go(
+                                      '/collection/${collectionId ?? product!.catId}?collection_name=${Uri.encodeComponent(collectionName.isNotEmpty ? collectionName : product!.catName)}&cat_id=${product!.catId}',
+                                    )
+                                    : context.go(
+                                      '${AppRoutes.catalog}?cat_id=${product!.catId}', // Use URL parameter
+                                    );
                               },
                             ),
 
@@ -996,9 +1037,9 @@ class _ProductDetailsState extends State<ProductDetails>
               ),
             ),
             if (relatedProducts.isEmpty) ...[
-              SizedBox(height: 200),
+              SizedBox(height: 300),
             ] else ...[
-              SizedBox(height: 600),
+              SizedBox(height: 670),
             ],
           ],
         ),

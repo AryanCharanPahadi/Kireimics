@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kireimics/component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 
 class ProductBadgesRow extends StatelessWidget {
@@ -25,6 +27,11 @@ class ProductBadgesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future<bool> isUserLoggedIn() async {
+      String? userData = await SharedPreferencesHelper.getUserData();
+      return userData != null && userData.isNotEmpty;
+    }
+
     if (isOutOfStock) {
       // Only show out-of-stock image and wishlist icon
       return Row(
@@ -35,6 +42,7 @@ class ProductBadgesRow extends StatelessWidget {
             child: SvgPicture.asset(
               "assets/home_page/outofstock.svg",
               height: 24,
+              width: 70,
             ),
           ),
           Align(
@@ -48,6 +56,12 @@ class ProductBadgesRow extends StatelessWidget {
 
                 return GestureDetector(
                   onTap: () async {
+                    bool loggedIn = await isUserLoggedIn();
+                    if (!loggedIn) {
+                      context.go(AppRoutes.logIn);
+                      return;
+                    }
+
                     if (isInWishlist) {
                       await SharedPreferencesHelper.removeFromWishlist(
                         product.id.toString(),
@@ -59,9 +73,6 @@ class ProductBadgesRow extends StatelessWidget {
                       );
                       onWishlistChanged?.call('Product Added To Wishlist');
                     }
-                    // Trigger UI update
-                    // Since this is a StatelessWidget, we rely on the parent to handle state changes
-                    // The setState call is removed, and we assume the parent will handle it
                   },
                   child: SvgPicture.asset(
                     isInWishlist
@@ -108,8 +119,8 @@ class ProductBadgesRow extends StatelessWidget {
             if (product.discount != 0)
               Container(
                 margin: const EdgeInsets.only(top: 2),
-                height: 32,
-                width: 80,
+                height: 24,
+                width: 70,
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
@@ -137,13 +148,19 @@ class ProductBadgesRow extends StatelessWidget {
 
         /// RIGHT SIDE — manually aligned to match badge
         Padding(
-          padding: const EdgeInsets.only(top: 7), // match left badge padding
+          padding: const EdgeInsets.only(top: 5), // match left badge padding
           child: FutureBuilder<bool>(
             future: SharedPreferencesHelper.isInWishlist(product.id.toString()),
             builder: (context, snapshot) {
               final isInWishlist = snapshot.data ?? false;
               return GestureDetector(
                 onTap: () async {
+                  bool loggedIn = await isUserLoggedIn();
+                  if (!loggedIn) {
+                    context.go(AppRoutes.logIn);
+                    return;
+                  }
+
                   if (isInWishlist) {
                     await SharedPreferencesHelper.removeFromWishlist(
                       product.id.toString(),

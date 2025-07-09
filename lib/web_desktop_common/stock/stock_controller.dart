@@ -19,7 +19,7 @@ class StockController extends GetxController {
       }
       stockQuantity.value = null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       stockQuantity.value = null;
     } finally {
       isLoading.value = false;

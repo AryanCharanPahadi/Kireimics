@@ -13,6 +13,7 @@ import '../../../component/api_helper/api_helper.dart';
 import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
+import '../../../component/title_service.dart';
 import '../../../component/utilities/utility.dart';
 import '../../../web/checkout/checkout_controller.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_controller.dart';
@@ -38,7 +39,13 @@ class _ForgotPasswordMainMobileState extends State<ForgotPasswordMainMobile> {
   final _confirmPasswordController = TextEditingController();
   final String formattedDate = getFormattedDate();
   bool _isLoading = false;
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    TitleService.setTitle("Kireimics | Reset Your Password");
 
+}
   @override
   Widget build(BuildContext context) {
     final route = GoRouter.of(context).routerDelegate.currentConfiguration;

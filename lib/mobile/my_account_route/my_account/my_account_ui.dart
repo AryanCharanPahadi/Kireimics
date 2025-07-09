@@ -13,6 +13,7 @@ import '../../../component/api_helper/api_helper.dart';
 import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/text_fonts/custom_text.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
+import '../../../component/title_service.dart';
 import '../../../component/utilities/utility.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_controller.dart';
 
@@ -39,6 +40,8 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | View Your Details & Addresses");
+
     _loadUserData();
     addAddressController.fetchAddress();
   }
@@ -50,7 +53,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
   Future<bool> handleSignUp(BuildContext context) async {
     String? userId = await SharedPreferencesHelper.getUserId();
 
-    print("this is the user id $userId");
+    // print("this is the user id $userId");
 
     if (formKey.currentState!.validate()) {
       String formattedDate = getFormattedDate();
@@ -65,7 +68,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
         );
 
         // Print the full API response
-        print("Signup Response: $response");
+        // print("Signup Response: $response");
 
         if (response['error'] == true) {
           // Display error message
@@ -79,7 +82,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
           String userData =
               "${userId}, ${firstNameController.text.trim()} ${lastNameController.text.trim()}, ${mobileController.text.trim()}, ${emailController.text.trim()}";
           await SharedPreferencesHelper.saveUserData(userData);
-          print("Saved user data to SharedPreferences: $userData");
+          // print("Saved user data to SharedPreferences: $userData");
 
           // Reload user data to update UI
           await _loadUserData();
@@ -98,7 +101,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
           return true;
         }
       } catch (e) {
-        print("Signup exception: $e");
+        // print("Signup exception: $e");
         signupMessage = "An error occurred during update";
         widget.onWishlistChanged?.call(
           signupMessage,
@@ -137,10 +140,10 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
           });
         }
       } else {
-        print('Invalid user data format: $storedUser');
+        // print('Invalid user data format: $storedUser');
       }
     } else {
-      print('No user data found in SharedPreferences');
+      // print('No user data found in SharedPreferences');
     }
   }
 
@@ -194,7 +197,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
-                          letterSpacing: 1 * 0.04,
+                          letterSpacing: 1 * 0.04, // 4% of 32px
                           route: AppRoutes.myAccount,
                           enableUnderlineForActiveRoute: true,
                           decorationColor: Color(0xFF30578E),
@@ -207,6 +210,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
+                          letterSpacing: 1 * 0.04, // 4% of 32px
                           onTap: () {
                             context.go(AppRoutes.myOrder);
                           },
@@ -218,6 +222,7 @@ class _MyAccountUiMobileState extends State<MyAccountUiMobile> {
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           lineHeight: 1.0,
+                          letterSpacing: 1 * 0.04, // 4% of 32px
                           onTap: () {
                             context.go(AppRoutes.wishlist);
                           },

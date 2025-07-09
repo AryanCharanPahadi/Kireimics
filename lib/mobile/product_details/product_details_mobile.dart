@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../component/api_helper/api_helper.dart';
 import '../../component/cart_length/cart_loader.dart';
-import '../../component/no_result_found/no_order_yet.dart';
-import '../../component/no_result_found/no_product_yet.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/product_details/product_details_modal.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
-import '../../web_desktop_common/catalog_sale_gridview/catalog_controller1.dart';
+import '../../component/title_service.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../web_desktop_common/notify_me/notify_me.dart';
 import '../component/badges_mobile.dart';
@@ -36,11 +32,13 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
   bool isLoading = true;
   String errorMessage = "";
   List<Product> relatedProducts = [];
-  int _currentIndex = 0; // Tracks the starting index of displayed products
+  final int _currentIndex =
+      0; // Tracks the starting index of displayed products
   String? _currentMainImage; // Track the currently displayed main image
   List<String> _otherImages = []; // Track all other images
   bool _isOutOfStock = false; // Track stock status of the main product
-
+  String collectionName = '';
+  int? collectionId;
   Future<bool> _isLoggedIn() async {
     String? userData = await SharedPreferencesHelper.getUserData();
     return userData != null && userData.isNotEmpty;
@@ -49,6 +47,12 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Loading..."); // Reset title
+    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
+    final uri = Uri.parse(route.uri.toString());
+    collectionName = uri.queryParameters['collection_name'] ?? '';
+    collectionId = int.tryParse(uri.queryParameters['collection_id'] ?? '');
+
     fetchProduct();
   }
 
@@ -83,21 +87,22 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
           _otherImages = List.from(fetchedProduct.otherImages);
           _isOutOfStock = stockQuantity == 0; // Set stock status
           isLoading = false;
+          TitleService.setTitle(
+            "Kireimics | ${fetchedProduct.name}",
+          ); // Set dynamic title
         });
 
         // Fetch related products by category ID
         final categoryProducts = await ApiHelper.fetchProductByCatId(
           fetchedProduct.catId,
         );
-        if (categoryProducts != null) {
-          setState(() {
-            relatedProducts =
-                categoryProducts
-                    .where((p) => p.id != widget.productId)
-                    .take(3)
-                    .toList();
-          });
-        }
+        setState(() {
+          relatedProducts =
+              categoryProducts
+                  .where((p) => p.id != widget.productId)
+                  .take(3)
+                  .toList();
+        });
       } else {
         setState(() {
           errorMessage = "Product not found";
@@ -114,9 +119,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
 
   void _swapImageWithMain(int index) {
     setState(() {
-      final clickedImage = _otherImages[index];
-      _otherImages[index] = _currentMainImage!;
-      _currentMainImage = clickedImage;
+      _currentMainImage = _otherImages[index];
     });
   }
 
@@ -132,13 +135,14 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
       return null;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isNarrow = screenWidth < 418;
     if (isLoading) {
       return Center(
         child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
@@ -162,69 +166,130 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
       }
     }
 
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 22, right: 22, top: 20),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                Column(
                   children: [
-                    BarlowText(
-                      text: "Catalog",
-                      color: Color(0xFF30578E),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      lineHeight: 1.0,
-                      letterSpacing: 1 * 0.04,
-                      onTap: () {
-                        context.go(AppRoutes.catalog);
-                      },
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        BarlowText(
+                          text: "Catalog",
+                          color: Color(0xFF30578E),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          lineHeight: 1.0,
+                          letterSpacing: 1 * 0.04,
+                          onTap: () {
+                            context.go(AppRoutes.catalog);
+                          },
+                        ),
+                        SizedBox(width: 9.0),
+                        SvgPicture.asset(
+                          'assets/icons/right_icon.svg',
+                          width: 20,
+                          height: 20,
+                          color: Color(0xFF30578E),
+                        ),
+                        SizedBox(width: 9.0),
+                        BarlowText(
+                          text:
+                              collectionName.isEmpty
+                                  ? product!.catName
+                                  : "Collections",
+                          color: Color(0xFF30578E),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          lineHeight: 1.0,
+                          letterSpacing: 1 * 0.04,
+                          onTap: () {
+                            collectionName.isEmpty
+                                ? context.go(
+                                  '${AppRoutes.catalog}?cat_id=${product!.catId}',
+                                )
+                                : context.go(
+                                  '${AppRoutes.catalog}?cat_id=collections',
+                                );
+                          },
+                        ),
+                        SizedBox(width: 9.0),
+                        SvgPicture.asset(
+                          'assets/icons/right_icon.svg',
+                          width: 20,
+                          height: 20,
+                          color: Color(0xFF30578E),
+                        ),
+                        if (collectionName.isNotEmpty) ...[
+                          SizedBox(width: 9.0),
+                          BarlowText(
+                            text: collectionName,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            lineHeight: 1.0,
+                            letterSpacing: 1 * 0.04,
+                            color: Color(0xFF30578E),
+                            onTap: () {
+                              context.go(
+                                '${AppRoutes.idCollectionView(collectionId!)}?collection_name=$collectionName',
+                              );
+                            },
+                          ),
+                          SizedBox(width: 9.0),
+                          SvgPicture.asset(
+                            'assets/icons/right_icon.svg',
+                            width: 20,
+                            height: 20,
+                            color: Color(0xFF30578E),
+                          ),
+                        ],
+                        if (!isNarrow)
+                          BarlowText(
+                            text: "View Details",
+                            color: Color(0xFF30578E),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            lineHeight: 1.0,
+                            letterSpacing: 1 * 0.04,
+                            route: AppRoutes.productDetails(product!.id),
+                            enableUnderlineForActiveRoute: true,
+                            decorationColor: Color(0xFF30578E),
+                            onTap: () {},
+                          ),
+                      ],
                     ),
-                    SizedBox(width: 9.0),
-                    SvgPicture.asset(
-                      'assets/icons/right_icon.svg',
-                      width: 20,
-                      height: 20,
-                      color: Color(0xFF30578E),
-                    ),
-                    SizedBox(width: 9.0),
-                    BarlowText(
-                      text: product!.catName,
-                      color: Color(0xFF30578E),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      lineHeight: 1.0,
-                      onTap: () {
-                        context.go(
-                          '${AppRoutes.catalog}?cat_id=${product!.catId}', // Use URL parameter
-                        );
-                      },
-                    ),
-                    SizedBox(width: 9.0),
-                    SvgPicture.asset(
-                      'assets/icons/right_icon.svg',
-                      width: 20,
-                      height: 20,
-                      color: Color(0xFF30578E),
-                    ),
-                    SizedBox(width: 9.0),
-                    BarlowText(
-                      text: "View Details",
-                      color: Color(0xFF30578E),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      lineHeight: 1.0,
-                      route: AppRoutes.productDetails(product!.id),
-                      enableUnderlineForActiveRoute: true,
-                      decorationColor: Color(0xFF30578E),
-                      onTap: () {},
-                    ),
+                    if (isNarrow)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: BarlowText(
+                              text: "View Details",
+                              color: Color(0xFF30578E),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              lineHeight: 1.0,
+                              letterSpacing: 1 * 0.04,
+                              route: AppRoutes.productDetails(product!.id),
+                              enableUnderlineForActiveRoute: true,
+                              decorationColor: Color(0xFF30578E),
+                              onTap: () {},
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
+
                 SizedBox(height: 20),
                 Stack(
                   children: [
@@ -362,14 +427,18 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                       letterSpacing: 1 * 0.04,
                       color: Color(0xFF30578E),
                       onTap: () {
-                        context.go(
-                          '${AppRoutes.catalog}?cat_id=${product!.catId}', // Use URL parameter
-                        );
+                        collectionName.isNotEmpty
+                            ? context.go(
+                              '/collection/${collectionId ?? product!.catId}?collection_name=${Uri.encodeComponent(collectionName.isNotEmpty ? collectionName : product!.catName)}&cat_id=${product!.catId}',
+                            )
+                            : context.go(
+                              '${AppRoutes.catalog}?cat_id=${product!.catId}', // Use URL parameter
+                            );
                       },
                     ),
                     SizedBox(height: 14),
                     BarlowText(
-                      text: product!.price.toString(),
+                      text: product!.price.toStringAsFixed(2),
                       fontWeight: FontWeight.w400,
                       fontSize: 14,
                       lineHeight: 1.0,
@@ -659,7 +728,6 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                                           builder: (context, constraints) {
                                             bool isMobile =
                                                 constraints.maxWidth < 800;
-                                            List<Widget> badges = [];
 
                                             return ProductBadgesRow(
                                               isOutOfStock: isOutOfStock,

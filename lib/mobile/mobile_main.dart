@@ -25,6 +25,7 @@ import 'package:kireimics/component/app_routes/routes.dart';
 import '../component/notification_toast/custom_toast.dart';
 import '../component/shared_preferences/shared_preferences.dart';
 import '../component/text_fonts/custom_text.dart';
+import '../component/utilities/delivery_charge.dart';
 import '../component/utilities/utility.dart';
 import '../web/checkout/checkout_controller.dart';
 import '../web_desktop_common/component/rotating_svg_loader.dart';
@@ -235,7 +236,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                 _updateSubtotalAndTotal();
               });
               // Print product details
-              print('Product Details:');
+              // print('Product Details:');
               productQuantities.forEach((productId, quantity) {
                 final price = productPrices[productId] ?? 0.0;
                 final name =
@@ -244,10 +245,10 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                 final width = productWidths[productId] ?? 'N/A';
                 final length = productLengths[productId] ?? 'N/A';
                 final weight = productWeights[productId] ?? 'N/A';
-                print(
-                  'Product ID: $productId, Name: $name, Quantity: $quantity, Price: $price, '
-                  'Height: $height, Width: $width, Length: $length, Weight: $weight',
-                );
+                // print(
+                //   'Product ID: $productId, Name: $name, Quantity: $quantity, Price: $price, '
+                //   'Height: $height, Width: $width, Length: $length, Weight: $weight',
+                // );
               });
             },
           ),
@@ -402,7 +403,9 @@ class _LandingPageMobileState extends State<LandingPageMobile>
   @override
   Widget build(BuildContext context) {
     final double finalDeliveryCharge =
-        _subtotal > 2500 ? 0.0 : checkoutController.totalDeliveryCharge.value;
+        _subtotal > AppConstants.deliveryCharge
+            ? 0.0
+            : checkoutController.totalDeliveryCharge.value;
     final double total = _subtotal + finalDeliveryCharge;
 
     final isLoginRoute = _selectedPage == AppRoutes.logIn;
@@ -576,11 +579,14 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                         html.window.history.back();
 
                                         // Navigate to signup page after a slight delay
-                                        Future.delayed(const Duration(milliseconds: 100), () {
-                                          if (context.mounted) {
-                                            context.go(AppRoutes.signIn);
-                                          }
-                                        });
+                                        Future.delayed(
+                                          const Duration(milliseconds: 100),
+                                          () {
+                                            if (context.mounted) {
+                                              context.go(AppRoutes.signIn);
+                                            }
+                                          },
+                                        );
                                       },
                                       child: BarlowText(
                                         text: "SIGN UP NOW",
@@ -664,11 +670,14 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                         html.window.history.back();
 
                                         // Navigate to signup page after a slight delay
-                                        Future.delayed(const Duration(milliseconds: 100), () {
-                                          if (context.mounted) {
-                                            context.go(AppRoutes.logIn);
-                                          }
-                                        });
+                                        Future.delayed(
+                                          const Duration(milliseconds: 100),
+                                          () {
+                                            if (context.mounted) {
+                                              context.go(AppRoutes.logIn);
+                                            }
+                                          },
+                                        );
                                       },
                                       child: BarlowText(
                                         text: "LOG IN NOW",
@@ -729,7 +738,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                         right: 0,
                         child: Obx(() {
                           final double finalDeliveryCharge =
-                              _subtotal > 2500
+                              _subtotal > AppConstants.deliveryCharge
                                   ? 0.0
                                   : checkoutController
                                       .totalDeliveryCharge
@@ -741,7 +750,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                           return Container(
                             width: MediaQuery.of(context).size.width,
                             height: 125,
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withOpacity(0.94),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -767,7 +776,7 @@ class _LandingPageMobileState extends State<LandingPageMobile>
                                           )
                                           : BarlowText(
                                             text:
-                                                "Rs. ${total.toStringAsFixed(2)}",
+                                                "Rs. ${(checkoutController.subtotal.value + (checkoutController.subtotal.value > AppConstants.deliveryCharge ? 0.0 : checkoutController.totalDeliveryCharge.value)).toStringAsFixed(2)}",
                                             color: Color(0xFF30578E),
                                             fontSize: 20,
                                             fontWeight: FontWeight.w400,

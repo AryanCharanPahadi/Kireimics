@@ -9,6 +9,7 @@ import 'package:kireimics/component/app_routes/routes.dart';
 import '../../../component/no_result_found/no_order_yet.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
+import '../../../component/title_service.dart';
 import '../../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../../web_desktop_common/view_details_cart/view_detail/view_details_cart.dart';
 
@@ -26,6 +27,8 @@ class _MyOrderUiWebState extends State<MyOrderUiWeb> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | View Your Orders");
+
     getOrderData();
   }
 

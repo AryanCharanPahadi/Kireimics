@@ -13,6 +13,7 @@ import '../../../component/api_helper/api_helper.dart';
 import '../../../component/notification_toast/custom_toast.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
+import '../../../component/title_service.dart';
 import '../../../web/checkout/checkout_controller.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_controller.dart';
 import '../../../web_desktop_common/component/rotating_svg_loader.dart';
@@ -34,6 +35,13 @@ class _ForgotPasswordUiMobileState extends State<ForgotPasswordUiMobile> {
   final TextEditingController emailController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   bool isSendingMail = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    TitleService.setTitle("Kireimics | Forgot Your Password");
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,9 +144,9 @@ class _ForgotPasswordUiMobileState extends State<ForgotPasswordUiMobile> {
                                       email: emailController.text,
                                     );
 
-                                print(
-                                  "Password Reset Mail Response: $mailResponse",
-                                );
+                                // print(
+                                //   "Password Reset Mail Response: $mailResponse",
+                                // );
 
                                 if (mailResponse['error'] == false) {
                                   widget.onWishlistChanged?.call(

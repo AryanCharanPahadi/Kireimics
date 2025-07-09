@@ -26,7 +26,7 @@ class CollectionModal {
         count = raw.split(',').length;
       }
     } catch (e) {
-      print("Failed to parse product_id: ${json['product_id']}");
+      // print("Failed to parse product_id: ${json['product_id']}");
     }
 
     return CollectionModal(

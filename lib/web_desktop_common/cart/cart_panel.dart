@@ -63,7 +63,7 @@ class _CartPanelState extends State<CartPanel> {
         await checkoutController.fetchPincodeData(savedPincode);
       }
     } catch (e) {
-      print('Error preloading checkout data: $e');
+      // print('Error preloading checkout data: $e');
     }
   }
 
@@ -90,7 +90,7 @@ class _CartPanelState extends State<CartPanel> {
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }
@@ -516,17 +516,12 @@ class _CartPanelState extends State<CartPanel> {
                                       .split(',');
                                   checkoutController.lengths.value = lengths
                                       .split(',');
+                                  checkoutController.calculateDimensions();
 
                                   final newCheckoutRoute =
-                                      '${AppRoutes.checkOut}?subtotal=${subtotal.toStringAsFixed(2)}'
+                                      '${AppRoutes.checkOut}?'
                                       '&productIds=$productIds'
-                                      '&productNames=$productNames'
-                                      '&productPrices=$productPrices'
-                                      '&quantities=$quantities'
-                                      '&lengths=$lengths'
-                                      '&height=$heights'
-                                      '&breadths=$breadths'
-                                      '&weights=$weights';
+                                      '&quantities=$quantities';
 
                                   if (currentRoute.contains(
                                     AppRoutes.checkOut,

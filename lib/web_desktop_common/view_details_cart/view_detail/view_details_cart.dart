@@ -49,7 +49,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
       var response = await ApiHelper.getOrderDetailsByOrderId(
         widget.orderId.toString(),
       );
-      print('API Response: $response');
+      // print('API Response: $response');
 
       if (response != null &&
           response['error'] == false &&
@@ -70,7 +70,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
           var awbResponse = await ApiHelper.awbCodeDetails(
             awbCode: order['awb_code'],
           );
-          print('AWB Response: $awbResponse');
+          // print('AWB Response: $awbResponse');
 
           if (awbResponse != null &&
               awbResponse['error'] == false &&
@@ -79,7 +79,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
             final trackingData = awbResponse['tracking_data']['tracking_data'];
 
             // Debug entire trackingData
-            print('Tracking Data: $trackingData');
+            // print('Tracking Data: $trackingData');
 
             if (trackingData['shipment_track'] != null &&
                 trackingData['shipment_track'].isNotEmpty) {
@@ -89,9 +89,9 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
               trackUrl = trackingData['track_url'];
 
               // Debug EDD access
-              print('EDD key exists: ${trackingData.containsKey('etd')}');
-              print('EDD value: ${trackingData['etd']}');
-              print('EDD type: ${trackingData['etd']?.runtimeType}');
+              // print('EDD key exists: ${trackingData.containsKey('etd')}');
+              // print('EDD value: ${trackingData['etd']}');
+              // print('EDD type: ${trackingData['etd']?.runtimeType}');
 
               if (trackingData.containsKey('etd') &&
                   trackingData['etd'] != null &&
@@ -101,13 +101,13 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
                   expectedDelivery = DateFormat(
                     'EEE, d MMM yyyy',
                   ).format(eddDate);
-                  print('Parsed EDD: $expectedDelivery');
+                  // print('Parsed EDD: $expectedDelivery');
                 } catch (e) {
-                  print('Error parsing EDD: $e');
+                  // print('Error parsing EDD: $e');
                   expectedDelivery = 'N/A';
                 }
               } else {
-                print('EDD is null, missing, or empty');
+                // print('EDD is null, missing, or empty');
                 expectedDelivery = 'N/A';
               }
 
@@ -120,27 +120,27 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
                   deliveredDateFormatted = DateFormat(
                     'EEE, d MMM yyyy',
                   ).format(deliveredDate);
-                  print('Parsed Delivered Date: $deliveredDateFormatted');
+                  // print('Parsed Delivered Date: $deliveredDateFormatted');
                 } catch (e) {
-                  print('Error parsing delivered date: $e');
+                  // print('Error parsing delivered date: $e');
                   deliveredDateFormatted = 'N/A';
                 }
               } else {
-                print('Delivered date is null or empty');
+                // print('Delivered date is null or empty');
                 deliveredDateFormatted = 'N/A';
               }
             } else {
-              print('No shipment track data available');
+              // print('No shipment track data available');
               expectedDelivery = 'N/A';
               deliveredDateFormatted = 'N/A';
             }
           } else {
-            print('Invalid AWB response structure');
+            // print('Invalid AWB response structure');
             expectedDelivery = 'N/A';
             deliveredDateFormatted = 'N/A';
           }
         } catch (e) {
-          print('AWB API error: $e');
+          // print('AWB API error: $e');
           expectedDelivery = 'N/A';
           deliveredDateFormatted = 'N/A';
         }
@@ -161,14 +161,14 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
           errorMessage = 'No valid response or data is empty';
           isLoading = false;
         });
-        print(errorMessage);
+        // print(errorMessage);
       }
     } catch (e) {
       setState(() {
         errorMessage = 'Failed to fetch order details: $e';
         isLoading = false;
       });
-      print(errorMessage);
+      // print(errorMessage);
     }
   }
 
@@ -177,7 +177,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
       for (var product in orderData!['product_details']) {
         final productId = int.tryParse(product['product_id']) ?? 0;
         if (productId == 0) {
-          print('Invalid product_id: ${product['product_id']}');
+          // print('Invalid product_id: ${product['product_id']}');
           continue;
         }
         final productDetails = await ApiHelper.fetchProductDetailsByIdShowAll(
@@ -191,7 +191,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
         }
       }
     } catch (e) {
-      print('Error fetching product details: $e');
+      // print('Error fetching product details: $e');
     }
   }
 
@@ -209,6 +209,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 1400;
+    final isLargeScreen2 = screenWidth > 1900;
 
     if (isLoading) {
       return Center(
@@ -226,7 +227,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
         final date = DateTime.parse(orderData!['created_at']);
         formattedDate = DateFormat('EEE, d MMM yyyy').format(date);
       } catch (e) {
-        print('Error parsing date: $e');
+        // print('Error parsing date: $e');
       }
     }
 
@@ -296,7 +297,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
                         ),
                         Builder(
                           builder: (context) {
-                            print('Status in build: ${orderData!['status']}');
+                            // print('Status in build: ${orderData!['status']}');
                             if (orderData!['status'].toLowerCase() !=
                                 'delivered') {
                               return GestureDetector(
@@ -575,7 +576,7 @@ class _ViewDetailsCartState extends State<ViewDetailsCart> {
           ),
         ),
         // Positioned contact container for wide screens
-        if (isLargeScreen)
+        if (isLargeScreen2)
           Positioned(
             bottom: 20,
             right: 44,

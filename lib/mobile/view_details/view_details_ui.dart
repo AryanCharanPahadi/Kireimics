@@ -43,7 +43,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
       var response = await ApiHelper.getOrderDetailsByOrderId(
         orderId.toString(),
       );
-      print('API Response: $response');
+      // print('API Response: $response');
 
       if (response != null &&
           response['error'] == false &&
@@ -64,7 +64,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
           var awbResponse = await ApiHelper.awbCodeDetails(
             awbCode: order['awb_code'],
           );
-          print('AWB Response: $awbResponse');
+          // print('AWB Response: $awbResponse');
 
           if (awbResponse != null &&
               awbResponse['error'] == false &&
@@ -72,7 +72,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
               awbResponse['tracking_data']['tracking_data'] != null) {
             final trackingData = awbResponse['tracking_data']['tracking_data'];
 
-            print('Tracking Data: $trackingData');
+            // print('Tracking Data: $trackingData');
 
             if (trackingData['shipment_track'] != null &&
                 trackingData['shipment_track'].isNotEmpty) {
@@ -90,7 +90,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
                     'EEE, d MMM yyyy',
                   ).format(eddDate);
                 } catch (e) {
-                  print('Error parsing EDD: $e');
+                  // print('Error parsing EDD: $e');
                   expectedDelivery = 'N/A';
                 }
               } else {
@@ -107,24 +107,24 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
                     'EEE, d MMM yyyy',
                   ).format(deliveredDate);
                 } catch (e) {
-                  print('Error parsing delivered date: $e');
+                  // print('Error parsing delivered date: $e');
                   deliveredDateFormatted = 'N/A';
                 }
               } else {
                 deliveredDateFormatted = 'N/A';
               }
             } else {
-              print('No shipment track data available');
+              // print('No shipment track data available');
               expectedDelivery = 'N/A';
               deliveredDateFormatted = 'N/A';
             }
           } else {
-            print('Invalid AWB response structure');
+            // print('Invalid AWB response structure');
             expectedDelivery = 'N/A';
             deliveredDateFormatted = 'N/A';
           }
         } catch (e) {
-          print('AWB API error: $e');
+          // print('AWB API error: $e');
           expectedDelivery = 'N/A';
           deliveredDateFormatted = 'N/A';
         }
@@ -139,9 +139,9 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
           isLoading = false;
         });
 
-        print(
-          'Final orderData status: ${orderData!['status']}, Track URL: ${orderData!['track_url']}, EDD: ${orderData!['expected_delivery']}, Delivered Date: ${orderData!['delivered_date']}',
-        );
+        // print(
+        //   'Final orderData status: ${orderData!['status']}, Track URL: ${orderData!['track_url']}, EDD: ${orderData!['expected_delivery']}, Delivered Date: ${orderData!['delivered_date']}',
+        // );
 
         await fetchProductNames();
       } else {
@@ -149,14 +149,14 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
           errorMessage = 'No valid response or data is empty';
           isLoading = false;
         });
-        print(errorMessage);
+        // print(errorMessage);
       }
     } catch (e) {
       setState(() {
         errorMessage = 'Failed to fetch order details: $e';
         isLoading = false;
       });
-      print(errorMessage);
+      // print(errorMessage);
     }
   }
 
@@ -165,7 +165,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
       for (var product in orderData!['product_details']) {
         final productId = int.tryParse(product['product_id']) ?? 0;
         if (productId == 0) {
-          print('Invalid product_id: ${product['product_id']}');
+          // print('Invalid product_id: ${product['product_id']}');
           continue;
         }
         final productDetails = await ApiHelper.fetchProductDetailsById(
@@ -179,7 +179,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
         }
       }
     } catch (e) {
-      print('Error fetching product details: $e');
+      // print('Error fetching product details: $e');
     }
   }
 
@@ -271,7 +271,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
         final date = DateTime.parse(orderData!['created_at']);
         formattedDate = DateFormat('EEE, d MMM yyyy').format(date);
       } catch (e) {
-        print('Error parsing date: $e');
+        // print('Error parsing date: $e');
       }
     }
 
@@ -326,7 +326,7 @@ class _ViewDetailsUiMobileState extends State<ViewDetailsUiMobile> {
               ),
               Builder(
                 builder: (context) {
-                  print('Status in build: ${orderData!['status']}');
+                  // print('Status in build: ${orderData!['status']}');
                   if (orderData!['status'].toLowerCase() != 'delivered') {
                     return GestureDetector(
                       onTap: () => _launchTrackUrl(orderData!['track_url']),

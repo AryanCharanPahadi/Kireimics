@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:kireimics/component/text_fonts/custom_text.dart';
 
 import '../../component/above_footer/above_footer.dart';
+import '../../component/title_service.dart';
 import '../../component/utilities/url_launcher.dart';
 import '../../component/utilities/utility.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
@@ -113,6 +114,8 @@ class _ContactUsState extends State<ContactUs> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Contact");
+
     _loadData();
   }
 
@@ -133,9 +136,16 @@ class _ContactUsState extends State<ContactUs> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 292, top: 35),
+              padding: EdgeInsets.only(
+                left: MediaQuery.of(context).size.width > 1400 ? 395 : 292,
+                top: 35,
+                right: MediaQuery.of(context).size.width > 1400 ? 266 : 0,
+              ),
               child: Container(
-                width: MediaQuery.of(context).size.width - 292,
+                width:
+                    MediaQuery.of(context).size.width > 1400
+                        ? MediaQuery.of(context).size.width - (395 + 266)
+                        : MediaQuery.of(context).size.width - 292,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: const AssetImage("assets/home_page/background.png"),
@@ -147,12 +157,19 @@ class _ContactUsState extends State<ContactUs> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: 40,
-                    left: 47,
-                    bottom: 40,
-                    right: 50,
-                  ),
+                  padding:
+                      MediaQuery.of(context).size.width > 1400
+                          ? const EdgeInsets.symmetric(
+                            vertical: 40,
+                            horizontal: 47,
+                          )
+                          : const EdgeInsets.only(
+                            top: 40,
+                            left: 47,
+                            bottom: 40,
+                            right: 50,
+                          ),
+
                   child: BarlowText(
                     text:
                         contactController.contactData!['band_text'] ??
@@ -169,7 +186,10 @@ class _ContactUsState extends State<ContactUs> {
             ),
             const SizedBox(height: 32),
             Padding(
-              padding: const EdgeInsets.only(left: 292, top: 35),
+              padding: EdgeInsets.only(
+                left: MediaQuery.of(context).size.width > 1400 ? 395 : 292,
+                top: 35,
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -185,10 +205,14 @@ class _ContactUsState extends State<ContactUs> {
             SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Padding(
-                padding: EdgeInsets.only(
-                  left: 292,
-                  right: MediaQuery.of(context).size.width * 0.07,
-                ),
+                padding:
+                    MediaQuery.of(context).size.width > 1400
+                        ? const EdgeInsets.only(left: 395, right: 266)
+                        : EdgeInsets.only(
+                          left: 292,
+                          right: MediaQuery.of(context).size.width * 0.07,
+                        ),
+
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +273,8 @@ class _ContactUsState extends State<ContactUs> {
                       ],
                     ),
                     SizedBox(
-                      width: 302,
+                      width:
+                          MediaQuery.of(context).size.width > 1400 ? 462 : 302,
                       child: Form(
                         key: _formKey,
                         child: Column(
@@ -317,7 +342,10 @@ class _ContactUsState extends State<ContactUs> {
             ),
             const SizedBox(height: 32),
             Padding(
-              padding: const EdgeInsets.only(left: 292, top: 35),
+              padding:
+                  MediaQuery.of(context).size.width > 1400
+                      ? const EdgeInsets.only(left: 395, top: 35)
+                      : EdgeInsets.only(left: 292, top: 35),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -333,10 +361,14 @@ class _ContactUsState extends State<ContactUs> {
             Container(
               width: MediaQuery.of(context).size.width,
               child: Padding(
-                padding: EdgeInsets.only(
-                  left: 292,
-                  right: MediaQuery.of(context).size.width * 0.07,
-                ),
+                padding:
+                    MediaQuery.of(context).size.width > 1400
+                        ? const EdgeInsets.only(left: 395, right: 266)
+                        : EdgeInsets.only(
+                          left: 292,
+                          right: MediaQuery.of(context).size.width * 0.07,
+                        ),
+
                 child: ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
@@ -476,7 +508,7 @@ class _ContactUsState extends State<ContactUs> {
         );
       });
     } catch (e) {
-      debugPrint("Error parsing social links: $e");
+      // debugPrint("Error parsing social links: $e");
       return []; // Return empty list if parsing fails
     }
   }

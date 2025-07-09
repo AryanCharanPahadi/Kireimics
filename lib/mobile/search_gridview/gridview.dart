@@ -12,6 +12,7 @@ import '../../component/text_fonts/custom_text.dart';
 import '../../component/product_details/product_details_controller.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
+import '../../component/title_service.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../web_desktop_common/notify_me/notify_me.dart';
 import '../component/badges_mobile.dart';
@@ -39,6 +40,8 @@ class _GridviewSearchState extends State<GridviewSearch> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Search Loading..."); // Placeholder title
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {
@@ -64,6 +67,8 @@ class _GridviewSearchState extends State<GridviewSearch> {
         });
         controller.resetFilter();
         controller.filterProducts(_currentQuery);
+        TitleService.setTitle("Kireimics | Search Results for $_currentQuery");
+
       }
     }
   }
@@ -89,7 +94,7 @@ class _GridviewSearchState extends State<GridviewSearch> {
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }
@@ -100,23 +105,31 @@ class _GridviewSearchState extends State<GridviewSearch> {
       padding: const EdgeInsets.only(top: 20, left: 14, right: 14),
       child: Obx(() {
         if (controller.isLoading.value && controller.filteredProducts.isEmpty) {
+          TitleService.setTitle(
+            "Kireimics | Search Loading...",
+          );
           return const Center(
             child: RotatingSvgLoader(assetPath: 'assets/footer/footerbg.svg'),
           );
         }
 
         if (controller.errorMessage.isNotEmpty) {
+          TitleService.setTitle(
+            "Kireimics | Search Error",
+          );
           return Center(child: Text("Error: ${controller.errorMessage}"));
         }
 
         final resultCount = controller.filteredProducts.length;
         final resultText =
-            resultCount == 1
-                ? '1 Result'
-                : resultCount == 0
-                ? '0 Result'
-                : '$resultCount Results';
-
+        resultCount == 1
+            ? '1 Result'
+            : resultCount == 0
+            ? '0 Results'
+            : '$resultCount Results';
+        TitleService.setTitle(
+          "Kireimics | Search Results $resultText found for \"$_currentQuery\"",
+        );
         if (controller.filteredProducts.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

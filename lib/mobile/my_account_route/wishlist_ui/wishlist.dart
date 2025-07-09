@@ -10,6 +10,7 @@ import '../../../component/text_fonts/custom_text.dart';
 import '../../../component/product_details/product_details_modal.dart';
 import '../../../component/app_routes/routes.dart' show AppRoutes;
 import '../../../component/shared_preferences/shared_preferences.dart';
+import '../../../component/title_service.dart';
 import '../../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../../web_desktop_common/notify_me/notify_me.dart';
 
@@ -34,6 +35,8 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | View Your Wishlist");
+
     initWishlist();
   }
 
@@ -111,7 +114,7 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }
@@ -161,10 +164,10 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                     BarlowText(
                       text: "My Account",
                       color: const Color(0xFF30578E),
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
-                      letterSpacing: 1 * 0.04,
+                      letterSpacing: 1 * 0.04, // 4% of 32px
                       route: AppRoutes.myAccount,
                       enableUnderlineForActiveRoute: true,
                       decorationColor: const Color(0xFF30578E),
@@ -176,9 +179,10 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                     BarlowText(
                       text: "My Orders",
                       color: const Color(0xFF30578E),
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
+                      letterSpacing: 1 * 0.04, // 4% of 32px
                       route: AppRoutes.myOrder,
                       enableUnderlineForActiveRoute: true,
                       decorationColor: const Color(0xFF30578E),
@@ -190,9 +194,10 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                     BarlowText(
                       text: "Wishlist",
                       color: const Color(0xFF30578E),
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       lineHeight: 1.0,
+                      letterSpacing: 1 * 0.04, // 4% of 32px
                       route: AppRoutes.wishlist,
                       enableUnderlineForActiveRoute: true,
                       decorationColor: const Color(0xFF30578E),
@@ -208,7 +213,8 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CralikaFont(
-                      text: "${productList.length} Items Added",
+                      text:
+                          "${productList.length} Item${productList.length == 1 ? '' : 's'} Added",
                       fontWeight: FontWeight.w400,
                       fontSize: 20,
                       lineHeight: 36 / 32,
@@ -359,6 +365,7 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                         child: SvgPicture.asset(
                                                           "assets/home_page/outofstock.svg",
                                                           height: 24,
+                                                          width: 70,
                                                         ),
                                                       ),
                                                       Align(
@@ -456,8 +463,8 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                                 const EdgeInsets.only(
                                                                   top: 2,
                                                                 ),
-                                                            height: 32,
-                                                            width: 80,
+                                                            height: 24,
+                                                            width: 70,
                                                             child: ElevatedButton(
                                                               onPressed: () {},
                                                               style: ElevatedButton.styleFrom(
@@ -500,7 +507,7 @@ class _WishlistUiMobileState extends State<WishlistUiMobile> {
                                                     Padding(
                                                       padding:
                                                           const EdgeInsets.only(
-                                                            top: 5,
+                                                            top: 6,
                                                           ),
                                                       child: FutureBuilder<
                                                         bool

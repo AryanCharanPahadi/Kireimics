@@ -6,6 +6,7 @@ import 'package:kireimics/component/api_helper/api_helper.dart';
 import 'package:kireimics/web_desktop_common/privacy_policy/privacy_policy_modal.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../component/text_fonts/custom_text.dart';
+import '../../component/title_service.dart';
 import '../component/rotating_svg_loader.dart';
 
 class PrivacyPolicy extends StatefulWidget {
@@ -22,6 +23,8 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Privacy Policy");
+
     loadPrivacyPolicy();
   }
 

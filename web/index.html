@@ -1,85 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MG661ZQNR"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-4MG661ZQNR');
+  </script>
   <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Kireimics">
-  <meta name="google-signin-client_id" content="542570800162-9u5ejijd3njgf89ge91i05o8rienr6p6.apps.googleusercontent.com">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Kireimics">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <!-- ✅ Primary Meta Tags -->
+  <title>Kireimics | Premium Handmade Ceramics in India</title>
+  <meta name="title" content="Kireimics | Premium Handmade Ceramics in India">
+  <meta name="description" content="Buy 100% handmade cups, mugs, plates, bowls & decor - Premium tableware, gifting & accessories. Shop & support animal welfare.">
+  <meta name="keywords" content="ceramic mugs, handmade ceramic cups, ceramic pet bowls, ceramic plates, cat accessories, dog bowls, pet ceramic items, animal ceramics, ceramic dog feeders, ceramic cat dishes, ceramic home decor, pottery for pets, decorative ceramics, Kireimics">
 
-  <!-- Favicon -->
+  <!-- ✅ Robots & Canonical -->
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.kireimics.com/">
+
+
+
+  <!-- ✅ Favicon & Mobile -->
   <link rel="icon" type="image/png" href="logo.png"/>
-
-  <!-- Safari/iOS and modern browser address bar color -->
-  <meta name="theme-color" content="#30578E">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Kireimics">
   <meta name="apple-mobile-web-app-status-bar-style" content="#30578E">
-  <title>Kireimics</title>
+  <meta name="theme-color" content="#30578E">
+
+  <!-- ✅ Web App Manifest -->
   <link rel="manifest" href="manifest.json">
+
+  <!-- ✅ Google Sign-In -->
+  <meta name="google-signin-client_id" content="593473253260-hkon97safkjqsr4floedkc66dtlfnsiv.apps.googleusercontent.com">
+  <!-- ✅ Custom Cursor -->
+  <style>
+   * {
+      cursor: url('https://www.kireimics.com/apis/Vector.svg'), auto;
+    }
+  </style>
+
 </head>
+
 <body>
 
-<!-- Flutter Web -->
-<script src="flutter_bootstrap.js" async></script>
 
-<!-- Razorpay -->
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script src="razorpay.js"></script>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js"></script>
+<!-- ✅ Flutter App -->
+<script src="flutter_bootstrap.js" defer></script>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
+<!-- ✅ Razorpay -->
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
+<script src="razorpay.js" defer></script>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyC48_4nuTzlxahYvhWpt85A72YXXsOi6ps",
-    authDomain: "kireimics-35393.firebaseapp.com",
-    projectId: "kireimics-35393",
-    storageBucket: "kireimics-35393.firebasestorage.app",
-    messagingSenderId: "542570800162",
-    appId: "1:542570800162:web:53a56183806aca5ca7167b",
-    measurementId: "G-EHK73FFE7T"
-  };
 
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 
-<!-- Ensure theme-color is updated on Flutter navigation -->
+
+
+<!-- ✅ Theme color persistence across Flutter navigation -->
 <script>
   function setThemeColor(color) {
-    let themeMeta = document.querySelector("meta[name='theme-color']");
-    if (themeMeta) {
-      themeMeta.setAttribute("content", color);
-    }
+    const themeMeta = document.querySelector("meta[name='theme-color']");
+    if (themeMeta) themeMeta.setAttribute("content", color);
   }
 
-  // Set on load
-  setThemeColor("#30578E");
-
-  window.addEventListener('flutter-first-frame', function () {
+  window.addEventListener('flutter-first-frame', () => {
     setThemeColor("#30578E");
 
-    // Patch pushState to detect in-app navigation
     const originalPushState = history.pushState;
     history.pushState = function () {
       originalPushState.apply(this, arguments);
       setThemeColor("#30578E");
     };
 
-    // Handle back/forward navigation
-    window.addEventListener('popstate', () => {
-      setThemeColor("#30578E");
-    });
+    window.addEventListener('popstate', () => setThemeColor("#30578E"));
   });
 </script>
 

@@ -26,13 +26,13 @@ class ContactController {
             ).map((item) => Map<String, String>.from(item)),
           );
         } catch (e) {
-          print("Error parsing FAQ data: $e");
+          // print("Error parsing FAQ data: $e");
           faqData = [];
         }
       }
       isLoading = false;
     } catch (e) {
-      print("Error fetching contact data: $e");
+      // print("Error fetching contact data: $e");
       isLoading = false;
     }
   }

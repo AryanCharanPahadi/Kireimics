@@ -9,6 +9,7 @@ import 'package:kireimics/web/home_page_web/home_page_web.dart';
 import 'package:kireimics/web_desktop_common/footer/custom_footer.dart';
 import '../component/notification_toast/custom_toast.dart';
 import '../component/app_routes/routes.dart';
+import '../component/title_service.dart';
 import '../component/utilities/utility.dart';
 import '../web_desktop_common/add_address_ui/add_address_ui.dart';
 import '../web_desktop_common/cart/cart_panel.dart';
@@ -67,6 +68,7 @@ class _LandingPageWebState extends State<LandingPageWeb>
   @override
   void initState() {
     super.initState();
+
     _selectedPage = _getPageFromRoute(widget.initialRoute ?? AppRoutes.home);
     _scrollController.addListener(_handleScroll);
 
@@ -207,7 +209,7 @@ class _LandingPageWebState extends State<LandingPageWeb>
             onErrorWishlistChanged: _showErrorNotification,
           ),
       AppRoutes.checkOut:
-          (_) => CheckoutPageWeb(
+          (_) => CheckoutPage(
             onWishlistChanged: _showNotification,
             onErrorWishlistChanged: _showErrorNotification,
             onPaymentProcessing: (isProcessing) {

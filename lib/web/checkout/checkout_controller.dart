@@ -12,11 +12,19 @@ import 'package:kireimics/web_desktop_common/add_address_ui/add_address_controll
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../component/app_routes/routes.dart';
+import '../../component/cart_length/cart_loader.dart';
+import '../../component/utilities/delivery_charge.dart';
 import '../../component/utilities/utility.dart';
+import 'encription.dart';
 
 class CheckoutController extends GetxController {
+  // Centralized API URL
+  static const String _userDataApiUrl =
+      'https://www.kireimics.com/apis/common/user_data/get_user_data.php';
+  static const String _productDetailsApiUrl =
+      'https://www.kireimics.com/apis/common/product_details/get_checkout_product_details.php';
   RxBool showLoginBox = true.obs;
-  bool isPrivacyPolicyChecked = false; // Added checkbox state
+  bool isPrivacyPolicyChecked = false;
 
   var isLoading = false.obs;
   RxBool isChecked = false.obs;
@@ -35,6 +43,7 @@ class CheckoutController extends GetxController {
   final RxBool isSignupProcessing = false.obs;
   var productIds = <String>[].obs;
   var productName = <String>[].obs;
+  var productPrices = <String>[].obs;
   var quantities = <String>[].obs;
   var heights = <String>[].obs;
   var weights = <String>[].obs;
@@ -52,11 +61,47 @@ class CheckoutController extends GetxController {
   var totalWeight = 0.0.obs;
   var totalQuantity = 0.0.obs;
   final RxBool isLoggedIn = false.obs;
+  var subtotal = 0.0.obs;
+
+  GoRouter? _router;
 
   Function(bool)? onPaymentProcessing;
+  var isShippingTaxLoaded = false.obs;
+  Timer? _debounce;
+
+  Future<bool> isUserLoggedIn() async {
+    String? userData = await SharedPreferencesHelper.getUserData();
+    return userData != null && userData.isNotEmpty;
+  }
+
+  void updateFromRoute(BuildContext context) {
+    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
+    final uri = Uri.parse(route.uri.toString());
+
+    // Load product IDs and quantities from URL
+    loadProductIds(context);
+    // Fetch product details (including names, prices, and dimensions) from API
+    getData();
+  }
+
+  void initializeRouter(BuildContext context) {
+    _router = GoRouter.of(context);
+    _router!.routeInformationProvider.addListener(() {
+      updateFromRoute(context);
+    });
+  }
+
+  void disposeRouter() {
+    _router?.routeInformationProvider.removeListener(() {
+      updateFromRoute(Get.context!);
+    });
+    _router = null;
+  }
+
   Future<void> checkLoginStatus() async {
     String? userData = await SharedPreferencesHelper.getUserData();
     isLoggedIn.value = userData != null && userData.isNotEmpty;
+    showLoginBox.value = !isLoggedIn.value;
   }
 
   void setCallbacks({
@@ -69,14 +114,100 @@ class CheckoutController extends GetxController {
     this.onPaymentProcessing = onPaymentProcessing;
   }
 
-  var isShippingTaxLoaded = false.obs;
-  Timer? _debounce;
+  Future<void> getData() async {
+    try {
+      final ids = productIds.value;
+      final quantitiesList = quantities.value;
+
+      if (ids.isEmpty ||
+          quantitiesList.isEmpty ||
+          ids.length != quantitiesList.length) {
+        throw Exception("Missing or mismatched product ID(s) and quantities.");
+      }
+
+      final idString = ids.join(',');
+      final url = Uri.parse("$_productDetailsApiUrl?id=$idString");
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final jsonBody = jsonDecode(response.body);
+
+        if (jsonBody['error'] == false && jsonBody['data'] != null) {
+          final List data = jsonBody['data'];
+          double tempSubtotal = 0.0;
+          productName.clear();
+          productPrices.clear();
+          lengths.clear();
+          breadths.clear();
+          heights.clear();
+          weights.clear();
+
+          for (int i = 0; i < data.length; i++) {
+            final item = data[i];
+
+            final double price =
+                double.tryParse(item['price']?.toString() ?? '0.0') ?? 0.0;
+            final double discount =
+                double.tryParse(item['discount']?.toString() ?? '0.0') ?? 0.0;
+            final double discountedPrice =
+                discount > 0 ? price * (1 - discount / 100) : price;
+
+            final int quantity =
+                int.tryParse(quantitiesList[i].toString()) ?? 1;
+            final double totalForItem = discountedPrice * quantity;
+
+            tempSubtotal += totalForItem;
+
+            // Store product details from API
+            productName.add(item['name']?.toString() ?? '');
+            productPrices.add(discountedPrice.toStringAsFixed(2));
+            lengths.add(item['length']?.toString() ?? '0.0');
+            breadths.add(item['breadth']?.toString() ?? '0.0');
+            heights.add(item['height']?.toString() ?? '0.0');
+            weights.add(item['weight']?.toString() ?? '0.0');
+
+            // print('Name: ${item['name']}');
+            // print('Price: $price');
+            // print('Discount: $discount');
+            // print('Discounted Price: $discountedPrice');
+            // print('Quantity: $quantity');
+            // print('Total for this item: $totalForItem');
+            // print('Length: ${item['length']}');
+            // print('Breadth: ${item['breadth']}');
+            // print('Height: ${item['height']}');
+            // print('Weight: ${item['weight']}');
+            // print('---');
+          }
+
+          subtotal.value = tempSubtotal;
+          calculateDimensions(); // Calculate dimensions after fetching
+          update();
+        } else {
+          throw Exception(jsonBody['message'] ?? "Unknown error");
+        }
+      } else {
+        throw Exception("Failed to fetch products: ${response.statusCode}");
+      }
+    } catch (e) {
+      // print('Error fetching product details: $e');
+      subtotal.value = 0.0;
+      productName.clear();
+      productPrices.clear();
+      lengths.clear();
+      breadths.clear();
+      heights.clear();
+      weights.clear();
+      update();
+    }
+  }
+
   Future<void> getShippingTax() async {
     final deliveryPostcode = zipController.text;
     if (deliveryPostcode.isEmpty || deliveryPostcode.length != 6) {
-      print(
-        'Skipping shipping tax request: Invalid or empty delivery_postcode',
-      );
+      // print(
+      //   'Skipping shipping tax request: Invalid or empty delivery_postcode',
+      // );
       totalDeliveryCharge.value = 0.0;
       isShippingTaxLoaded.value = true;
       return;
@@ -92,20 +223,17 @@ class CheckoutController extends GetxController {
       'delivery_postcode': deliveryPostcode,
     };
 
-    print('Shipping tax request params: $params');
-    isShippingTaxLoaded.value = false; // Start loading
-    isPincodeLoading.value = true; // Ensure pincode loading is also set
+    // print('Shipping tax request params: $params');
+    isShippingTaxLoaded.value = false;
+    isPincodeLoading.value = true;
 
     final result = await ApiHelper.getShippingTax(params);
-    print('Shipping tax response: $result');
+    // print('Shipping tax response: $result');
 
-    isPincodeLoading.value = false; // End pincode loading
+    isPincodeLoading.value = false;
     if (result['error'] == true) {
-      print('Error: ${result['message']}');
+      // print('Error: ${result['message']}');
       totalDeliveryCharge.value = 0.0;
-      // onErrorWishlistChanged?.call(
-      //   result['message'] ?? 'Failed to calculate shipping',
-      // );
       isShippingTaxLoaded.value = true;
       return;
     }
@@ -131,36 +259,34 @@ class CheckoutController extends GetxController {
       if (lowestCostCourier != null) {
         totalDeliveryCharge.value = lowestTotalCost;
 
-        print(
-          'Lowest Freight Charge + 18% GST: ₹${lowestTotalCost.toStringAsFixed(2)}',
-        );
-        print('Courier Details:');
-        print('  Courier Name: ${lowestCostCourier['courier_name']}');
-        print(
-          '  Courier Company ID: ${lowestCostCourier['courier_company_id']}',
-        );
-        print(
-          '  Estimated Delivery Days: ${lowestCostCourier['estimated_delivery_days']}',
-        );
-        print('  Max Weight: ${lowestCostCourier['max_weight']} kg');
-        print('  COD Available: ${lowestCostCourier['cod_available']}');
+        // print(
+        //   'Lowest Freight Charge + 18% GST: ₹${lowestTotalCost.toStringAsFixed(2)}',
+        // );
+        // print('Courier Details:');
+        // print('  Courier Name: ${lowestCostCourier['courier_name']}');
+        // print(
+        //   '  Courier Company ID: ${lowestCostCourier['courier_company_id']}',
+        // );
+        // print(
+        //   '  Estimated Delivery Days: ${lowestCostCourier['estimated_delivery_days']}',
+        // );
+        // print('  Max Weight: ${lowestCostCourier['max_weight']} kg');
+        // print('  COD Available: ${lowestCostCourier['cod_available']}');
       } else {
-        print('No valid courier options found.');
+        // print('No valid courier options found.');
         totalDeliveryCharge.value = 0.0;
       }
     } else {
-      print('No courier data available in response.');
+      // print('No courier data available in response.');
       totalDeliveryCharge.value = 0.0;
     }
-    isShippingTaxLoaded.value = true; // Mark as loaded after processing
-    update(); // Force GetX update
+    isShippingTaxLoaded.value = true;
+    update();
   }
 
   @override
   void onInit() {
     super.onInit();
-    // Use debounce to handle PIN code changes
-
     checkLoginStatus();
     zipController.addListener(() {
       final pincode = zipController.text.trim();
@@ -172,8 +298,9 @@ class CheckoutController extends GetxController {
             getShippingTax();
           }
         } else {
-          isShippingTaxLoaded.value = true; // No valid PIN, show 0.0
-          totalDeliveryCharge.value = 0.0;
+          isShippingTaxLoaded.value = true;
+          totalDeliveryCharge.value = 0;
+
           stateController.text = '';
           cityController.text = '';
         }
@@ -200,6 +327,8 @@ class CheckoutController extends GetxController {
     weights.clear();
     breadths.clear();
     lengths.clear();
+    productName.clear();
+    productPrices.clear();
     isLoading.value = false;
     addressExists.value = false;
     isPincodeLoading.value = false;
@@ -214,7 +343,8 @@ class CheckoutController extends GetxController {
     isChecked = false.obs;
     onWishlistChanged = null;
     onErrorWishlistChanged = null;
-    isShippingTaxLoaded.value = false; // Reset
+    isShippingTaxLoaded.value = false;
+    disposeRouter();
     Get.delete<AddAddressController>(force: true);
     super.onClose();
   }
@@ -241,13 +371,7 @@ class CheckoutController extends GetxController {
       totalWeight.value += weightsList[i] * quantitiesList[i];
     }
 
-    print('Total Length: ${totalLength.value}');
-    print('Total Height: ${totalHeight.value}');
-    print('Total Breadth: ${totalBreadth.value}');
-    print('Total Weight: ${totalWeight.value}');
-    print('Total Quantity: ${totalQuantity.value}');
-
-    printAllDimensionsAndLargest();
+    // printAllDimensionsAndLargest();
   }
 
   void printAllDimensionsAndLargest() {
@@ -259,10 +383,10 @@ class CheckoutController extends GetxController {
       weights.length,
       productName.length,
       quantities.length,
+      productPrices.length,
     ].reduce((a, b) => a < b ? a : b);
 
     if (minLength == 0) {
-      print('No products available to display dimensions.');
       return;
     }
 
@@ -270,13 +394,6 @@ class CheckoutController extends GetxController {
     double maxBreadth = 0.0;
     double maxHeight = 0.0;
     double maxWeight = 0.0;
-    String maxLengthProductId = '';
-    String maxBreadthProductId = '';
-    String maxHeightProductId = '';
-    String maxWeightProductId = '';
-
-    print('Product Dimensions and Weights:');
-    print('--------------------------------');
 
     final random = Random();
 
@@ -290,47 +407,19 @@ class CheckoutController extends GetxController {
       final height = double.tryParse(heights[i]) ?? 0.0;
       final weight = double.tryParse(weights[i]) ?? 0.0;
 
-      print('Unique Product ID: $uniqueId');
-      print('Product Quantity: $productQuantity');
-      print('Product Names: ${productName[i]}');
-      print('  Length: ${length.toStringAsFixed(2)} cm');
-      print('  Breadth: ${breadth.toStringAsFixed(2)} cm');
-      print('  Height: ${height.toStringAsFixed(2)} cm');
-      print('  Weight: ${weight.toStringAsFixed(2)} kg');
-      print('--------------------------------');
-
       if (length > maxLength) {
         maxLength = length;
-        maxLengthProductId = uniqueId;
       }
       if (breadth > maxBreadth) {
         maxBreadth = breadth;
-        maxBreadthProductId = uniqueId;
       }
       if (height > maxHeight) {
         maxHeight = height;
-        maxHeightProductId = uniqueId;
       }
       if (weight > maxWeight) {
         maxWeight = weight;
-        maxWeightProductId = uniqueId;
       }
     }
-
-    print('Largest Dimensions and Weight:');
-    print('--------------------------------');
-    print(
-      'Largest Length: ${maxLength.toStringAsFixed(2)} cm (Product ID: $maxLengthProductId)',
-    );
-    print(
-      'Largest Breadth: ${maxBreadth.toStringAsFixed(2)} cm (Product ID: $maxBreadthProductId)',
-    );
-    print(
-      'Largest Height: ${maxHeight.toStringAsFixed(2)} cm (Product ID: $maxHeightProductId)',
-    );
-    print(
-      'Largest Weight: ${maxWeight.toStringAsFixed(2)} kg (Product ID: $maxWeightProductId)',
-    );
   }
 
   Future<void> loadProductIds(BuildContext context) async {
@@ -338,14 +427,9 @@ class CheckoutController extends GetxController {
     final uri = Uri.parse(route.uri.toString());
 
     productIds.value = uri.queryParameters['productIds']?.split(',') ?? [];
-    productName.value = uri.queryParameters['productNames']?.split(',') ?? [];
     quantities.value = uri.queryParameters['quantities']?.split(',') ?? [];
-    heights.value = uri.queryParameters['height']?.split(',') ?? [];
-    weights.value = uri.queryParameters['weights']?.split(',') ?? [];
-    breadths.value = uri.queryParameters['breadths']?.split(',') ?? [];
-    lengths.value = uri.queryParameters['lengths']?.split(',') ?? [];
 
-    calculateDimensions();
+    // Dimensions and product details are fetched from API in getData()
   }
 
   Future<void> fetchPincodeData(String pincode) async {
@@ -358,15 +442,14 @@ class CheckoutController extends GetxController {
     try {
       isPincodeLoading.value = true;
       lastProcessedPincode = pincode;
-      totalDeliveryCharge.value = 0.0; // Reset while fetching
-      isShippingTaxLoaded.value = false; // Reset loading state
+      totalDeliveryCharge.value = 0.0;
+      isShippingTaxLoaded.value = false;
       stateController.text = '';
       cityController.text = '';
 
       final data = await ApiHelper().fetchPincodeData(pincode);
       stateController.text = data['state'] ?? '';
       cityController.text = data['city'] ?? '';
-      // Trigger shipping tax calculation immediately after pincode data
       await getShippingTax();
     } catch (e) {
       stateController.text = '';
@@ -375,7 +458,7 @@ class CheckoutController extends GetxController {
       isShippingTaxLoaded.value = true;
     } finally {
       isPincodeLoading.value = false;
-      update(); // Force GetX update
+      update();
     }
   }
 
@@ -443,7 +526,7 @@ class CheckoutController extends GetxController {
     } catch (e) {
       _clearAddressData();
       await SharedPreferencesHelper.clearSelectedAddress();
-      print('Error loading address data: $e');
+      // print('Error loading address data: $e');
     } finally {
       isLoading.value = false;
     }
@@ -488,7 +571,7 @@ class CheckoutController extends GetxController {
     final String formattedDate = getFormattedDate();
 
     try {
-      isSignupProcessing.value = true; // Start loader
+      isSignupProcessing.value = true;
       final response = await ApiHelper.registerUser(
         firstName: firstNameController.text.trim(),
         lastName: lastNameController.text.trim(),
@@ -499,27 +582,26 @@ class CheckoutController extends GetxController {
 
       if (response['error'] == true) {
         signupMessage = response['message'] ?? "Signup failed";
-        isSignupProcessing.value = false; // Stop loader
+        isSignupProcessing.value = false;
         return false;
       }
 
       final mailResponse = await ApiHelper.registerMail(email: email);
-      print("Register Mail Response: $mailResponse");
+      // print("Register Mail Response: $mailResponse");
 
       if (mailResponse['error'] == true) {
         signupMessage = mailResponse['message'] ?? "Failed to send email";
-        isSignupProcessing.value = false; // Stop loader
+        isSignupProcessing.value = false;
         return false;
       }
 
-      // Rest of the existing handleSignUp code...
-      final String apiUrl =
-          'https://vedvika.com/v1/apis/common/user_data/get_user_data.php?email=$email';
-      final http.Response apiResponse = await http.get(Uri.parse(apiUrl));
+      final http.Response apiResponse = await http.get(
+        Uri.parse('$_userDataApiUrl?email=$email'),
+      );
 
       if (apiResponse.statusCode != 200) {
         signupMessage = "Failed to fetch user data";
-        isSignupProcessing.value = false; // Stop loader
+        isSignupProcessing.value = false;
         return false;
       }
 
@@ -527,14 +609,14 @@ class CheckoutController extends GetxController {
 
       if (responseData['error'] == true || responseData['data'].isEmpty) {
         signupMessage = "Failed to fetch user data";
-        isSignupProcessing.value = false; // Stop loader
+        isSignupProcessing.value = false;
         return false;
       }
 
       final userData = responseData['data'][0];
       int userId = userData['id'] ?? -1;
       String firstName = userData['first_name'] ?? 'Unknown';
-      String lastName = userData['last_name'] ?? 'Unknown';
+      String lastName = userData['last38_name'] ?? 'Unknown';
       String phone = userData['phone'] ?? 'Unknown';
       String createdAt = userData['createdAt'] ?? formattedDate;
 
@@ -551,11 +633,11 @@ class CheckoutController extends GetxController {
               ? "Signup and address addition successful"
               : "Signup successful, but failed to add address";
 
-      isSignupProcessing.value = false; // Stop loader
+      isSignupProcessing.value = false;
       return true;
     } catch (e) {
       signupMessage = "An error occurred during signup";
-      isSignupProcessing.value = false; // Stop loader
+      isSignupProcessing.value = false;
       return false;
     }
   }
@@ -641,9 +723,8 @@ class CheckoutController extends GetxController {
     String orderId,
   ) async {
     if (!js.context.hasProperty('openRazorpay')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: Payment system not initialized')),
-      );
+      onErrorWishlistChanged?.call("'Error: Payment system not initialized");
+
       return;
     }
 
@@ -651,14 +732,10 @@ class CheckoutController extends GetxController {
     String selectedAddressId = await _getSelectedAddressId(userId);
     String formattedDate = getFormattedDate();
 
-    final route = GoRouter.of(context).routerDelegate.currentConfiguration;
-    final uri = Uri.parse(route.uri.toString());
-    final productPrices =
-        uri.queryParameters['productPrices']?.split(',') ?? [];
-    final subtotal =
-        double.tryParse(uri.queryParameters['subtotal'] ?? '0.0') ?? 0.0;
     final finalAmount =
-        subtotal > 2500 ? subtotal : subtotal + totalDeliveryCharge.value;
+        subtotal.value > AppConstants.deliveryCharge
+            ? subtotal.value
+            : subtotal.value + totalDeliveryCharge.value;
 
     List<Map<String, String>> productDetailsList = [];
     for (int i = 0; i < productIds.length && i < quantities.length; i++) {
@@ -672,7 +749,7 @@ class CheckoutController extends GetxController {
     String productDetailsJson = jsonEncode(productDetailsList);
 
     final options = {
-      'key': 'rzp_test_PKUyVj9nF0FvA7',
+      'key': 'rzp_live_cuFo6uTCGdpJ6Z',
       'amount': (finalAmount * 100).toInt(),
       'currency': 'INR',
       'name': 'Kireimics',
@@ -694,15 +771,15 @@ class CheckoutController extends GetxController {
         try {
           final serverResponse = await http.get(
             Uri.parse(
-              'https://vedvika.com/v1/apis/backend/order_payments_details/payment_details.php?payment_id=$paymentId',
+              'https://www.kireimics.com/apis/backend/order_payments_details/payment_details.php?payment_id=$paymentId',
             ),
           );
           if (serverResponse.statusCode == 200) {
             paymentDetails = jsonDecode(serverResponse.body);
-            print("paymentDetails: $paymentDetails");
+            // print("paymentDetails: $paymentDetails");
           }
         } catch (e) {
-          print('Error fetching payment details: $e');
+          // print('Error fetching payment details: $e');
         }
 
         Map<String, dynamic>? addressData;
@@ -753,7 +830,6 @@ class CheckoutController extends GetxController {
         final fields = {
           'order_id': orderIdResponse,
           'order_date': formattedDate,
-          'pickup_location': 'warehouse',
           'billing_customer_name':
               addressData?['first_name']?.toString() ??
               firstNameController.text,
@@ -774,28 +850,28 @@ class CheckoutController extends GetxController {
               addressData?['phone']?.toString() ?? mobileController.text,
           'order_items': orderItems,
           'payment_method': 'Prepaid',
-          'sub_total': subtotal.toStringAsFixed(2),
+          'sub_total': subtotal.value.toStringAsFixed(2),
           'length': maxLength.toStringAsFixed(2),
           'breadth': maxBreadth.toStringAsFixed(2),
           'height': maxHeight.toStringAsFixed(2),
           'weight': maxWeight.toStringAsFixed(2),
         };
 
-        print('=== Payment Successful - Order Details ===');
+        // print('=== Payment Successful - Order Details ===');
         fields.forEach((key, value) {
           if (key == 'order_items') {
-            print('$key: [');
+            // print('$key: [');
             for (var item in value) {
-              print('  {');
-              print('    "name": "${item['name']}",');
-              print('    "sku": "${item['sku']}",');
-              print('    "units": ${item['units']},');
-              print('    "selling_price": "${item['selling_price']}"');
-              print('  },');
+              // print('  {');
+              // print('    "name": "${item['name']}",');
+              // print('    "sku": "${item['sku']}",');
+              // print('    "units": ${item['units']},');
+              // print('    "selling_price": "${item['selling_price']}"');
+              // print('  },');
             }
-            print(']');
+            // print(']');
           } else {
-            print('$key: $value');
+            // print('$key: $value');
           }
         });
 
@@ -803,7 +879,6 @@ class CheckoutController extends GetxController {
           final orderCreateResponse = await ApiHelper.orderCreate(
             orderId: fields['order_id'],
             orderDate: fields['order_date'],
-            pickupLocation: fields['pickup_location'],
             billingCustomerName: fields['billing_customer_name'],
             billingLastName: fields['billing_last_name'],
             billingAddress: fields['billing_address'],
@@ -823,23 +898,47 @@ class CheckoutController extends GetxController {
           );
 
           if (orderCreateResponse['error'] == true) {
-            print('Order Create Error: ${orderCreateResponse['message']}');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Failed to create order: ${orderCreateResponse['message']}',
-                ),
-              ),
-            );
+            // print('Order Create Error: ${orderCreateResponse['message']}');
+
+            onErrorWishlistChanged?.call("${orderCreateResponse['message']}");
+
             isPaymentProcessing.value = false;
             onPaymentProcessing?.call(false);
             return;
           }
+          // ⬇️ Update stock for each product
+          for (int i = 0; i < productIds.length; i++) {
+            final productId = productIds[i];
+            final quantity = quantities[i];
+            final updatedAt = formattedDate;
+
+            try {
+              final stockResponse = await ApiHelper.updateStock(
+                productId: productId,
+                quantity: quantity,
+                updatedAt: updatedAt,
+              );
+
+              if (stockResponse['error'] == true) {
+                // print(
+                //   '⚠️ Stock update error for product $productId: ${stockResponse['message']}',
+                // );
+                onErrorWishlistChanged?.call(
+                  "Stock update failed: ${stockResponse['message']}",
+                );
+              } else {
+                // print('✅ Stock updated for product $productId');
+              }
+            } catch (e) {
+              // print('❌ Error updating stock for product $productId: $e');
+              onErrorWishlistChanged?.call("Error updating stock: $e");
+            }
+          }
         } catch (e) {
-          print('Error calling orderCreate: $e');
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error creating order: $e')));
+          // print('Error calling orderCreate: $e');
+
+          onErrorWishlistChanged?.call("Error creating order: $e");
+
           isPaymentProcessing.value = false;
           onPaymentProcessing?.call(false);
           return;
@@ -866,19 +965,17 @@ class CheckoutController extends GetxController {
                   : finalAmount.toStringAsFixed(2),
           addressId: selectedAddressId,
           shippingTaxes:
-              subtotal > 2500 ? '0' : totalDeliveryCharge.value.toString(),
+              subtotal.value >AppConstants.deliveryCharge
+                  ? '0'
+                  : totalDeliveryCharge.value.toString(),
           createdAt: formattedDate,
         );
 
         if (orderResponse['error'] == true) {
-          print('Order Response Error: ${orderResponse['message']}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Failed to save order details: ${orderResponse['message']}',
-              ),
-            ),
-          );
+          // print('Order Response Error: ${orderResponse['message']}');
+
+          onErrorWishlistChanged?.call("${orderResponse['message']}");
+
           isPaymentProcessing.value = false;
           onPaymentProcessing?.call(false);
         }
@@ -892,36 +989,36 @@ class CheckoutController extends GetxController {
             totalAmount: finalAmount.toStringAsFixed(2),
           );
           if (mailResponse['error'] == true) {
-            print('Order Created Mail Error: ${mailResponse['message']}');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Failed to send order confirmation email: ${mailResponse['message']}',
-                ),
-              ),
-            );
+            // print('Order Created Mail Error: ${mailResponse['message']}');
+
+            onErrorWishlistChanged?.call("${mailResponse['message']}");
           }
         } catch (e) {
-          print('Error calling orderCreatedMail: $e');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error sending order confirmation email: $e'),
-            ),
+          // print('Error calling orderCreatedMail: $e');
+
+          onErrorWishlistChanged?.call(
+            "Error sending order confirmation email: $e",
           );
         }
 
         await SharedPreferencesHelper.clearAllProductIds();
+        cartNotifier.value = 0;
 
         isPaymentProcessing.value = false;
         onPaymentProcessing?.call(false);
 
-        context.go(
-          '${AppRoutes.paymentResult}?success=true&orderId=$orderId&amount=$finalAmount',
+        await PaymentStateService().setPaymentResult(
+          success: true,
+          orderId: orderId,
+          amount: finalAmount,
+          orderDate: DateTime.now(),
         );
+
+        context.go(AppRoutes.paymentResult);
       }),
       'modal': {
         'ondismiss': js.allowInterop(([dynamic _]) async {
-          print('Razorpay modal dismissed');
+          // print('Razorpay modal dismissed');
           isPaymentProcessing.value = false;
           onPaymentProcessing?.call(false);
 
@@ -945,38 +1042,39 @@ class CheckoutController extends GetxController {
               addressId: selectedAddressId,
               itemTotal: itemTotal.toStringAsFixed(2),
               shippingTaxes:
-                  subtotal > 2500 ? '0' : totalDeliveryCharge.value.toString(),
+                  subtotal.value >AppConstants.deliveryCharge
+                      ? '0'
+                      : totalDeliveryCharge.value.toString(),
               createdAt: formattedDate,
             );
 
             if (orderResponse['error'] == true) {
-              print(
-                'Order Response Error (Dismiss): ${orderResponse['message']}',
-              );
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Failed to save order details: ${orderResponse['message']}',
-                  ),
-                ),
-              );
+              // print(
+              //   'Order Response Error (Dismiss): ${orderResponse['message']}',
+              // );
+
+              onErrorWishlistChanged?.call("${orderResponse['message']}");
             }
           } catch (e) {
-            print('Error saving order details (Dismiss): $e');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error saving order details: $e')),
-            );
+            // print('Error saving order details (Dismiss): $e');
+
+            onErrorWishlistChanged?.call("Error saving order details: $e");
           } finally {
             try {
-              context.go(
-                '${AppRoutes.paymentResult}?success=false&orderId=$orderId&amount=$finalAmount',
+              await PaymentStateService().setPaymentResult(
+                success: false,
+                orderId: orderId,
+                amount: finalAmount,
+                orderDate: DateTime.now(),
               );
-              print('Navigation to payment failure page successful');
+
+              context.go(AppRoutes.paymentResult);
+
+              // print('Navigation to payment failure page successful');
             } catch (e) {
-              print('Navigation error: $e');
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text('Navigation error: $e')));
+              // print('Navigation error: $e');
+
+              onErrorWishlistChanged?.call("Navigation error: $e");
             }
           }
         }),
@@ -986,10 +1084,9 @@ class CheckoutController extends GetxController {
     try {
       js.context.callMethod('openRazorpay', [js.JsObject.jsify(options)]);
     } catch (e) {
-      print('Error initiating Razorpay: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Error initiating payment')));
+      // print('Error initiating Razorpay: $e');
+
+      onErrorWishlistChanged?.call("Error initiating payment");
     }
   }
 
@@ -1012,9 +1109,11 @@ class CheckoutController extends GetxController {
     weights.clear();
     breadths.clear();
     lengths.clear();
+    productName.clear();
+    productPrices.clear();
     totalDeliveryCharge.value = 0.0;
-    isShippingTaxLoaded.value = false; // Reset
-    showLoginBox.value = true; // Ensure login box is shown after reset
+    isShippingTaxLoaded.value = false;
+    showLoginBox.value = true;
 
     totalLength.value = 0.0;
     totalHeight.value = 0.0;
@@ -1022,6 +1121,7 @@ class CheckoutController extends GetxController {
     totalWeight.value = 0.0;
     totalQuantity.value = 0.0;
     lastProcessedPincode = null;
-    update(); // Force GetX update
+    subtotal.value = 0.0;
+    update();
   }
 }

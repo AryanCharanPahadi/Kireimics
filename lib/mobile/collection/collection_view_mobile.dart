@@ -12,6 +12,7 @@ import '../../component/product_details/product_details_modal.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/shared_preferences/shared_preferences.dart';
 
+import '../../component/title_service.dart';
 import '../../web_desktop_common/collection/collection_controller.dart';
 import '../../web_desktop_common/collection/collection_navigation.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
@@ -34,6 +35,7 @@ class CollectionViewMobile extends StatefulWidget {
 
 class _CollectionViewMobileState extends State<CollectionViewMobile> {
   String? _selectedFilter = 'All'; // Initialize with 'All' by default
+  String _selectedSortOption = 'New'; // Track selected sort option
 
   String _selectedDescription =
       '/ Browse our collection of handcrafted pottery, where each one-of-a-kind piece adds charm to your home while serving a purpose you\'ll appreciate every day /';
@@ -45,37 +47,86 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
   List<bool> _isHoveredList = []; // Track hover state for grid items
   bool _showSortOptions = false; // Track if sort options are visible
   bool _showFilterOptions = false; // Track if filter options are visible
-  final _sortFilterKey = GlobalKey(); // Key for sort/filter widgets
+  final _sortKey = GlobalKey();
+  final _filterKey = GlobalKey();
   late String collectionName = '';
   @override
   void initState() {
     super.initState();
+
     final route = GoRouter.of(context).routerDelegate.currentConfiguration;
     final uri = Uri.parse(route.uri.toString());
     collectionName = uri.queryParameters['collection_name'] ?? 'No Collection';
-    _fetchProductsForAll();
+    final String? catIdStr = uri.queryParameters['cat_id'];
+    // print('CollectionProductPage init: collectionName=$collectionName, catIdStr=$catIdStr, productIds=${widget.productIds}');
+    TitleService.setTitle("Kireimics | $collectionName");
+
+    if (catIdStr != null) {
+      final int? catId = int.tryParse(catIdStr);
+      if (catId != null) {
+        // print('Fetching products for category: catId=$catId');
+        _selectedCategoryId = catId;
+        _selectedCategoryName = collectionName;
+        _fetchProductsByCategory(catId, widget.productIds);
+      } else {
+        // print('Invalid catIdStr, fetching all products');
+        _fetchProductsForAll();
+      }
+    } else {
+      // print('No catIdStr, fetching all products');
+      _fetchProductsForAll();
+    }
   }
 
   // Handle clicks outside the sort/filter options
   void _handleOutsideClick(PointerDownEvent event) {
-    final renderBox =
-        _sortFilterKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final offset = renderBox.localToGlobal(Offset.zero);
-      final size = renderBox.size;
-      final Rect widgetRect = Rect.fromLTWH(
-        offset.dx,
-        offset.dy,
-        size.width,
-        size.height,
-      );
+    bool shouldCloseSort = _showSortOptions;
+    bool shouldCloseFilter = _showFilterOptions;
 
-      if (!widgetRect.contains(event.position)) {
-        setState(() {
-          _showSortOptions = false;
-          _showFilterOptions = false;
-        });
+    // Check sort container
+    if (_showSortOptions) {
+      final sortRenderBox =
+          _sortKey.currentContext?.findRenderObject() as RenderBox?;
+      if (sortRenderBox != null) {
+        final sortOffset = sortRenderBox.localToGlobal(Offset.zero);
+        final sortSize = sortRenderBox.size;
+        final sortRect = Rect.fromLTWH(
+          sortOffset.dx,
+          sortOffset.dy,
+          sortSize.width,
+          sortSize.height,
+        );
+        if (sortRect.contains(event.position)) {
+          shouldCloseSort = false; // Click is inside sort container
+        }
       }
+    }
+
+    // Check filter container
+    if (_showFilterOptions) {
+      final filterRenderBox =
+          _filterKey.currentContext?.findRenderObject() as RenderBox?;
+      if (filterRenderBox != null) {
+        final filterOffset = filterRenderBox.localToGlobal(Offset.zero);
+        final filterSize = filterRenderBox.size;
+        final filterRect = Rect.fromLTWH(
+          filterOffset.dx,
+          filterOffset.dy,
+          filterSize.width,
+          filterSize.height,
+        );
+        if (filterRect.contains(event.position)) {
+          shouldCloseFilter = false; // Click is inside filter container
+        }
+      }
+    }
+
+    // Close containers if click is outside both
+    if (shouldCloseSort || shouldCloseFilter) {
+      setState(() {
+        _showSortOptions = false;
+        _showFilterOptions = false;
+      });
     }
   }
 
@@ -85,10 +136,6 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
     });
   }
 
-  Future<bool> _isLoggedIn() async {
-    String? userData = await SharedPreferencesHelper.getUserData();
-    return userData != null && userData.isNotEmpty;
-  }
 
   Future<int?> fetchStockQuantity(String productId) async {
     try {
@@ -102,7 +149,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
       }
       return null;
     } catch (e) {
-      print("Error fetching stock: $e");
+      // print("Error fetching stock: $e");
       return null;
     }
   }
@@ -122,6 +169,8 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
         _isHoveredList = List<bool>.filled(products.length, false);
         _isLoading = false;
         _selectedFilter = null; // Reset filter
+        _selectedSortOption = 'New'; // Reset sort option
+
       });
     } catch (e) {
       setState(() {
@@ -138,49 +187,50 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
       _isLoading = true;
     });
 
-    print(
-      'Sending request with catId: $catId and productIds: ${widget.productIds}',
-    );
-
     try {
+      print('Fetching products with catId=$catId, productIds=$productIds');
       final products = await ApiHelper.fetchBannerProductByCatIdAndId(
-        widget.productIds,
-        catId,
+        productIds, // Likely the collection ID
+        catId, // Category ID from cat_id
       );
-
-      print('Fetched products: ${products.length}');
-      print('Raw products For Cat id and Id: $products');
-
+      print('Fetched ${products.length} products: $products');
       setState(() {
         _products = products;
-        _originalProducts = List.from(products); // Store original list
+        _originalProducts = List.from(products);
         _isHoveredList = List<bool>.filled(products.length, false);
         _isLoading = false;
-        _selectedFilter = null; // Reset filter
+        _selectedFilter = null;
+        _selectedSortOption = 'New'; // Reset sort option
       });
     } catch (e) {
+      print('Error fetching products: $e');
       setState(() {
         _isLoading = false;
+        _products = [];
+        _originalProducts = [];
+        _isHoveredList = [];
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to load products: $e')));
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Failed to load products: $e')),
+      // );
     }
   }
 
   void onCategorySelected(int id, String name, String desc, {int? productIds}) {
-    print('Category ID: $id, Name: $name, productIds: $productIds');
     setState(() {
-      _selectedDescription = desc;
+      _selectedDescription = desc.isNotEmpty ? desc : _selectedDescription;
       _selectedCategoryId = id;
       _selectedCategoryName = name;
       _showSortOptions = false;
       _showFilterOptions = false;
-      _selectedFilter = null; // Reset filter when category changes
+      _selectedFilter = null;
+      _selectedSortOption = 'New';
+      // Do not reset _selectedFilter unless explicitly needed
+      // _selectedFilter = null; // Comment out or remove this line
     });
 
     if (name.toLowerCase() == 'collections') {
-      // _fetchCollections();
+      // Handle collections view if needed
     } else if (name.toLowerCase() == 'all') {
       _fetchProductsForAll();
     } else {
@@ -249,6 +299,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             lineHeight: 1.0,
+                            letterSpacing: 1 * 0.04, // 4% of 32px
                             onTap: () {
                               context.go(
                                 '${AppRoutes.catalog}?cat_id=${'collections'}', // Use URL parameter
@@ -271,6 +322,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             lineHeight: 1.0,
+                            letterSpacing: 1 * 0.04, // 4% of 32px
                             decoration: TextDecoration.underline,
                           ),
                         ],
@@ -322,7 +374,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                   : '${_products.length} Product${_products.length == 1
                                       ? ''
                                       : _products.length == 0
-                                      ? ''
+                                      ? 's'
                                       : 's'}',
 
                           fontWeight: FontWeight.w400,
@@ -356,12 +408,12 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                             onTap: _toggleSortOptions,
 
                             child: BarlowText(
-                              text: "Sort / New",
+                              text:  "Sort / $_selectedSortOption", // Updated to show selected sort option
                               color: Color(0xFF30578E),
                               fontWeight: FontWeight.w600,
-                              fontSize: 16,
+                              fontSize: 14,
                               lineHeight: 1.0,
-                              letterSpacing: 0.04 * 16,
+                              letterSpacing: 1 * 0.04, // 4% of 32px
                             ),
                           ),
                           SizedBox(width: 16),
@@ -372,10 +424,10 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                             child: BarlowText(
                               text: "Filter / ${_selectedFilter ?? 'All'}",
                               color: Color(0xFF30578E),
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              fontSize: 16,
                               lineHeight: 1.0,
-                              letterSpacing: 0.04 * 16,
+                              letterSpacing: 1 * 0.04, // 4% of 32px
                             ),
                           ),
                         ],
@@ -490,10 +542,11 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                                                 Positioned.fill(
                                                   child: GestureDetector(
                                                     onTap: () {
+
                                                       context.go(
-                                                        AppRoutes.productDetails(
-                                                          product.id,
-                                                        ),
+                                                        '${AppRoutes.productDetails(product.id)}'
+                                                        '?collection_name=${Uri.encodeComponent(product.collectionName ?? '')}'
+                                                        '&collection_id=${widget.productIds}',
                                                       );
                                                     },
                                                     child: ColorFiltered(
@@ -735,6 +788,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
         ),
         if (_showSortOptions)
           Positioned(
+            key: _sortKey,
             right: 50,
             top: 320,
             child: Container(
@@ -763,6 +817,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
           ),
         if (_showFilterOptions)
           Positioned(
+            key: _filterKey,
             right: 16,
             top: 320,
             child: Container(
@@ -836,6 +891,10 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
                 fontSize: 16,
                 color: const Color(0xFF30578E),
                 hoverTextColor: const Color(0xFF2876E4),
+                enableUnderlineForCurrentFilter: true,
+                currentFilterValue: _selectedSortOption,
+                decorationColor: const Color(0xFF30578E),
+                activeUnderlineDecoration: TextDecoration.underline,
               ),
             ),
           ),
@@ -885,8 +944,10 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
   }
 
   void _handleSortSelected(String sortOption) {
-    print('Sorting by: $sortOption');
-
+    // print('Sorting by: $sortOption');
+    setState(() {
+      _selectedSortOption = sortOption; // Update selected sort option
+    });
     if (_selectedCategoryName.toLowerCase() == 'collections') {
       // Handle collection sorting
       if (sortOption == 'Newest') {
@@ -907,7 +968,7 @@ class _CollectionViewMobileState extends State<CollectionViewMobile> {
   }
 
   void _handleFilterSelected(String filterOption) {
-    print('Filter option selected: $filterOption');
+    // print('Filter option selected: $filterOption');
     setState(() {
       _selectedFilter = filterOption; // Update selected filter
       if (filterOption == 'All') {

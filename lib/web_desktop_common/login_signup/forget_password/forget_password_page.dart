@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kireimics/component/api_helper/api_helper.dart';
 import '../../../component/app_routes/routes.dart';
 import '../../../component/text_fonts/custom_text.dart';
+import '../../../component/title_service.dart';
 import '../../../component/utilities/utility.dart';
 import '../../component/rotating_svg_loader.dart';
 import 'dart:html' as html;
@@ -31,7 +32,13 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    TitleService.setTitle("Kireimics | Reset Your Password");
 
+}
   @override
   Widget build(BuildContext context) {
     final route = GoRouter.of(context).routerDelegate.currentConfiguration;

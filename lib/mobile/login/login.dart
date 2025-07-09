@@ -12,6 +12,7 @@ import 'dart:html' as html;
 import '../../component/google_sign_in/google_sign_in_button.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/notification_toast/custom_toast.dart';
+import '../../component/title_service.dart' show TitleService;
 import '../../web_desktop_common/login_signup/login/login_controller.dart';
 
 class LoginMobile extends StatefulWidget {
@@ -38,6 +39,13 @@ class _LoginMobileState extends State<LoginMobile> {
     loginController.emailController.clear();
     loginController.passwordController.clear();
     super.dispose();
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    TitleService.setTitle("Kireimics | Login to Your Account");
+
   }
 
   @override

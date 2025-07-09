@@ -16,12 +16,12 @@ class UrlLauncherHelper {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        _showError(context, 'Could not launch $url');
-        debugPrint("Could not launch $url");
+        // _showError(context, 'Could not launch $url');
+        // debugPrint("Could not launch $url");
       }
     } catch (e) {
-      _showError(context, 'Error launching URL');
-      debugPrint("Error launching URL: $e");
+      // _showError(context, 'Error launching URL');
+      // debugPrint("Error launching URL: $e");
     }
   }
 

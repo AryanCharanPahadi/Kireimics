@@ -20,7 +20,7 @@ class CatalogNavigation extends StatelessWidget {
     this.onCategorySelected,
     this.fetchAllProducts,
     this.context,
-    this.fontSize = 16,
+    this.fontSize = 14,
     this.fontWeight = FontWeight.w600,
   });
 

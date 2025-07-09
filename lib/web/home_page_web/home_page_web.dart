@@ -1,18 +1,16 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import '../../component/api_helper/api_helper.dart';
 import '../../component/app_routes/routes.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/custom_text_form_field/custom_text_form_field.dart';
 import '../../component/product_details/product_details_controller.dart';
+import '../../component/title_service.dart';
 import '../../component/utilities/utility.dart';
+import '../../web_desktop_common/collection/collection_modal.dart';
 import '../../web_desktop_common/component/rotating_svg_loader.dart';
 import '../../web_desktop_common/home_page_gridview/product_gridview_homepage.dart';
 import '../../component/above_footer/above_footer.dart';
@@ -43,7 +41,6 @@ class _HomePageWebState extends State<HomePageWeb>
     if (mounted) setState(() {});
   }
 
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -63,6 +60,7 @@ class _HomePageWebState extends State<HomePageWeb>
     _anotherMessageFocusNode.dispose();
     super.dispose();
   }
+
   bool isSubmitting = false; // New flag to track form submission
 
   Future<void> _submitForm() async {
@@ -134,44 +132,38 @@ class _HomePageWebState extends State<HomePageWeb>
 
   Future getCollectionBanner() async {
     try {
-      final response = await http.get(
-        Uri.parse(
-          "https://vedvika.com/v1/apis/common/collection_list/get_collection_banner.php",
-        ),
-      );
+      List<CollectionModal> collections =
+          await ApiHelper.fetchCollectionBanner();
 
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body.toString());
+      if (collections.isNotEmpty) {
+        final bannerData = collections.first;
 
-        // Access the first element of the 'data' array
-        var bannerData = data['data'][0];
-
-        // Split product_id string by commas and get the length
-        List<String> productIds = bannerData['product_id'].toString().split(
-          ',',
-        );
+        // Safely handle empty or null product_id
+        List<String> productIds = [];
+        if (bannerData.productId != null &&
+            bannerData.productId!.trim().isNotEmpty) {
+          productIds = bannerData.productId!.split(',');
+        }
 
         setState(() {
-          bannerImg = bannerData['banner_img'].toString();
-          bannerText = bannerData['name'].toString();
-          bannerId = bannerData['id'];
+          bannerImg = bannerData.bannerImg ?? '';
+          bannerText = bannerData.name ?? '';
+          bannerId = bannerData.id;
           bannerQuantity = productIds.length.toString();
         });
-
-        // print(bannerImg);
-        // print(bannerText);
-        // print(bannerQuantity);
       } else {
-        print('Error: Status code ${response.statusCode}');
+        // print("No collection data found.");
       }
     } catch (e) {
-      print('Error: ${e.toString()}');
+      // print('Error: ${e.toString()}');
     }
   }
 
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | Premium Handmade Ceramics in India");
+
     _initializeWishlistStates();
     getCollectionBanner();
     _controller = AnimationController(
@@ -474,7 +466,7 @@ class _HomePageWebState extends State<HomePageWeb>
                                           fontSize: 20,
                                           lineHeight: 36 / 20,
                                           letterSpacing: 0.04 * 20,
-                                          color: Color(0xFF0D2C54),
+                                          color: Color(0xFF30578E),
                                         ),
                                       ),
                                       const SizedBox(height: 4),
@@ -498,7 +490,7 @@ class _HomePageWebState extends State<HomePageWeb>
                                           fontSize: 16,
                                           lineHeight: 1.0,
                                           letterSpacing: 0.04 * 16,
-                                          color: const Color(0xFF0D2C54),
+                                          color: const Color(0xFF30578E),
                                           enableHoverBackground: true,
                                           hoverBackgroundColor: Color(
                                             0xFF30578E,

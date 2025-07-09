@@ -9,6 +9,7 @@ import 'package:kireimics/web_desktop_common/add_address_ui/delete_address.dart'
 import '../../../component/api_helper/api_helper.dart';
 import '../../../component/shared_preferences/shared_preferences.dart';
 import '../../../component/text_fonts/custom_text.dart';
+import '../../../component/title_service.dart';
 import '../../../component/utilities/utility.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_controller.dart';
 import '../../../web_desktop_common/add_address_ui/add_address_ui.dart';
@@ -44,7 +45,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
 
   Future<bool> handleSignUp(BuildContext context) async {
     String? userId = await SharedPreferencesHelper.getUserId();
-    print("User ID: $userId");
+    // print("User ID: $userId");
 
     if (userId == null || userId.isEmpty) {
       widget.onErrorWishlistChanged?.call("User ID is missing");
@@ -53,9 +54,9 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
 
     if (formKey.currentState!.validate()) {
       String formattedDate = getFormattedDate();
-      print(
-        "Input values: firstName=${firstNameController.text}, lastName=${lastNameController.text}, phone=${mobileController.text}, updatedAt=$formattedDate",
-      );
+      // print(
+      //   "Input values: firstName=${firstNameController.text}, lastName=${lastNameController.text}, phone=${mobileController.text}, updatedAt=$formattedDate",
+      // );
 
       try {
         final response = await ApiHelper.editRegisterUser(
@@ -66,7 +67,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
           updatedAt: formattedDate,
         );
 
-        print("Signup Response: $response");
+        // print("Signup Response: $response");
 
         if (response['error'] == true) {
           String errorMessage =
@@ -77,14 +78,14 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
           String userData =
               "$userId, ${firstNameController.text.trim()} ${lastNameController.text.trim()}, ${mobileController.text.trim()}, ${emailController.text.trim()}";
           await SharedPreferencesHelper.saveUserData(userData);
-          print("Saved user data: $userData");
+          // print("Saved user data: $userData");
 
           await _loadUserData();
           widget.onWishlistChanged?.call('Updated Successfully');
           return true;
         }
       } catch (e) {
-        print("Signup exception: $e");
+        // print("Signup exception: $e");
         widget.onErrorWishlistChanged?.call(
           "An error occurred during update: $e",
         );
@@ -120,16 +121,18 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
           });
         }
       } else {
-        print('Invalid user data format: $storedUser');
+        // print('Invalid user data format: $storedUser');
       }
     } else {
-      print('No user data found in SharedPreferences');
+      // print('No user data found in SharedPreferences');
     }
   }
 
   @override
   void initState() {
     super.initState();
+    TitleService.setTitle("Kireimics | View Your Details & Addresses");
+
     _loadUserData();
   }
 
@@ -241,7 +244,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                             children: [
                               CralikaFont(
                                 text: "My Details",
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w400,
                                 fontSize: 20,
                                 lineHeight: 27 / 20,
                                 letterSpacing: 0.04 * 20,
@@ -336,7 +339,7 @@ class _MyAccountUiWebState extends State<MyAccountUiWeb> {
                           children: [
                             CralikaFont(
                               text: "My Addresses",
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w400,
                               fontSize: 20,
                               lineHeight: 27 / 20,
                               letterSpacing: 0.04 * 20,
