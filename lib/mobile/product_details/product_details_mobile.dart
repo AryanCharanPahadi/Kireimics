@@ -251,7 +251,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                             color: Color(0xFF30578E),
                           ),
                         ],
-                        if (!isNarrow)
+                        if (!isNarrow || collectionName.isEmpty)
                           BarlowText(
                             text: "View Details",
                             color: Color(0xFF30578E),
@@ -266,7 +266,7 @@ class _ProductDetailsMobileState extends State<ProductDetailsMobile> {
                           ),
                       ],
                     ),
-                    if (isNarrow)
+                    if (isNarrow && collectionName.isNotEmpty)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [

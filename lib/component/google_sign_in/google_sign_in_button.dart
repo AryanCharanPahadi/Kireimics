@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart' show Get;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../web/checkout/checkout_controller.dart';
 import '../api_helper/api_helper.dart';
 import '../app_routes/routes.dart';
 import '../shared_preferences/shared_preferences.dart';
@@ -20,6 +23,8 @@ class GoogleSignInButton extends StatelessWidget {
   }
 
   Future<void> _handleGoogleSignIn(BuildContext context) async {
+    final CheckoutController checkoutController = Get.put(CheckoutController());
+
     try {
       User? user = await signInWithGoogle();
       if (user != null) {
@@ -80,10 +85,16 @@ class GoogleSignInButton extends StatelessWidget {
               prefs.setBool('auth', true);
               await SharedPreferencesHelper.saveUserData(userDetails);
 
-              String? storedUser = await SharedPreferencesHelper.getUserData();
-              // print("Stored user data from API: $storedUser");
+              final mailResponse = await ApiHelper.registerMail(email: email);
+              print('Register Mail Response: $mailResponse');
 
-              context.go(AppRoutes.myAccount);
+              await checkoutController.loadUserData();
+              await checkoutController.loadAddressData();
+
+              // ✅ Close login popup after successful sign-in
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
             } else {
               // print("Failed to fetch user data: ${responseData['message']}");
             }
@@ -93,8 +104,6 @@ class GoogleSignInButton extends StatelessWidget {
         } catch (e) {
           // print("Error fetching data from API: $e");
         }
-
-        context.go(AppRoutes.myAccount);
       } else {
         // print('Google Sign-In failed');
       }

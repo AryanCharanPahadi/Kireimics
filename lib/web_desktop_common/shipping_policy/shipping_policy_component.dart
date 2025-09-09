@@ -1,5 +1,3 @@
-// lib/screens/policy/ShippingPolicy.dart
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:kireimics/component/api_helper/api_helper.dart';
@@ -7,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../component/text_fonts/custom_text.dart';
 import '../../component/title_service.dart';
 import '../component/rotating_svg_loader.dart';
-import 'ShippingPolicyModal.dart'; // <-- Import API class
+import 'ShippingPolicyModal.dart';
 
 class ShippingPolicy extends StatefulWidget {
   const ShippingPolicy({super.key});

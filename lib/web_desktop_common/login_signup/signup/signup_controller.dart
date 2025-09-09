@@ -56,6 +56,7 @@ class SignupController extends GetxController {
         firstName: firstNameController.text.trim(),
         lastName: lastNameController.text.trim(),
         email: email,
+        password: passwordController.text,
         phone: phoneController.text.trim(),
         createdAt: formattedDate,
       );
@@ -111,14 +112,12 @@ class SignupController extends GetxController {
       passwordController.clear();
       signupMessage = 'Signup successfully';
       final currentRoute =
-      GoRouter.of(context).routeInformationProvider.value.uri.toString();
+          GoRouter.of(context).routeInformationProvider.value.uri.toString();
 
       if (currentRoute.contains(AppRoutes.checkOut)) {
         // Load user data and address data
         await checkoutController.loadUserData();
         await checkoutController.loadAddressData();
-
-
       }
 
       isLoading.value = false; // Stop loading

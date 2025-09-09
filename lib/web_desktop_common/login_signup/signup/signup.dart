@@ -341,6 +341,7 @@ class _SignupState extends State<Signup> {
                                   Row(
                                     children: [
                                       GoogleSignInButton(
+
                                         functionName: 'signInWithGoogle',
                                       ),
                                     ],

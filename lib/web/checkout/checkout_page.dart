@@ -13,7 +13,6 @@ import 'package:kireimics/web_desktop_common/login_signup/login/login_page.dart'
 import '../../component/title_service.dart';
 import '../../component/utilities/delivery_charge.dart';
 import 'checkout_controller.dart';
-import 'dart:js' as js;
 
 class CheckoutPage extends StatefulWidget {
   final Function(String)? onWishlistChanged;
@@ -122,8 +121,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   const SizedBox(width: 9),
                   SvgPicture.asset(
                     'assets/icons/right_icon.svg',
-                    width: 24 * (isDesktop ? 1.0 : contentWidth / 600),
-                    height: 24 * (isDesktop ? 1.0 : contentWidth / 600),
+                    width: 24,
+                    height: 24,
                     color: const Color(0xFF30578E),
                   ),
                   const SizedBox(width: 9),
